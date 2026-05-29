@@ -1,0 +1,424 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { 
+  MapPin, 
+  Calendar as CalendarIcon, 
+  Clock, 
+  AlertCircle, 
+  QrCode, 
+  X, 
+  Info, 
+  CheckCircle, 
+  XCircle,
+  Ticket
+} from 'lucide-react';
+
+const MyBookings = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Active filter tab: 'All' | 'Active' | 'Expired'
+  const [activeTab, setActiveTab] = useState('All');
+  
+  // Real-time ticking remaining time in seconds (initially 29 minutes = 1740 seconds)
+  const [timeLeft, setTimeLeft] = useState(() => {
+    // Current time: 2026-05-29T22:17:11+07:00
+    // Deadline: 22:46 on 2026-05-29
+    const now = new Date();
+    const target = new Date(2026, 4, 29, 22, 46, 0); // May is 0-indexed (4)
+    const diff = Math.floor((target - now) / 1000);
+    return diff > 0 ? diff : 1740; // Default to 29m if time elapsed
+  });
+
+  // Dynamic state for bookings data
+  const [bookings, setBookings] = useState(() => {
+    const saved = localStorage.getItem('spotflow_driver_bookings');
+    return saved ? JSON.parse(saved) : [
+      {
+        id: 1,
+        ticketId: 'TKT-V03MKT2N',
+        vehicleType: 'Bicycle',
+        status: 'Active', // 'Active' or 'Cancelled / Expired'
+        location: 'Floor 1 - 1-002',
+        bookedDate: '29/05/2026',
+        bookedTime: '22:16',
+        deadlineTime: '22:46',
+        contact: '1 - 1'
+      }
+    ];
+  });
+
+  // Modal display states
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
+  const [isQrOpen, setIsQrOpen] = useState(false);
+  const [targetBookingId, setTargetBookingId] = useState(null);
+
+  // Sync state changes with localStorage
+  useEffect(() => {
+    localStorage.setItem('spotflow_driver_bookings', JSON.stringify(bookings));
+  }, [bookings]);
+
+  // Tick-timer countdown interval (Optional dynamic counter decrement)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          clearInterval(interval);
+          // Automatically expire ticket if countdown reaches 0
+          setBookings(prevBookings => 
+            prevBookings.map(b => b.status === 'Active' ? { ...b, status: 'Cancelled / Expired' } : b)
+          );
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Compute remaining minutes label
+  const getRemainingMinutesText = () => {
+    if (timeLeft <= 0) return '0m remaining';
+    const minutes = Math.ceil(timeLeft / 60);
+    return `${minutes}m remaining`;
+  };
+
+  // Metrics summary counts
+  const totalBookings = bookings.length;
+  const activeCount = bookings.filter(b => b.status === 'Active').length;
+  const expiredCount = bookings.filter(b => b.status === 'Cancelled / Expired').length;
+
+  // Filter list items based on active tab selection
+  const filteredBookings = bookings.filter(b => {
+    if (activeTab === 'Active') return b.status === 'Active';
+    if (activeTab === 'Expired') return b.status === 'Cancelled / Expired';
+    return true;
+  });
+
+  // Trigger booking cancel popup
+  const handleCancelClick = (id) => {
+    setTargetBookingId(id);
+    setIsCancelConfirmOpen(true);
+  };
+
+  // Confirm booking cancellation
+  const handleConfirmCancel = () => {
+    if (targetBookingId !== null) {
+      setBookings(prevBookings => 
+        prevBookings.map(b => 
+          b.id === targetBookingId 
+            ? { ...b, status: 'Cancelled / Expired' } 
+            : b
+        )
+      );
+      setIsCancelConfirmOpen(false);
+      setTargetBookingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6 font-sans select-none pb-12">
+      
+      {/* 1. PAGE HEADER */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">My Bookings</h1>
+          <p className="text-slate-500 text-sm mt-1">View and manage your parking reservations</p>
+        </div>
+      </div>
+
+      {/* 2. OVERVIEW STATISTICS ROW (3 Balanced summary cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Total Bookings Card */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-sm text-slate-500 font-medium block">Total Bookings</span>
+            <span className="text-3xl font-bold text-slate-900 block">{totalBookings}</span>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <Ticket size={24} />
+          </div>
+        </div>
+
+        {/* Active Card */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-sm text-slate-500 font-medium block">Active</span>
+            <span className="text-3xl font-bold text-green-600 block">{activeCount}</span>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+            <CheckCircle size={24} />
+          </div>
+        </div>
+
+        {/* Expired Card */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-sm text-slate-500 font-medium block">Expired</span>
+            <span className="text-3xl font-bold text-slate-900 block">{expiredCount}</span>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+            <XCircle size={24} />
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. STATUS FILTER TABS */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setActiveTab('All')}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 ${
+            activeTab === 'All'
+              ? 'bg-black border-black text-white shadow-sm'
+              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900'
+          }`}
+        >
+          All ({totalBookings})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('Active')}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 ${
+            activeTab === 'Active'
+              ? 'bg-black border-black text-white shadow-sm'
+              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900'
+          }`}
+        >
+          Active ({activeCount})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('Expired')}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 ${
+            activeTab === 'Expired'
+              ? 'bg-black border-black text-white shadow-sm'
+              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900'
+          }`}
+        >
+          Expired ({expiredCount})
+        </button>
+      </div>
+
+      {/* 4. BOOKING TICKET CONTAINER */}
+      <div className="space-y-4">
+        {filteredBookings.length === 0 ? (
+          <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
+            <Info size={40} className="text-slate-350 mx-auto mb-3" />
+            <h3 className="text-slate-700 font-bold text-base">No reservations found</h3>
+            <p className="text-xs text-slate-550 mt-1">There are no bookings matching the selected filter.</p>
+          </div>
+        ) : (
+          filteredBookings.map((booking, index) => (
+            <div 
+              key={booking.id}
+              className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm mb-4"
+            >
+              
+              {/* Top Info Bar (Badge Row) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-bold text-black">{index + 1}</span>
+                  <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-50 text-green-700 border border-green-100">
+                    {booking.vehicleType}
+                  </span>
+                  <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg ${
+                    booking.status === 'Active'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {booking.status}
+                  </span>
+                </div>
+                <span className="text-slate-400 text-xs font-mono">
+                  Ticket ID: {booking.ticketId}
+                </span>
+              </div>
+
+              {/* Thin Divider */}
+              <hr className="border-slate-100 mb-6" />
+
+              {/* Content block: Metadata grid on left, action buttons on right */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                
+                {/* Metadata Core Grid (4-Column Layout) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 flex-1">
+                  
+                  {/* Column 1 (Location) */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
+                      <MapPin size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-slate-400 font-medium">Location</span>
+                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.location}</span>
+                    </div>
+                  </div>
+
+                  {/* Column 2 (Booked Date) */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
+                      <CalendarIcon size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-slate-400 font-medium">Booked Date</span>
+                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.bookedDate}</span>
+                    </div>
+                  </div>
+
+                  {/* Column 3 (Booked Time) */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
+                      <Clock size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-slate-400 font-medium">Booked Time</span>
+                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.bookedTime}</span>
+                    </div>
+                  </div>
+
+                  {/* Column 4 (Arrival Deadline) */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 border border-orange-100">
+                      <Clock size={18} className="text-orange-500" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-slate-400 font-medium">Arrival Deadline</span>
+                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.deadlineTime}</span>
+                      {booking.status === 'Active' ? (
+                        <span className="text-orange-500 text-xs font-semibold animate-pulse mt-0.5">
+                          {getRemainingMinutesText()}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-xs font-semibold mt-0.5">Expired</span>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Action Buttons Block (Right-Aligned Column) */}
+                <div className="flex flex-col gap-2 shrink-0 w-full lg:w-auto sm:min-w-[140px]">
+                  <button 
+                    onClick={() => setIsQrOpen(true)}
+                    className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <QrCode size={16} />
+                    View QR
+                  </button>
+
+                  {booking.status === 'Active' && (
+                    <button 
+                       onClick={() => handleCancelClick(booking.id)}
+                       className="w-full bg-[#D91B5C] text-white hover:bg-rose-700 font-medium py-2 px-5 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 active:scale-[0.98]"
+                    >
+                      <X size={16} />
+                      Cancel
+                    </button>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Full-width Contact Section (Inner Banner) */}
+              <div className="bg-blue-50/60 rounded-lg p-3 flex items-center gap-2 mt-4">
+                <Info size={16} className="text-blue-700 shrink-0" />
+                <span className="text-blue-700 text-sm font-medium">Contact: {booking.contact}</span>
+              </div>
+
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* 5. DYNAMIC CUSTOM REACTION CONFIRMATION MODAL OVERLAY */}
+      {isCancelConfirmOpen && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 animate-scale-in relative">
+            <button 
+              onClick={() => setIsCancelConfirmOpen(false)}
+              className="absolute top-4 right-4 h-7 w-7 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="space-y-4 pt-2 text-center">
+              <div className="w-12 h-12 bg-rose-50 border border-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <AlertCircle size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-slate-800">Cancel Parking Booking?</h3>
+                <p className="text-xs text-slate-500 leading-normal">
+                  Are you sure you want to cancel this reservation? Expired tickets release spots back to the building map grids immediately.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={() => setIsCancelConfirmOpen(false)}
+                  className="flex-1 h-10 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-xs transition-all"
+                >
+                  No, Keep it
+                </button>
+                <button
+                  onClick={handleConfirmCancel}
+                  className="flex-1 h-10 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-rose-600/10 active:scale-[0.98]"
+                >
+                  Yes, Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. DYNAMIC QR DISPLAY MODAL OVERLAY */}
+      {isQrOpen && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 animate-scale-in relative text-center">
+            <button 
+              onClick={() => setIsQrOpen(false)}
+              className="absolute top-4 right-4 h-7 w-7 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="space-y-5 pt-2">
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-slate-800">Parking Booking Ticket</h3>
+                <p className="text-xs text-slate-550">Scan at entrance scan readers or camera checkpoints</p>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-100 p-6 rounded-xl inline-block shadow-sm">
+                {/* Visual mock QR block */}
+                <div className="w-40 h-40 bg-white border border-slate-200 rounded-lg p-2.5 mx-auto flex items-center justify-center">
+                  <div className="w-full h-full relative" style={{ backgroundImage: 'linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px' }}>
+                    <div className="absolute inset-4 bg-white border-2 border-slate-800 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-slate-800"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-xs font-mono font-bold text-indigo-600 tracking-wide uppercase">
+                Ticket ID: TKT-V03MKT2N
+              </div>
+
+              <button
+                onClick={() => setIsQrOpen(false)}
+                className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-all"
+              >
+                Close Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default MyBookings;
