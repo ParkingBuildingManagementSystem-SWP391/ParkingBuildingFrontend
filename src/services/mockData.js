@@ -2,7 +2,7 @@
 
 export const PRESET_USERS = {
   admin: {
-    username: 'admin',
+    username: 'alex_johnson',
     name: 'Alex Johnson',
     role: 'admin',
     avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Alex',
@@ -10,7 +10,7 @@ export const PRESET_USERS = {
     details: 'System Administrator'
   },
   staff: {
-    username: 'staff',
+    username: 'sarah_connor',
     name: 'Sarah Connor',
     role: 'staff',
     avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sarah',
@@ -19,7 +19,7 @@ export const PRESET_USERS = {
     shift: 'Day Shift (06:00 AM - 02:00 PM)'
   },
   driver: {
-    username: 'driver',
+    username: 'david_miller',
     name: 'David Miller',
     role: 'driver',
     avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=David',
@@ -32,7 +32,7 @@ export const PRESET_USERS = {
     activeTicket: 'T-1004' // Currently parked in slot L1-03
   },
   manager: {
-    username: 'manager',
+    username: 'robert_vance',
     name: 'Robert Vance',
     role: 'manager',
     avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Robert',

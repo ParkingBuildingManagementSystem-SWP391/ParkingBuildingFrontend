@@ -17,11 +17,8 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(savedUser));
       setRole(savedRole);
     } else {
-      // Default to Admin role for development/demo ease
-      setUser(PRESET_USERS.admin);
-      setRole(PRESET_USERS.admin.role);
-      localStorage.setItem('spotflow_user', JSON.stringify(PRESET_USERS.admin));
-      localStorage.setItem('spotflow_role', PRESET_USERS.admin.role);
+      setUser(null);
+      setRole(null);
     }
     setLoading(false);
   }, []);
@@ -62,13 +59,23 @@ export const AuthProvider = ({ children }) => {
     return false;
   };
 
+  const updateUser = (updatedFields) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const newUser = { ...prev, ...updatedFields };
+      localStorage.setItem('spotflow_user', JSON.stringify(newUser));
+      return newUser;
+    });
+  };
+
   const value = {
     user,
     role,
     loading,
     login,
     logout,
-    switchRole
+    switchRole,
+    updateUser
   };
 
   return (

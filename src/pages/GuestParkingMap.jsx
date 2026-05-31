@@ -221,8 +221,8 @@ const GuestParkingMap = () => {
     setIsAuthenticated(true);
     setUser({
       phone: phoneNumber,
-      role: 'User',
-      avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=UserFlow'
+      role: 'Driver',
+      avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=DriverFlow'
     });
 
     // Reset login fields

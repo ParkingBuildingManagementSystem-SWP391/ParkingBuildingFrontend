@@ -103,11 +103,19 @@ const initAuthParkingMap = () => {
 };
 
 const ParkingLotMap = () => {
-  const { role, user } = useAuth();
+  const { role, user, login } = useAuth();
 
   const [activeFloor, setActiveFloor] = useState('Floor 1');
   const [searchQuery, setSearchQuery] = useState('');
   const [zoomLevel, setZoomLevel] = useState(100);
+  
+  // Guest view states
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [pendingBookingSlot, setPendingBookingSlot] = useState(null);
+  const [authPhone, setAuthPhone] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
   
   // Stateful slots
   const [authSlots, setAuthSlots] = useState(() => {
@@ -145,6 +153,23 @@ const ParkingLotMap = () => {
     setBookingDuration('1 Hour');
     setAdminPlate('');
   }, [activeFloor, selectedSlot]);
+
+  // Automatically open booking modal if user gets authenticated and has a pending slot
+  useEffect(() => {
+    if (user && role === 'driver') {
+      const pendingSlotId = pendingBookingSlot || sessionStorage.getItem('spotflow_pending_booking_slot');
+      if (pendingSlotId) {
+        const slot = authSlots.find(s => s.id === pendingSlotId);
+        if (slot && slot.status === 'Available') {
+          setSelectedSlot(slot);
+          setIsBookingModalOpen(true);
+        }
+        setPendingBookingSlot(null);
+        sessionStorage.removeItem('spotflow_pending_booking_slot');
+        setIsAuthModalOpen(false);
+      }
+    }
+  }, [user, role, authSlots, pendingBookingSlot]);
   
   // Counts & Progress
   const currentFloorSlots = useMemo(() => {
@@ -201,6 +226,16 @@ const ParkingLotMap = () => {
 
   // Slot click handler
   const handleSlotClick = (slot) => {
+    // If not logged in, intercept Available (green) clicks
+    if (!user) {
+      if (slot.status === 'Available') {
+        sessionStorage.setItem('spotflow_pending_booking_slot', slot.id);
+        setPendingBookingSlot(slot.id);
+        setIsAuthModalOpen(true);
+      }
+      return; // Do nothing for occupied/reserved slots in guest public view
+    }
+
     setSelectedSlot(slot);
     if (slot.status === 'Available') {
       if (role === 'driver') {
@@ -371,6 +406,49 @@ const ParkingLotMap = () => {
     setTimeout(() => {
       setAlertBanner(null);
     }, 3500);
+  };
+
+  // Submit handler for inline Guest Auth Modal
+  const handleAuthModalSubmit = (e) => {
+    e.preventDefault();
+    if (!authPhone || !authPassword) {
+      setAuthError('Please enter phone number and password.');
+      return;
+    }
+    setAuthLoading(true);
+    setAuthError('');
+
+    setTimeout(() => {
+      const res = login('driver');
+      setAuthLoading(false);
+      if (res.success) {
+        localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
+        localStorage.setItem('spotflow_guest_user', JSON.stringify({
+          phone: authPhone,
+          role: 'Driver',
+          avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=DriverFlow'
+        }));
+      } else {
+        setAuthError('Authentication failed. Use the quick demo registration.');
+      }
+    }, 500);
+  };
+
+  // Quick Demo Bypass Sign Up for Guest Auth Modal
+  const handleQuickGuestSignUp = () => {
+    setAuthLoading(true);
+    setTimeout(() => {
+      const res = login('driver');
+      setAuthLoading(false);
+      if (res.success) {
+        localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
+        localStorage.setItem('spotflow_guest_user', JSON.stringify({
+          phone: '0915277878',
+          role: 'Driver',
+          avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=DriverFlow'
+        }));
+      }
+    }, 300);
   };
 
   // Format dynamic details for modal occupancy view
@@ -1068,6 +1146,84 @@ const ParkingLotMap = () => {
                 </div>
               )}
 
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 5. GUEST LOGIN / SIGN UP MODAL (Auth Form) */}
+      {isAuthModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans p-6 sm:p-8 space-y-6">
+            
+            <button 
+              onClick={() => setIsAuthModalOpen(false)}
+              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="space-y-2">
+              <div className="w-12 h-12 rounded-xl bg-[#2563EB] flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-blue-500/10">
+                P
+              </div>
+              <h3 className="text-xl font-extrabold text-slate-800 mt-2">Sign in to reserve</h3>
+              <p className="text-xs text-slate-500 font-medium">Authentication is required to book Slot <span className="font-mono text-[#2563EB] font-extrabold">{pendingBookingSlot || sessionStorage.getItem('spotflow_pending_booking_slot')}</span></p>
+            </div>
+
+            {authError && (
+              <div className="bg-rose-50 border border-rose-100 text-rose-700 text-xs font-semibold p-3.5 rounded-xl flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0"></span>
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAuthModalSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 block">Phone Number</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter your phone number"
+                  value={authPhone}
+                  onChange={(e) => setAuthPhone(e.target.value)}
+                  className="w-full h-11 px-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 block">Password</label>
+                <input 
+                  type="password" 
+                  required
+                  placeholder="Enter your password"
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  className="w-full h-11 px-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold"
+                />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={authLoading}
+                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 text-sm mt-6"
+              >
+                {authLoading ? 'Logging in...' : 'Login & Continue'}
+              </button>
+            </form>
+
+            <div className="text-center pt-2">
+              <span className="text-xs text-slate-500">
+                Don't have an account?{' '}
+                <button 
+                  type="button"
+                  onClick={handleQuickGuestSignUp}
+                  className="text-[#2563EB] font-bold hover:underline"
+                >
+                  Quick Sign Up
+                </button>
+              </span>
             </div>
 
           </div>

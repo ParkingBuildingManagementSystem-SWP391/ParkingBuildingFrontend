@@ -30,20 +30,23 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/map" element={<GuestParkingMap />} />
 
-        {/* Shell wrapping authenticated workspaces */}
-        <Route element={<RoleProtectedRoute allowedRoles={['admin', 'staff', 'driver', 'manager']} />}>
-          <Route element={<MainLayout />}>
+        {/* MainLayout wrapping for both public and protected routes */}
+        <Route element={<MainLayout />}>
+          {/* Public parking map */}
+          <Route path="/parking-map" element={<ParkingLotMap />} />
+
+          {/* Shell wrapping authenticated workspaces */}
+          <Route element={<RoleProtectedRoute allowedRoles={['admin', 'staff', 'driver', 'manager']} />}>
             
             {/* Common dashboard path - content routes adapt to user role */}
             <Route path="/dashboard" element={<Dashboard />} />
             
-            {/* Shared visual parking map grid */}
-            <Route path="/parking-map" element={<ParkingLotMap />} />
+            {/* My Account Settings (accessible by all authenticated roles) */}
+            <Route path="/settings" element={<Settings />} />
             
             {/* Admin-only paths */}
             <Route element={<RoleProtectedRoute allowedRoles={['admin']} />}>
               <Route path="/staff-management" element={<StaffManagement />} />
-              <Route path="/settings" element={<Settings />} />
               <Route path="/accounts" element={<Accounts />} />
             </Route>
 

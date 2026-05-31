@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Phone, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
   // Controlled component states
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -17,8 +17,8 @@ const Login = () => {
   // Form submit handler
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (!phoneNumber || !password) {
-      setErrorMsg('Please enter both phone number and password.');
+    if (!usernameOrEmail || !password) {
+      setErrorMsg('Please enter both username or email and password.');
       return;
     }
 
@@ -35,9 +35,9 @@ const Login = () => {
         // Save guest map sync states persistently
         localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
         localStorage.setItem('spotflow_guest_user', JSON.stringify({
-          phone: phoneNumber,
-          role: 'User',
-          avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=UserFlow'
+          phone: usernameOrEmail,
+          role: 'Driver',
+          avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=DriverFlow'
         }));
         
         // Push user to main dashboard
@@ -107,16 +107,16 @@ const Login = () => {
         {/* Input Form Elements */}
         <form onSubmit={handleFormSubmit} className="space-y-4">
           
-          {/* Phone input group */}
+          {/* Identifier input group (Username or Email) */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 block">Phone Number</label>
+            <label className="text-xs font-semibold text-slate-700 block">Username or Email</label>
             <div className="relative">
-              <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
                 type="text" 
-                placeholder="Enter your phone number"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter your username or email"
+                value={usernameOrEmail}
+                onChange={(e) => setUsernameOrEmail(e.target.value)}
                 className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#1A62FF] focus:ring-1 focus:ring-[#1A62FF] focus:bg-white transition-all font-medium"
               />
             </div>

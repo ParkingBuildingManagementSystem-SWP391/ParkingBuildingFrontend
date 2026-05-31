@@ -45,7 +45,7 @@ const Accounts = () => {
 
   // Helper mapping role tags for readable view
   const displayRole = (role) => {
-    if (role === 'driver') return 'User';
+    if (role === 'driver') return 'Driver';
     if (role === 'admin') return 'Admin';
     if (role === 'manager') return 'Manager';
     if (role === 'staff') return 'Staff';
@@ -94,7 +94,7 @@ const Accounts = () => {
       // 2. Role Filter matching
       let matchesRole = true;
       if (roleFilter !== 'All Roles') {
-        const queryRole = roleFilter === 'User' ? 'driver' : roleFilter.toLowerCase();
+        const queryRole = roleFilter === 'Driver' ? 'driver' : roleFilter.toLowerCase();
         matchesRole = acc.role === queryRole;
       }
 
@@ -181,10 +181,10 @@ const Accounts = () => {
           <span className="text-2xl font-bold text-slate-800 mt-2">{staffCount} Staff</span>
         </div>
 
-        {/* Users Card */}
+        {/* Drivers Card */}
         <div className="bg-white p-5 rounded-2xl border-l-4 border-slate-400 border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Users</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2">{userCount} Users</span>
+          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Drivers</span>
+          <span className="text-2xl font-bold text-slate-800 mt-2">{userCount} Drivers</span>
         </div>
       </div>
 
@@ -230,7 +230,7 @@ const Accounts = () => {
               <option value="Admin">Admin</option>
               <option value="Manager">Manager</option>
               <option value="Staff">Staff</option>
-              <option value="User">User</option>
+              <option value="Driver">Driver</option>
             </select>
 
             {/* Custom Statuses select dropdown */}
@@ -309,7 +309,7 @@ const Accounts = () => {
                         )}
                         {item.role === 'driver' && (
                           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                            User
+                            Driver
                           </span>
                         )}
                       </td>
@@ -413,7 +413,7 @@ const Accounts = () => {
                 >
                   <option value="manager">Manager</option>
                   <option value="staff">Staff</option>
-                  <option value="driver">User (Driver)</option>
+                  <option value="driver">Driver</option>
                 </select>
               </div>
 
