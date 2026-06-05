@@ -44,7 +44,11 @@ const Dashboard = () => {
   // Redirect driver and staff to /parking-map automatically
   useEffect(() => {
     const lowerRole = role?.toLowerCase();
+<<<<<<< Updated upstream
     if (lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {
+=======
+    if (lowerRole === 'driver' || lowerRole === 'member' || lowerRole === 'registered_driver' || lowerRole === 'customer' || lowerRole === 'staff') {
+>>>>>>> Stashed changes
       navigate('/parking-map');
     }
   }, [role, navigate]);
@@ -401,8 +405,10 @@ const Dashboard = () => {
     );
   };
 
+  const lowerRole = role?.toLowerCase();
+
   // Redirect and load map for drivers and staff
-  if (role === 'driver' || role === 'staff') {
+  if (lowerRole === 'driver' || lowerRole === 'member' || lowerRole === 'registered_driver' || lowerRole === 'customer' || lowerRole === 'staff') {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-400 font-medium font-sans">
         <div className="h-8 w-8 rounded-full border-4 border-slate-200 border-t-[#2563EB] animate-spin mb-3"></div>
@@ -412,14 +418,22 @@ const Dashboard = () => {
   }
 
   // Render correct dashboard based on role context
+<<<<<<< Updated upstream
   switch (role?.toLowerCase()) {
+=======
+  switch (lowerRole) {
+>>>>>>> Stashed changes
     case 'admin':
     case 'manager':
       return renderManagerDashboard();
     default:
       return (
         <div className="min-h-screen flex items-center justify-center text-rose-500 font-bold bg-white rounded-xl border border-slate-200 p-6">
+<<<<<<< Updated upstream
           <ShieldAlert size={20} className="mr-2 animate-bounce" /> Error loading dashboard: User role undefined (Role: {role})
+=======
+          <ShieldAlert size={20} className="mr-2 animate-bounce" /> Error loading dashboard: User role undefined ({role})
+>>>>>>> Stashed changes
         </div>
       );
   }

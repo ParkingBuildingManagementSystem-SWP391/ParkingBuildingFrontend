@@ -1,17 +1,28 @@
 import axios from 'axios';
 
 const api = axios.create({
+<<<<<<< Updated upstream
   // Đường dẫn tương đối dựa theo cấu hình Vite Proxy trong vite.config.js
+=======
+  // Đust CHUYỂN THÀNH: Đường dẫn tương đối dựa theo cấu hình Vite Proxy
+  // Trình duyệt sẽ hiểu là gọi tới http://localhost:3000/api và không bị chặn CORS nữa
+>>>>>>> Stashed changes
   baseURL: '/api', 
   headers: {
     'Content-Type': 'application/json',
   },
+<<<<<<< Updated upstream
   timeout: 10000, // (Tùy chọn) Ngắt request nếu sau 10 giây Backend không phản hồi
 });
 
 // ==========================================
 // 1. INTERCEPTOR CHO REQUEST (Đầu đi)
 // ==========================================
+=======
+});
+
+// Tự động thêm Token vào Header của mỗi Request (nếu có)
+>>>>>>> Stashed changes
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -25,6 +36,7 @@ api.interceptors.request.use(
   }
 );
 
+<<<<<<< Updated upstream
 // ==========================================
 // 2. INTERCEPTOR CHO RESPONSE (Đầu về)
 // ==========================================
@@ -72,4 +84,6 @@ api.interceptors.response.use(
   }
 );
 
+=======
+>>>>>>> Stashed changes
 export default api;

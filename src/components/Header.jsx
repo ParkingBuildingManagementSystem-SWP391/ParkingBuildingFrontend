@@ -35,7 +35,12 @@ const Header = () => {
 
   const getRoleBadge = (userRole) => {
     const baseClass = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all duration-200 shadow-sm";
+<<<<<<< Updated upstream
     switch (userRole?.toLowerCase()) {
+=======
+    const lowerUserRole = userRole?.toLowerCase();
+    switch (lowerUserRole) {
+>>>>>>> Stashed changes
       case 'admin':
         return (
           <span className={`${baseClass} bg-rose-50 text-rose-600 border-rose-200`}>
@@ -80,7 +85,11 @@ const Header = () => {
       icon: <User size={14} className="text-slate-400" />,
       onClick: () => navigate('/settings')
     },
+<<<<<<< Updated upstream
     ...((role && ['driver', 'member', 'registered_driver', 'customer'].includes(role.toLowerCase())) ? [{
+=======
+    ...((role?.toLowerCase() === 'driver' || role?.toLowerCase() === 'member' || role?.toLowerCase() === 'customer' || role?.toLowerCase() === 'registered_driver') ? [{
+>>>>>>> Stashed changes
       key: 'monthly-pass',
       label: <span className="text-slate-600 font-medium">Monthly Pass Card</span>,
       icon: <CreditCard size={14} className="text-slate-400" />,
@@ -110,6 +119,8 @@ const Header = () => {
     const currentPath = location.pathname;
     const lowerRole = role?.toLowerCase();
 
+    const lowerRole = role?.toLowerCase();
+
     // Guest view: only Parking Map is allowed
     if (!user) {
       return (
@@ -126,7 +137,11 @@ const Header = () => {
     }
 
     // Role 1: "Driver" (Driver View) -> Allowed Tabs: Parking Map, My Bookings
+<<<<<<< Updated upstream
     if (lowerRole && ['driver', 'member', 'registered_driver', 'customer'].includes(lowerRole)) {
+=======
+    if (lowerRole === 'driver' || lowerRole === 'member' || lowerRole === 'registered_driver' || lowerRole === 'customer') {
+>>>>>>> Stashed changes
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
           <button

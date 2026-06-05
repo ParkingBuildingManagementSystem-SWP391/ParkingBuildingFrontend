@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
+<<<<<<< Updated upstream
    * Thiết lập phiên đăng nhập sau khi nhận được thông tin xác thực từ server
    */
   const loginWithUserData = (data) => {
@@ -77,6 +78,68 @@ export const AuthProvider = ({ children }) => {
       console.error("Quá trình đăng nhập xảy ra lỗi:", error);
       return { success: false, message: error || "Đăng nhập thất bại!" };
     }
+=======
+   * Hàm Login kết nối trực tiếp với API Backend thật (.NET)
+   */
+  const login = async (usernameOrEmail, password) => {
+    try {
+      const data = await authService.login({ 
+        usernameOrEmail: usernameOrEmail, 
+        password: password 
+      });
+      
+      if (!data) {
+        throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
+      }
+      
+      const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
+      const matchedUser = {
+        username: data.username || data.Username || usernameOrEmail.split('@')[0],
+        role: rawRole
+      };
+
+      // Cập nhật State cho toàn bộ ứng dụng Frontend
+      setUser(matchedUser);
+      setRole(matchedUser.role);
+
+      // Lưu Token và thông tin User một cách an toàn vào localStorage
+      const tokenString = data.token || data.Token;
+      if (tokenString) {
+        localStorage.setItem('token', tokenString);
+      }
+      localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
+      localStorage.setItem('spotflow_role', matchedUser.role);
+
+      return { success: true, user: matchedUser };
+
+    } catch (error) {
+      console.error("Quá trình đăng nhập xảy ra lỗi:", error);
+      return { success: false, message: error || "Đăng nhập thất bại!" };
+    }
+  };
+
+  /**
+   * Hàm hỗ trợ đăng nhập trực tiếp từ dữ liệu trả về sau khi OTP thành công
+   */
+  const loginWithUserData = (data) => {
+    if (!data) return;
+    
+    const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
+    const matchedUser = {
+      username: data.username || data.Username || data.email?.split('@')[0] || "User",
+      role: rawRole
+    };
+    
+    setUser(matchedUser);
+    setRole(matchedUser.role);
+
+    const tokenString = data.token || data.Token;
+    if (tokenString) {
+      localStorage.setItem('token', tokenString);
+    }
+    localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
+    localStorage.setItem('spotflow_role', matchedUser.role);
+>>>>>>> Stashed changes
   };
 
   /**
@@ -86,6 +149,23 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setRole(null);
     authService.logout();
+<<<<<<< Updated upstream
+=======
+  };
+
+  // Giữ nguyên phục vụ mục đích demo/presentation khi mất mạng công cộng
+  const switchRole = (newRole) => {
+    const matchedUser = PRESET_USERS[newRole];
+    if (matchedUser) {
+      setUser(matchedUser);
+      setRole(matchedUser.role);
+      localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
+      localStorage.setItem('spotflow_role', matchedUser.role);
+      window.dispatchEvent(new Event('storage'));
+      return true;
+    }
+    return false;
+>>>>>>> Stashed changes
   };
 
   const updateUser = (updatedFields) => {
@@ -97,7 +177,11 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+<<<<<<< Updated upstream
   const value = { user, role, loading, login, logout, updateUser, loginWithUserData };
+=======
+  const value = { user, role, loading, login, loginWithUserData, logout, switchRole, updateUser };
+>>>>>>> Stashed changes
 
   return (
     <AuthContext.Provider value={value}>
