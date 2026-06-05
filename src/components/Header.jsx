@@ -23,16 +23,9 @@ import logoImg from '../imports/image.png';
 const { Header: AntHeader } = Layout;
 
 const Header = () => {
-  const { user, role, switchRole, logout } = useAuth();
+  const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const handleRoleChange = (value) => {
-    switchRole(value);
-    message.success(`Switched workspace view to: ${value.toUpperCase()}`);
-    // Navigate to dashboard automatically to refresh context
-    navigate('/dashboard');
-  };
 
   const handleLogoutClick = () => {
     logout();
@@ -42,7 +35,7 @@ const Header = () => {
 
   const getRoleBadge = (userRole) => {
     const baseClass = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all duration-200 shadow-sm";
-    switch (userRole) {
+    switch (userRole?.toLowerCase()) {
       case 'admin':
         return (
           <span className={`${baseClass} bg-rose-50 text-rose-600 border-rose-200`}>
@@ -65,6 +58,9 @@ const Header = () => {
           </span>
         );
       case 'driver':
+      case 'member':
+      case 'registered_driver':
+      case 'customer':
         return (
           <span className={`${baseClass} bg-emerald-50 text-emerald-700 border-emerald-200`}>
             <Contact size={12} className="text-emerald-600 shrink-0" />
@@ -84,7 +80,7 @@ const Header = () => {
       icon: <User size={14} className="text-slate-400" />,
       onClick: () => navigate('/settings')
     },
-    ...(role === 'driver' ? [{
+    ...((role && ['driver', 'member', 'registered_driver', 'customer'].includes(role.toLowerCase())) ? [{
       key: 'monthly-pass',
       label: <span className="text-slate-600 font-medium">Monthly Pass Card</span>,
       icon: <CreditCard size={14} className="text-slate-400" />,
@@ -112,6 +108,7 @@ const Header = () => {
       : `${commonTabClass} bg-transparent text-slate-600 hover:text-[#2563EB] hover:bg-slate-100`;
 
     const currentPath = location.pathname;
+    const lowerRole = role?.toLowerCase();
 
     // Guest view: only Parking Map is allowed
     if (!user) {
@@ -129,7 +126,7 @@ const Header = () => {
     }
 
     // Role 1: "Driver" (Driver View) -> Allowed Tabs: Parking Map, My Bookings
-    if (role === 'driver') {
+    if (lowerRole && ['driver', 'member', 'registered_driver', 'customer'].includes(lowerRole)) {
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
           <button
@@ -151,7 +148,7 @@ const Header = () => {
     }
 
     // Role 2: "Parking Staff" -> Allowed Tabs: Parking Map, My Bookings, Operations
-    if (role === 'staff') {
+    if (lowerRole === 'staff') {
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
           <button
@@ -180,7 +177,7 @@ const Header = () => {
     }
 
     // Role 3: "Parking Manager" & Role 4: "System Admin" -> Allowed Tabs: Dashboard, Operations, Parking Map
-    if (role === 'manager' || role === 'admin') {
+    if (lowerRole === 'manager' || lowerRole === 'admin') {
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
           <button
@@ -204,7 +201,7 @@ const Header = () => {
             <Map size={16} />
             Parking Map
           </button>
-          {role === 'admin' && (
+          {lowerRole === 'admin' && (
             <button
               onClick={() => navigate('/accounts')}
               className={currentPath === '/accounts' ? activeTabClass : inactiveTabClass}
@@ -232,21 +229,15 @@ const Header = () => {
 
   const roleLabels = {
     driver: 'Driver',
+    member: 'Driver',
+    registered_driver: 'Driver',
+    customer: 'Driver',
     staff: 'Parking Staff',
     manager: 'Parking Manager',
     admin: 'System Admin'
   };
 
-  const roleMenuItems = [
-    { key: 'driver', label: 'Driver' },
-    { key: 'staff', label: 'Parking Staff' },
-    { key: 'manager', label: 'Parking Manager' },
-    { key: 'admin', label: 'System Admin' }
-  ].map(item => ({
-    key: item.key,
-    label: item.label,
-    onClick: () => handleRoleChange(item.key)
-  }));
+
 
   return (
     <AntHeader 
@@ -283,13 +274,10 @@ const Header = () => {
         
         {user ? (
           <>
-            {/* Streamlined Role Dropdown Button */}
-            <Dropdown menu={{ items: roleMenuItems }} trigger={['click']} placement="bottomRight">
-              <button className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition-all border border-white/10">
-                <span>{roleLabels[role] || role}</span>
-                <ChevronDown size={14} className="text-white/80" />
-              </button>
-            </Dropdown>
+            {/* Static Role Display Badge */}
+            <div className="flex items-center gap-1.5 bg-white/10 text-white font-semibold text-xs px-3.5 py-2 rounded-xl border border-white/10 select-none">
+              <span>{roleLabels[role?.toLowerCase()] || role}</span>
+            </div>
 
             {/* Circular Avatar Initials */}
             <div className="flex items-center pl-3 border-l border-white/20">

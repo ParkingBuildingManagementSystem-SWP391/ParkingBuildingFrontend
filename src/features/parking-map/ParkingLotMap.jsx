@@ -39,16 +39,16 @@ const Motorcycle = ({ size = 18, className = '' }) => (
 const initAuthParkingMap = () => {
   const slots = [];
   
-  // Floor 1 (Bicycle - 45 spots, Motorcycle - 105 spots) -> Total 150 spots
-  // Stats Floor 1: Total 150. Available: 24. Occupied: 83. Reserved: 43.
-  let f1BikeAvail = 7, f1BikeOcc = 25, f1BikeRes = 13;
+  // Floor G (Bicycle - 45 spots, Motorcycle - 105 spots) -> Total 150 spots
+  // Stats Floor G: Total 150. Available: 22. Occupied: 85. Reserved: 43.
+  let f1BikeAvail = 5, f1BikeOcc = 27, f1BikeRes = 13;
   for (let i = 1; i <= 45; i++) {
     let status = 'Occupied';
     if (i <= f1BikeAvail) status = 'Available';
     else if (i > f1BikeAvail + f1BikeOcc) status = 'Reserved';
     slots.push({
       id: `F1-B-${String(i).padStart(3, '0')}`,
-      floor: 'Floor 1',
+      floor: 'Floor G',
       zone: 'Bicycle',
       type: 'Bicycle',
       status: status
@@ -62,29 +62,29 @@ const initAuthParkingMap = () => {
     else if (i > f1MotorAvail + f1MotorOcc) status = 'Reserved';
     slots.push({
       id: `F1-M-${String(i).padStart(3, '0')}`,
-      floor: 'Floor 1',
+      floor: 'Floor G',
       zone: 'Motorcycle',
       type: 'Motorcycle',
       status: status
     });
   }
 
-  // Floor 2 (Car zone ONLY -> Total 150 spots, 20 free)
-  let f2Avail = 20, f2Occ = 88, f2Res = 42;
+  // Basement 1 (Car zone ONLY -> Total 150 spots, 28 free)
+  let f2Avail = 28, f2Occ = 80, f2Res = 42;
   for (let i = 1; i <= 150; i++) {
     let status = 'Occupied';
     if (i <= f2Avail) status = 'Available';
     else if (i > f2Avail + f2Occ) status = 'Reserved';
     slots.push({
       id: `F2-C-${String(i).padStart(3, '0')}`,
-      floor: 'Floor 2',
+      floor: 'Basement 1',
       zone: 'Car',
       type: 'Car',
       status: status
     });
   }
 
-  // Basement (Car zone ONLY -> Total 150 spots, 5 free)
+  // Basement 2 (Car zone ONLY -> Total 150 spots, 5 free)
   let bsAvail = 5, bsOcc = 103, bsRes = 42;
   for (let i = 1; i <= 150; i++) {
     let status = 'Occupied';
@@ -92,7 +92,7 @@ const initAuthParkingMap = () => {
     else if (i > bsAvail + bsOcc) status = 'Reserved';
     slots.push({
       id: `B-C-${String(i).padStart(3, '0')}`,
-      floor: 'Basement',
+      floor: 'Basement 2',
       zone: 'Car',
       type: 'Car',
       status: status
@@ -105,7 +105,7 @@ const initAuthParkingMap = () => {
 const ParkingLotMap = () => {
   const { role, user, login } = useAuth();
 
-  const [activeFloor, setActiveFloor] = useState('Floor 1');
+  const [activeFloor, setActiveFloor] = useState('Floor G');
   const [searchQuery, setSearchQuery] = useState('');
   const [zoomLevel, setZoomLevel] = useState(100);
   
@@ -120,7 +120,14 @@ const ParkingLotMap = () => {
   // Stateful slots
   const [authSlots, setAuthSlots] = useState(() => {
     const saved = localStorage.getItem('spotflow_auth_map_slots');
-    return saved ? JSON.parse(saved) : initAuthParkingMap();
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.some(s => s.floor === 'Floor 1' || s.floor === 'Floor 2' || s.floor === 'Basement')) {
+        return initAuthParkingMap();
+      }
+      return parsed;
+    }
+    return initAuthParkingMap();
   });
 
   useEffect(() => {
@@ -144,7 +151,7 @@ const ParkingLotMap = () => {
 
   // Synchronize dynamic booking form selection on floor/slot updates
   useEffect(() => {
-    if (activeFloor === 'Floor 1') {
+    if (activeFloor === 'Floor G') {
       setBookingVehicleType('Bicycle');
     } else {
       setBookingVehicleType('Car');
@@ -194,16 +201,16 @@ const ParkingLotMap = () => {
   }, [occupiedCount, reservedCount]);
 
   // Available free slots for floor indicators
-  const floor1Available = useMemo(() => {
-    return authSlots.filter(s => s.floor === 'Floor 1' && s.status === 'Available').length;
+  const floorGAvailable = useMemo(() => {
+    return authSlots.filter(s => s.floor === 'Floor G' && s.status === 'Available').length;
   }, [authSlots]);
 
-  const floor2Available = useMemo(() => {
-    return authSlots.filter(s => s.floor === 'Floor 2' && s.status === 'Available').length;
+  const basement1Available = useMemo(() => {
+    return authSlots.filter(s => s.floor === 'Basement 1' && s.status === 'Available').length;
   }, [authSlots]);
 
-  const basementAvailable = useMemo(() => {
-    return authSlots.filter(s => s.floor === 'Basement' && s.status === 'Available').length;
+  const basement2Available = useMemo(() => {
+    return authSlots.filter(s => s.floor === 'Basement 2' && s.status === 'Available').length;
   }, [authSlots]);
 
   // Query filter
@@ -534,69 +541,69 @@ const ParkingLotMap = () => {
             <h2 className="text-xs font-extrabold text-slate-400 tracking-widest uppercase">Select Parking Level</h2>
             <div className="flex flex-col gap-3">
               
-              {/* Floor 1 Selector Button */}
+              {/* Floor G Selector Button */}
               <button
-                onClick={() => { setActiveFloor('Floor 1'); setSearchQuery(''); }}
+                onClick={() => { setActiveFloor('Floor G'); setSearchQuery(''); }}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Floor 1'
+                  activeFloor === 'Floor G'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-100 hover:border-blue-400 hover:bg-slate-50/55 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-semibold">Floor 1</span>
-                  <span className={`text-[11px] ${activeFloor === 'Floor 1' ? 'text-blue-100' : 'text-slate-500'}`}>Bicycle & Motorcycle</span>
+                  <span className="text-sm font-semibold">Floor G</span>
+                  <span className={`text-[11px] ${activeFloor === 'Floor G' ? 'text-blue-100' : 'text-slate-500'}`}>Bicycle & Motorcycle</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Floor 1'
+                  activeFloor === 'Floor G'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {floor1Available} free
+                  {floorGAvailable} free
                 </span>
               </button>
 
-              {/* Floor 2 Selector Button */}
+              {/* Basement 1 Selector Button */}
               <button
-                onClick={() => { setActiveFloor('Floor 2'); setSearchQuery(''); }}
+                onClick={() => { setActiveFloor('Basement 1'); setSearchQuery(''); }}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Floor 2'
+                  activeFloor === 'Basement 1'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-100 hover:border-blue-400 hover:bg-slate-50/55 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-semibold">Floor 2</span>
-                  <span className={`text-[11px] ${activeFloor === 'Floor 2' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
+                  <span className="text-sm font-semibold">Basement 1 (B1)</span>
+                  <span className={`text-[11px] ${activeFloor === 'Basement 1' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Floor 2'
+                  activeFloor === 'Basement 1'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {floor2Available} free
+                  {basement1Available} free
                 </span>
               </button>
 
-              {/* Basement Selector Button */}
+              {/* Basement 2 Selector Button */}
               <button
-                onClick={() => { setActiveFloor('Basement'); setSearchQuery(''); }}
+                onClick={() => { setActiveFloor('Basement 2'); setSearchQuery(''); }}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Basement'
+                  activeFloor === 'Basement 2'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-100 hover:border-blue-400 hover:bg-slate-50/55 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-semibold">Basement</span>
-                  <span className={`text-[11px] ${activeFloor === 'Basement' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
+                  <span className="text-sm font-semibold">Basement 2 (B2)</span>
+                  <span className={`text-[11px] ${activeFloor === 'Basement 2' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Basement'
+                  activeFloor === 'Basement 2'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {basementAvailable} free
+                  {basement2Available} free
                 </span>
               </button>
 
@@ -718,7 +725,7 @@ const ParkingLotMap = () => {
               style={{ transform: `scale(${zoomLevel / 100})` }}
             >
               
-              {activeFloor === 'Floor 1' ? (
+              {activeFloor === 'Floor G' ? (
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                   
                   {/* Bicycle Area */}
@@ -888,7 +895,7 @@ const ParkingLotMap = () => {
                     onChange={(e) => setBookingVehicleType(e.target.value)}
                     className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all font-medium"
                   >
-                    {activeFloor === 'Floor 1' ? (
+                    {activeFloor === 'Floor G' ? (
                       <>
                         <option value="Bicycle">Bicycle</option>
                         <option value="Motorcycle">Motorcycle</option>

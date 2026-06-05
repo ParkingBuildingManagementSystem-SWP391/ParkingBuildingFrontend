@@ -43,7 +43,8 @@ const Dashboard = () => {
 
   // Redirect driver and staff to /parking-map automatically
   useEffect(() => {
-    if (role === 'driver' || role === 'staff') {
+    const lowerRole = role?.toLowerCase();
+    if (lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {
       navigate('/parking-map');
     }
   }, [role, navigate]);
@@ -411,14 +412,14 @@ const Dashboard = () => {
   }
 
   // Render correct dashboard based on role context
-  switch (role) {
+  switch (role?.toLowerCase()) {
     case 'admin':
     case 'manager':
       return renderManagerDashboard();
     default:
       return (
         <div className="min-h-screen flex items-center justify-center text-rose-500 font-bold bg-white rounded-xl border border-slate-200 p-6">
-          <ShieldAlert size={20} className="mr-2 animate-bounce" /> Error loading dashboard: User role undefined
+          <ShieldAlert size={20} className="mr-2 animate-bounce" /> Error loading dashboard: User role undefined (Role: {role})
         </div>
       );
   }
