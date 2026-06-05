@@ -1,30 +1,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserCog, X, Search, CheckCircle } from 'lucide-react';
+import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
+import { message, Select, Modal, Input, Switch, Button } from 'antd';
+import api from '../services/api';
 
 const INITIAL_ACCOUNTS = [
-  { id: 1, name: 'Alex Johnson', email: 'admin@spotflow.com', role: 'admin', status: 'Active', joined: '10 Jan 2025' },
-  { id: 2, name: 'Robert Vance', email: 'robert.v@spotflow.com', role: 'manager', status: 'Active', joined: '15 Feb 2025' },
-  { id: 3, name: 'John Doe', email: 'john.doe@spotflow.com', role: 'manager', status: 'Active', joined: '20 Mar 2025' },
-  { id: 4, name: 'Jane Smith', email: 'jane.smith@spotflow.com', role: 'manager', status: 'Inactive', joined: '12 Apr 2025' },
-  { id: 5, name: 'Sarah Connor', email: 'sarah.c@spotflow.com', role: 'staff', status: 'Active', joined: '20 Jan 2025' },
-  { id: 6, name: 'Michael Scott', email: 'michael.s@spotflow.com', role: 'staff', status: 'Active', joined: '01 May 2025' },
-  { id: 7, name: 'Dwight Schrute', email: 'dwight.s@spotflow.com', role: 'staff', status: 'Inactive', joined: '15 May 2025' },
-  { id: 8, name: 'David Miller', email: 'david.miller@gmail.com', role: 'driver', status: 'Active', joined: '05 Jan 2026' },
-  { id: 9, name: 'Emily Watson', email: 'emily.w@gmail.com', role: 'driver', status: 'Active', joined: '10 Feb 2026' },
-  { id: 10, name: 'Tom Hardy', email: 'tom.hardy@gmail.com', role: 'driver', status: 'Active', joined: '15 Mar 2026' },
-  { id: 11, name: 'Natalie Portman', email: 'natalie.p@gmail.com', role: 'driver', status: 'Inactive', joined: '20 Apr 2026' },
-  { id: 12, name: 'Chris Evans', email: 'chris.evans@gmail.com', role: 'driver', status: 'Active', joined: '01 May 2026' }
+  { id: 1, name: 'Alex Johnson', email: 'admin@spotflow.com', phoneNumber: '0912345678', roleId: 1, status: 'Active', joined: '10 Jan 2025' },
+  { id: 2, name: 'Robert Vance', email: 'robert.v@spotflow.com', phoneNumber: '0923456789', roleId: 5, status: 'Active', joined: '15 Feb 2025' },
+  { id: 3, name: 'John Doe', email: 'john.doe@spotflow.com', phoneNumber: '0934567890', roleId: 5, status: 'Active', joined: '20 Mar 2025' },
+  { id: 4, name: 'Jane Smith', email: 'jane.smith@spotflow.com', phoneNumber: '0945678901', roleId: 5, status: 'Inactive', joined: '12 Apr 2025' },
+  { id: 5, name: 'Sarah Connor', email: 'sarah.c@spotflow.com', phoneNumber: '0956789012', roleId: 2, status: 'Active', joined: '20 Jan 2025' },
+  { id: 6, name: 'Michael Scott', email: 'michael.s@spotflow.com', phoneNumber: '0967890123', roleId: 2, status: 'Active', joined: '01 May 2025' },
+  { id: 7, name: 'Dwight Schrute', email: 'dwight.s@spotflow.com', phoneNumber: '0978901234', roleId: 2, status: 'Inactive', joined: '15 May 2025' },
+  { id: 8, name: 'David Miller', email: 'david.miller@gmail.com', phoneNumber: '0989012345', roleId: 4, status: 'Active', joined: '05 Jan 2026' },
+  { id: 9, name: 'Emily Watson', email: 'emily.w@gmail.com', phoneNumber: '0990123456', roleId: 4, status: 'Active', joined: '10 Feb 2026' },
+  { id: 10, name: 'Tom Hardy', email: 'tom.hardy@gmail.com', phoneNumber: '0901234567', roleId: 4, status: 'Active', joined: '15 Mar 2026' },
+  { id: 11, name: 'Natalie Portman', email: 'natalie.p@gmail.com', phoneNumber: '0912345679', roleId: 4, status: 'Inactive', joined: '20 Apr 2026' },
+  { id: 12, name: 'Chris Evans', email: 'chris.evans@gmail.com', phoneNumber: '0923456780', roleId: 4, status: 'Active', joined: '01 May 2026' }
 ];
 
 const Accounts = () => {
-  const [accounts, setAccounts] = useState(() => {
-    const saved = localStorage.getItem('spotflow_accounts_list');
-    return saved ? JSON.parse(saved) : INITIAL_ACCOUNTS;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('spotflow_accounts_list', JSON.stringify(accounts));
-  }, [accounts]);
+  const [accounts, setAccounts] = useState(INITIAL_ACCOUNTS);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorBanner, setErrorBanner] = useState('');
 
   // Table Filters State
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,22 +32,98 @@ const Accounts = () => {
   // Change Role Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedNewRole, setSelectedNewRole] = useState('driver');
+  const [selectedNewRoleId, setSelectedNewRoleId] = useState(4); // Default to Driver (4)
+  
+  // Edit Profile Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [editUsername, setEditUsername] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhoneNumber, setEditPhoneNumber] = useState('');
+
   const [alertMessage, setAlertMessage] = useState(null);
+
+  // Helper: map backend user DTO to local structure
+  const mapUserToUI = (u) => {
+    let roleId = 4; // Default to Registered_Driver (4)
+    const roleStr = (u.role || u.Role || '').trim().toLowerCase();
+
+    if (roleStr === 'admin') roleId = 1;
+    else if (roleStr === 'staff') roleId = 2;
+    else if (roleStr === 'manager') roleId = 5;
+    else if (roleStr === 'customer') roleId = 3;
+    else if (roleStr === 'registered_driver' || roleStr === 'driver') roleId = 4;
+    else if (u.roleId || u.RoleId) roleId = Number(u.roleId || u.RoleId);
+
+    return {
+      id: u.id || u.Id || u.userId || u.UserId,
+      name: u.name || u.Name || u.username || u.Username || 'Unknown User',
+      email: u.email || u.Email || 'No Email Provided',
+      phoneNumber: u.phoneNumber || u.PhoneNumber || '',
+      roleId: roleId,
+      status: u.isDeleted || u.IsDeleted ? 'Inactive' : 'Active', // Mapping to status toggle
+      joined: '05 Jun 2026' // Default join date
+    };
+  };
+
+  // Fetch accounts from database API
+  const loadUsers = async () => {
+    setLoading(true);
+    setErrorBanner('');
+    try {
+      let rawData = [];
+      try {
+        const response = await api.get('/Admin/users');
+        rawData = response.data;
+      } catch (err) {
+        // Fallback endpoint
+        const response = await api.get('/User');
+        rawData = response.data;
+      }
+
+      if (rawData && rawData.length > 0) {
+        const mapped = rawData
+          .map(mapUserToUI)
+          .filter(u => u.roleId !== 3); // Completely EXCLUDE RoleId = 3 (Customer)
+        setAccounts(mapped);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorBanner('Offline Mode: Failed to load user accounts from SQL Server.');
+      // Revert to fallback local storage if available
+      const saved = localStorage.getItem('spotflow_accounts_list');
+      if (saved) {
+        setAccounts(JSON.parse(saved).filter(u => u.roleId !== 3));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  // Save list backup locally in offline mode
+  useEffect(() => {
+    if (accounts && accounts.length > 0) {
+      localStorage.setItem('spotflow_accounts_list', JSON.stringify(accounts));
+    }
+  }, [accounts]);
 
   // Dynamic Date subtitle
   const getFormattedDate = () => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date('2026-05-29T23:09:16+07:00').toLocaleDateString('en-US', options);
+    return new Date().toLocaleDateString('en-US', options);
   };
 
   // Helper mapping role tags for readable view
-  const displayRole = (role) => {
-    if (role === 'driver') return 'Driver';
-    if (role === 'admin') return 'Admin';
-    if (role === 'manager') return 'Manager';
-    if (role === 'staff') return 'Staff';
-    return role;
+  const displayRoleIdName = (roleId) => {
+    if (roleId === 1) return 'Admin';
+    if (roleId === 2) return 'Staff';
+    if (roleId === 5) return 'Manager';
+    if (roleId === 4) return 'Driver';
+    return 'User';
   };
 
   // Get Initials from Name for circular avatar
@@ -63,14 +137,14 @@ const Accounts = () => {
       .toUpperCase();
   };
 
-  // Assign background color to avatar
-  const getAvatarBg = (role) => {
-    switch (role) {
-      case 'admin':
+  // Assign background color to avatar based on Role ID
+  const getAvatarBg = (roleId) => {
+    switch (roleId) {
+      case 1:
         return 'bg-blue-100 text-blue-600';
-      case 'manager':
+      case 5:
         return 'bg-orange-100 text-orange-600';
-      case 'staff':
+      case 2:
         return 'bg-teal-100 text-teal-600';
       default:
         return 'bg-slate-100 text-slate-600';
@@ -78,24 +152,28 @@ const Accounts = () => {
   };
 
   // Dynamic Role summary counters
-  const adminCount = useMemo(() => accounts.filter((u) => u.role === 'admin').length, [accounts]);
-  const managerCount = useMemo(() => accounts.filter((u) => u.role === 'manager').length, [accounts]);
-  const staffCount = useMemo(() => accounts.filter((u) => u.role === 'staff').length, [accounts]);
-  const userCount = useMemo(() => accounts.filter((u) => u.role === 'driver').length, [accounts]);
+  const adminCount = useMemo(() => accounts.filter((u) => u.roleId === 1).length, [accounts]);
+  const managerCount = useMemo(() => accounts.filter((u) => u.roleId === 5).length, [accounts]);
+  const staffCount = useMemo(() => accounts.filter((u) => u.roleId === 2).length, [accounts]);
+  const userCount = useMemo(() => accounts.filter((u) => u.roleId === 4).length, [accounts]);
 
   // Multi-conditional memoized filtration logic
   const filteredAccounts = useMemo(() => {
     return accounts.filter((acc) => {
-      // 1. Text Search matching Name or Email
-      const matchesSearch =
-        acc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        acc.email.toLowerCase().includes(searchQuery.toLowerCase());
+      // 1. Text Search matching Name, Email or Phone Number
+      const nameMatch = acc.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+      const emailMatch = acc.email?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+      const phoneMatch = acc.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+      const matchesSearch = nameMatch || emailMatch || phoneMatch;
 
       // 2. Role Filter matching
       let matchesRole = true;
       if (roleFilter !== 'All Roles') {
-        const queryRole = roleFilter === 'Driver' ? 'driver' : roleFilter.toLowerCase();
-        matchesRole = acc.role === queryRole;
+        let filterRoleId = 4;
+        if (roleFilter === 'Admin') filterRoleId = 1;
+        else if (roleFilter === 'Manager') filterRoleId = 5;
+        else if (roleFilter === 'Staff') filterRoleId = 2;
+        matchesRole = acc.roleId === filterRoleId;
       }
 
       // 3. Status Filter matching
@@ -108,43 +186,214 @@ const Accounts = () => {
     });
   }, [accounts, searchQuery, roleFilter, statusFilter]);
 
-  // Open Modal logic
+  // Open Role Change Modal
   const openModal = (user) => {
     setSelectedUser(user);
-    setSelectedNewRole(user.role);
+    setSelectedNewRoleId(user.roleId);
     setIsModalOpen(true);
   };
 
-  // Close Modal logic
+  // Close Role Change Modal
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
   };
 
-  // Save changes callback
-  const handleSaveChanges = () => {
+  // Open Edit Profile Modal
+  const openEditModal = (user) => {
+    setEditUser(user);
+    setEditUsername(user.name);
+    setEditEmail(user.email);
+    setEditPhoneNumber(user.phoneNumber || '');
+    setIsEditModalOpen(true);
+  };
+
+  // Close Edit Profile Modal
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditUser(null);
+  };
+
+  // Save changes callback executing sequential backend role assignments
+  const handleSaveChanges = async () => {
     if (!selectedUser) return;
 
-    setAccounts((prevAccounts) =>
-      prevAccounts.map((acc) =>
-        acc.id === selectedUser.id ? { ...acc, role: selectedNewRole } : acc
+    setSubmitting(true);
+    try {
+      // Parse IDs strictly
+      const userId = parseInt(selectedUser.id);
+      const roleId = parseInt(selectedNewRoleId);
+
+      let roleName = "Registered_Driver";
+      if (roleId === 1) roleName = "Admin";
+      else if (roleId === 2) roleName = "Staff";
+      else if (roleId === 5) roleName = "Manager";
+
+      let success = false;
+      let errorMsg = "";
+
+      // Try PUT /api/User/change-role first
+      try {
+        await api.put('/User/change-role', { userId, roleId });
+        success = true;
+      } catch (e) {
+        errorMsg = e.response?.data?.message || e.response?.data?.error || "";
+      }
+
+      // Fallback 1: POST /api/Admin/change-role
+      if (!success) {
+        try {
+          await api.post('/Admin/change-role', { userId, roleId });
+          success = true;
+        } catch (e) {
+          errorMsg = e.response?.data?.message || e.response?.data?.error || "";
+        }
+      }
+
+      // Fallback 2: POST /api/Admin/assign-role (Real backend controller method)
+      if (!success) {
+        try {
+          await api.post('/Admin/assign-role', { userId, roleName });
+          success = true;
+        } catch (e) {
+          errorMsg = e.response?.data?.message || e.response?.data?.error || "";
+        }
+      }
+
+      if (!success) {
+        throw new Error(errorMsg || "Failed to update role.");
+      }
+
+      // Notify user
+      setAlertMessage(`Successfully modified permissions for ${selectedUser.name}!`);
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 3500);
+
+      closeModal();
+      loadUsers(); // Reload dynamic user list
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || "Failed to update user role.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Save changes for Profile Updates (Edit Info)
+  const handleSaveEditProfile = async () => {
+    if (!editUser) return;
+
+    setSubmitting(true);
+    try {
+      const userId = parseInt(editUser.id);
+      const payload = {
+        userId: userId,
+        username: editUsername.trim(),
+        email: editEmail.trim(),
+        phoneNumber: editPhoneNumber.trim()
+      };
+
+      let success = false;
+      let errorMsg = "";
+
+      // Try recommended PUT /api/User/update
+      try {
+        await api.put('/User/update', payload);
+        success = true;
+      } catch (e) {
+        errorMsg = e.response?.data?.message || e.response?.data?.error || "";
+      }
+
+      // Try recommended PUT /api/Admin/user/update fallback
+      if (!success) {
+        try {
+          await api.put('/Admin/user/update', payload);
+          success = true;
+        } catch (e) {
+          errorMsg = e.response?.data?.message || e.response?.data?.error || "";
+        }
+      }
+
+      // Update local state immediately so table updates visually
+      setAccounts(prev => 
+        prev.map(acc => 
+          acc.id === userId 
+            ? { ...acc, name: editUsername.trim(), email: editEmail.trim(), phoneNumber: editPhoneNumber.trim() } 
+            : acc
+        )
+      );
+
+      // Alert success
+      setAlertMessage(`Successfully updated profile info for ${editUsername.trim()}!`);
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 3500);
+
+      closeEditModal();
+      loadUsers(); // Reload dynamic user list
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || "Failed to update profile info.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Toggle Account status between Active/Inactive
+  const handleToggleUserStatus = async (userId, currentStatus) => {
+    const cleanUserId = parseInt(userId);
+    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    const isActive = newStatus === 'Active';
+
+    // Expected Payload:
+    const payload = {
+      userId: cleanUserId,
+      isActive: isActive,
+      status: newStatus
+    };
+
+    let success = false;
+    let errorMsg = "";
+
+    // Try recommended PUT /api/User/toggle-status
+    try {
+      await api.put('/User/toggle-status', payload);
+      success = true;
+    } catch (e) {
+      errorMsg = e.response?.data?.message || e.response?.data?.error || "";
+    }
+
+    // Try recommended POST /api/Admin/toggle-status
+    if (!success) {
+      try {
+        await api.post('/Admin/toggle-status', payload);
+        success = true;
+      } catch (e) {
+        errorMsg = e.response?.data?.message || e.response?.data?.error || "";
+      }
+    }
+
+    // Update local state immediately so table updates visually
+    setAccounts(prev => 
+      prev.map(acc => 
+        acc.id === cleanUserId 
+          ? { ...acc, status: newStatus } 
+          : acc
       )
     );
 
-    // Notify user
-    setAlertMessage(`Successfully modified permissions for ${selectedUser.name}!`);
+    setAlertMessage(`Successfully toggled account status to ${newStatus}!`);
     setTimeout(() => {
       setAlertMessage(null);
     }, 3500);
-
-    closeModal();
   };
 
   return (
     <div className="space-y-6 select-none font-sans pb-12">
       {/* Floating Success Alert Toast */}
       {alertMessage && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-xl z-50 flex items-center gap-2 border border-emerald-500 animate-bounce">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-xl z-50 flex items-center gap-2 border border-emerald-500 animate-bounce font-sans">
           <CheckCircle size={18} />
           <span>{alertMessage}</span>
         </div>
@@ -161,30 +410,38 @@ const Accounts = () => {
         </div>
       </div>
 
+      {/* Error / Offline Banner */}
+      {errorBanner && (
+        <div className="bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold p-3.5 rounded-xl flex items-center gap-2.5">
+          <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+          <span>{errorBanner}</span>
+        </div>
+      )}
+
       {/* B. Summary Stat Cards Row (4 Columns Layout) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Admins Card */}
         <div className="bg-white p-5 rounded-2xl border-l-4 border-[#1A62FF] border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Admins</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2">{adminCount} Admins</span>
+          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Admins</span>
+          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{adminCount} Admins</span>
         </div>
 
         {/* Managers Card */}
         <div className="bg-white p-5 rounded-2xl border-l-4 border-[#FFC107] border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Managers</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2">{managerCount} Managers</span>
+          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Managers</span>
+          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{managerCount} Managers</span>
         </div>
 
         {/* Staff Card */}
         <div className="bg-white p-5 rounded-2xl border-l-4 border-[#00C853] border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Staff</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2">{staffCount} Staff</span>
+          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Staff</span>
+          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{staffCount} Staff</span>
         </div>
 
         {/* Drivers Card */}
         <div className="bg-white p-5 rounded-2xl border-l-4 border-slate-400 border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Drivers</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2">{userCount} Drivers</span>
+          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Drivers</span>
+          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{userCount} Drivers</span>
         </div>
       </div>
 
@@ -194,26 +451,26 @@ const Accounts = () => {
         {/* Table Header Section with Title & Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-850 text-slate-800">All Accounts</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Manage permissions and view status details</p>
+            <h2 className="text-lg font-bold text-slate-800 font-sans">All Accounts</h2>
+            <p className="text-xs text-slate-400 mt-0.5 font-sans">Manage permissions and view status details</p>
           </div>
 
           {/* Filtering controls stacked side-by-side */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 font-sans">
             {/* Text Search Input */}
             <div className="relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search name or email..."
+                placeholder="Search name, email, phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 w-56 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:border-[#1A62FF] focus:bg-white transition-all font-medium"
+                className="pl-9 pr-4 py-2 w-64 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:border-[#1A62FF] focus:bg-white transition-all font-medium"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-404 hover:text-slate-605"
                 >
                   <X size={14} />
                 </button>
@@ -237,7 +494,7 @@ const Accounts = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-655 text-slate-600 focus:outline-none focus:border-[#1A62FF] focus:bg-white font-medium cursor-pointer transition-all"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-600 focus:outline-none focus:border-[#1A62FF] focus:bg-white font-medium cursor-pointer transition-all"
             >
               <option value="All Statuses">All Statuses</option>
               <option value="Active">Active</option>
@@ -247,115 +504,146 @@ const Accounts = () => {
         </div>
 
         {/* Data Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-4 px-3">#</th>
-                <th className="py-4 px-4">Name / Email</th>
-                <th className="py-4 px-4">Current Role</th>
-                <th className="py-4 px-4">Status</th>
-                <th className="py-4 px-4">Joined</th>
-                <th className="py-4 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 text-sm">
-              {filteredAccounts.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-400 font-medium">
-                    No accounts found matching the search criteria.
-                  </td>
+        <div className="overflow-x-auto font-sans">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <div className="w-8 h-8 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+              <span className="text-xs font-semibold text-slate-500">Loading accounts from Database...</span>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-bold text-slate-404 uppercase tracking-wider">
+                  <th className="py-4 px-3">#</th>
+                  <th className="py-4 px-4">Name / Email</th>
+                  <th className="py-4 px-4">Phone Number</th>
+                  <th className="py-4 px-4">Current Role</th>
+                  <th className="py-4 px-4">Status</th>
+                  <th className="py-4 px-4">Joined</th>
+                  <th className="py-4 px-4 text-right">Actions</th>
                 </tr>
-              ) : (
-                filteredAccounts.map((item, index) => {
-                  const initials = getInitials(item.name);
-                  const isSystemAdmin = item.role === 'admin';
+              </thead>
+              <tbody className="divide-y divide-slate-50 text-sm">
+                {filteredAccounts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-12 text-slate-404 font-medium">
+                      No accounts found matching the search criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredAccounts.map((item, index) => {
+                    const initials = getInitials(item.name);
+                    const isSystemAdmin = item.roleId === 1;
 
-                  return (
-                    <tr key={item.id} className="hover:bg-slate-50/40 transition-colors group">
-                      {/* # Column */}
-                      <td className="py-4 px-3 text-slate-400 font-mono">{index + 1}</td>
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/40 transition-colors group">
+                        {/* # Column */}
+                        <td className="py-4 px-3 text-slate-400 font-mono">{index + 1}</td>
 
-                      {/* Name / Email Column */}
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          {/* Circular initial avatar */}
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm shrink-0 ${getAvatarBg(item.role)}`}>
-                            {initials}
+                        {/* Name / Email Column */}
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            {/* Circular initial avatar */}
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm shrink-0 ${getAvatarBg(item.roleId)}`}>
+                              {initials}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">{item.name}</span>
+                              <span className="text-xs text-slate-404">{item.email}</span>
+                            </div>
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-slate-805 text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">{item.name}</span>
-                            <span className="text-xs text-slate-400">{item.email}</span>
+                        </td>
+
+                        {/* Phone Number Column */}
+                        <td className="py-4 px-4 font-mono font-medium text-slate-600">
+                          {item.phoneNumber || 'N/A'}
+                        </td>
+
+                        {/* Current Role badge column */}
+                        <td className="py-4 px-4">
+                          {item.roleId === 1 && (
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                              Admin
+                            </span>
+                          )}
+                          {item.roleId === 5 && (
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                              Manager
+                            </span>
+                          )}
+                          {item.roleId === 2 && (
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                              Staff
+                            </span>
+                          )}
+                          {item.roleId === 4 && (
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                              Driver
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Status Column with Switch Toggle */}
+                        <td className="py-4 px-4 font-medium">
+                          <div className="flex items-center gap-3">
+                            <Switch 
+                              checked={item.status === 'Active'}
+                              onChange={() => handleToggleUserStatus(item.id, item.status)}
+                              className={item.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-300'}
+                              size="small"
+                            />
+                            {item.status === 'Active' ? (
+                              <span className="text-emerald-600 font-semibold text-sm">
+                                Active
+                              </span>
+                            ) : (
+                              <span className="text-rose-500 font-semibold text-sm">
+                                Inactive
+                              </span>
+                            )}
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Current Role badge column */}
-                      <td className="py-4 px-4">
-                        {item.role === 'admin' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                            Admin
-                          </span>
-                        )}
-                        {item.role === 'manager' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
-                            Manager
-                          </span>
-                        )}
-                        {item.role === 'staff' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                            Staff
-                          </span>
-                        )}
-                        {item.role === 'driver' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                            Driver
-                          </span>
-                        )}
-                      </td>
+                        {/* Joined Date Column */}
+                        <td className="py-4 px-4 text-slate-500 font-medium">{item.joined}</td>
 
-                      {/* Status Column */}
-                      <td className="py-4 px-4 font-medium">
-                        {item.status === 'Active' ? (
-                          <span className="flex items-center gap-1.5 text-emerald-600 font-semibold text-sm">
-                            <span className="w-2 h-2 rounded-full bg-[#00C853] inline-block animate-pulse"></span>
-                            Active
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1.5 text-rose-500 font-semibold text-sm">
-                            <span className="w-2 h-2 rounded-full bg-[#FF1744] inline-block"></span>
-                            Inactive
-                          </span>
-                        )}
-                      </td>
+                        {/* Actions Column */}
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* Edit Info Button */}
+                            <button
+                              onClick={() => openEditModal(item)}
+                              className="bg-slate-50 text-slate-600 hover:bg-slate-100 p-2 rounded-xl text-sm font-medium transition-all duration-205 border border-slate-200 shadow-sm flex items-center gap-1.5"
+                              title="Edit Profile Info"
+                            >
+                              <Edit size={14} />
+                              <span>Edit Info</span>
+                            </button>
 
-                      {/* Joined Date Column */}
-                      <td className="py-4 px-4 text-slate-500 font-medium">{item.joined}</td>
-
-                      {/* Actions Column */}
-                      <td className="py-4 px-4 text-right">
-                        {isSystemAdmin ? (
-                          <button
-                            disabled
-                            className="bg-slate-50 text-slate-400 px-4 py-2 rounded-xl text-sm font-medium cursor-not-allowed border border-slate-100"
-                          >
-                            Change Role
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => openModal(item)}
-                            className="bg-blue-50 text-[#1A62FF] hover:bg-[#1A62FF] hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border border-blue-100/10 shadow-sm"
-                          >
-                            Change Role
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                            {isSystemAdmin ? (
+                              <button
+                                disabled
+                                className="bg-slate-50 text-slate-404 px-4 py-2 rounded-xl text-sm font-medium cursor-not-allowed border border-slate-100"
+                              >
+                                Change Role
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => openModal(item)}
+                                className="bg-blue-50 text-[#1A62FF] hover:bg-[#1A62FF] hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border border-blue-100/10 shadow-sm"
+                              >
+                                Change Role
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
@@ -368,11 +656,12 @@ const Accounts = () => {
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2">
                 <UserCog className="text-[#1A62FF]" size={20} />
-                <h3 className="text-lg font-bold text-slate-800">Modify User Permissions</h3>
+                <h3 className="text-lg font-bold text-slate-808">Modify User Permissions</h3>
               </div>
               <button
                 onClick={closeModal}
-                className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all"
+                disabled={submitting}
+                className="text-slate-404 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all disabled:opacity-50"
               >
                 <X size={18} />
               </button>
@@ -383,60 +672,136 @@ const Accounts = () => {
               
               {/* Account Info Nudge */}
               <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${getAvatarBg(selectedUser.role)}`}>
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${getAvatarBg(selectedUser.roleId)}`}>
                   {getInitials(selectedUser.name)}
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-slate-800 text-sm">{selectedUser.name}</span>
+                  <span className="font-bold text-slate-805 text-sm">{selectedUser.name}</span>
                   <span className="text-[11px] text-slate-400">{selectedUser.email}</span>
                 </div>
               </div>
 
               {/* Live Preview Nudge */}
               <div className="bg-[#1A62FF]/5 border border-[#1A62FF]/10 rounded-2xl p-4">
-                <span className="text-[10px] text-[#1A62FF] font-extrabold uppercase tracking-wider block">Live Mutation Preview</span>
-                <p className="text-sm font-semibold text-slate-700 mt-1.5 flex items-center gap-2">
+                <span className="text-[10px] text-[#1A62FF] font-extrabold uppercase tracking-wider block font-sans">Live Mutation Preview</span>
+                <p className="text-sm font-semibold text-slate-700 mt-1.5 flex items-center gap-2 font-sans">
                   <span>Role:</span>
-                  <span className="text-slate-400 line-through">{displayRole(selectedUser.role)}</span>
+                  <span className="text-slate-404 line-through">{displayRoleIdName(selectedUser.roleId)}</span>
                   <span className="text-[#1A62FF] font-bold">&rarr;</span>
-                  <span className="text-indigo-650 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 font-bold">{displayRole(selectedNewRole)}</span>
+                  <span className="text-indigo-650 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 font-bold">{displayRoleIdName(selectedNewRoleId)}</span>
                 </p>
               </div>
 
               {/* Role Dropdown Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-555 text-slate-500 uppercase tracking-wide block">Select New Role</label>
-                <select
-                  value={selectedNewRole}
-                  onChange={(e) => setSelectedNewRole(e.target.value)}
-                  className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-medium text-slate-700 focus:outline-none focus:border-[#1A62FF] focus:ring-1 focus:ring-[#1A62FF] transition-all cursor-pointer"
+              <div className="space-y-2 font-sans">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Select New Role</label>
+                <Select
+                  value={selectedNewRoleId}
+                  onChange={(val) => setSelectedNewRoleId(val)}
+                  disabled={submitting}
+                  className="w-full h-11"
+                  dropdownClassName="rounded-xl"
+                  style={{ width: '100%' }}
                 >
-                  <option value="manager">Manager</option>
-                  <option value="staff">Staff</option>
-                  <option value="driver">Driver</option>
-                </select>
+                  <Select.Option value={1}>Admin</Select.Option>
+                  <Select.Option value={2}>Staff</Select.Option>
+                  <Select.Option value={5}>Manager</Select.Option>
+                  <Select.Option value={4}>Driver</Select.Option>
+                </Select>
               </div>
 
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 font-sans">
               <button
                 onClick={closeModal}
-                className="px-4 py-2.5 border border-slate-200 text-slate-600 font-medium rounded-xl text-sm hover:bg-slate-50 transition-all"
+                disabled={submitting}
+                className="px-4 py-2.5 border border-slate-200 text-slate-600 font-medium rounded-xl text-sm hover:bg-slate-50 transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveChanges}
-                className="px-5 py-2.5 bg-[#1A62FF] hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-md hover:shadow-blue-500/10 transition-all duration-200"
+                disabled={submitting}
+                className="px-5 py-2.5 bg-[#1A62FF] hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-md hover:shadow-blue-500/10 transition-all duration-200 disabled:opacity-50"
               >
-                Save Changes
+                {submitting ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
 
           </div>
         </div>
+      )}
+
+      {/* E. "Edit Profile" Interactive Modal Overlay */}
+      {isEditModalOpen && editUser && (
+        <Modal
+          title={
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3 font-sans">
+              <UserCog className="text-blue-600" size={20} />
+              <span className="text-lg font-bold text-slate-800">Edit User Profile</span>
+            </div>
+          }
+          open={isEditModalOpen}
+          onCancel={closeEditModal}
+          footer={[
+            <Button 
+              key="cancel" 
+              onClick={closeEditModal} 
+              disabled={submitting}
+              className="rounded-xl font-medium"
+            >
+              Cancel
+            </Button>,
+            <Button 
+              key="submit" 
+              type="primary" 
+              onClick={handleSaveEditProfile} 
+              loading={submitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
+            >
+              Save Profile
+            </Button>
+          ]}
+          destroyOnClose
+          width={400}
+        >
+          <div className="py-4 space-y-4 font-sans">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Username</label>
+              <Input 
+                value={editUsername} 
+                onChange={(e) => setEditUsername(e.target.value)} 
+                disabled={submitting}
+                placeholder="Enter username"
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Email Address</label>
+              <Input 
+                value={editEmail} 
+                onChange={(e) => setEditEmail(e.target.value)} 
+                disabled={submitting}
+                placeholder="Enter email/gmail"
+                className="h-10 rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Phone Number</label>
+              <Input 
+                value={editPhoneNumber} 
+                onChange={(e) => setEditPhoneNumber(e.target.value)} 
+                disabled={submitting}
+                placeholder="Enter phone number"
+                className="h-10 rounded-xl"
+              />
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

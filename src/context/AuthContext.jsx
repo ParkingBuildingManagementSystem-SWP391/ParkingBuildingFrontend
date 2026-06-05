@@ -9,76 +9,47 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Khởi tạo và kiểm tra dữ liệu đăng nhập cũ khi tải lại trang (F5)
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem('spotflow_user');
-      const savedRole = localStorage.getItem('spotflow_role');
-      
-      if (savedUser && savedUser !== "undefined" && savedRole && savedRole !== "undefined") {
-        setUser(JSON.parse(savedUser));
-        setRole(savedRole);
-      } else {
-        setUser(null);
-        setRole(null);
+    const initializeAuth = () => {
+      try {
+        const savedUser = localStorage.getItem('spotflow_user');
+        const savedRole = localStorage.getItem('spotflow_role');
+        
+        if (savedUser && savedUser !== "undefined" && savedRole && savedRole !== "undefined") {
+          try {
+            // Khối catch riêng biệt để xử lý nếu chuỗi JSON bị lỗi cấu trúc, tránh làm sập app
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+            setRole(savedRole);
+          } catch (jsonError) {
+            console.error("Dữ liệu JSON lưu trữ bị lỗi cấu trúc, tiến hành dọn dẹp...", jsonError);
+            handleInitialClear();
+          }
+        } else {
+          handleInitialClear();
+        }
+      } catch (e) {
+        console.error("Lỗi hệ thống khi đọc session cũ:", e);
+        handleInitialClear();
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error("Lỗi đọc session cũ, đang clear cache...", e);
-      localStorage.clear();
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    const handleInitialClear = () => {
+      setUser(null);
+      setRole(null);
+      localStorage.removeItem('spotflow_user');
+      localStorage.removeItem('spotflow_role');
+      localStorage.removeItem('token');
+      localStorage.removeItem('spotflow_guest_isAuthenticated');
+    };
+
+    initializeAuth();
   }, []);
 
   /**
-<<<<<<< Updated upstream
-   * Thiết lập phiên đăng nhập sau khi nhận được thông tin xác thực từ server
-   */
-  const loginWithUserData = (data) => {
-    const rawRole = data.RoleName || data.roleName || data.Role || data.role || "User";
-    const matchedUser = {
-      username: data.Username || data.username || data.Email || "User",
-      role: rawRole
-    };
-
-    // Cập nhật State cho toàn bộ ứng dụng Frontend
-    setUser(matchedUser);
-    setRole(matchedUser.role);
-
-    // Lưu Token và thông tin User một cách an toàn vào localStorage
-    const tokenString = data.Token || data.token;
-    if (tokenString) {
-      localStorage.setItem('token', tokenString);
-    }
-    localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
-    localStorage.setItem('spotflow_role', matchedUser.role);
-    localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
-
-    return matchedUser;
-  };
-
-  /**
-   * Hàm Login kết nối trực tiếp với API Backend thật (.NET)
-   */
-  const login = async (usernameOrEmail, password) => {
-    try {
-      // ĐÃ SỬA: Gửi đúng key 'usernameOrEmail' đồng bộ với authService
-      const data = await authService.login({ 
-        usernameOrEmail: usernameOrEmail, 
-        password: password 
-      });
-      
-      if (!data) {
-        throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
-      }
-      
-      const matchedUser = loginWithUserData(data);
-      return { success: true, user: matchedUser };
-
-    } catch (error) {
-      console.error("Quá trình đăng nhập xảy ra lỗi:", error);
-      return { success: false, message: error || "Đăng nhập thất bại!" };
-    }
-=======
    * Hàm Login kết nối trực tiếp với API Backend thật (.NET)
    */
   const login = async (usernameOrEmail, password) => {
@@ -94,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       
       const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
       const matchedUser = {
-        username: data.username || data.Username || usernameOrEmail.split('@')[0],
+        username: data.username || data.Username || (typeof usernameOrEmail === 'string' ? usernameOrEmail.split('@')[0] : "User"),
         role: rawRole
       };
 
@@ -109,6 +80,7 @@ export const AuthProvider = ({ children }) => {
       }
       localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
       localStorage.setItem('spotflow_role', matchedUser.role);
+      localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
 
       return { success: true, user: matchedUser };
 
@@ -119,7 +91,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Hàm hỗ trợ đăng nhập trực tiếp từ dữ liệu trả về sau khi OTP thành công
+   * Hàm hỗ trợ đăng nhập trực tiếp từ dữ liệu trả về sau khi xác thực OTP thành công
    */
   const loginWithUserData = (data) => {
     if (!data) return;
@@ -139,7 +111,7 @@ export const AuthProvider = ({ children }) => {
     }
     localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
     localStorage.setItem('spotflow_role', matchedUser.role);
->>>>>>> Stashed changes
+    localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
   };
 
   /**
@@ -149,11 +121,11 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setRole(null);
     authService.logout();
-<<<<<<< Updated upstream
-=======
   };
 
-  // Giữ nguyên phục vụ mục đích demo/presentation khi mất mạng công cộng
+  /**
+   * Giữ nguyên phục vụ mục đích demo/presentation khi mất mạng hoặc cần chuyển quyền nhanh
+   */
   const switchRole = (newRole) => {
     const matchedUser = PRESET_USERS[newRole];
     if (matchedUser) {
@@ -165,7 +137,6 @@ export const AuthProvider = ({ children }) => {
       return true;
     }
     return false;
->>>>>>> Stashed changes
   };
 
   const updateUser = (updatedFields) => {
@@ -177,11 +148,7 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-<<<<<<< Updated upstream
-  const value = { user, role, loading, login, logout, updateUser, loginWithUserData };
-=======
   const value = { user, role, loading, login, loginWithUserData, logout, switchRole, updateUser };
->>>>>>> Stashed changes
 
   return (
     <AuthContext.Provider value={value}>
