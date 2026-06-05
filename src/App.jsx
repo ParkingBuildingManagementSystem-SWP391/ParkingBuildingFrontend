@@ -6,6 +6,7 @@ import MainLayout from './components/MainLayout';
 
 // Public Pages
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import GuestParkingMap from './pages/GuestParkingMap';
 
@@ -27,6 +28,7 @@ function App() {
       <Routes>
         {/* Public auth pages */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/map" element={<GuestParkingMap />} />
 
@@ -35,8 +37,9 @@ function App() {
           {/* Public parking map */}
           <Route path="/parking-map" element={<ParkingLotMap />} />
 
+          {/* ĐUST SỬA: Đổi tên roles thành viết hoa chữ cái đầu cho khớp chuẩn với Database của bạn */}
           {/* Shell wrapping authenticated workspaces */}
-          <Route element={<RoleProtectedRoute allowedRoles={['admin', 'staff', 'driver', 'manager']} />}>
+          <Route element={<RoleProtectedRoute allowedRoles={['Admin', 'Staff', 'Driver', 'Manager', 'Member', 'Registered_Driver', 'Customer']} />}>
             
             {/* Common dashboard path - content routes adapt to user role */}
             <Route path="/dashboard" element={<Dashboard />} />
@@ -45,21 +48,21 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             
             {/* Admin-only paths */}
-            <Route element={<RoleProtectedRoute allowedRoles={['admin']} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
               <Route path="/staff-management" element={<StaffManagement />} />
               <Route path="/accounts" element={<Accounts />} />
             </Route>
 
             {/* Staff-only paths */}
-            <Route element={<RoleProtectedRoute allowedRoles={['staff', 'manager', 'admin']} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={['Staff', 'Manager', 'Admin']} />}>
               <Route path="/checkin-checkout" element={<GateController />} />
             </Route>
 
             {/* Driver/Customer-only paths */}
-            <Route element={<RoleProtectedRoute allowedRoles={['driver', 'staff']} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={['Driver', 'Staff', 'Member', 'Registered_Driver', 'Customer']} />}>
               <Route path="/my-bookings" element={<MyBookings />} />
             </Route>
-            <Route element={<RoleProtectedRoute allowedRoles={['driver']} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={['Driver', 'Member', 'Registered_Driver', 'Customer']} />}>
               <Route path="/monthly-pass" element={<MonthlyPass />} />
             </Route>
             

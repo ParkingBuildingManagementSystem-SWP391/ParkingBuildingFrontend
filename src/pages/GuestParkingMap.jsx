@@ -25,52 +25,52 @@ import logoImg from '../imports/image.png';
 const initGuestParkingMapSlots = () => {
   const slots = [];
   
-  // Floor 1 (Bicycle - 15 spots, Motorcycle - 35 spots)
-  let f1BikeAvail = 8, f1BikeOcc = 5, f1BikeRes = 2;
+  // Floor G (Bicycle - 15 spots, Motorcycle - 35 spots)
+  let f1BikeAvail = 5, f1BikeOcc = 8, f1BikeRes = 2;
   for (let i = 1; i <= 15; i++) {
     let status = 'Occupied';
     if (i <= f1BikeAvail) status = 'Available';
     else if (i > f1BikeAvail + f1BikeOcc) status = 'Reserved';
-    slots.push({ id: `B-${String(i).padStart(3, '0')}`, floor: 'Floor 1', zone: 'Bicycle', type: 'Bicycle', status });
+    slots.push({ id: `B-${String(i).padStart(3, '0')}`, floor: 'Floor G', zone: 'Bicycle', type: 'Bicycle', status });
   }
   let f1MotorAvail = 17, f1MotorOcc = 13, f1MotorRes = 5;
   for (let i = 1; i <= 35; i++) {
     let status = 'Occupied';
     if (i <= f1MotorAvail) status = 'Available';
     else if (i > f1MotorAvail + f1MotorOcc) status = 'Reserved';
-    slots.push({ id: `M-${String(i).padStart(3, '0')}`, floor: 'Floor 1', zone: 'Motorcycle', type: 'Motorcycle', status });
+    slots.push({ id: `M-${String(i).padStart(3, '0')}`, floor: 'Floor G', zone: 'Motorcycle', type: 'Motorcycle', status });
   }
 
-  // Floor 2
-  let f2BikeAvail = 9, f2BikeOcc = 4, f2BikeRes = 2;
+  // Basement 1 (B1)
+  let f2BikeAvail = 8, f2BikeOcc = 5, f2BikeRes = 2;
   for (let i = 1; i <= 15; i++) {
     let status = 'Occupied';
     if (i <= f2BikeAvail) status = 'Available';
     else if (i > f2BikeAvail + f2BikeOcc) status = 'Reserved';
-    slots.push({ id: `B-${String(i).padStart(3, '0')}`, floor: 'Floor 2', zone: 'Bicycle', type: 'Bicycle', status });
+    slots.push({ id: `B-${String(i).padStart(3, '0')}`, floor: 'Basement 1', zone: 'Bicycle', type: 'Bicycle', status });
   }
   let f2MotorAvail = 20, f2MotorOcc = 10, f2MotorRes = 5;
   for (let i = 1; i <= 35; i++) {
     let status = 'Occupied';
     if (i <= f2MotorAvail) status = 'Available';
     else if (i > f2MotorAvail + f2MotorOcc) status = 'Reserved';
-    slots.push({ id: `M-${String(i).padStart(3, '0')}`, floor: 'Floor 2', zone: 'Motorcycle', type: 'Motorcycle', status });
+    slots.push({ id: `M-${String(i).padStart(3, '0')}`, floor: 'Basement 1', zone: 'Motorcycle', type: 'Motorcycle', status });
   }
 
-  // Basement
+  // Basement 2 (B2)
   let bsBikeAvail = 1, bsBikeOcc = 12, bsBikeRes = 2;
   for (let i = 1; i <= 15; i++) {
     let status = 'Occupied';
     if (i <= bsBikeAvail) status = 'Available';
     else if (i > bsBikeAvail + bsBikeOcc) status = 'Reserved';
-    slots.push({ id: `B-${String(i).padStart(3, '0')}`, floor: 'Basement', zone: 'Bicycle', type: 'Bicycle', status });
+    slots.push({ id: `B-${String(i).padStart(3, '0')}`, floor: 'Basement 2', zone: 'Bicycle', type: 'Bicycle', status });
   }
   let bsMotorAvail = 4, bsMotorOcc = 26, bsMotorRes = 5;
   for (let i = 1; i <= 35; i++) {
     let status = 'Occupied';
     if (i <= bsMotorAvail) status = 'Available';
     else if (i > bsMotorAvail + bsMotorOcc) status = 'Reserved';
-    slots.push({ id: `M-${String(i).padStart(3, '0')}`, floor: 'Basement', zone: 'Motorcycle', type: 'Motorcycle', status });
+    slots.push({ id: `M-${String(i).padStart(3, '0')}`, floor: 'Basement 2', zone: 'Motorcycle', type: 'Motorcycle', status });
   }
 
   return slots;
@@ -90,7 +90,7 @@ const GuestParkingMap = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Map & Controls States
-  const [activeFloor, setActiveFloor] = useState('Floor 1');
+  const [activeFloor, setActiveFloor] = useState('Floor G');
   const [searchQuery, setSearchQuery] = useState('');
   const [zoomLevel, setZoomLevel] = useState(100);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -106,7 +106,14 @@ const GuestParkingMap = () => {
   // Persistent slots state
   const [mapSlots, setMapSlots] = useState(() => {
     const saved = localStorage.getItem('spotflow_guest_map_slots');
-    return saved ? JSON.parse(saved) : initGuestParkingMapSlots();
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.some(s => s.floor === 'Floor 1' || s.floor === 'Floor 2' || s.floor === 'Basement')) {
+        return initGuestParkingMapSlots();
+      }
+      return parsed;
+    }
+    return initGuestParkingMapSlots();
   });
 
   // Save map states & auth states persistently
@@ -136,22 +143,22 @@ const GuestParkingMap = () => {
 
   // Calculate stats dynamically based on map slots mutations
   const getFloorStats = () => {
-    let baseAvailable = 25;
-    let baseOccupied = 83;
-    let baseReserved = 42;
+    let baseAvailable = 22;
+    let baseOccupied = 85;
+    let baseReserved = 43;
     
-    if (activeFloor === 'Floor 2') {
-      baseAvailable = 29;
-      baseOccupied = 79;
+    if (activeFloor === 'Basement 1') {
+      baseAvailable = 28;
+      baseOccupied = 80;
       baseReserved = 42;
-    } else if (activeFloor === 'Basement') {
+    } else if (activeFloor === 'Basement 2') {
       baseAvailable = 5;
       baseOccupied = 103;
       baseReserved = 42;
     }
     
     // Scale stats counts based on grid available slots decrement
-    const initialAvailable = activeFloor === 'Floor 1' ? 25 : activeFloor === 'Floor 2' ? 29 : 5;
+    const initialAvailable = activeFloor === 'Floor G' ? 22 : activeFloor === 'Basement 1' ? 28 : 5;
     const currentAvailable = mapSlots.filter(s => s.floor === activeFloor && s.status === 'Available').length;
     const bookingsCount = initialAvailable - currentAvailable;
     
@@ -349,69 +356,69 @@ const GuestParkingMap = () => {
             <h2 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Select Parking Floor</h2>
             <div className="flex flex-col gap-3">
               
-              {/* Floor 1 Option */}
+              {/* Floor G Option */}
               <button
-                onClick={() => handleFloorChange('Floor 1')}
+                onClick={() => handleFloorChange('Floor G')}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Floor 1'
+                  activeFloor === 'Floor G'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm">Floor 1 (Ground)</span>
-                  <span className={`text-[11px] ${activeFloor === 'Floor 1' ? 'text-blue-100' : 'text-slate-500'}`}>VIP & EV Hub</span>
+                  <span className="text-sm font-semibold font-sans">Floor G</span>
+                  <span className={`text-[11px] ${activeFloor === 'Floor G' ? 'text-blue-100' : 'text-slate-500'}`}>Bicycle & Motorcycle</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Floor 1'
+                  activeFloor === 'Floor G'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {mapSlots.filter(s => s.floor === 'Floor 1' && s.status === 'Available').length} free
+                  {mapSlots.filter(s => s.floor === 'Floor G' && s.status === 'Available').length} free
                 </span>
               </button>
 
-              {/* Floor 2 Option */}
+              {/* Basement 1 Option */}
               <button
-                onClick={() => handleFloorChange('Floor 2')}
+                onClick={() => handleFloorChange('Basement 1')}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Floor 2'
+                  activeFloor === 'Basement 1'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm">Floor 2</span>
-                  <span className={`text-[11px] ${activeFloor === 'Floor 2' ? 'text-blue-100' : 'text-slate-500'}`}>Standard Spaces</span>
+                  <span className="text-sm font-semibold font-sans">Basement 1 (B1)</span>
+                  <span className={`text-[11px] ${activeFloor === 'Basement 1' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Floor 2'
+                  activeFloor === 'Basement 1'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {mapSlots.filter(s => s.floor === 'Floor 2' && s.status === 'Available').length} free
+                  {mapSlots.filter(s => s.floor === 'Basement 1' && s.status === 'Available').length} free
                 </span>
               </button>
 
-              {/* Basement Option */}
+              {/* Basement 2 Option */}
               <button
-                onClick={() => handleFloorChange('Basement')}
+                onClick={() => handleFloorChange('Basement 2')}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Basement'
+                  activeFloor === 'Basement 2'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-200 hover:border-blue-400 hover:bg-slate-50/50 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm">Basement</span>
-                  <span className={`text-[11px] ${activeFloor === 'Basement' ? 'text-blue-100' : 'text-slate-500'}`}>Compact & Motorbike</span>
+                  <span className="text-sm font-semibold font-sans">Basement 2 (B2)</span>
+                  <span className={`text-[11px] ${activeFloor === 'Basement 2' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Basement'
+                  activeFloor === 'Basement 2'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {mapSlots.filter(s => s.floor === 'Basement' && s.status === 'Available').length} free
+                  {mapSlots.filter(s => s.floor === 'Basement 2' && s.status === 'Available').length} free
                 </span>
               </button>
 

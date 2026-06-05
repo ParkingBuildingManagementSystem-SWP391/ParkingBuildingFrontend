@@ -12,8 +12,12 @@ import {
   Coins, 
   ShieldCheck, 
   UserCheck, 
-  AlertTriangle 
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { message } from 'antd';
+import { parkingService } from '../../services/parkingService';
 
 const Motorcycle = ({ size = 18, className = '' }) => (
   <svg 
@@ -39,93 +43,131 @@ const Motorcycle = ({ size = 18, className = '' }) => (
 const initAuthParkingMap = () => {
   const slots = [];
   
-  // Floor 1 (Bicycle - 45 spots, Motorcycle - 105 spots) -> Total 150 spots
-  // Stats Floor 1: Total 150. Available: 24. Occupied: 83. Reserved: 43.
-  let f1BikeAvail = 7, f1BikeOcc = 25, f1BikeRes = 13;
+<<<<<<< Updated upstream
+  // Floor G (Bicycle - 45 spots, Motorcycle - 105 spots) -> Total 150 spots
+  // Stats Floor G: Total 150. Available: 22. Occupied: 85. Reserved: 43.
+  let f1BikeAvail = 5, f1BikeOcc = 27, f1BikeRes = 13;
+=======
+  // Simulated Fallback Data (Floor 1)
+>>>>>>> Stashed changes
   for (let i = 1; i <= 45; i++) {
-    let status = 'Occupied';
-    if (i <= f1BikeAvail) status = 'Available';
-    else if (i > f1BikeAvail + f1BikeOcc) status = 'Reserved';
     slots.push({
       id: `F1-B-${String(i).padStart(3, '0')}`,
+<<<<<<< Updated upstream
+      floor: 'Floor G',
+=======
+      dbSlotId: 1000 + i,
       floor: 'Floor 1',
+>>>>>>> Stashed changes
       zone: 'Bicycle',
       type: 'Bicycle',
-      status: status
+      status: 'Available',
+      typeId: 1
     });
   }
-  
-  let f1MotorAvail = 17, f1MotorOcc = 58, f1MotorRes = 30;
   for (let i = 1; i <= 105; i++) {
-    let status = 'Occupied';
-    if (i <= f1MotorAvail) status = 'Available';
-    else if (i > f1MotorAvail + f1MotorOcc) status = 'Reserved';
     slots.push({
       id: `F1-M-${String(i).padStart(3, '0')}`,
+<<<<<<< Updated upstream
+      floor: 'Floor G',
+=======
+      dbSlotId: 1100 + i,
       floor: 'Floor 1',
+>>>>>>> Stashed changes
       zone: 'Motorcycle',
       type: 'Motorcycle',
-      status: status
+      status: i % 5 === 0 ? 'Occupied' : 'Available',
+      typeId: 2
     });
   }
 
-  // Floor 2 (Car zone ONLY -> Total 150 spots, 20 free)
-  let f2Avail = 20, f2Occ = 88, f2Res = 42;
+<<<<<<< Updated upstream
+  // Basement 1 (Car zone ONLY -> Total 150 spots, 28 free)
+  let f2Avail = 28, f2Occ = 80, f2Res = 42;
+=======
+  // Simulated Fallback Data (Floor 2)
+>>>>>>> Stashed changes
   for (let i = 1; i <= 150; i++) {
-    let status = 'Occupied';
-    if (i <= f2Avail) status = 'Available';
-    else if (i > f2Avail + f2Occ) status = 'Reserved';
     slots.push({
       id: `F2-C-${String(i).padStart(3, '0')}`,
+<<<<<<< Updated upstream
+      floor: 'Basement 1',
+=======
+      dbSlotId: 5 + i,
       floor: 'Floor 2',
+>>>>>>> Stashed changes
       zone: 'Car',
       type: 'Car',
-      status: status
+      status: i % 8 === 0 ? 'Reserved' : i % 5 === 0 ? 'Occupied' : 'Available',
+      typeId: 3
     });
   }
 
-  // Basement (Car zone ONLY -> Total 150 spots, 5 free)
+<<<<<<< Updated upstream
+  // Basement 2 (Car zone ONLY -> Total 150 spots, 5 free)
   let bsAvail = 5, bsOcc = 103, bsRes = 42;
+=======
+  // Simulated Fallback Data (Basement)
+>>>>>>> Stashed changes
   for (let i = 1; i <= 150; i++) {
-    let status = 'Occupied';
-    if (i <= bsAvail) status = 'Available';
-    else if (i > bsAvail + bsOcc) status = 'Reserved';
     slots.push({
       id: `B-C-${String(i).padStart(3, '0')}`,
+<<<<<<< Updated upstream
+      floor: 'Basement 2',
+=======
+      dbSlotId: 2000 + i,
       floor: 'Basement',
+>>>>>>> Stashed changes
       zone: 'Car',
       type: 'Car',
-      status: status
+      status: i % 10 === 0 ? 'Occupied' : 'Available',
+      typeId: 3
     });
   }
 
   return slots;
 };
 
-const ParkingLotMap = () => {
-  const { role, user, login } = useAuth();
+const floorMapping = {
+  'Floor 1': 3, // Floor G (Motorbike/Bicycle)
+  'Floor 2': 1, // Floor B1 (Car)
+  'Basement': 2 // Floor B2 (Empty/Car)
+};
 
-  const [activeFloor, setActiveFloor] = useState('Floor 1');
+const ParkingLotMap = () => {
+  const { role, user } = useAuth();
+
+  const [activeFloor, setActiveFloor] = useState('Floor G');
   const [searchQuery, setSearchQuery] = useState('');
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [loadingMap, setLoadingMap] = useState(false);
+  const [errorMap, setErrorMap] = useState('');
   
   // Guest view states
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [pendingBookingSlot, setPendingBookingSlot] = useState(null);
-  const [authPhone, setAuthPhone] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
   
+<<<<<<< Updated upstream
   // Stateful slots
   const [authSlots, setAuthSlots] = useState(() => {
     const saved = localStorage.getItem('spotflow_auth_map_slots');
-    return saved ? JSON.parse(saved) : initAuthParkingMap();
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.some(s => s.floor === 'Floor 1' || s.floor === 'Floor 2' || s.floor === 'Basement')) {
+        return initAuthParkingMap();
+      }
+      return parsed;
+    }
+    return initAuthParkingMap();
   });
 
   useEffect(() => {
     localStorage.setItem('spotflow_auth_map_slots', JSON.stringify(authSlots));
   }, [authSlots]);
+=======
+  // Stateful slots (Merged with Database loading)
+  const [authSlots, setAuthSlots] = useState(() => initAuthParkingMap());
+>>>>>>> Stashed changes
 
   // Modal triggers
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -141,11 +183,87 @@ const ParkingLotMap = () => {
   const [adminPlate, setAdminPlate] = useState('');
 
   const [alertBanner, setAlertBanner] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Pagination for high slot density floors (e.g. Floor G has 1200 slots)
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 120;
+
+  // Helper: map database response to UI structure
+  const mapBackendSlotsToUI = (backendSlots, floorName) => {
+    // Sort slots by name to assign deterministic IDs matching the seed pattern
+    const sortedBackendSlots = [...backendSlots].sort((a, b) => a.slotName.localeCompare(b.slotName));
+    const floorId = floorMapping[floorName];
+    const startSlotId = floorId === 3 ? 155 : floorId === 1 ? 5 : 2000;
+
+    return sortedBackendSlots.map((s, index) => {
+      const slotId = startSlotId + index;
+      let type = 'Car';
+      if (s.typeId === 1) type = 'Bicycle';
+      else if (s.typeId === 2) type = 'Motorcycle';
+      
+      let zone = 'Car';
+      if (type === 'Bicycle') zone = 'Bicycle';
+      else if (type === 'Motorcycle') zone = 'Motorcycle';
+
+      return {
+        id: s.slotName,
+        dbSlotId: slotId,
+        floor: floorName,
+        zone: zone,
+        type: type,
+        status: s.slotStatus ? s.slotStatus.trim() : 'Available',
+        typeId: s.typeId,
+        occupiedBy: s.slotStatus.trim() !== 'Available' ? {
+          plate: type === 'Bicycle' ? 'Bicycle Entry' : 'Unknown',
+          checkInTime: new Date().toISOString(),
+          type: type
+        } : null
+      };
+    });
+  };
+
+  // Fetch slots from backend database
+  const fetchParkingSlots = async () => {
+    setLoadingMap(true);
+    setErrorMap('');
+    try {
+      const floorId = floorMapping[activeFloor];
+      const data = await parkingService.getSlotsByFloor(floorId);
+      
+      if (data && data.length > 0) {
+        const mapped = mapBackendSlotsToUI(data, activeFloor);
+        setAuthSlots(prev => {
+          const otherFloorSlots = prev.filter(s => s.floor !== activeFloor);
+          return [...otherFloorSlots, ...mapped];
+        });
+      } else {
+        // If the floor is empty in DB, clear its slots
+        setAuthSlots(prev => prev.filter(s => s.floor !== activeFloor));
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMap('Offline Mode: Displaying simulated parking layout.');
+    } finally {
+      setLoadingMap(false);
+    }
+  };
+
+  // Trigger fetch when floor changes
+  useEffect(() => {
+    fetchParkingSlots();
+    setCurrentPage(1);
+  }, [activeFloor]);
 
   // Synchronize dynamic booking form selection on floor/slot updates
   useEffect(() => {
-    if (activeFloor === 'Floor 1') {
+<<<<<<< Updated upstream
+    if (activeFloor === 'Floor G') {
       setBookingVehicleType('Bicycle');
+=======
+    if (activeFloor === 'Floor 1') {
+      setBookingVehicleType('Motorcycle');
+>>>>>>> Stashed changes
     } else {
       setBookingVehicleType('Car');
     }
@@ -156,7 +274,7 @@ const ParkingLotMap = () => {
 
   // Automatically open booking modal if user gets authenticated and has a pending slot
   useEffect(() => {
-    if (user && role === 'driver') {
+    if (user && (role === 'Registered_Driver' || role === 'Driver')) {
       const pendingSlotId = pendingBookingSlot || sessionStorage.getItem('spotflow_pending_booking_slot');
       if (pendingSlotId) {
         const slot = authSlots.find(s => s.id === pendingSlotId);
@@ -171,7 +289,7 @@ const ParkingLotMap = () => {
     }
   }, [user, role, authSlots, pendingBookingSlot]);
   
-  // Counts & Progress
+  // Counts & Progress computed based on active floor slots
   const currentFloorSlots = useMemo(() => {
     return authSlots.filter(s => s.floor === activeFloor);
   }, [authSlots, activeFloor]);
@@ -188,22 +306,32 @@ const ParkingLotMap = () => {
     return currentFloorSlots.filter(s => s.status === 'Reserved').length;
   }, [currentFloorSlots]);
 
-  const totalCount = 150;
-  const occupancyRate = useMemo(() => {
-    return Math.round(((occupiedCount + reservedCount) / totalCount) * 100);
-  }, [occupiedCount, reservedCount]);
+  const totalCount = useMemo(() => {
+    return currentFloorSlots.length || 150;
+  }, [currentFloorSlots]);
 
+<<<<<<< Updated upstream
   // Available free slots for floor indicators
+  const floorGAvailable = useMemo(() => {
+    return authSlots.filter(s => s.floor === 'Floor G' && s.status === 'Available').length;
+=======
+  const occupancyRate = useMemo(() => {
+    if (totalCount === 0) return 0;
+    return Math.round(((occupiedCount + reservedCount) / totalCount) * 100);
+  }, [occupiedCount, reservedCount, totalCount]);
+
+  // Count available slots globally for sidebar badges
   const floor1Available = useMemo(() => {
     return authSlots.filter(s => s.floor === 'Floor 1' && s.status === 'Available').length;
+>>>>>>> Stashed changes
   }, [authSlots]);
 
-  const floor2Available = useMemo(() => {
-    return authSlots.filter(s => s.floor === 'Floor 2' && s.status === 'Available').length;
+  const basement1Available = useMemo(() => {
+    return authSlots.filter(s => s.floor === 'Basement 1' && s.status === 'Available').length;
   }, [authSlots]);
 
-  const basementAvailable = useMemo(() => {
-    return authSlots.filter(s => s.floor === 'Basement' && s.status === 'Available').length;
+  const basement2Available = useMemo(() => {
+    return authSlots.filter(s => s.floor === 'Basement 2' && s.status === 'Available').length;
   }, [authSlots]);
 
   // Query filter
@@ -216,6 +344,25 @@ const ParkingLotMap = () => {
   const motorcycleSlots = useMemo(() => currentFloorSlots.filter(s => s.type === 'Motorcycle'), [currentFloorSlots]);
   const carSlots = useMemo(() => currentFloorSlots.filter(s => s.type === 'Car'), [currentFloorSlots]);
 
+  // Paginated grids to prevent DOM lagging on heavy slot datasets
+  const filteredBicycles = useMemo(() => bicycleSlots.filter(filterQuery), [bicycleSlots, searchQuery]);
+  const filteredMotorcycles = useMemo(() => motorcycleSlots.filter(filterQuery), [motorcycleSlots, searchQuery]);
+  const filteredCars = useMemo(() => carSlots.filter(filterQuery), [carSlots, searchQuery]);
+
+  const totalFilteredCount = useMemo(() => {
+    return filteredBicycles.length + filteredMotorcycles.length + filteredCars.length;
+  }, [filteredBicycles, filteredMotorcycles, filteredCars]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(totalFilteredCount / itemsPerPage) || 1;
+  }, [totalFilteredCount]);
+
+  const paginatedSlots = useMemo(() => {
+    const allFiltered = [...filteredBicycles, ...filteredMotorcycles, ...filteredCars];
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return allFiltered.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredBicycles, filteredMotorcycles, filteredCars, currentPage]);
+
   // Zoom handlers
   const handleZoomIn = () => {
     if (zoomLevel < 150) setZoomLevel(prev => prev + 10);
@@ -226,258 +373,131 @@ const ParkingLotMap = () => {
 
   // Slot click handler
   const handleSlotClick = (slot) => {
-    // If not logged in, intercept Available (green) clicks
+    // If guest clicks an Available slot, prompt authentication
     if (!user) {
       if (slot.status === 'Available') {
         sessionStorage.setItem('spotflow_pending_booking_slot', slot.id);
         setPendingBookingSlot(slot.id);
         setIsAuthModalOpen(true);
       }
-      return; // Do nothing for occupied/reserved slots in guest public view
+      return;
     }
 
     setSelectedSlot(slot);
     if (slot.status === 'Available') {
-      if (role === 'driver') {
+      if (role === 'Registered_Driver' || role === 'Driver') {
         setIsBookingModalOpen(true);
       } else {
-        setIsDetailsModalOpen(true);
+        setIsDetailsModalOpen(true); // Staff/Admin manual reservation
       }
     } else {
-      if (role !== 'driver') {
-        setIsDetailsModalOpen(true);
-      }
-    }
-  };
-
-  // Booking confirm submission
-  const handleConfirmBookingSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedSlot) return;
-
-    const slotId = selectedSlot.id;
-
-    // Mutate slot state
-    setAuthSlots(prevSlots => 
-      prevSlots.map(s => 
-        s.id === slotId 
-          ? { 
-              ...s, 
-              status: 'Reserved', 
-              occupiedBy: { 
-                plate: bookingPlate || 'Bicycle Entry', 
-                checkInTime: new Date().toISOString(), 
-                type: bookingVehicleType 
-              } 
-            } 
-          : s
-      )
-    );
-
-    // Save ticket into bookings list
-    const newBooking = {
-      id: Date.now(),
-      ticketId: 'TKT-' + Math.random().toString(36).substr(2, 8).toUpperCase(),
-      vehicleType: bookingVehicleType,
-      status: 'Active',
-      location: `${activeFloor} - ${slotId.split('-')[2] || slotId}`,
-      bookedDate: '29/05/2026',
-      bookedTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      deadlineTime: new Date(Date.now() + 30 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      contact: '1 - 1'
-    };
-
-    const currentBookings = JSON.parse(localStorage.getItem('spotflow_driver_bookings') || '[]');
-    currentBookings.push(newBooking);
-    localStorage.setItem('spotflow_driver_bookings', JSON.stringify(currentBookings));
-
-    setIsBookingModalOpen(false);
-
-    setAlertBanner(`Booking confirmed successfully for Slot ${slotId}!`);
-    setTimeout(() => {
-      setAlertBanner(null);
-    }, 3500);
-  };
-
-  // Admin/Staff/Manager reservation handler
-  const handleAdminReserveSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedSlot) return;
-
-    const slotId = selectedSlot.id;
-
-    setAuthSlots(prevSlots => 
-      prevSlots.map(s => 
-        s.id === slotId 
-          ? { 
-              ...s, 
-              status: 'Occupied', 
-              occupiedBy: { 
-                plate: adminPlate || '29A-888.88', 
-                checkInTime: new Date().toISOString(), 
-                type: s.type 
-              } 
-            } 
-          : s
-      )
-    );
-
-    setIsDetailsModalOpen(false);
-
-    setAlertBanner(`Slot ${slotId} is now marked as Occupied by ${adminPlate || 'assigned vehicle'}.`);
-    setTimeout(() => {
-      setAlertBanner(null);
-    }, 3500);
-  };
-
-  // Force checkout/release handler
-  const handleForceCheckout = () => {
-    if (!selectedSlot) return;
-
-    const slotId = selectedSlot.id;
-    const occupant = selectedSlot.occupiedBy;
-    let chargeText = '';
-
-    if (occupant) {
-      const checkInTime = new Date(occupant.checkInTime);
-      const now = new Date();
-      const diffMs = now - checkInTime;
-      const diffHours = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60)));
-      
-      let rate = 15000;
-      if (selectedSlot.type === 'Bicycle') rate = 2000;
-      else if (selectedSlot.type === 'Motorcycle') rate = 5000;
-      
-      const totalFee = diffHours * rate;
-      chargeText = ` Fee processed: ${totalFee.toLocaleString('vi-VN')} đ.`;
-    }
-
-    setAuthSlots(prevSlots => 
-      prevSlots.map(s => 
-        s.id === slotId 
-          ? { ...s, status: 'Available', occupiedBy: null } 
-          : s
-      )
-    );
-
-    setIsDetailsModalOpen(false);
-
-    setAlertBanner(`Slot ${slotId} released successfully.${chargeText}`);
-    setTimeout(() => {
-      setAlertBanner(null);
-    }, 4000);
-  };
-
-  // Suspend slot (Maintenance)
-  const handleSuspendSlot = () => {
-    if (!selectedSlot) return;
-
-    setAuthSlots(prevSlots => 
-      prevSlots.map(s => 
-        s.id === selectedSlot.id 
-          ? { ...s, status: 'Maintenance', occupiedBy: null } 
-          : s
-      )
-    );
-
-    setIsDetailsModalOpen(false);
-
-    setAlertBanner(`Slot ${selectedSlot.id} is now suspended (Maintenance).`);
-    setTimeout(() => {
-      setAlertBanner(null);
-    }, 3500);
-  };
-
-  // Restore slot from maintenance
-  const handleRestoreSlot = () => {
-    if (!selectedSlot) return;
-
-    setAuthSlots(prevSlots => 
-      prevSlots.map(s => 
-        s.id === selectedSlot.id 
-          ? { ...s, status: 'Available', occupiedBy: null } 
-          : s
-      )
-    );
-
-    setIsDetailsModalOpen(false);
-
-    setAlertBanner(`Slot ${selectedSlot.id} restored back to service.`);
-    setTimeout(() => {
-      setAlertBanner(null);
-    }, 3500);
-  };
-
-  // Submit handler for inline Guest Auth Modal
-  const handleAuthModalSubmit = (e) => {
-    e.preventDefault();
-    if (!authPhone || !authPassword) {
-      setAuthError('Please enter phone number and password.');
-      return;
-    }
-    setAuthLoading(true);
-    setAuthError('');
-
-    setTimeout(() => {
-      const res = login('driver');
-      setAuthLoading(false);
-      if (res.success) {
-        localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
-        localStorage.setItem('spotflow_guest_user', JSON.stringify({
-          phone: authPhone,
-          role: 'Driver',
-          avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=DriverFlow'
-        }));
+      if (role !== 'Registered_Driver' && role !== 'Driver') {
+        setIsDetailsModalOpen(true); // Staff/Admin releasing slot
       } else {
-        setAuthError('Authentication failed. Use the quick demo registration.');
+        message.info("This slot is currently occupied or reserved.");
       }
-    }, 500);
+    }
   };
 
-  // Quick Demo Bypass Sign Up for Guest Auth Modal
-  const handleQuickGuestSignUp = () => {
-    setAuthLoading(true);
-    setTimeout(() => {
-      const res = login('driver');
-      setAuthLoading(false);
-      if (res.success) {
-        localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
-        localStorage.setItem('spotflow_guest_user', JSON.stringify({
-          phone: '0915277878',
-          role: 'Driver',
-          avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=DriverFlow'
-        }));
-      }
-    }, 300);
+  // Driver Booking Submit
+  const handleConfirmBookingSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedSlot) return;
+
+    setSubmitting(true);
+    try {
+      const plate = bookingVehicleType === 'Bicycle' ? 'Bicycle Entry' : bookingPlate;
+      
+      const response = await parkingService.bookSlot(
+        selectedSlot.dbSlotId,
+        plate,
+        selectedSlot.typeId
+      );
+
+      setIsBookingModalOpen(false);
+      setAlertBanner(response.message || `Booking confirmed successfully for Slot ${selectedSlot.id}!`);
+      setTimeout(() => {
+        setAlertBanner(null);
+      }, 4000);
+
+      // Reload slots from backend database
+      fetchParkingSlots();
+    } catch (err) {
+      console.error(err);
+      message.error(err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Format dynamic details for modal occupancy view
-  const occupantInfo = useMemo(() => {
-    if (!selectedSlot || !selectedSlot.occupiedBy) return null;
-    const occupant = selectedSlot.occupiedBy;
-    const checkInTime = new Date(occupant.checkInTime);
-    const now = new Date();
-    const diffMs = now - checkInTime;
-    const diffHours = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60)));
-    
-    let rate = 15000;
-    if (selectedSlot.type === 'Bicycle') rate = 2000;
-    else if (selectedSlot.type === 'Motorcycle') rate = 5000;
+  // Admin/Staff manual check-in (Walk-in bypass)
+  const handleAdminReserveSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedSlot) return;
 
-    return {
-      plate: occupant.plate,
-      type: occupant.type,
-      time: checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + checkInTime.toLocaleDateString() + ')',
-      duration: `${diffHours} Hour${diffHours > 1 ? 's' : ''}`,
-      fee: `${(diffHours * rate).toLocaleString('vi-VN')} đ`
-    };
-  }, [selectedSlot]);
+    setSubmitting(true);
+    try {
+      const response = await parkingService.walkInCheckIn(
+        adminPlate,
+        selectedSlot.typeId,
+        null // optional checkInImageUrl
+      );
+
+      setIsDetailsModalOpen(false);
+      setAlertBanner(response.message || `Slot ${selectedSlot.id} is now occupied by ${adminPlate}.`);
+      setTimeout(() => {
+        setAlertBanner(null);
+      }, 4000);
+
+      // Reload slots
+      fetchParkingSlots();
+    } catch (err) {
+      console.error(err);
+      message.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Admin/Staff check-out (Release slot and process fee)
+  const handleForceCheckout = async () => {
+    if (!selectedSlot) return;
+
+    setSubmitting(true);
+    try {
+      const plate = selectedSlot.occupiedBy?.plate || 'Unknown';
+      const response = await parkingService.checkOutVehicle(
+        null, // ticketCode
+        plate !== 'Unknown' ? plate : null,
+        null, // checkOutImageUrl
+        null  // sessionId
+      );
+
+      setIsDetailsModalOpen(false);
+      const invoiceText = response.totalAmount !== undefined 
+        ? ` Fee processed: ${response.totalAmount.toLocaleString('vi-VN')} đ.` 
+        : '';
+      
+      setAlertBanner((response.message || `Slot ${selectedSlot.id} released successfully.`) + invoiceText);
+      setTimeout(() => {
+        setAlertBanner(null);
+      }, 5000);
+
+      // Reload slots
+      fetchParkingSlots();
+    } catch (err) {
+      console.error(err);
+      message.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Hourly Rate display helper
   const hourlyRateLabel = (type) => {
     if (type === 'Bicycle') return '2.000 đ';
-    if (type === 'Motorcycle') return '5.000 đ';
-    return '15.000 đ';
+    if (type === 'Motorcycle') return '20.000 đ';
+    return '5.000 đ';
   };
 
   return (
@@ -494,7 +514,7 @@ const ParkingLotMap = () => {
       <div className="space-y-3">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 mb-1">Interactive Parking Map</h1>
-          <p className="text-sm text-slate-500">Real-time slot availability — click any slot for details</p>
+          <p className="text-sm text-slate-500">Real-time slot availability from SQL Server database — click any slot to manage</p>
         </div>
         
         {/* Status Legends Row */}
@@ -523,6 +543,14 @@ const ParkingLotMap = () => {
         </div>
       </div>
 
+      {/* Error / Offline Banner */}
+      {errorMap && (
+        <div className="bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold p-3.5 rounded-xl flex items-center gap-2.5">
+          <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+          <span>{errorMap}</span>
+        </div>
+      )}
+
       {/* 2. Main Two-Column Layout Panel */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         
@@ -534,69 +562,74 @@ const ParkingLotMap = () => {
             <h2 className="text-xs font-extrabold text-slate-400 tracking-widest uppercase">Select Parking Level</h2>
             <div className="flex flex-col gap-3">
               
-              {/* Floor 1 Selector Button */}
+              {/* Floor G Selector Button */}
               <button
-                onClick={() => { setActiveFloor('Floor 1'); setSearchQuery(''); }}
+                onClick={() => { setActiveFloor('Floor G'); setSearchQuery(''); }}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Floor 1'
+                  activeFloor === 'Floor G'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-100 hover:border-blue-400 hover:bg-slate-50/55 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
+<<<<<<< Updated upstream
+                  <span className="text-sm font-semibold">Floor G</span>
+                  <span className={`text-[11px] ${activeFloor === 'Floor G' ? 'text-blue-100' : 'text-slate-500'}`}>Bicycle & Motorcycle</span>
+=======
                   <span className="text-sm font-semibold">Floor 1</span>
-                  <span className={`text-[11px] ${activeFloor === 'Floor 1' ? 'text-blue-100' : 'text-slate-500'}`}>Bicycle & Motorcycle</span>
+                  <span className={`text-[11px] ${activeFloor === 'Floor 1' ? 'text-blue-100' : 'text-slate-500'}`}>Motorbike & Bicycle</span>
+>>>>>>> Stashed changes
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Floor 1'
+                  activeFloor === 'Floor G'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {floor1Available} free
+                  {floorGAvailable} free
                 </span>
               </button>
 
-              {/* Floor 2 Selector Button */}
+              {/* Basement 1 Selector Button */}
               <button
-                onClick={() => { setActiveFloor('Floor 2'); setSearchQuery(''); }}
+                onClick={() => { setActiveFloor('Basement 1'); setSearchQuery(''); }}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Floor 2'
+                  activeFloor === 'Basement 1'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-100 hover:border-blue-400 hover:bg-slate-50/55 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-semibold">Floor 2</span>
-                  <span className={`text-[11px] ${activeFloor === 'Floor 2' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
+                  <span className="text-sm font-semibold">Basement 1 (B1)</span>
+                  <span className={`text-[11px] ${activeFloor === 'Basement 1' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Floor 2'
+                  activeFloor === 'Basement 1'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {floor2Available} free
+                  {basement1Available} free
                 </span>
               </button>
 
-              {/* Basement Selector Button */}
+              {/* Basement 2 Selector Button */}
               <button
-                onClick={() => { setActiveFloor('Basement'); setSearchQuery(''); }}
+                onClick={() => { setActiveFloor('Basement 2'); setSearchQuery(''); }}
                 className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                  activeFloor === 'Basement'
+                  activeFloor === 'Basement 2'
                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
                     : 'bg-white border-slate-100 hover:border-blue-400 hover:bg-slate-50/55 font-medium'
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-semibold">Basement</span>
-                  <span className={`text-[11px] ${activeFloor === 'Basement' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
+                  <span className="text-sm font-semibold">Basement 2 (B2)</span>
+                  <span className={`text-[11px] ${activeFloor === 'Basement 2' ? 'text-blue-100' : 'text-slate-500'}`}>Car Parking Only</span>
                 </div>
                 <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                  activeFloor === 'Basement'
+                  activeFloor === 'Basement 2'
                     ? 'bg-white/20 text-white'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                 }`}>
-                  {basementAvailable} free
+                  {basement2Available} free
                 </span>
               </button>
 
@@ -612,12 +645,12 @@ const ParkingLotMap = () => {
 
             <div className="space-y-3.5">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-555 text-slate-500 font-medium">Total Slots</span>
+                <span className="text-slate-500 font-medium">Total Slots</span>
                 <span className="font-bold text-slate-800">{totalCount}</span>
               </div>
 
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-555 text-slate-500 font-medium flex items-center gap-2">
+                <span className="text-slate-500 font-medium flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#00C853] inline-block"></span>
                   Available
                 </span>
@@ -625,7 +658,7 @@ const ParkingLotMap = () => {
               </div>
 
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-555 text-slate-500 font-medium flex items-center gap-2">
+                <span className="text-slate-500 font-medium flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#FF1744] inline-block"></span>
                   Occupied
                 </span>
@@ -633,7 +666,7 @@ const ParkingLotMap = () => {
               </div>
 
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-555 text-slate-500 font-medium flex items-center gap-2">
+                <span className="text-slate-500 font-medium flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#FFC107] inline-block"></span>
                   Reserved
                 </span>
@@ -654,12 +687,6 @@ const ParkingLotMap = () => {
                 ></div>
               </div>
             </div>
-          </div>
-
-          {/* Quick Demo Info Box */}
-          <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-2.5 text-xs text-slate-500 leading-normal">
-            <span className="font-bold text-slate-700 block uppercase tracking-wider text-[10px]">Portal Info</span>
-            <p>Click any green (Available) space on the map grid to lock your reservation. Your pass billing updates instantly.</p>
           </div>
 
         </div>
@@ -694,7 +721,7 @@ const ParkingLotMap = () => {
             <div className="flex items-center gap-3">
               <button 
                 onClick={handleZoomOut} 
-                className="h-10 w-10 border border-slate-200 hover:bg-slate-55 flex items-center justify-center rounded-lg text-slate-500 transition-all active:scale-95 bg-white"
+                className="h-10 w-10 border border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-lg text-slate-500 transition-all active:scale-95 bg-white"
               >
                 <Minus size={16} />
               </button>
@@ -712,13 +739,14 @@ const ParkingLotMap = () => {
           </div>
 
           {/* Scrollable Maps Zone */}
+<<<<<<< Updated upstream
           <div className="flex-1 overflow-auto p-6 bg-slate-50/20">
             <div 
               className="space-y-8 transition-transform duration-200 origin-top-left"
               style={{ transform: `scale(${zoomLevel / 100})` }}
             >
               
-              {activeFloor === 'Floor 1' ? (
+              {activeFloor === 'Floor G' ? (
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                   
                   {/* Bicycle Area */}
@@ -791,54 +819,98 @@ const ParkingLotMap = () => {
                     </div>
                   </div>
 
+=======
+          <div className="flex-1 overflow-auto p-6 bg-slate-50/20 relative">
+            {loadingMap && (
+              <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <div className="flex flex-col items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                  <span className="text-xs font-semibold text-slate-555">Loading slots from Database...</span>
+>>>>>>> Stashed changes
                 </div>
-              ) : (
-                // FLOOR 2 & BASEMENT: Larger slots for Cars
+              </div>
+            )}
+
+            {paginatedSlots.length === 0 ? (
+              <div className="flex flex-col items-center justify-center min-h-[300px] text-slate-400 gap-2">
+                <Info size={24} />
+                <span className="text-sm font-medium">No slots found on this floor.</span>
+              </div>
+            ) : (
+              <div 
+                className="space-y-8 transition-transform duration-200 origin-top-left"
+                style={{ transform: `scale(${zoomLevel / 100})` }}
+              >
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
-                    <Car size={18} className="text-blue-600" />
-                    <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Car Parking Area (Only)</h3>
+                    {activeFloor === 'Floor 1' ? <Motorcycle size={18} className="text-indigo-650" /> : <Car size={18} className="text-blue-600" />}
+                    <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">
+                      {activeFloor === 'Floor 1' ? 'Motorbike & Bicycle Parking' : 'Car Parking Area'}
+                    </h3>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-                    {carSlots.filter(filterQuery).map((slot) => (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3.5">
+                    {paginatedSlots.map((slot) => (
                       <div key={slot.id} className="relative group">
                         <div
                           onClick={() => handleSlotClick(slot)}
-                          className={`aspect-[4/3] rounded-xl flex flex-col justify-between p-3 border transition-all duration-200 ${
+                          className={`aspect-square rounded-xl flex flex-col justify-between p-3 border transition-all duration-200 ${
                             slot.status === 'Available'
-                              ? 'bg-[#00C853] text-white border-[#00B24A] hover:-translate-y-1 hover:shadow-md cursor-pointer hover:scale-102'
+                              ? 'bg-[#00C853] text-white border-[#00B24A] hover:-translate-y-1 hover:shadow-md cursor-pointer hover:scale-102 font-bold'
                               : slot.status === 'Occupied'
-                              ? 'bg-[#FF1744] text-white border-[#E0143C] opacity-90 cursor-not-allowed'
-                              : 'bg-[#FFC107] text-white border-[#E0A800] opacity-90 cursor-not-allowed'
+                              ? 'bg-[#FF1744] text-white border-[#E0143C] opacity-90 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm font-bold'
+                              : 'bg-[#FFC107] text-white border-[#E0A800] opacity-90 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm font-bold'
                           }`}
                         >
                           <div className="flex justify-between items-start">
-                            <span className="text-[9px] font-extrabold opacity-75 uppercase tracking-wide">CAR</span>
-                            <Car size={16} />
+                            <span className="text-[8px] font-extrabold opacity-75 uppercase tracking-wide">
+                              {slot.type === 'Bicycle' ? 'BIKE' : slot.type === 'Motorcycle' ? 'MOTO' : 'CAR'}
+                            </span>
+                            {slot.type === 'Bicycle' ? <Bike size={14} /> : slot.type === 'Motorcycle' ? <Motorcycle size={14} /> : <Car size={14} />}
                           </div>
-                          <span className="text-xs font-mono font-extrabold tracking-wide mt-2">{slot.id.split('-')[2]}</span>
+                          <span className="text-xs font-mono font-extrabold tracking-wide mt-2">{slot.id}</span>
                         </div>
 
-                        {/* Tooltip on hover for Occupied slots */}
-                        {slot.status === 'Occupied' && (
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[9px] font-bold py-1 px-2 rounded shadow-lg whitespace-nowrap z-30 pointer-events-none transition-all">
-                            Not Available
-                          </div>
-                        )}
+                        {/* Tooltip on hover */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[9px] font-bold py-1 px-2 rounded shadow-lg whitespace-nowrap z-30 pointer-events-none transition-all">
+                          Status: {slot.status} ({slot.type})
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
-
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* Sticky Bottom Ribbon */}
-          <div className="p-4 bg-white border-t border-slate-100">
-            <div className="w-full bg-[#1A62FF] text-white font-medium text-center text-sm py-3 rounded-xl shadow-md mt-4 flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          {/* Sticky Bottom Ribbon + Pagination */}
+          <div className="p-4 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5 mx-auto sm:mx-0">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <span className="text-xs font-semibold text-slate-600 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+
+            <div className="flex-1 bg-[#1A62FF] text-white font-medium text-center text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
               <span>{availableCount} slots available right now — click any green slot to book your space</span>
             </div>
           </div>
@@ -850,7 +922,7 @@ const ParkingLotMap = () => {
       {/* 3. CREATE BOOKING MODAL (Drivers Only) */}
       {isBookingModalOpen && selectedSlot && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-205 animate-scale-in relative font-sans">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans">
             
             <button 
               onClick={() => setIsBookingModalOpen(false)}
@@ -863,18 +935,18 @@ const ParkingLotMap = () => {
               
               <div className="space-y-1">
                 <h3 className="text-xl font-extrabold text-slate-800">Book Parking Slot</h3>
-                <p className="text-xs text-slate-500">Configure your reservation session</p>
+                <p className="text-xs text-slate-500">Configure your reservation session in the real database</p>
               </div>
 
               <div className="bg-sky-50 border border-sky-100 rounded-xl p-3.5 text-sky-800 text-xs font-semibold flex items-start gap-2.5">
-                <Info size={16} className="text-sky-600 shrink-0 mt-0.5 animate-pulse" />
+                <Info size={16} className="text-sky-600 shrink-0 mt-0.5" />
                 <div>
                   <span>You are reserving Slot: </span>
                   <span className="font-mono font-extrabold text-blue-600">{selectedSlot.id}</span>
                   <span> on </span>
                   <span className="font-bold text-slate-800">{activeFloor}</span>
                   <span className="text-sky-600 font-medium block mt-0.5">
-                    Selected slot classification: {selectedSlot.type}
+                    Selected slot classification: {selectedSlot.type} (DB Slot ID: {selectedSlot.dbSlotId})
                   </span>
                 </div>
               </div>
@@ -888,10 +960,10 @@ const ParkingLotMap = () => {
                     onChange={(e) => setBookingVehicleType(e.target.value)}
                     className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all font-medium"
                   >
-                    {activeFloor === 'Floor 1' ? (
+                    {activeFloor === 'Floor G' ? (
                       <>
-                        <option value="Bicycle">Bicycle</option>
                         <option value="Motorcycle">Motorcycle</option>
+                        <option value="Bicycle">Bicycle</option>
                       </>
                     ) : (
                       <option value="Car">Car</option>
@@ -927,7 +999,7 @@ const ParkingLotMap = () => {
                         className={`py-3.5 px-3 rounded-xl border text-center transition-all text-xs font-bold leading-tight ${
                           bookingDuration === duration
                             ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
-                            : 'bg-slate-50/50 border-slate-200 hover:bg-slate-50 text-slate-500 hover:text-slate-850'
+                            : 'bg-slate-50/50 border-slate-200 hover:bg-slate-55 text-slate-555 hover:text-slate-850'
                         }`}
                       >
                         {duration}
@@ -947,9 +1019,10 @@ const ParkingLotMap = () => {
                   
                   <button
                     type="submit"
+                    disabled={submitting}
                     className="flex-1 h-11 bg-blue-600 hover:bg-blue-550 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 text-sm"
                   >
-                    Confirm Booking
+                    {submitting ? 'Processing...' : 'Confirm Booking'}
                   </button>
                 </div>
 
@@ -964,7 +1037,7 @@ const ParkingLotMap = () => {
       {/* 4. SPACE OPERATIONAL DETAILS MODAL (Staff, Managers, Admins) */}
       {isDetailsModalOpen && selectedSlot && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-205 animate-scale-in relative font-sans">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans">
             
             <button 
               onClick={() => setIsDetailsModalOpen(false)}
@@ -1015,96 +1088,24 @@ const ParkingLotMap = () => {
 
               {/* Conditional Actions based on current status */}
               
-              {/* STATUS: OCCUPIED */}
-              {selectedSlot.status === 'Occupied' && (
+              {/* STATUS: OCCUPIED / RESERVED */}
+              {(selectedSlot.status === 'Occupied' || selectedSlot.status === 'Reserved') && (
                 <div className="space-y-4">
-                  {occupantInfo && (
-                    <div className="bg-slate-50 border border-slate-205 rounded-xl p-4 space-y-3">
-                      <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                        <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">License Plate</span>
-                        <span className="font-mono text-xs text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-350 font-extrabold shadow-sm">{occupantInfo.plate}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-500">Category Type</span>
-                        <span className="text-slate-800 font-bold capitalize">{occupantInfo.type}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-500">Check-in Time</span>
-                        <span className="text-slate-700 font-semibold">{occupantInfo.time}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-500">Hours Elapsed</span>
-                        <span className="text-slate-700 font-semibold">{occupantInfo.duration}</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                        <span className="text-xs font-bold text-slate-800 flex items-center gap-1"><Coins size={14}/> Total Surcharge</span>
-                        <span className="text-base font-extrabold text-emerald-600">{occupantInfo.fee}</span>
-                      </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Occupancy Mode</span>
+                      <span className="font-mono text-xs text-slate-800 bg-white px-2.5 py-1 rounded border border-slate-200 font-extrabold shadow-sm">{selectedSlot.status}</span>
                     </div>
-                  )}
+                  </div>
 
-                  {(role === 'admin' || role === 'staff') && (
+                  {(role === 'Admin' || role === 'Staff') && (
                     <button
                       onClick={handleForceCheckout}
+                      disabled={submitting}
                       className="w-full h-11 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-500/10 text-sm transition-all"
                     >
                       <UserCheck size={16} />
-                      Release Slot & Process Exit
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* STATUS: RESERVED */}
-              {selectedSlot.status === 'Reserved' && (
-                <div className="space-y-4">
-                  {occupantInfo && (
-                    <div className="bg-slate-50 border border-slate-205 rounded-xl p-4 space-y-3">
-                      <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                        <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">License Plate</span>
-                        <span className="font-mono text-xs text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-350 font-extrabold shadow-sm">{occupantInfo.plate}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-500">Reserved Time</span>
-                        <span className="text-slate-700 font-semibold">{occupantInfo.time}</span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="bg-sky-50 border border-sky-100 rounded-xl p-3 text-sky-800 text-xs font-semibold flex items-start gap-2">
-                    <Info size={16} className="text-sky-600 shrink-0 mt-0.5" />
-                    <span>This spot is reserved. Pre-booked by system users or checked in by supervisors.</span>
-                  </div>
-
-                  {(role === 'admin' || role === 'staff') && (
-                    <button
-                      onClick={handleForceCheckout}
-                      className="w-full h-11 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-500/10 text-sm transition-all"
-                    >
-                      Cancel Booking & Release Slot
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* STATUS: MAINTENANCE */}
-              {selectedSlot.status === 'Maintenance' && (
-                <div className="space-y-4">
-                  <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-amber-800 text-xs font-semibold flex items-start gap-2.5">
-                    <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold block">Spot Suspended</span>
-                      <span className="text-amber-600 font-medium">Currently out of service for cleanups, operations testing, or charging snoop.</span>
-                    </div>
-                  </div>
-
-                  {role === 'admin' && (
-                    <button
-                      onClick={handleRestoreSlot}
-                      className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/10 text-sm transition-all"
-                    >
-                      <ShieldCheck size={16} />
-                      Restore Space to Service
+                      {submitting ? 'Releasing...' : 'Check-out Vehicle & Clear Slot'}
                     </button>
                   )}
                 </div>
@@ -1115,7 +1116,7 @@ const ParkingLotMap = () => {
                 <div className="space-y-4">
                   <form onSubmit={handleAdminReserveSubmit} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Assign License Plate</label>
+                      <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Assign License Plate (Walk-in)</label>
                       <input 
                         type="text"
                         required
@@ -1129,101 +1130,16 @@ const ParkingLotMap = () => {
                     <div className="flex gap-3">
                       <button
                         type="submit"
+                        disabled={submitting}
                         className="flex-1 h-11 bg-blue-600 hover:bg-blue-550 text-white font-bold rounded-xl transition-all shadow-md text-sm"
                       >
-                        Reserve Spot
-                      </button>
-                      
-                      <button
-                        type="button"
-                        onClick={handleSuspendSlot}
-                        className="px-4 h-11 border border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white rounded-xl font-bold transition-all text-sm flex items-center justify-center gap-1"
-                      >
-                        Suspend Slot
+                        {submitting ? 'Processing...' : 'Check-in Vehicle'}
                       </button>
                     </div>
                   </form>
                 </div>
               )}
 
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* 5. GUEST LOGIN / SIGN UP MODAL (Auth Form) */}
-      {isAuthModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans p-6 sm:p-8 space-y-6">
-            
-            <button 
-              onClick={() => setIsAuthModalOpen(false)}
-              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="space-y-2">
-              <div className="w-12 h-12 rounded-xl bg-[#2563EB] flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-blue-500/10">
-                P
-              </div>
-              <h3 className="text-xl font-extrabold text-slate-800 mt-2">Sign in to reserve</h3>
-              <p className="text-xs text-slate-500 font-medium">Authentication is required to book Slot <span className="font-mono text-[#2563EB] font-extrabold">{pendingBookingSlot || sessionStorage.getItem('spotflow_pending_booking_slot')}</span></p>
-            </div>
-
-            {authError && (
-              <div className="bg-rose-50 border border-rose-100 text-rose-700 text-xs font-semibold p-3.5 rounded-xl flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0"></span>
-                <span>{authError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleAuthModalSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 block">Phone Number</label>
-                <input 
-                  type="text" 
-                  required
-                  placeholder="Enter your phone number"
-                  value={authPhone}
-                  onChange={(e) => setAuthPhone(e.target.value)}
-                  className="w-full h-11 px-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 block">Password</label>
-                <input 
-                  type="password" 
-                  required
-                  placeholder="Enter your password"
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  className="w-full h-11 px-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold"
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={authLoading}
-                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 text-sm mt-6"
-              >
-                {authLoading ? 'Logging in...' : 'Login & Continue'}
-              </button>
-            </form>
-
-            <div className="text-center pt-2">
-              <span className="text-xs text-slate-500">
-                Don't have an account?{' '}
-                <button 
-                  type="button"
-                  onClick={handleQuickGuestSignUp}
-                  className="text-[#2563EB] font-bold hover:underline"
-                >
-                  Quick Sign Up
-                </button>
-              </span>
             </div>
 
           </div>

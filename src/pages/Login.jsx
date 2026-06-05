@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { message } from 'antd';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login } = useAuth(); // Hàm login này giờ đã là hàm async gọi API thật
   const navigate = useNavigate();
 
   // Controlled component states
@@ -14,8 +15,8 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Form submit handler
-  const handleFormSubmit = (e) => {
+  // Đust CHUYỂN THÀNH HÀM ASYNC ĐỂ GỌI API THẬT
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!usernameOrEmail || !password) {
       setErrorMsg('Please enter both username or email and password.');
@@ -25,52 +26,33 @@ const Login = () => {
     setLoading(true);
     setErrorMsg('');
 
-    // Simulate network authentication latency
-    setTimeout(() => {
-      // Map mock credentials to auth flow helper in AuthContext
-      const res = login('driver');
-      setLoading(false);
+    // ĐÃ SỬA: Bỏ setTimeout, gọi trực tiếp API Backend thông qua AuthContext
+    const res = await login(usernameOrEmail, password);
+    setLoading(false);
+    
+    if (res.success) {
+      // ĐĂ CẬP NHẬT: Lưu trạng thái đồng bộ khớp với DB
+      localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
       
-      if (res.success) {
-        // Save guest map sync states persistently
-        localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
-        localStorage.setItem('spotflow_guest_user', JSON.stringify({
-          phone: usernameOrEmail,
-          role: 'Driver',
-          avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=DriverFlow'
-        }));
-        
-        // Push user to main dashboard
+      // Chuyển hướng người dùng dựa vào quyền (Role) trả về từ Database thật
+      if (res.user.role === 'Admin') {
         navigate('/dashboard');
+      } else if (res.user.role === 'Staff') {
+        navigate('/staff-management');
       } else {
-        setErrorMsg('Authentication error. Please try again.');
+        navigate('/dashboard'); // Hoặc trang bản đồ /guest-parking-map tùy bạn phân phối
       }
-    }, 500);
+    } else {
+      // Hiển thị nội dung lỗi thật từ Backend (ví dụ: "Tài khoản hoặc mật khẩu không chính xác")
+      setErrorMsg(res.message || 'Authentication error. Please try again.');
+    }
   };
 
-  // Demo bypass triggers for validation and fast reviews
-  const handleQuickDemoLogin = (roleName) => {
-    setLoading(true);
-    setTimeout(() => {
-      const res = login(roleName);
-      setLoading(false);
-      if (res.success) {
-        localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
-        localStorage.setItem('spotflow_guest_user', JSON.stringify({
-          phone: roleName === 'admin' ? '0988888888' : roleName === 'staff' ? '0977777777' : '0915277878',
-          role: roleName,
-          avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${roleName}`
-        }));
-        navigate('/dashboard');
-      }
-    }, 300);
-  };
 
   return (
     <div className="min-h-screen w-screen bg-[#F5F5F5] flex items-center justify-center relative overflow-hidden p-4 font-sans select-none">
       
       {/* 1. LAYOUT BACKGROUND ARCHITECTURE */}
-      {/* Simulated floor plan grid lines */}
       <div 
         className="absolute inset-0 opacity-[0.03] pointer-events-none" 
         style={{ 
@@ -78,7 +60,6 @@ const Login = () => {
           backgroundSize: '24px 24px, 72px 72px, 72px 72px' 
         }}
       />
-      {/* Abstract blurred color gradients */}
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
 
@@ -162,40 +143,12 @@ const Login = () => {
             Don't have an account?{' '}
             <button 
               type="button"
-              onClick={() => handleQuickDemoLogin('driver')}
+              onClick={() => navigate('/register')}
               className="text-[#1A62FF] font-bold hover:underline"
             >
               Sign Up
             </button>
           </span>
-        </div>
-
-        {/* presentation bypass trigger card row */}
-        <div className="mt-8 pt-6 border-t border-slate-100 space-y-3">
-          <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block text-center">Quick Presentation Demos</span>
-          <div className="grid grid-cols-3 gap-2.5">
-            <button
-              type="button"
-              onClick={() => handleQuickDemoLogin('admin')}
-              className="py-2 h-9 rounded-lg border border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-slate-50 text-[10px] font-bold text-slate-600 transition-all active:scale-95"
-            >
-              Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemoLogin('staff')}
-              className="py-2 h-9 rounded-lg border border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-slate-50 text-[10px] font-bold text-slate-600 transition-all active:scale-95"
-            >
-              Staff
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemoLogin('driver')}
-              className="py-2 h-9 rounded-lg border border-slate-200 hover:border-blue-400 bg-slate-50/50 hover:bg-slate-50 text-[10px] font-bold text-slate-600 transition-all active:scale-95"
-            >
-              Driver
-            </button>
-          </div>
         </div>
 
       </div>

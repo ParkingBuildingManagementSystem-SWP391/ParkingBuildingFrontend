@@ -39,7 +39,7 @@ const Motorcycle = ({ size = 18, className = '' }) => (
 );
 
 const Settings = () => {
-  const { user, role, switchRole, updateUser } = useAuth();
+  const { user, role, updateUser } = useAuth();
   const navigate = useNavigate();
 
   // Profile fields state
@@ -48,9 +48,6 @@ const Settings = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [vehicleType, setVehicleType] = useState('Car');
-
-  // Admin section role switcher state
-  const [selectedNewRole, setSelectedNewRole] = useState('driver');
 
   // Alert/Toast states
   const [alertMsg, setAlertMsg] = useState(null);
@@ -71,9 +68,6 @@ const Settings = () => {
       setEmail(user.email || '');
       setPhone(user.phone || user.vehiclePlate || '0915277878');
       setVehicleType(user.vehicleType || 'Car');
-    }
-    if (role) {
-      setSelectedNewRole(role);
     }
   }, [user, role]);
 
@@ -114,24 +108,6 @@ const Settings = () => {
     setTimeout(() => setAlertMsg(null), 3000);
   };
 
-  // Handle Admin Switch Role Session promotion
-  const handleAdminRolePromotion = (e) => {
-    e.preventDefault();
-    const success = switchRole(selectedNewRole);
-
-    if (success) {
-      setAlertType('success');
-      setAlertMsg(`Role switched successfully to: ${selectedNewRole.toUpperCase()}`);
-      setTimeout(() => {
-        setAlertMsg(null);
-        navigate('/dashboard');
-      }, 1500);
-    } else {
-      setAlertType('info');
-      setAlertMsg('Failed to switch roles. Please select a valid configuration.');
-      setTimeout(() => setAlertMsg(null), 3000);
-    }
-  };
 
   const getVehicleIcon = (type) => {
     if (type === 'Bicycle') return <Bike size={18} className="text-blue-500" />;
@@ -294,67 +270,7 @@ const Settings = () => {
         {/* Right Side Column: Stats or Admin Panel */}
         <div className="space-y-6 w-full">
           
-          {/* Conditional Administrative Portal Action Box */}
-          {role === 'admin' && (
-            <div className="bg-white rounded-2xl border border-rose-100 shadow-md shadow-rose-50/10 overflow-hidden">
-              
-              {/* Header Header */}
-              <div className="p-5 border-b border-rose-50 bg-rose-50/40 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldAlert className="text-rose-500 shrink-0" size={16} />
-                  <span className="text-[10px] font-extrabold text-rose-600 uppercase tracking-widest">Admin Portal Only</span>
-                </div>
-                <span className="bg-rose-100 text-rose-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-rose-200">
-                  Access Granted
-                </span>
-              </div>
 
-              {/* Body */}
-              <form onSubmit={handleAdminRolePromotion} className="p-5 space-y-4">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-850 text-slate-800">Switch Session Role</h3>
-                  <p className="text-xs text-slate-400 mt-0.5 leading-normal">
-                    Change your current active role session to test different workflows and view permissions instantly.
-                  </p>
-                </div>
-
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-xs text-slate-600 flex justify-between items-center">
-                  <span className="font-semibold text-slate-400">Current Role</span>
-                  <span className="font-extrabold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-100 uppercase tracking-wider text-[10px]">
-                    {displayRoleName(role)}
-                  </span>
-                </div>
-
-                {/* Role Switcher Option Dropdown */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Select Session Role</label>
-                  <div className="relative">
-                    <UserCheck size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <select
-                      value={selectedNewRole}
-                      onChange={(e) => setSelectedNewRole(e.target.value)}
-                      className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-xs rounded-xl focus:outline-none focus:border-rose-500 focus:bg-white transition-all font-bold text-slate-700 cursor-pointer"
-                    >
-                      <option value="driver">Driver</option>
-                      <option value="staff">Parking Staff</option>
-                      <option value="manager">Parking Manager</option>
-                      <option value="admin">System Admin</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Action button */}
-                <button
-                  type="submit"
-                  className="w-full h-11 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-md shadow-rose-500/10 flex items-center justify-center gap-1.5 text-xs transition-all border border-rose-500 hover:scale-[1.01]"
-                >
-                  <ShieldAlert size={14} />
-                  Update Role & Reload View
-                </button>
-              </form>
-
-            </div>
-          )}
 
           {/* Account Status / Overview Widget (Renders for everyone, providing nice context) */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
