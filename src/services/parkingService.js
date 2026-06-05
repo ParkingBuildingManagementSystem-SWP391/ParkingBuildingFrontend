@@ -1,25 +1,7 @@
 import api from './api';
 
 export const parkingService = {
-<<<<<<< Updated upstream
-  // Lấy tất cả chỗ đỗ xe
-  getAllSlots: async () => {
-    try {
-      // Đường dẫn này sẽ map với [HttpGet] trong ParkingController.cs bên Backend
-      const response = await api.get('/parking'); 
-      return response.data;
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách slot:", error);
-      throw error;
-    }
-  },
-
-  // Ví dụ tạo một yêu cầu đỗ xe mới (WalkInRequest)
-  createWalkInRequest: async (walkInData) => {
-    const response = await api.post('/parking/walk-in', walkInData);
-    return response.data;
-=======
-  // Fetch real parking slots by Floor ID from DB
+  // 1. Lấy danh sách slot thực tế từ DB dựa theo Floor ID
   getSlotsByFloor: async (floorId) => {
     try {
       const response = await api.get(`/Parking/floor/${floorId}`);
@@ -30,7 +12,7 @@ export const parkingService = {
     }
   },
 
-  // Driver reserves a parking slot
+  // 2. Tài xế đặt chỗ trước qua Web (Book Parking Slot)
   bookSlot: async (slotId, licenseVehicle, typeId) => {
     try {
       const response = await api.post('/Parking/book', {
@@ -45,7 +27,7 @@ export const parkingService = {
     }
   },
 
-  // Staff scans vehicle at entrance (Check-in)
+  // 3. Nhân viên quét xe tại cổng vào bãi (Check-in cho khách đã đặt trước)
   checkInVehicle: async (ticketCode, licenseVehicle, checkInImageUrl) => {
     try {
       const response = await api.post('/Parking/check-in', {
@@ -60,7 +42,7 @@ export const parkingService = {
     }
   },
 
-  // Staff check-in for walk-in customer (Bypass booking)
+  // 4. Nhân viên check-in cho khách vãng lai (Walk-in - Không đặt trước)
   walkInCheckIn: async (licenseVehicle, vehicleTypeId, checkInImageUrl) => {
     try {
       const response = await api.post('/Parking/walk-in', {
@@ -75,7 +57,7 @@ export const parkingService = {
     }
   },
 
-  // Staff check-out vehicle (Process fee & release slot)
+  // 5. Nhân viên quét xe cho xe ra cổng (Check-out - Tính phí & giải phóng slot)
   checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId) => {
     try {
       const response = await api.post('/Parking/check-out', {
@@ -89,6 +71,5 @@ export const parkingService = {
       const serverMessage = error.response?.data?.message || error.response?.data?.error || "Check-out failed.";
       throw serverMessage;
     }
->>>>>>> Stashed changes
   }
 };

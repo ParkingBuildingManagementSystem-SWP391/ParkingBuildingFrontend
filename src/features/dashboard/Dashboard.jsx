@@ -20,6 +20,8 @@ const Dashboard = () => {
   const [logs, setLogs] = useState([]);
   const [occupancyRate, setOccupancyRate] = useState(0);
 
+  const lowerRole = role?.toLowerCase();
+
   // Fetch data on load and subscribe to simulated state changes
   const fetchData = () => {
     setSlots(parkingService.getSlots());
@@ -43,15 +45,10 @@ const Dashboard = () => {
 
   // Redirect driver and staff to /parking-map automatically
   useEffect(() => {
-    const lowerRole = role?.toLowerCase();
-<<<<<<< Updated upstream
     if (lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {
-=======
-    if (lowerRole === 'driver' || lowerRole === 'member' || lowerRole === 'registered_driver' || lowerRole === 'customer' || lowerRole === 'staff') {
->>>>>>> Stashed changes
       navigate('/parking-map');
     }
-  }, [role, navigate]);
+  }, [lowerRole, navigate]);
 
   // Format currencies in VND
   const formatVND = (value) => {
@@ -179,7 +176,6 @@ const Dashboard = () => {
                 <div className="flex flex-col items-center justify-center py-6">
                   {/* Custom SVG Donut Chart */}
                   <svg viewBox="0 0 320 210" className="w-full max-w-[290px] h-auto">
-                    {/* Background track (optional for styling) */}
                     <circle cx="160" cy="105" r="50" fill="transparent" stroke="#F1F5F9" strokeWidth="16" />
                     
                     {/* Car Slice (61.54%) */}
@@ -249,7 +245,6 @@ const Dashboard = () => {
                 <div className="flex flex-col items-center justify-center py-6">
                   {/* Custom SVG Bar Chart */}
                   <svg viewBox="0 0 420 210" className="w-full max-w-[390px] h-auto">
-                    {/* Grid Lines & Labels */}
                     <line x1="50" y1="30" x2="390" y2="30" stroke="#F1F5F9" strokeWidth="1" />
                     <text x="40" y="34" className="text-[9px] text-slate-400 font-semibold fill-slate-400" textAnchor="end">600</text>
                     
@@ -266,43 +261,36 @@ const Dashboard = () => {
                     <text x="40" y="184" className="text-[9px] text-slate-400 font-semibold fill-slate-400" textAnchor="end">0</text>
 
                     {/* Bars: Mon-Sun */}
-                    {/* Mon: 420 -> H=105, Y=75 */}
                     <rect className="fill-[#2563EB] hover:fill-[#1D4ED8] transition-colors cursor-pointer" x="65" y="75" width="24" height="105" rx="3">
                       <title>Mon: 420 Vehicles</title>
                     </rect>
                     <text x="77" y="196" className="text-[9px] font-bold fill-slate-500" textAnchor="middle">Mon</text>
 
-                    {/* Tue: 480 -> H=120, Y=60 */}
                     <rect className="fill-[#2563EB] hover:fill-[#1D4ED8] transition-colors cursor-pointer" x="113.5" y="60" width="24" height="120" rx="3">
                       <title>Tue: 480 Vehicles</title>
                     </rect>
                     <text x="125.5" y="196" className="text-[9px] font-bold fill-slate-500" textAnchor="middle">Tue</text>
 
-                    {/* Wed: 510 -> H=127.5, Y=52.5 */}
                     <rect className="fill-[#2563EB] hover:fill-[#1D4ED8] transition-colors cursor-pointer" x="162" y="52.5" width="24" height="127.5" rx="3">
                       <title>Wed: 510 Vehicles</title>
                     </rect>
                     <text x="174" y="196" className="text-[9px] font-bold fill-slate-500" textAnchor="middle">Wed</text>
 
-                    {/* Thu: 460 -> H=115, Y=65 */}
                     <rect className="fill-[#2563EB] hover:fill-[#1D4ED8] transition-colors cursor-pointer" x="210.5" y="65" width="24" height="115" rx="3">
                       <title>Thu: 460 Vehicles</title>
                     </rect>
                     <text x="222.5" y="196" className="text-[9px] font-bold fill-slate-500" textAnchor="middle">Thu</text>
 
-                    {/* Fri: 550 -> H=137.5, Y=42.5 */}
                     <rect className="fill-[#2563EB] hover:fill-[#1D4ED8] transition-colors cursor-pointer" x="259" y="42.5" width="24" height="137.5" rx="3">
                       <title>Fri: 550 Vehicles</title>
                     </rect>
                     <text x="271" y="196" className="text-[9px] font-bold fill-slate-500" textAnchor="middle">Fri</text>
 
-                    {/* Sat: 380 -> H=95, Y=85 */}
                     <rect className="fill-[#2563EB] hover:fill-[#1D4ED8] transition-colors cursor-pointer" x="307.5" y="85" width="24" height="95" rx="3">
                       <title>Sat: 380 Vehicles</title>
                     </rect>
                     <text x="319.5" y="196" className="text-[9px] font-bold fill-slate-500" textAnchor="middle">Sat</text>
 
-                    {/* Sun: 320 -> H=80, Y=100 */}
                     <rect className="fill-[#2563EB] hover:fill-[#1D4ED8] transition-colors cursor-pointer" x="356" y="100" width="24" height="80" rx="3">
                       <title>Sun: 320 Vehicles</title>
                     </rect>
@@ -405,10 +393,8 @@ const Dashboard = () => {
     );
   };
 
-  const lowerRole = role?.toLowerCase();
-
   // Redirect and load map for drivers and staff
-  if (lowerRole === 'driver' || lowerRole === 'member' || lowerRole === 'registered_driver' || lowerRole === 'customer' || lowerRole === 'staff') {
+  if (lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-400 font-medium font-sans">
         <div className="h-8 w-8 rounded-full border-4 border-slate-200 border-t-[#2563EB] animate-spin mb-3"></div>
@@ -418,22 +404,14 @@ const Dashboard = () => {
   }
 
   // Render correct dashboard based on role context
-<<<<<<< Updated upstream
-  switch (role?.toLowerCase()) {
-=======
   switch (lowerRole) {
->>>>>>> Stashed changes
     case 'admin':
     case 'manager':
       return renderManagerDashboard();
     default:
       return (
-        <div className="min-h-screen flex items-center justify-center text-rose-500 font-bold bg-white rounded-xl border border-slate-200 p-6">
-<<<<<<< Updated upstream
-          <ShieldAlert size={20} className="mr-2 animate-bounce" /> Error loading dashboard: User role undefined (Role: {role})
-=======
+        <div className="min-h-[400px] flex items-center justify-center text-rose-500 font-bold bg-white rounded-xl border border-slate-200 p-6">
           <ShieldAlert size={20} className="mr-2 animate-bounce" /> Error loading dashboard: User role undefined ({role})
->>>>>>> Stashed changes
         </div>
       );
   }

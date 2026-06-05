@@ -6,22 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-<<<<<<< Updated upstream
-    open: true, 
-    proxy: {
-      '/api': {
-        target: 'https://localhost:7008', 
-        changeOrigin: true,
-        secure: false, 
-=======
     open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5284',
+        target: 'http://localhost:5284', // Trỏ chính xác về port Backend .NET của bạn
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path // keep /api intact
->>>>>>> Stashed changes
+        rewrite: (path) => path // Giữ nguyên tiền tố /api để khớp với [Route("api/[controller]")] ở Backend
       }
     }
   },

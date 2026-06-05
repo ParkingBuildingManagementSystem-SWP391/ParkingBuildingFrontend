@@ -35,12 +35,9 @@ const Header = () => {
 
   const getRoleBadge = (userRole) => {
     const baseClass = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all duration-200 shadow-sm";
-<<<<<<< Updated upstream
-    switch (userRole?.toLowerCase()) {
-=======
     const lowerUserRole = userRole?.toLowerCase();
+    
     switch (lowerUserRole) {
->>>>>>> Stashed changes
       case 'admin':
         return (
           <span className={`${baseClass} bg-rose-50 text-rose-600 border-rose-200`}>
@@ -85,11 +82,7 @@ const Header = () => {
       icon: <User size={14} className="text-slate-400" />,
       onClick: () => navigate('/settings')
     },
-<<<<<<< Updated upstream
-    ...((role && ['driver', 'member', 'registered_driver', 'customer'].includes(role.toLowerCase())) ? [{
-=======
     ...((role?.toLowerCase() === 'driver' || role?.toLowerCase() === 'member' || role?.toLowerCase() === 'customer' || role?.toLowerCase() === 'registered_driver') ? [{
->>>>>>> Stashed changes
       key: 'monthly-pass',
       label: <span className="text-slate-600 font-medium">Monthly Pass Card</span>,
       icon: <CreditCard size={14} className="text-slate-400" />,
@@ -119,8 +112,6 @@ const Header = () => {
     const currentPath = location.pathname;
     const lowerRole = role?.toLowerCase();
 
-    const lowerRole = role?.toLowerCase();
-
     // Guest view: only Parking Map is allowed
     if (!user) {
       return (
@@ -137,11 +128,7 @@ const Header = () => {
     }
 
     // Role 1: "Driver" (Driver View) -> Allowed Tabs: Parking Map, My Bookings
-<<<<<<< Updated upstream
-    if (lowerRole && ['driver', 'member', 'registered_driver', 'customer'].includes(lowerRole)) {
-=======
     if (lowerRole === 'driver' || lowerRole === 'member' || lowerRole === 'registered_driver' || lowerRole === 'customer') {
->>>>>>> Stashed changes
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
           <button
@@ -252,8 +239,6 @@ const Header = () => {
     admin: 'System Admin'
   };
 
-
-
   return (
     <AntHeader 
       className={`w-full px-6 py-4 flex items-center justify-between h-16 sticky top-0 z-50 shadow-md select-none border-none ${
@@ -299,7 +284,7 @@ const Header = () => {
               <Dropdown menu={{ items: profileMenuItems }} trigger={['click']} placement="bottomRight">
                 <div className="cursor-pointer group flex items-center hover:opacity-90 transition-all select-none">
                   <div className="w-9 h-9 rounded-full bg-white text-[#2563EB] font-bold flex items-center justify-center text-sm border border-white/20 shadow-md shrink-0 transition-transform group-hover:scale-105">
-                    {getInitials(user.name)}
+                    {getInitials(user.username || user.name)}
                   </div>
                 </div>
               </Dropdown>
@@ -308,7 +293,7 @@ const Header = () => {
         ) : (
           <div className="flex items-center gap-4">
             {/* Public view warning banner */}
-            <div className="flex items-center gap-2 text-slate-555 text-slate-500 font-medium text-xs sm:text-sm bg-slate-50 border border-slate-100 py-1.5 px-3 rounded-lg">
+            <div className="flex items-center gap-2 text-slate-500 font-medium text-xs sm:text-sm bg-slate-50 border border-slate-100 py-1.5 px-3 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-amber-400"></span>
               <span>Public view — read only</span>
             </div>
