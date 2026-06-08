@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { message } from 'antd';
 import { parkingService } from '../../services/parkingService';
+import api from '../../services/api';
+
 
 const Motorcycle = ({ size = 18, className = '' }) => (
   <svg 
@@ -379,34 +381,62 @@ const ParkingLotMap = () => {
       return;
     }
 
+    // Guard: ensure user is authorized to book (roleId === 4)
+    if (user && user.roleId !== undefined && Number(user.roleId) !== 4) {
+      message.error("Access denied. Only registered drivers can book slots.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       // 1. STRICT DATA TYPE SANITIZATION
       // Strip spaces, dashes, and special characters from the plate
       const rawPlate = bookingVehicleType === 'Bicycle' ? 'BicycleEntry' : bookingPlate;
-      const cleanPlate = rawPlate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      const cleanPlate = rawPlate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().trim();
 
-      let vehicleTypeId = 3; // Default to Car (3)
-      if (bookingVehicleType === 'Bicycle') vehicleTypeId = 1;
-      else if (bookingVehicleType === 'Motorcycle') vehicleTypeId = 2;
+      // Determine vehicle type ID from form selection (bookingVehicleType)
+      let vehicleTypeId = 3; // Default to Car
+      const cleanVehicleType = String(bookingVehicleType || '').trim().toLowerCase();
+      if (cleanVehicleType === 'bicycle') {
+        vehicleTypeId = 1;
+      } else if (cleanVehicleType === 'motorcycle') {
+        vehicleTypeId = 2;
+      } else {
+        vehicleTypeId = 3;
+      }
 
-      // Explicitly convert payload slotId and typeId to numbers
-      const response = await parkingService.bookSlot(
-        Number(selectedSlot.slotId),
-        cleanPlate,
-        Number(vehicleTypeId)
-      );
+      // Robust fallback mapping mechanism for typeId (if somehow selectedSlot.typeId is missing/undefined)
+      let finalVehicleTypeId = Number(vehicleTypeId);
+      if (!finalVehicleTypeId) {
+        const fallbackTypeId = selectedSlot.typeId !== undefined && selectedSlot.typeId !== null
+          ? Number(selectedSlot.typeId)
+          : (String(selectedSlot.type || '').trim().toLowerCase() === 'bicycle' ? 1 : String(selectedSlot.type || '').trim().toLowerCase() === 'motorcycle' ? 2 : 3);
+        finalVehicleTypeId = fallbackTypeId;
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      const response = await api.post('/Parking/book', {
+        slotId: Number(selectedSlot.slotId),
+        licenseVehicle: cleanPlate,
+        typeId: finalVehicleTypeId
+      }, config);
 
       setIsBookingModalOpen(false);
-      setAlertBanner(response.message || `Booking confirmed successfully for Slot ${selectedSlot.id}!`);
+      setAlertBanner(response.data?.message || `Booking confirmed successfully for Slot ${selectedSlot.id}!`);
       setTimeout(() => {
         setAlertBanner(null);
       }, 4000);
 
       onFloorChange(activeFloorId);
     } catch (err) {
-      console.error(err);
-      message.error(err);
+      console.error("Booking Error Response:", err.response?.data || err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Failed to reserve parking slot.";
+      message.error(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -417,27 +447,73 @@ const ParkingLotMap = () => {
     e.preventDefault();
     if (!selectedSlot) return;
 
+    // Guard: ensure JWT bearer token is fully authenticated
+    const token = localStorage.getItem('token');
+    if (!token) {
+      message.error("Authentication session expired. Please log in again to check in.");
+      return;
+    }
+
+    // Guard: ensure user is authorized for staff check-in (Staff = 2, Admin = 1)
+    if (user && user.roleId !== undefined && Number(user.roleId) !== 1 && Number(user.roleId) !== 2) {
+      message.error("Access denied. Only staff or admins can perform walk-in check-ins.");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      // Strip spaces, dashes, and special characters from the admin check-in plate
-      const cleanPlate = adminPlate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      // Làm sạch biển số xe
+      const cleanPlate = adminPlate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().trim();
 
-      const response = await parkingService.walkInCheckIn(
-        cleanPlate,
-        Number(selectedSlot.typeId),
-        null
-      );
+      // Validate license plate length (between 7 and 9 alphanumeric characters)
+      if (cleanPlate.length < 7 || cleanPlate.length > 9) {
+        message.warning("Biển số xe không hợp lệ. Vui lòng nhập từ 7 đến 9 ký tự chữ và số.");
+        setSubmitting(false);
+        return;
+      }
+
+      // Robust fallback mapping mechanism for typeId (force map if undefined/null/NaN/0)
+      let vehicleTypeId = selectedSlot.typeId;
+      if (vehicleTypeId === undefined || vehicleTypeId === null || isNaN(Number(vehicleTypeId)) || Number(vehicleTypeId) === 0) {
+        const slotType = String(selectedSlot.type || '').trim().toLowerCase();
+        if (slotType === 'bicycle') {
+          vehicleTypeId = 1;
+        } else if (slotType === 'motorcycle') {
+          vehicleTypeId = 2;
+        } else {
+          vehicleTypeId = 3;
+        }
+      }
+      vehicleTypeId = Number(vehicleTypeId);
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      // Call API directly to make sure we pass the headers & payload correctly
+      const response = await api.post('/Parking/walk-in', {
+        licenseVehicle: cleanPlate,
+        vehicleTypeId: vehicleTypeId,
+        checkInImageUrl: null
+      }, config);
 
       setIsDetailsModalOpen(false);
-      setAlertBanner(response.message || `Slot ${selectedSlot.id} is now occupied by ${cleanPlate}.`);
+      
+      const successMsg = response.data?.message || `Slot ${selectedSlot.id} is now occupied by ${cleanPlate}.`;
+      setAlertBanner(successMsg);
+      
       setTimeout(() => {
         setAlertBanner(null);
       }, 4000);
 
+      // Load lại sơ đồ bãi xe để cập nhật màu Đỏ (Occupied)
       onFloorChange(activeFloorId);
     } catch (err) {
-      console.error(err);
-      message.error(err);
+      console.error("Walk-in Check-in Error Response:", err.response?.data || err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Check-in thất bại. Vui lòng kiểm tra lại quyền.";
+      message.error(errMsg);
     } finally {
       setSubmitting(false);
     }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+
 import { 
   MapPin, 
   Calendar as CalendarIcon, 
@@ -21,32 +23,17 @@ const MyBookings = () => {
   // Active filter tab: 'All' | 'Active' | 'Expired'
   const [activeTab, setActiveTab] = useState('All');
   
-  // Real-time ticking remaining time in seconds (initially 29 minutes = 1740 seconds)
-  const [timeLeft, setTimeLeft] = useState(() => {
-    // Current time: 2026-05-29T22:17:11+07:00
-    // Deadline: 22:46 on 2026-05-29
-    const now = new Date();
-    const target = new Date(2026, 4, 29, 22, 46, 0); // May is 0-indexed (4)
-    const diff = Math.floor((target - now) / 1000);
-    return diff > 0 ? diff : 1740; // Default to 29m if time elapsed
-  });
+  // Loading and Error states
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Ticking count state
+  const [tick, setTick] = useState(0);
 
   // Dynamic state for bookings data
   const [bookings, setBookings] = useState(() => {
     const saved = localStorage.getItem('spotflow_driver_bookings');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 1,
-        ticketId: 'TKT-V03MKT2N',
-        vehicleType: 'Bicycle',
-        status: 'Active', // 'Active' or 'Cancelled / Expired'
-        location: 'Floor 1 - 1-002',
-        bookedDate: '29/05/2026',
-        bookedTime: '22:16',
-        deadlineTime: '22:46',
-        contact: '1 - 1'
-      }
-    ];
+    return saved ? JSON.parse(saved) : [];
   });
 
   // Modal display states
@@ -54,45 +41,135 @@ const MyBookings = () => {
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [targetBookingId, setTargetBookingId] = useState(null);
 
+  // Helper to check if a session is active
+  const isActiveSession = (status) => {
+    const s = String(status || '').trim().toLowerCase();
+    return s === 'reserved' || s === 'occupied' || s === 'inprogress' || s === 'active';
+  };
+
+  // Fetch bookings function
+  const fetchMyBookings = async () => {
+    // Structural validation check for driver role (target roleId === 4)
+    if (user && user.roleId !== undefined && Number(user.roleId) !== 4) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError("No token found. Please log in.");
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      
+      const response = await api.get('/Parking/my-bookings', config);
+      
+      // Map properties from .NET DTO response
+      const data = response.data || [];
+      const mapped = data.map((item, idx) => {
+        let vehicleType = 'Car';
+        if (item.typeId === 1) vehicleType = 'Bicycle';
+        else if (item.typeId === 2) vehicleType = 'Motorcycle';
+
+        // Parse bookedDate and bookedTime from bookingTime DTO property
+        let bookedDate = 'N/A';
+        let bookedTime = 'N/A';
+        let deadlineTime = 'N/A';
+
+        if (item.bookingTime) {
+          const d = new Date(item.bookingTime);
+          if (!isNaN(d.getTime())) {
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            bookedDate = `${day}/${month}/${year}`;
+
+            const hours = String(d.getHours()).padStart(2, '0');
+            const mins = String(d.getMinutes()).padStart(2, '0');
+            bookedTime = `${hours}:${mins}`;
+
+            const deadline = new Date(d.getTime() + 15 * 60 * 1000);
+            const dlHours = String(deadline.getHours()).padStart(2, '0');
+            const dlMins = String(deadline.getMinutes()).padStart(2, '0');
+            deadlineTime = `${dlHours}:${dlMins}`;
+          }
+        }
+
+        return {
+          id: item.sessionId || idx + 1,
+          ticketId: item.ticket?.ticketCode || item.ticketCode || `TKT-${item.sessionId || idx + 1}`,
+          vehicleType: vehicleType,
+          status: isActiveSession(item.sessionStatus) ? 'Active' : 'Cancelled / Expired',
+          sessionStatus: item.sessionStatus || 'Expired',
+          location: `${item.floorName || item.slot?.floor?.floorName || 'Floor'} - ${item.slotName || item.slot?.slotName || 'Slot'}`,
+          bookedDate: bookedDate,
+          bookedTime: bookedTime,
+          deadlineTime: deadlineTime,
+          contact: item.licenseVehicle || 'N/A',
+          rawBookingTime: item.bookingTime
+        };
+      });
+
+      setBookings(mapped);
+      localStorage.setItem('spotflow_driver_bookings', JSON.stringify(mapped));
+    } catch (err) {
+      console.error("Fetch bookings error:", err.response?.data || err);
+      setError("Failed to load reservations.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sync state changes with localStorage
   useEffect(() => {
     localStorage.setItem('spotflow_driver_bookings', JSON.stringify(bookings));
   }, [bookings]);
 
-  // Tick-timer countdown interval (Optional dynamic counter decrement)
+  // Fetch bookings on mount
+  useEffect(() => {
+    fetchMyBookings();
+  }, []);
+
+  // Tick-timer countdown interval
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 0) {
-          clearInterval(interval);
-          // Automatically expire ticket if countdown reaches 0
-          setBookings(prevBookings => 
-            prevBookings.map(b => b.status === 'Active' ? { ...b, status: 'Cancelled / Expired' } : b)
-          );
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTick((prev) => prev + 1);
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Compute remaining minutes label
-  const getRemainingMinutesText = () => {
-    if (timeLeft <= 0) return '0m remaining';
-    const minutes = Math.ceil(timeLeft / 60);
+  // Compute remaining minutes label dynamically based on raw booking time
+  const getRemainingMinutesText = (bookingTime) => {
+    if (!bookingTime) return '0m remaining';
+    const now = new Date();
+    const booked = new Date(bookingTime);
+    if (isNaN(booked.getTime())) return '0m remaining';
+    
+    // 15 minutes limit
+    const target = new Date(booked.getTime() + 15 * 60 * 1000);
+    const diffSeconds = Math.floor((target - now) / 1000);
+    if (diffSeconds <= 0) return '0m remaining';
+    
+    const minutes = Math.ceil(diffSeconds / 60);
     return `${minutes}m remaining`;
   };
 
   // Metrics summary counts
   const totalBookings = bookings.length;
-  const activeCount = bookings.filter(b => b.status === 'Active').length;
-  const expiredCount = bookings.filter(b => b.status === 'Cancelled / Expired').length;
+  const activeCount = bookings.filter(b => isActiveSession(b.sessionStatus)).length;
+  const expiredCount = bookings.filter(b => !isActiveSession(b.sessionStatus)).length;
 
   // Filter list items based on active tab selection
   const filteredBookings = bookings.filter(b => {
-    if (activeTab === 'Active') return b.status === 'Active';
-    if (activeTab === 'Expired') return b.status === 'Cancelled / Expired';
+    if (activeTab === 'Active') return isActiveSession(b.sessionStatus);
+    if (activeTab === 'Expired') return !isActiveSession(b.sessionStatus);
     return true;
   });
 
@@ -108,7 +185,7 @@ const MyBookings = () => {
       setBookings(prevBookings => 
         prevBookings.map(b => 
           b.id === targetBookingId 
-            ? { ...b, status: 'Cancelled / Expired' } 
+            ? { ...b, status: 'Cancelled / Expired', sessionStatus: 'Canceled' } 
             : b
         )
       );
@@ -204,11 +281,21 @@ const MyBookings = () => {
 
       {/* 4. BOOKING TICKET CONTAINER */}
       <div className="space-y-4">
-        {filteredBookings.length === 0 ? (
+        {loading ? (
+          <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
+            <div className="w-8 h-8 rounded-full border-4 border-slate-900 border-t-transparent animate-spin mx-auto mb-3"></div>
+            <h3 className="text-slate-700 font-bold text-base">Loading bookings...</h3>
+          </div>
+        ) : error ? (
+          <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
+            <AlertCircle size={40} className="text-red-500 mx-auto mb-3" />
+            <h3 className="text-slate-700 font-bold text-base">{error}</h3>
+          </div>
+        ) : filteredBookings.length === 0 ? (
           <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
             <Info size={40} className="text-slate-350 mx-auto mb-3" />
             <h3 className="text-slate-700 font-bold text-base">No reservations found</h3>
-            <p className="text-xs text-slate-550 mt-1">There are no bookings matching the selected filter.</p>
+            <p className="text-xs text-slate-555 mt-1">There are no bookings matching the selected filter.</p>
           </div>
         ) : (
           filteredBookings.map((booking, index) => (
@@ -225,11 +312,11 @@ const MyBookings = () => {
                     {booking.vehicleType}
                   </span>
                   <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg ${
-                    booking.status === 'Active'
+                    isActiveSession(booking.sessionStatus)
                       ? 'bg-green-600 text-white'
                       : 'bg-slate-100 text-slate-600'
                   }`}>
-                    {booking.status}
+                    {booking.sessionStatus || booking.status}
                   </span>
                 </div>
                 <span className="text-slate-400 text-xs font-mono">
@@ -287,9 +374,9 @@ const MyBookings = () => {
                     <div className="flex flex-col">
                       <span className="text-xs text-slate-400 font-medium">Arrival Deadline</span>
                       <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.deadlineTime}</span>
-                      {booking.status === 'Active' ? (
+                      {isActiveSession(booking.sessionStatus) ? (
                         <span className="text-orange-500 text-xs font-semibold animate-pulse mt-0.5">
-                          {getRemainingMinutesText()}
+                          {getRemainingMinutesText(booking.rawBookingTime)}
                         </span>
                       ) : (
                         <span className="text-slate-400 text-xs font-semibold mt-0.5">Expired</span>
@@ -309,7 +396,7 @@ const MyBookings = () => {
                     View QR
                   </button>
 
-                  {booking.status === 'Active' && (
+                  {isActiveSession(booking.sessionStatus) && (
                     <button 
                        onClick={() => handleCancelClick(booking.id)}
                        className="w-full bg-[#D91B5C] text-white hover:bg-rose-700 font-medium py-2 px-5 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 active:scale-[0.98]"

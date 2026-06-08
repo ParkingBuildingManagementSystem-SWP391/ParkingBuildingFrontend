@@ -59,10 +59,10 @@ function App() {
             </Route>
 
             {/* Driver/Customer-only paths */}
-            <Route element={<RoleProtectedRoute allowedRoles={['Driver', 'Staff', 'Member', 'Registered_Driver', 'Customer']} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={[4]} />}>
               <Route path="/my-bookings" element={<MyBookings />} />
             </Route>
-            <Route element={<RoleProtectedRoute allowedRoles={['Driver', 'Member', 'Registered_Driver', 'Customer']} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={[4]} />}>
               <Route path="/monthly-pass" element={<MonthlyPass />} />
             </Route>
             
