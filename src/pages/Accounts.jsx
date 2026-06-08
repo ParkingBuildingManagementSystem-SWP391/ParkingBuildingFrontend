@@ -214,7 +214,7 @@ const Accounts = () => {
     setEditUser(null);
   };
 
-  // Save changes callback executing sequential backend role assignments
+  // Save changes callback executing backend role update
   const handleSaveChanges = async () => {
     if (!selectedUser) return;
 
@@ -229,40 +229,17 @@ const Accounts = () => {
       else if (roleId === 2) roleName = "Staff";
       else if (roleId === 5) roleName = "Manager";
 
-      let success = false;
-      let errorMsg = "";
+      const payload = {
+        userId: userId,
+        roleId: roleId,
+        roleName: roleName,
+        userName: "",
+        email: "",
+        phoneNumber: ""
+      };
 
-      // Try PUT /api/User/change-role first
-      try {
-        await api.put('/User/change-role', { userId, roleId });
-        success = true;
-      } catch (e) {
-        errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-      }
-
-      // Fallback 1: POST /api/Admin/change-role
-      if (!success) {
-        try {
-          await api.post('/Admin/change-role', { userId, roleId });
-          success = true;
-        } catch (e) {
-          errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-        }
-      }
-
-      // Fallback 2: POST /api/Admin/assign-role (Real backend controller method)
-      if (!success) {
-        try {
-          await api.post('/Admin/assign-role', { userId, roleName });
-          success = true;
-        } catch (e) {
-          errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-        }
-      }
-
-      if (!success) {
-        throw new Error(errorMsg || "Failed to update role.");
-      }
+      // Call correct backend route using shared axios instance
+      await api.post('/Admin/update-user', payload);
 
       // Notify user
       setAlertMessage(`Successfully modified permissions for ${selectedUser.name}!`);
@@ -273,8 +250,9 @@ const Accounts = () => {
       closeModal();
       loadUsers(); // Reload dynamic user list
     } catch (err) {
-      console.error(err);
-      message.error(err.message || "Failed to update user role.");
+      console.error("Change Role Error Response:", err.response?.data || err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to update user role.";
+      message.error(errMsg);
     } finally {
       setSubmitting(false);
     }
