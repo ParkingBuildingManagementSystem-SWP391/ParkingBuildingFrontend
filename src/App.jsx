@@ -53,8 +53,8 @@ function App() {
               <Route path="/accounts" element={<Accounts />} />
             </Route>
 
-            {/* Staff-only paths */}
-            <Route element={<RoleProtectedRoute allowedRoles={['Staff', 'Manager', 'Admin']} />}>
+            {/* Staff/Manager operations paths */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Staff', 'Manager']} />}>
               <Route path="/checkin-checkout" element={<GateController />} />
             </Route>
 

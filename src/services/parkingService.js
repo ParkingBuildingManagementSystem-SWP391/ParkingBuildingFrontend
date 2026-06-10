@@ -58,13 +58,14 @@ export const parkingService = {
   },
 
   // 5. Nhân viên quét xe cho xe ra cổng (Check-out - Tính phí & giải phóng slot)
-  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId) => {
+  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'CASH') => {
     try {
       const response = await api.post('/Parking/check-out', {
         ticketCode: ticketCode ? ticketCode.trim() : null,
         checkoutLicensePlate: checkoutLicensePlate ? checkoutLicensePlate.trim().toUpperCase() : null,
         checkOutImageUrl: checkOutImageUrl || null,
-        sessionId: sessionId ? parseInt(sessionId) : null
+        sessionId: sessionId ? parseInt(sessionId) : null,
+        paymentMethod: paymentMethod
       });
       return response.data;
     } catch (error) {
