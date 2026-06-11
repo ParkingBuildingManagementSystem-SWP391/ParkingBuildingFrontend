@@ -149,7 +149,7 @@ const Header = () => {
       );
     }
 
-    // Role 2: "Parking Staff" -> Allowed Tabs: Parking Map, My Bookings, Operations
+    // Role 2: "Parking Staff" -> Allowed Tabs: Parking Map, Operations
     if (lowerRole === 'staff') {
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
@@ -159,13 +159,6 @@ const Header = () => {
           >
             <Map size={16} />
             Parking Map
-          </button>
-          <button
-            onClick={() => navigate('/my-bookings')}
-            className={currentPath === '/my-bookings' ? activeTabClass : inactiveTabClass}
-          >
-            <CalendarIcon size={16} />
-            My Bookings
           </button>
           <button
             onClick={() => navigate('/checkin-checkout')}
@@ -178,7 +171,7 @@ const Header = () => {
       );
     }
 
-    // Role 3: "Parking Manager" & Role 4: "System Admin" -> Allowed Tabs: Dashboard, Operations, Parking Map
+    // Role 3: "Parking Manager" & Role 4: "System Admin"
     if (lowerRole === 'manager' || lowerRole === 'admin') {
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
@@ -189,13 +182,15 @@ const Header = () => {
             <LayoutDashboard size={16} />
             Dashboard
           </button>
-          <button
-            onClick={() => navigate('/checkin-checkout')}
-            className={currentPath === '/checkin-checkout' ? activeTabClass : inactiveTabClass}
-          >
-            <ScanLine size={16} />
-            Operations
-          </button>
+          {lowerRole === 'manager' && (
+            <button
+              onClick={() => navigate('/checkin-checkout')}
+              className={currentPath === '/checkin-checkout' ? activeTabClass : inactiveTabClass}
+            >
+              <ScanLine size={16} />
+              Operations
+            </button>
+          )}
           <button
             onClick={() => navigate('/parking-map')}
             className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}

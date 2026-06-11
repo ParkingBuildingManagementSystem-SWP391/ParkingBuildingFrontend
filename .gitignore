@@ -71,3 +71,5 @@ desktop.ini
 # 6. Scripts & Log Files
 # ==========================================
 scripts/
+clean_unused_files.py
+*.code-workspace
