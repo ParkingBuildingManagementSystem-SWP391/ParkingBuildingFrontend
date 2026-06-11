@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { message } from 'antd';
+import Logo from '../components/Logo';
 
 const Login = () => {
   const { login } = useAuth(); // Hàm login này giờ đã là hàm async gọi API thật
@@ -66,11 +67,9 @@ const Login = () => {
       {/* 2. THE LOGIN CARD CONTAINER */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 sm:p-10 border border-slate-100 z-10 animate-scale-in">
         
-        {/* Header Block with stylized Brand logo */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-[#1A62FF] flex items-center justify-center text-white font-extrabold text-2xl shadow-md shadow-blue-500/20 shrink-0">
-            P
-          </div>
+        {/* Header Block with Brand logo */}
+        <div className="space-y-5 mb-8">
+          <Logo imageClassName="h-14" textClassName="text-sm text-slate-700" />
           <div className="space-y-0.5">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight leading-snug">Login to your account</h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">Access your parking bookings</p>

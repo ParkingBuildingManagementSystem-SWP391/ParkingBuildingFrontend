@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layout, Select, Avatar, Dropdown, Space, message } from 'antd';
 import { useAuth } from '../context/AuthContext';
-import { 
+import {
   ChevronDown, 
   LogOut, 
   User, 
@@ -18,7 +18,6 @@ import {
   UserCog
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import logoImg from '../imports/image.png';
 
 const { Header: AntHeader } = Layout;
 
@@ -235,23 +234,24 @@ const Header = () => {
   };
 
   return (
-    <AntHeader 
-      className={`w-full px-6 py-4 flex items-center justify-between h-16 sticky top-0 z-50 shadow-md select-none border-none ${
+    <AntHeader
+      className={`w-full px-5 py-3 flex items-center justify-between h-14 sticky top-0 z-50 shadow-md select-none border-none ${
         !user ? 'bg-white border-b border-slate-100' : ''
       }`}
-      style={{ backgroundColor: user ? '#2563EB' : '#FFFFFF', padding: '0 24px', lineHeight: 'normal' }}
+      style={{ backgroundColor: user ? '#2563EB' : '#FFFFFF', padding: '0 20px', lineHeight: 'normal' }}
     >
       
-      {/* Left Side (Brand Logo & Navigation Tabs) */}
-      <div className="flex items-center gap-6">
+      {/* Left Side (Brand Text & Navigation Tabs) */}
+      <div className="flex items-center gap-5">
         
-        {/* Brand Logo Layout */}
-        <div 
-          className="flex items-center gap-3 shrink-0 cursor-pointer" 
+        {/* Brand Text Layout */}
+        <div
+          className="flex items-center shrink-0 cursor-pointer"
           onClick={() => navigate(user ? '/dashboard' : '/parking-map')}
         >
-          <LayoutDashboard className={`w-6 h-6 ${user ? 'text-white' : 'text-[#2563EB]'}`} />
-          <span className={`font-bold text-lg tracking-wide ${user ? 'text-white' : 'text-slate-800'}`}>Smart Parking System</span>
+          <span className={`font-bold text-base tracking-wide ${user ? 'text-white' : 'text-slate-800'}`}>
+            Parking Building System
+          </span>
         </div>
 
         {/* Vertical Divider */}
