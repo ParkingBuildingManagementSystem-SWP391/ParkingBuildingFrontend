@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
+import AppFooter from './AppFooter';
 
 const { Content } = Layout;
 
@@ -12,11 +13,12 @@ const MainLayout = () => {
       <Header />
 
       {/* Content Body */}
-      <Content className="p-6 md:p-8 overflow-y-auto max-h-[calc(100vh-64px)] flex-grow bg-[#F5F5F5] w-full">
-        <div className="max-w-7xl mx-auto w-full animate-fade-in">
+      <Content className="px-4 py-5 md:px-6 md:py-6 flex-grow bg-[#F5F5F5] w-full relative z-0">
+        <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
           <Outlet />
         </div>
       </Content>
+      <AppFooter />
     </Layout>
   );
 };
