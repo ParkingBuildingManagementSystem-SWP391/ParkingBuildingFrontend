@@ -103,12 +103,28 @@ export const parkingService = {
   createVnPayPayment: async (sessionId) => {
     try {
       const response = await api.post('/Payments/vnpay/create', {
-        sessionId: parseInt(sessionId)
+        sessionId: parseInt(sessionId),
+        ipAddress: "127.0.0.1"
       });
       return response.data;
     } catch (error) {
-      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Failed to create VNPay payment link.";
-      throw serverMessage;
+      let errorMsg = "Failed to create VNPay payment link.";
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.message) {
+          errorMsg = data.message;
+        } else if (data.error) {
+          errorMsg = data.error;
+        } else if (data.errors) {
+          const validationErrors = Object.entries(data.errors)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+            .join('\n');
+          if (validationErrors) {
+            errorMsg = `Validation errors:\n${validationErrors}`;
+          }
+        }
+      }
+      throw errorMsg;
     }
   }
 };

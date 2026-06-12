@@ -57,7 +57,8 @@ const MyBookings = () => {
     setPayingSessionId(booking.id);
     try {
       const response = await api.post('/Payments/vnpay/create', {
-        sessionId: parseInt(booking.id)
+        sessionId: parseInt(booking.id),
+        ipAddress: "127.0.0.1"
       });
       if (response.data && response.data.success && response.data.paymentUrl) {
         // Redirect to VNPay payment URL
@@ -67,7 +68,23 @@ const MyBookings = () => {
       }
     } catch (err) {
       console.error("VNPay payment creation error:", err);
-      alert(err.response?.data?.message || err.response?.data?.error || "Giao dịch thất bại. Vui lòng thử lại.");
+      let errorMsg = "Giao dịch thất bại. Vui lòng thử lại.";
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (data.message) {
+          errorMsg = data.message;
+        } else if (data.error) {
+          errorMsg = data.error;
+        } else if (data.errors) {
+          const validationErrors = Object.entries(data.errors)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+            .join('\n');
+          if (validationErrors) {
+            errorMsg = `Lỗi hệ thống: ${validationErrors}`;
+          }
+        }
+      }
+      alert(errorMsg);
     } finally {
       setPayingSessionId(null);
     }
