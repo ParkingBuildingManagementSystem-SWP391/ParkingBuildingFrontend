@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Bike, 
@@ -18,9 +18,11 @@ import {
 } from 'lucide-react';
 import { message } from 'antd';
 import { parkingService } from '../../services/parkingService';
+import { managerService } from '../../services/managerService';
 import api from '../../services/api';
 import carIcon from '../../assets/vehicles/car.png';
 import motorbikeIcon from '../../assets/vehicles/motorbike.png';
+
 
 
 const Motorcycle = ({ size = 18, className = '' }) => (
@@ -193,6 +195,24 @@ const ParkingLotMap = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
+  // Slot details state
+  const [fetchingDetail, setFetchingDetail] = useState(false);
+  const [slotDetail, setSlotDetail] = useState(null);
+
+  const fetchSlotDetail = async (slotId) => {
+    setFetchingDetail(true);
+    setSlotDetail(null);
+    try {
+      const detail = await managerService.getSlotDetail(slotId);
+      setSlotDetail(detail);
+    } catch (err) {
+      console.error("Failed to fetch slot detail:", err);
+    } finally {
+      setFetchingDetail(false);
+    }
+  };
+
+
   // Form states for booking
   const [bookingVehicleType, setBookingVehicleType] = useState('Motorcycle');
   const [bookingPlate, setBookingPlate] = useState('');
@@ -218,7 +238,7 @@ const ParkingLotMap = () => {
     const startSlotId = floorId === 3 ? 155 : floorId === 1 ? 5 : 2000;
 
     return sortedBackendSlots.map((s, index) => {
-      const slotId = startSlotId + index;
+      const slotId = s.slotId || (startSlotId + index);
       let type = 'Car';
       if (s.typeId === 1) type = 'Bicycle';
       else if (s.typeId === 2) type = 'Motorcycle';
@@ -247,6 +267,7 @@ const ParkingLotMap = () => {
       };
     });
   };
+
 
   // Implement explicit onFloorChange event handler executing API with DB Floor ID
   const onFloorChange = async (floorId) => {
@@ -451,6 +472,7 @@ const ParkingLotMap = () => {
     }
 
     setSelectedSlot(slot);
+    setSlotDetail(null);
     if (slot.status === 'Available') {
       if (role === 'Registered_Driver' || role === 'Driver') {
         setIsBookingModalOpen(true);
@@ -460,11 +482,13 @@ const ParkingLotMap = () => {
     } else {
       if (role !== 'Registered_Driver' && role !== 'Driver') {
         setIsDetailsModalOpen(true);
+        fetchSlotDetail(slot.slotId);
       } else {
         message.info("This slot is currently occupied or reserved.");
       }
     }
   };
+
 
   // Driver Booking Submit
   const handleConfirmBookingSubmit = async (e) => {
@@ -559,12 +583,12 @@ const ParkingLotMap = () => {
 
     setSubmitting(true);
     try {
-      // LÃ m sáº¡ch biá»ƒn sá»‘ xe
+      // Làm sạch biển số xe
       const cleanPlate = adminPlate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().trim();
 
       // Validate license plate length (between 7 and 9 alphanumeric characters)
       if (cleanPlate.length < 7 || cleanPlate.length > 9) {
-        message.warning("Biá»ƒn sá»‘ xe khÃ´ng há»£p lá»‡. Vui lÃ²ng nháº­p tá»« 7 Ä‘áº¿n 9 kÃ½ tá»± chá»¯ vÃ  sá»‘.");
+        message.warning("Biển số xe không hợp lệ. Vui lòng nhập từ 7 đến 9 ký tự chữ và số.");
         setSubmitting(false);
         return;
       }
@@ -605,11 +629,11 @@ const ParkingLotMap = () => {
         setAlertBanner(null);
       }, 4000);
 
-      // Load láº¡i sÆ¡ Ä‘á»“ bÃ£i xe Ä‘á»ƒ cáº­p nháº­t mÃ u Äá» (Occupied)
+      // Load lại sơ đồ bãi xe để cập nhật màu Đỏ (Occupied)
       onFloorChange(activeFloorId);
     } catch (err) {
       console.error("Walk-in Check-in Error Response:", err.response?.data || err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error || "Check-in tháº¥t báº¡i. Vui lÃ²ng kiá»ƒm tra láº¡i quyá»n.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Check-in thất bại. Vui lòng kiểm tra lại quyền.";
       message.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -622,7 +646,7 @@ const ParkingLotMap = () => {
 
     setSubmitting(true);
     try {
-      const plate = selectedSlot.occupiedBy?.plate || 'Unknown';
+      const plate = slotDetail?.activeSession?.licenseVehicle || selectedSlot.occupiedBy?.plate || 'Unknown';
       const cleanPlate = plate !== 'Unknown' ? plate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null;
       
       const response = await parkingService.checkOutVehicle(
@@ -632,9 +656,10 @@ const ParkingLotMap = () => {
         null
       );
 
+
       setIsDetailsModalOpen(false);
       const invoiceText = response.totalAmount !== undefined 
-        ? ` Fee processed: ${response.totalAmount.toLocaleString('vi-VN')} Ä‘.` 
+        ? ` Fee processed: ${response.totalAmount.toLocaleString('vi-VN')} đ.` 
         : '';
       
       setAlertBanner((response.message || `Slot ${selectedSlot.id} released successfully.`) + invoiceText);
@@ -653,9 +678,9 @@ const ParkingLotMap = () => {
 
   // Hourly Rate display helper
   const hourlyRateLabel = (type) => {
-    if (type === 'Bicycle') return '2.000 Ä‘';
-    if (type === 'Motorcycle') return '20.000 Ä‘';
-    return '5.000 Ä‘';
+    if (type === 'Bicycle') return '2.000 đ';
+    if (type === 'Motorcycle') return '20.000 đ';
+    return '5.000 đ';
   };
 
   const renderSlotTile = (slot) => {
@@ -1235,7 +1260,67 @@ const ParkingLotMap = () => {
                       <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Occupancy Mode</span>
                       <span className="font-mono text-xs text-slate-800 bg-white px-2.5 py-1 rounded border border-slate-205 font-extrabold shadow-sm">{selectedSlot.status}</span>
                     </div>
+
+                    {fetchingDetail ? (
+                      <div className="flex items-center justify-center py-4 gap-2">
+                        <div className="w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
+                        <span className="text-xs text-slate-505 font-medium">Fetching database details...</span>
+                      </div>
+                    ) : slotDetail?.activeSession ? (
+                      <div className="space-y-2.5 pt-1 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500 font-medium">Vehicle License Plate:</span>
+                          <span className="font-mono font-bold text-slate-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 text-sm">{slotDetail.activeSession.licenseVehicle}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500 font-medium">Vehicle Type:</span>
+                          <span className="font-semibold text-slate-700 capitalize">{slotDetail.activeSession.vehicleTypeName}</span>
+                        </div>
+                        {slotDetail.activeSession.checkInTime && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-slate-500 font-medium">Actual Check-In Time:</span>
+                            <span className="font-semibold text-slate-700">{new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
+                          </div>
+                        )}
+                        {slotDetail.activeSession.bookingTime && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-slate-500 font-medium">Pre-booking Time:</span>
+                            <span className="font-semibold text-slate-700">{new Date(slotDetail.activeSession.bookingTime).toLocaleString('vi-VN')}</span>
+                          </div>
+                        )}
+                        {slotDetail.activeSession.customer && (
+                          <div className="pt-2 border-t border-dashed border-slate-200 space-y-2">
+                            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Customer Profile</div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-500 font-medium">Full Name:</span>
+                              <span className="font-bold text-slate-800">{slotDetail.activeSession.customer.username}</span>
+                            </div>
+                            {slotDetail.activeSession.customer.email && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-500 font-medium">Email Address:</span>
+                                <span className="font-semibold text-slate-700">{slotDetail.activeSession.customer.email}</span>
+                              </div>
+                            )}
+                            {slotDetail.activeSession.customer.phoneNumber && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-500 font-medium">Phone Contact:</span>
+                                <span className="font-mono font-bold text-slate-700">{slotDetail.activeSession.customer.phoneNumber}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-500 font-medium">Membership Class:</span>
+                              <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">{slotDetail.activeSession.customer.customerType || "Registered Driver"}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center text-slate-400 py-3 text-xs font-medium">
+                        No occupant info retrieved.
+                      </div>
+                    )}
                   </div>
+
 
                   {(role === 'Admin' || role === 'Staff') && (
                     <button
