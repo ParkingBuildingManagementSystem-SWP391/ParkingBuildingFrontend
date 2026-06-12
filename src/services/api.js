@@ -1,13 +1,14 @@
 import axios from 'axios';
 
+// src/services/api.js
 const api = axios.create({
-  // Đường dẫn tương đối dựa theo cấu hình Vite Proxy trong vite.config.js
   baseURL: '/api', 
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // Ngắt request nếu sau 10 giây Backend không phản hồi
+  timeout: 10000,
 });
+
 
 // ==========================================
 // 1. INTERCEPTOR CHO REQUEST (Đầu đi)

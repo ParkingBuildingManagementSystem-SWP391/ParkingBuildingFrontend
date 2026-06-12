@@ -9,7 +9,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5284', // Trỏ chính xác về port Backend .NET của bạn
+        target: 'https://mindy.huydevops.id.vn', // Trỏ chính xác về port Backend .NET của bạn
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path // Giữ nguyên tiền tố /api để khớp với [Route("api/[controller]")] ở Backend

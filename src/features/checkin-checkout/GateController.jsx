@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Input, Select, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image } from 'antd';
+import { Card, Form, Input, Select, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { parkingService } from '../../services/parkingService';
 import { 
   CheckCircle, 
@@ -13,6 +13,7 @@ const GateController = () => {
   const [slots, setSlots] = useState([]);
   const [checkInForm] = Form.useForm();
   const [checkOutForm] = Form.useForm();
+  const [checkInMode, setCheckInMode] = useState('walkin'); // 'walkin' or 'reservation'
 
   // Frontend-only image upload/preview states
   const [entryImagePreviewUrl, setEntryImagePreviewUrl] = useState(null);
@@ -106,45 +107,66 @@ const GateController = () => {
     Car: 3
   };
 
-  // Perform Check-in (Walk-in)
+  // Perform Check-in (Supports both Walk-in and Reservation QR code)
   const handleCheckInSubmit = async (values) => {
     try {
-      const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 1;
-      
-      // Call walk-in check-in API
-      const response = await parkingService.walkInCheckIn(values.plate, vehicleTypeId, null);
-      
-      if (response && response.isSuccess) {
-        const ticket = {
-          id: response.data?.ticketCode || response.data?.TicketCode || "N/A",
-          plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || values.plate,
-          type: values.type,
-          slotId: response.data?.slotName || response.data?.SlotName || "N/A",
-          checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString()
-        };
+      if (checkInMode === 'walkin') {
+        const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 1;
         
-        setTicketDetails(ticket);
-        setIsTicketOpen(true);
-        message.success(response.message || "Walk-in Check-in successful!");
+        // Call walk-in check-in API
+        const response = await parkingService.walkInCheckIn(values.plate, vehicleTypeId, null);
         
-        checkInForm.resetFields();
-        if (entryImagePreviewUrl) {
-          URL.revokeObjectURL(entryImagePreviewUrl);
-          setEntryImagePreviewUrl(null);
+        if (response && response.isSuccess) {
+          const ticket = {
+            id: response.data?.ticketCode || response.data?.TicketCode || "N/A",
+            plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || values.plate,
+            type: values.type,
+            slotId: response.data?.slotName || response.data?.SlotName || "N/A",
+            checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString()
+          };
+          
+          setTicketDetails(ticket);
+          setIsTicketOpen(true);
+          message.success(response.message || "Walk-in Check-in successful!");
+          
+          checkInForm.resetFields();
+          if (entryImagePreviewUrl) {
+            URL.revokeObjectURL(entryImagePreviewUrl);
+            setEntryImagePreviewUrl(null);
+          }
+          fetchActiveParkedVehicles();
+        } else {
+          message.error(response?.message || "Check-in failed.");
         }
-        fetchActiveParkedVehicles();
       } else {
-        message.error(response?.message || "Check-in failed.");
+        // Reservation mode
+        const ticketCode = values.ticketCode;
+        const licenseVehicle = values.plate;
+        
+        const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, null);
+        
+        if (response) {
+          message.success(response.message || "Reservation QR Check-in successful! Barrier opened.");
+          checkInForm.resetFields();
+          if (entryImagePreviewUrl) {
+            URL.revokeObjectURL(entryImagePreviewUrl);
+            setEntryImagePreviewUrl(null);
+          }
+          fetchActiveParkedVehicles();
+        } else {
+          message.error("Check-in failed. Please verify QR Ticket Code.");
+        }
       }
     } catch (err) {
-      console.error("Walk-in Check-in Error:", err);
+      console.error("Check-in Error:", err);
       message.error(err.message || String(err));
     }
   };
 
-  // Unified exit check-out handler
+  // Unified exit check-out handler (Supports matching by ticketCode + licensePlate)
   const handleCheckOut = async (paymentMethod = 'CASH') => {
     const plate = checkOutForm.getFieldValue('plate');
+    const ticketCode = checkOutForm.getFieldValue('ticketCode');
     if (!plate) {
       message.error("Please input license plate number!");
       return;
@@ -152,7 +174,13 @@ const GateController = () => {
     
     try {
       // Call the real checkOutVehicle API on backend with VNPAY or CASH
-      const result = await parkingService.checkOutVehicle(null, plate, null, null, paymentMethod);
+      const result = await parkingService.checkOutVehicle(
+        ticketCode ? ticketCode.trim() : null, 
+        plate, 
+        null, 
+        null, 
+        paymentMethod
+      );
       
       setCheckoutResult(result);
       setIsCheckoutResultModalOpen(true);
@@ -360,6 +388,26 @@ const GateController = () => {
               )}
             </div>
 
+            {/* Check-In Mode Toggle */}
+            <div className="flex justify-center mb-4">
+              <Radio.Group 
+                value={checkInMode} 
+                onChange={(e) => {
+                  setCheckInMode(e.target.value);
+                  checkInForm.resetFields();
+                }}
+                buttonStyle="solid"
+                className="w-full text-center"
+              >
+                <Radio.Button value="walkin" className="w-1/2 font-bold text-xs">
+                  Walk-In Check-In
+                </Radio.Button>
+                <Radio.Button value="reservation" className="w-1/2 font-bold text-xs">
+                  Reservation QR
+                </Radio.Button>
+              </Radio.Group>
+            </div>
+
             {/* Check-In Form */}
             <Form
               form={checkInForm}
@@ -368,50 +416,63 @@ const GateController = () => {
               requiredMark={false}
               className="space-y-3"
             >
+              {checkInMode === 'reservation' && (
+                <Form.Item
+                  name="ticketCode"
+                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code</span>}
+                  rules={[{ required: true, message: 'Please input or scan QR ticket code!' }]}
+                  className="mb-3"
+                >
+                  <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500" />
+                </Form.Item>
+              )}
+
               <Form.Item
                 name="plate"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">License Plate Number</span>}
-                rules={[{ required: true, message: 'Please input plate number!' }]}
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{checkInMode === 'reservation' ? 'License Plate Number (Optional verification)' : 'License Plate Number'}</span>}
+                rules={[{ required: checkInMode === 'walkin', message: 'Please input plate number!' }]}
                 className="mb-3"
               >
                 <Input onChange={handlePlateChange} placeholder="e.g. 30A-123.45" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500" />
               </Form.Item>
 
-              <div className="grid grid-cols-2 gap-4 mb-3">
-                <Form.Item
-                  name="type"
-                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Classification</span>}
-                  rules={[{ required: true, message: 'Select type!' }]}
-                  initialValue="Car"
-                  className="mb-0"
-                >
-                  <Select
-                    className="h-10 text-slate-850 rounded-lg font-medium"
-                    options={[
-                      { value: 'Car', label: 'Standard Car' },
-                      { value: 'Motorbike', label: 'Motorbike' },
-                      { value: 'Bicycle', label: 'Bicycle' }
-                    ]}
-                  />
-                </Form.Item>
+              {checkInMode === 'walkin' && (
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <Form.Item
+                    name="type"
+                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Classification</span>}
+                    rules={[{ required: true, message: 'Select type!' }]}
+                    initialValue="Car"
+                    className="mb-0"
+                  >
+                    <Select
+                      className="h-10 text-slate-850 rounded-lg font-medium"
+                      options={[
+                        { value: 'Car', label: 'Standard Car' },
+                        { value: 'Motorbike', label: 'Motorbike' },
+                        { value: 'Bicycle', label: 'Bicycle' }
+                      ]}
+                    />
+                  </Form.Item>
 
-                <Form.Item
-                  name="floor"
-                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Target Level</span>}
-                  rules={[{ required: true, message: 'Select level!' }]}
-                  initialValue="L1"
-                  className="mb-0"
-                >
-                  <Select
-                    className="h-10 text-slate-850 rounded-lg font-medium"
-                    options={[
-                      { value: 'B1', label: 'Basement 1' },
-                      { value: 'L1', label: 'Level 1' },
-                      { value: 'L2', label: 'Level 2' }
-                    ]}
-                  />
-                </Form.Item>
-              </div>
+                  <Form.Item
+                    name="floor"
+                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Target Level</span>}
+                    rules={[{ required: true, message: 'Select level!' }]}
+                    initialValue="L1"
+                    className="mb-0"
+                  >
+                    <Select
+                      className="h-10 text-slate-850 rounded-lg font-medium"
+                      options={[
+                        { value: 'B1', label: 'Basement 1' },
+                        { value: 'L1', label: 'Level 1' },
+                        { value: 'L2', label: 'Level 2' }
+                      ]}
+                    />
+                  </Form.Item>
+                </div>
+              )}
 
               <Form.Item className="mb-0 pt-2">
                 <Button 
@@ -419,7 +480,7 @@ const GateController = () => {
                   htmlType="submit" 
                   className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 border-none font-bold rounded-lg transition-all shadow-md shadow-emerald-600/10 flex items-center justify-center gap-1.5"
                 >
-                  <Sparkles size={15}/> Print Ticket & Open Gate
+                  <Sparkles size={15}/> {checkInMode === 'reservation' ? 'Verify QR Code & Open Gate' : 'Print Ticket & Open Gate'}
                 </Button>
               </Form.Item>
             </Form>
@@ -523,9 +584,17 @@ const GateController = () => {
                 name="plate"
                 label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">License Plate Number</span>}
                 rules={[{ required: true, message: 'Please input plate number!' }]}
+                className="mb-2"
+              >
+                <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg uppercase font-bold focus:bg-white focus:border-rose-500" />
+              </Form.Item>
+
+              <Form.Item
+                name="ticketCode"
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code (Optional)</span>}
                 className="mb-3"
               >
-                <Input onChange={handleCheckOutPlateChange} placeholder="e.g. L1-03 or 29A-888.88" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg uppercase font-bold focus:bg-white focus:border-rose-500" />
+                <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500" />
               </Form.Item>
 
               <div className="flex gap-3 pt-2">
