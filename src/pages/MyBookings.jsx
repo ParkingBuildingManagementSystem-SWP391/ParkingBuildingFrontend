@@ -13,7 +13,8 @@ import {
   Info, 
   CheckCircle, 
   XCircle,
-  Ticket
+  Ticket,
+  CreditCard
 } from 'lucide-react';
 
 const MyBookings = () => {
@@ -36,10 +37,20 @@ const MyBookings = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Dynamic state for statistics dashboard
+  const [stats, setStats] = useState({
+    totalBookings: 0,
+    activeBookings: 0,
+    completedBookings: 0,
+    canceledBookings: 0,
+    totalAmountSpent: 0
+  });
+
   // Modal display states
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [targetBookingId, setTargetBookingId] = useState(null);
+  const [targetBooking, setTargetBooking] = useState(null);
 
   // Helper to check if a session is active
   const isActiveSession = (status) => {
@@ -72,7 +83,18 @@ const MyBookings = () => {
       const response = await api.get('/Parking/my-bookings', config);
       
       // Map properties from .NET DTO response
-      const data = response.data || [];
+      const dashboard = response.data || {};
+      const data = dashboard.bookingsList || [];
+
+      // Update statistics state
+      setStats({
+        totalBookings: dashboard.totalBookings || 0,
+        activeBookings: dashboard.activeBookings || 0,
+        completedBookings: dashboard.completedBookings || 0,
+        canceledBookings: dashboard.canceledBookings || 0,
+        totalAmountSpent: dashboard.totalAmountSpent || 0
+      });
+      
       const mapped = data.map((item, idx) => {
         let vehicleType = 'Car';
         if (item.typeId === 1) vehicleType = 'Bicycle';
@@ -104,7 +126,7 @@ const MyBookings = () => {
 
         return {
           id: item.sessionId || idx + 1,
-          ticketId: item.ticket?.ticketCode || item.ticketCode || `TKT-${item.sessionId || idx + 1}`,
+          ticketId: item.ticketCode || item.ticket?.ticketCode || `TKT-${item.sessionId || idx + 1}`,
           vehicleType: vehicleType,
           status: isActiveSession(item.sessionStatus) ? 'Active' : 'Cancelled / Expired',
           sessionStatus: item.sessionStatus || 'Expired',
@@ -113,7 +135,12 @@ const MyBookings = () => {
           bookedTime: bookedTime,
           deadlineTime: deadlineTime,
           contact: item.licenseVehicle || 'N/A',
-          rawBookingTime: item.bookingTime
+          rawBookingTime: item.bookingTime,
+          checkInTime: item.checkInTime,
+          checkOutTime: item.checkOutTime,
+          totalAmount: item.totalAmount,
+          paymentStatus: item.paymentStatus,
+          paymentMethod: item.paymentMethod
         };
       });
 
@@ -162,9 +189,16 @@ const MyBookings = () => {
   };
 
   // Metrics summary counts
-  const totalBookings = bookings.length;
-  const activeCount = bookings.filter(b => isActiveSession(b.sessionStatus)).length;
-  const expiredCount = bookings.filter(b => !isActiveSession(b.sessionStatus)).length;
+  const totalBookings = stats.totalBookings || bookings.length;
+  const activeCount = stats.activeBookings || bookings.filter(b => isActiveSession(b.sessionStatus)).length;
+  const expiredCount = (stats.completedBookings + stats.canceledBookings) || bookings.filter(b => !isActiveSession(b.sessionStatus)).length;
+  const totalSpent = stats.totalAmountSpent || 0;
+
+  // QR Code URL configuration from Design/TicketModal.tsx logic
+  const qrPayload = targetBooking ? encodeURIComponent(
+    `SLOT:${targetBooking.location.split(' - ')[1] || targetBooking.location}|PLATE:${targetBooking.contact}|ID:${targetBooking.id}|TICKET:${targetBooking.ticketId}`
+  ) : '';
+  const qrUrl = targetBooking ? `https://api.qrserver.com/v1/create-qr-code/?size=160x160&ecc=M&data=${qrPayload}` : '';
 
   // Filter list items based on active tab selection
   const filteredBookings = bookings.filter(b => {
@@ -205,8 +239,8 @@ const MyBookings = () => {
         </div>
       </div>
 
-      {/* 2. OVERVIEW STATISTICS ROW (3 Balanced summary cards) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 2. OVERVIEW STATISTICS ROW (4 Balanced summary cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         
         {/* Total Bookings Card */}
         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
@@ -236,8 +270,21 @@ const MyBookings = () => {
             <span className="text-sm text-slate-500 font-medium block">Expired</span>
             <span className="text-3xl font-bold text-slate-900 block">{expiredCount}</span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-505 flex items-center justify-center shrink-0">
             <XCircle size={24} />
+          </div>
+        </div>
+
+        {/* Total Spent Card */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-sm text-slate-500 font-medium block">Total Spent</span>
+            <span className="text-2xl font-bold text-purple-600 block">
+              {totalSpent.toLocaleString('vi-VN')} VND
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <CreditCard size={24} />
           </div>
         </div>
 
@@ -330,8 +377,8 @@ const MyBookings = () => {
               {/* Content block: Metadata grid on left, action buttons on right */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 
-                {/* Metadata Core Grid (4-Column Layout) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 flex-1">
+                {/* Metadata Core Grid (Flexible multi-column Layout) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6 flex-1">
                   
                   {/* Column 1 (Location) */}
                   <div className="flex items-start gap-3">
@@ -344,52 +391,88 @@ const MyBookings = () => {
                     </div>
                   </div>
 
-                  {/* Column 2 (Booked Date) */}
+                  {/* Column 2 (Booked At) */}
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
                       <CalendarIcon size={18} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs text-slate-400 font-medium">Booked Date</span>
+                      <span className="text-xs text-slate-400 font-medium">Booked At</span>
                       <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.bookedDate}</span>
+                      <span className="text-xs text-slate-500 mt-0.5">{booking.bookedTime}</span>
                     </div>
                   </div>
 
-                  {/* Column 3 (Booked Time) */}
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
-                      <Clock size={18} />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-slate-400 font-medium">Booked Time</span>
-                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.bookedTime}</span>
-                    </div>
-                  </div>
-
-                  {/* Column 4 (Arrival Deadline) */}
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 border border-orange-100">
-                      <Clock size={18} className="text-orange-500" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-slate-400 font-medium">Arrival Deadline</span>
-                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.deadlineTime}</span>
-                      {isActiveSession(booking.sessionStatus) ? (
+                  {/* Column 3 (Arrival Deadline or Activity Time) */}
+                  {booking.sessionStatus === 'Reserved' ? (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 border border-orange-100">
+                        <Clock size={18} className="text-orange-500" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-slate-400 font-medium">Arrival Deadline</span>
+                        <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.deadlineTime}</span>
                         <span className="text-orange-500 text-xs font-semibold animate-pulse mt-0.5">
                           {getRemainingMinutesText(booking.rawBookingTime)}
                         </span>
-                      ) : (
-                        <span className="text-slate-400 text-xs font-semibold mt-0.5">Expired</span>
-                      )}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
+                        <Clock size={18} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-slate-400 font-medium">Activity Time</span>
+                        <span className="text-xs font-semibold text-slate-700 mt-0.5">
+                          In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkInTime).toLocaleDateString([], {day: '2-digit', month: '2-digit'}) : 'N/A'}
+                        </span>
+                        {booking.checkOutTime && (
+                          <span className="text-xs font-semibold text-slate-700 mt-0.5">
+                            Out: {new Date(booking.checkOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkOutTime).toLocaleDateString([], {day: '2-digit', month: '2-digit'})}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Column 4 (Billing Info) */}
+                  {booking.totalAmount !== null && booking.totalAmount !== undefined ? (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+                        <CreditCard size={18} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-slate-400 font-medium">Billing</span>
+                        <span className="text-sm font-extrabold text-purple-700 mt-0.5">
+                          {booking.totalAmount.toLocaleString('vi-VN')} VND
+                        </span>
+                        <span className="text-[10px] text-slate-500 mt-0.5 uppercase font-semibold">
+                          {booking.paymentMethod || 'CASH'} - {booking.paymentStatus || 'PENDING'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-300 flex items-center justify-center shrink-0 border border-slate-100">
+                        <CreditCard size={18} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-slate-400 font-medium">Billing</span>
+                        <span className="text-xs font-medium text-slate-400 mt-0.5">No Invoice</span>
+                      </div>
+                    </div>
+                  )}
 
                 </div>
 
                 {/* Action Buttons Block (Right-Aligned Column) */}
                 <div className="flex flex-col gap-2 shrink-0 w-full lg:w-auto sm:min-w-[140px]">
                   <button 
-                    onClick={() => setIsQrOpen(true)}
+                    onClick={() => {
+                      setTargetBooking(booking);
+                      setIsQrOpen(true);
+                    }}
                     className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-1.5 transition-all"
                   >
                     <QrCode size={16} />
@@ -462,11 +545,14 @@ const MyBookings = () => {
       )}
 
       {/* 6. DYNAMIC QR DISPLAY MODAL OVERLAY */}
-      {isQrOpen && (
+      {isQrOpen && targetBooking && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 animate-scale-in relative text-center">
             <button 
-              onClick={() => setIsQrOpen(false)}
+              onClick={() => {
+                setIsQrOpen(false);
+                setTargetBooking(null);
+              }}
               className="absolute top-4 right-4 h-7 w-7 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
             >
               <X size={16} />
@@ -479,22 +565,25 @@ const MyBookings = () => {
               </div>
 
               <div className="bg-slate-50 border border-slate-100 p-6 rounded-xl inline-block shadow-sm">
-                {/* Visual mock QR block */}
-                <div className="w-40 h-40 bg-white border border-slate-200 rounded-lg p-2.5 mx-auto flex items-center justify-center">
-                  <div className="w-full h-full relative" style={{ backgroundImage: 'linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px' }}>
-                    <div className="absolute inset-4 bg-white border-2 border-slate-800 flex items-center justify-center">
-                      <div className="w-4 h-4 bg-slate-800"></div>
-                    </div>
-                  </div>
+                {/* Real thermal QR block */}
+                <div className="w-40 h-40 bg-white border border-slate-200 rounded-lg p-1.5 mx-auto flex items-center justify-center">
+                  <img
+                    src={qrUrl}
+                    alt={`QR Code for Ticket ${targetBooking.ticketId}`}
+                    className="w-full h-full rounded-md object-contain"
+                  />
                 </div>
               </div>
 
               <div className="text-xs font-mono font-bold text-indigo-600 tracking-wide uppercase">
-                Ticket ID: TKT-V03MKT2N
+                Ticket ID: {targetBooking.ticketId}
               </div>
 
               <button
-                onClick={() => setIsQrOpen(false)}
+                onClick={() => {
+                  setIsQrOpen(false);
+                  setTargetBooking(null);
+                }}
                 className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-all"
               >
                 Close Ticket
