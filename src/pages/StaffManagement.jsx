@@ -64,12 +64,6 @@ const StaffManagement = () => {
       )
     },
     {
-      title: 'Current Shift Rotation',
-      dataIndex: 'shift',
-      key: 'shift',
-      render: (text) => <span className="text-xs text-slate-350">{text}</span>
-    },
-    {
       title: 'Assigned Patrol Zone',
       dataIndex: 'zone',
       key: 'zone',

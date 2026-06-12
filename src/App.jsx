@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import GuestParkingMap from './pages/GuestParkingMap';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 // Protected Pages (Admin & Driver Features)
 import StaffManagement from './pages/StaffManagement';
@@ -31,6 +32,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/map" element={<GuestParkingMap />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
         {/* MainLayout wrapping for both public and protected routes */}
         <Route element={<MainLayout />}>

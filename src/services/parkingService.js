@@ -72,5 +72,43 @@ export const parkingService = {
       const serverMessage = error.response?.data?.message || error.response?.data?.error || "Check-out failed.";
       throw serverMessage;
     }
+  },
+
+  // 6. Ghi nhận thanh toán tiền mặt (CASH)
+  processCashPayment: async (sessionId, amountReceived) => {
+    try {
+      const response = await api.post('/Payments/cash', {
+        sessionId: parseInt(sessionId),
+        amountReceived: parseFloat(amountReceived)
+      });
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Cash payment processing failed.";
+      throw serverMessage;
+    }
+  },
+
+  // 7. Lấy trạng thái thanh toán của hóa đơn
+  getPaymentStatus: async (invoiceId) => {
+    try {
+      const response = await api.get(`/Payments/status/${invoiceId}`);
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Failed to fetch payment status.";
+      throw serverMessage;
+    }
+  },
+
+  // 8. Tạo URL thanh toán VNPay cho tài xế tự thanh toán trước (Pre-Exit Payment)
+  createVnPayPayment: async (sessionId) => {
+    try {
+      const response = await api.post('/Payments/vnpay/create', {
+        sessionId: parseInt(sessionId)
+      });
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Failed to create VNPay payment link.";
+      throw serverMessage;
+    }
   }
 };

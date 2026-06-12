@@ -560,19 +560,11 @@ const Dashboard = () => {
               {/* Right Column: Building Details & Current Shift */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">Shift & Building Summary</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Sales summary and active operations shift</p>
+                  <h3 className="text-lg font-bold text-slate-800">Building Operations Summary</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Sales summary and building volume metrics</p>
                 </div>
                 
                 <div className="divide-y divide-slate-100 space-y-4 py-4">
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-slate-500 font-semibold">Active Shift Name:</span>
-                    <span className="text-sm font-extrabold text-slate-800 bg-blue-50 px-3 py-1 rounded-lg border border-blue-100">{summary?.currentShiftName || "N/A"}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-slate-500 font-semibold">Current Shift Revenue:</span>
-                    <span className="text-sm font-extrabold text-emerald-600">{formatVND(summary?.currentShiftRevenue || 0)}</span>
-                  </div>
                   <div className="flex justify-between items-center py-2">
                     <span className="text-sm text-slate-500 font-semibold">Total Revenue (All-time):</span>
                     <span className="text-sm font-extrabold text-slate-800">{formatVND(summary?.totalRevenue || 0)}</span>
