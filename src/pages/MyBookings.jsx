@@ -51,6 +51,27 @@ const MyBookings = () => {
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [targetBookingId, setTargetBookingId] = useState(null);
   const [targetBooking, setTargetBooking] = useState(null);
+  const [payingSessionId, setPayingSessionId] = useState(null);
+
+  const handlePayVNPay = async (booking) => {
+    setPayingSessionId(booking.id);
+    try {
+      const response = await api.post('/Payments/vnpay/create', {
+        sessionId: parseInt(booking.id)
+      });
+      if (response.data && response.data.success && response.data.paymentUrl) {
+        // Redirect to VNPay payment URL
+        window.location.href = response.data.paymentUrl;
+      } else {
+        alert(response.data?.message || "Không thể tạo liên kết thanh toán VNPay.");
+      }
+    } catch (err) {
+      console.error("VNPay payment creation error:", err);
+      alert(err.response?.data?.message || err.response?.data?.error || "Giao dịch thất bại. Vui lòng thử lại.");
+    } finally {
+      setPayingSessionId(null);
+    }
+  };
 
   // Helper to check if a session is active
   const isActiveSession = (status) => {
@@ -473,19 +494,40 @@ const MyBookings = () => {
                       setTargetBooking(booking);
                       setIsQrOpen(true);
                     }}
-                    className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-1.5 transition-all"
+                    className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <QrCode size={16} />
                     View QR
                   </button>
 
-                  {isActiveSession(booking.sessionStatus) && (
+                  {/* Cancel button: Only for Reserved bookings that have not been paid/checked-in */}
+                  {booking.sessionStatus === 'Reserved' && (
                     <button 
                        onClick={() => handleCancelClick(booking.id)}
-                       className="w-full bg-[#D91B5C] text-white hover:bg-rose-700 font-medium py-2 px-5 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 active:scale-[0.98]"
+                       className="w-full bg-[#D91B5C] text-white hover:bg-rose-700 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 active:scale-[0.98] cursor-pointer"
                     >
                       <X size={16} />
                       Cancel
+                    </button>
+                  )}
+
+                  {/* VNPay Payment Button: For InProgress/Occupied sessions that are unpaid, or Reserved sessions waiting for deposit */}
+                  {(((booking.sessionStatus === 'InProgress' || booking.sessionStatus === 'Occupied') && 
+                     booking.paymentStatus !== 'SUCCESS' && booking.paymentStatus !== 'Paid') ||
+                    (booking.sessionStatus === 'Reserved' && 
+                     booking.paymentMethod === 'VNPAY' && 
+                     booking.paymentStatus === 'PENDING')) && (
+                    <button 
+                       disabled={payingSessionId === booking.id}
+                       onClick={() => handlePayVNPay(booking)}
+                       className="w-full bg-emerald-600 text-white hover:bg-emerald-500 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/10 active:scale-[0.98] cursor-pointer disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+                    >
+                      {payingSessionId === booking.id ? (
+                        <span className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                      ) : (
+                        <CreditCard size={16} />
+                      )}
+                      Pay via VNPay
                     </button>
                   )}
                 </div>

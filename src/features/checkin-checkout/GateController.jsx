@@ -5,7 +5,9 @@ import {
   CheckCircle, 
   CreditCard, 
   Sparkles, 
-  MonitorPlay
+  MonitorPlay,
+  RefreshCw,
+  Check
 } from 'lucide-react';
 import TicketModal from './TicketModal';
 
@@ -28,6 +30,12 @@ const GateController = () => {
   const [receiptDetails, setReceiptDetails] = useState(null);
   const [isTicketOpen, setIsTicketOpen] = useState(false);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+
+  // New checkout payment states
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('CASH');
+  const [cashReceived, setCashReceived] = useState('');
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const [changeDue, setChangeDue] = useState(null);
 
   const fetchActiveParkedVehicles = async () => {
     try {
@@ -164,13 +172,17 @@ const GateController = () => {
   };
 
   // Unified exit check-out handler (Supports matching by ticketCode + licensePlate)
-  const handleCheckOut = async (paymentMethod = 'CASH') => {
-    const plate = checkOutForm.getFieldValue('plate');
+  const handleCheckOut = async (paymentMethod = 'CASH', plateToUse = null) => {
+    const plate = plateToUse || checkOutForm.getFieldValue('plate');
     const ticketCode = checkOutForm.getFieldValue('ticketCode');
     if (!plate) {
       message.error("Please input license plate number!");
       return;
     }
+    
+    setSelectedPaymentMethod(paymentMethod);
+    setCashReceived('');
+    setChangeDue(null);
     
     try {
       // Call the real checkOutVehicle API on backend with VNPAY or CASH
@@ -186,13 +198,24 @@ const GateController = () => {
       setIsCheckoutResultModalOpen(true);
       
       const isSuccess = result.isSuccess || result.IsSuccess;
+      const isPaid = result.isPaid !== undefined ? result.isPaid : result.IsPaid;
       const messageText = result.message || result.Message;
       
       if (isSuccess === false) {
         message.warning(messageText || "License plate mismatch!");
       } else {
-        message.success("Check-out processed. Verification panel opened.");
-        fetchActiveParkedVehicles();
+        const totalAmt = result.totalAmount || result.TotalAmount || 0;
+        setCashReceived(totalAmt.toString());
+        if (isPaid) {
+          message.success(messageText || "Khách hàng đã thanh toán trước qua App di động. Mời xe ra!");
+          fetchActiveParkedVehicles();
+          setTimeout(() => {
+            handleCloseCheckoutResultModal();
+          }, 3000);
+        } else {
+          message.success("Check-out processed. Verification panel opened.");
+          fetchActiveParkedVehicles();
+        }
       }
     } catch (err) {
       console.error("Check-out Error:", err);
@@ -200,10 +223,119 @@ const GateController = () => {
     }
   };
 
-  // Perform Check-out (form submit defaults to VNPAY)
+  // Perform Check-out (form submit)
   const handleCheckOutSubmit = (values) => {
-    handleCheckOut('VNPAY');
+    handleCheckOut(values.paymentMethod || 'CASH');
   };
+
+  // Cash payment confirmation handler
+  const handleConfirmCashPayment = async () => {
+    const sessionId = checkoutResult?.sessionId || checkoutResult?.SessionId;
+    const totalAmount = checkoutResult?.totalAmount || checkoutResult?.TotalAmount || 0;
+    
+    if (!sessionId) {
+      message.error("Invalid session ID!");
+      return;
+    }
+    
+    const amount = parseFloat(cashReceived);
+    if (isNaN(amount) || amount < totalAmount) {
+      message.error(`Received cash must be at least ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount)}!`);
+      return;
+    }
+    
+    try {
+      const res = await parkingService.processCashPayment(sessionId, amount);
+      if (res && res.success) {
+        message.success(res.message || "Cash payment recorded successfully!");
+        setChangeDue(res.changeDue);
+        setCheckoutResult(prev => ({
+          ...prev,
+          isPaid: true,
+          IsPaid: true,
+          message: "Thanh toán tiền mặt thành công. Mở cổng cho xe ra."
+        }));
+        fetchActiveParkedVehicles();
+        setTimeout(() => {
+          handleCloseCheckoutResultModal();
+        }, 3000);
+      } else {
+        message.error(res?.message || "Failed to process cash payment.");
+      }
+    } catch (err) {
+      console.error("Confirm cash payment error:", err);
+      message.error(String(err));
+    }
+  };
+ 
+  // Refresh VNPay Payment Status
+  const handleRefreshPaymentStatus = async () => {
+    const invoiceId = checkoutResult?.invoiceId || checkoutResult?.InvoiceId;
+    if (!invoiceId) {
+      message.error("Invalid invoice ID!");
+      return;
+    }
+    
+    setIsCheckingStatus(true);
+    try {
+      const res = await parkingService.getPaymentStatus(invoiceId);
+      if (res && (res.status === 'SUCCESS' || res.status === 'SUCCESS'.toLowerCase() || res.status === 'SUCCESS'.toUpperCase())) {
+        message.success("Payment confirmed successfully! Barrier opened.");
+        setCheckoutResult(prev => ({
+          ...prev,
+          isPaid: true,
+          IsPaid: true,
+          message: "Thanh toán VNPay thành công. Mở cổng cho xe ra."
+        }));
+        fetchActiveParkedVehicles();
+        setTimeout(() => {
+          handleCloseCheckoutResultModal();
+        }, 2000);
+      } else {
+        message.info("Payment is still pending. Please wait for the driver to scan and complete payment.");
+      }
+    } catch (err) {
+      console.error("Refresh payment status error:", err);
+      message.error(String(err));
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+ 
+  // Auto-polling payment status for VNPay
+  useEffect(() => {
+    let intervalId;
+    const isPaid = checkoutResult?.isPaid || checkoutResult?.IsPaid;
+    const invoiceId = checkoutResult?.invoiceId || checkoutResult?.InvoiceId;
+ 
+    if (isCheckoutResultModalOpen && selectedPaymentMethod === 'VNPAY' && !isPaid && invoiceId) {
+      intervalId = setInterval(async () => {
+        try {
+          const res = await parkingService.getPaymentStatus(invoiceId);
+          if (res && (res.status === 'SUCCESS' || res.status === 'SUCCESS'.toLowerCase() || res.status === 'SUCCESS'.toUpperCase())) {
+            message.success("VNPay payment confirmed! Exit gate is opening.");
+            setCheckoutResult(prev => ({
+              ...prev,
+              isPaid: true,
+              IsPaid: true,
+              message: "Thanh toán VNPay thành công. Mở cổng cho xe ra."
+            }));
+            fetchActiveParkedVehicles();
+            clearInterval(intervalId);
+            setTimeout(() => {
+              handleCloseCheckoutResultModal();
+            }, 2000);
+          }
+        } catch (err) {
+          console.error("Polling payment status failed:", err);
+        }
+      }, 3000);
+    }
+ 
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isCheckoutResultModalOpen, selectedPaymentMethod, checkoutResult]);
 
   // Immediate check-out shortcut from table list
   const handleDirectCheckOut = (plate) => {
@@ -226,6 +358,7 @@ const GateController = () => {
   const handleCloseCheckoutResultModal = () => {
     setIsCheckoutResultModalOpen(false);
     setCheckoutResult(null);
+    setChangeDue(null);
     
     checkOutForm.resetFields();
     if (exitImagePreviewUrl) {
@@ -263,7 +396,7 @@ const GateController = () => {
       dataIndex: ['occupiedBy', 'type'],
       key: 'type',
       render: (type, record) => (
-        <span className="text-xs font-semibold text-slate-650 capitalize">{type || record.type || 'N/A'}</span>
+        <span className="text-xs font-semibold text-slate-600 capitalize">{type || record.type || 'N/A'}</span>
       )
     },
     {
@@ -297,7 +430,7 @@ const GateController = () => {
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Shift Counter Terminal</h1>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gate Control Terminal</h1>
         <p className="text-slate-500 text-sm mt-0.5">Simultaneous entry and exit lanes control center</p>
       </div>
 
@@ -381,7 +514,7 @@ const GateController = () => {
                       setEntryImagePreviewUrl(null);
                     }
                   }}
-                  className="h-10 text-slate-505 border-slate-200 hover:text-rose-500 hover:border-rose-500 rounded-lg font-bold"
+                  className="h-10 text-slate-500 border-slate-200 hover:text-rose-500 hover:border-rose-500 rounded-lg font-bold"
                 >
                   Clear Image
                 </Button>
@@ -389,23 +522,35 @@ const GateController = () => {
             </div>
 
             {/* Check-In Mode Toggle */}
-            <div className="flex justify-center mb-4">
-              <Radio.Group 
-                value={checkInMode} 
-                onChange={(e) => {
-                  setCheckInMode(e.target.value);
+            <div className="p-1 bg-slate-100 border border-slate-200/80 rounded-xl grid grid-cols-2 gap-1 mb-4 shadow-inner">
+              <button
+                type="button"
+                onClick={() => {
+                  setCheckInMode('walkin');
                   checkInForm.resetFields();
                 }}
-                buttonStyle="solid"
-                className="w-full text-center"
+                className={`flex items-center justify-center py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                  checkInMode === 'walkin'
+                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
               >
-                <Radio.Button value="walkin" className="w-1/2 font-bold text-xs">
-                  Walk-In Check-In
-                </Radio.Button>
-                <Radio.Button value="reservation" className="w-1/2 font-bold text-xs">
-                  Reservation QR
-                </Radio.Button>
-              </Radio.Group>
+                Walk-In Check-In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCheckInMode('reservation');
+                  checkInForm.resetFields();
+                }}
+                className={`flex items-center justify-center py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                  checkInMode === 'reservation'
+                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                Reservation QR
+              </button>
             </div>
 
             {/* Check-In Form */}
@@ -446,7 +591,7 @@ const GateController = () => {
                     className="mb-0"
                   >
                     <Select
-                      className="h-10 text-slate-850 rounded-lg font-medium"
+                      className="h-10 text-slate-800 rounded-lg font-medium"
                       options={[
                         { value: 'Car', label: 'Standard Car' },
                         { value: 'Motorbike', label: 'Motorbike' },
@@ -463,7 +608,7 @@ const GateController = () => {
                     className="mb-0"
                   >
                     <Select
-                      className="h-10 text-slate-850 rounded-lg font-medium"
+                      className="h-10 text-slate-800 rounded-lg font-medium"
                       options={[
                         { value: 'B1', label: 'Basement 1' },
                         { value: 'L1', label: 'Level 1' },
@@ -474,7 +619,7 @@ const GateController = () => {
                 </div>
               )}
 
-              <Form.Item className="mb-0 pt-2">
+              <div className="pt-2">
                 <Button 
                   type="primary" 
                   htmlType="submit" 
@@ -482,7 +627,7 @@ const GateController = () => {
                 >
                   <Sparkles size={15}/> {checkInMode === 'reservation' ? 'Verify QR Code & Open Gate' : 'Print Ticket & Open Gate'}
                 </Button>
-              </Form.Item>
+              </div>
             </Form>
           </Card>
         </div>
@@ -592,24 +737,36 @@ const GateController = () => {
               <Form.Item
                 name="ticketCode"
                 label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code (Optional)</span>}
-                className="mb-3"
+                className="mb-2"
               >
                 <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500" />
               </Form.Item>
 
-              <div className="flex gap-3 pt-2">
-                <Button 
-                  onClick={() => handleCheckOut('CASH')}
-                  className="flex-1 h-10 font-bold bg-[#2563EB] hover:bg-blue-700 text-white border-none rounded-lg flex items-center justify-center gap-1.5 shadow-sm"
-                >
-                  <CreditCard size={15}/> Check-out (CASH)
-                </Button>
+              <Form.Item
+                name="paymentMethod"
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Payment Method</span>}
+                initialValue="CASH"
+                className="mb-3"
+              >
+                <Radio.Group className="w-full" buttonStyle="solid">
+                  <div className="grid grid-cols-2 gap-3 w-full">
+                    <Radio.Button value="CASH" className="h-10 flex items-center justify-center font-bold rounded-lg border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-colors cursor-pointer">
+                      <CreditCard size={14} className="mr-1.5 text-rose-500" /> Cash (Tiền mặt)
+                    </Radio.Button>
+                    <Radio.Button value="VNPAY" className="h-10 flex items-center justify-center font-bold rounded-lg border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer">
+                      <CreditCard size={14} className="mr-1.5 text-emerald-500" /> VNPay (QR Code)
+                    </Radio.Button>
+                  </div>
+                </Radio.Group>
+              </Form.Item>
+
+              <div className="pt-2">
                 <Button 
                   type="primary"
                   htmlType="submit" 
-                  className="flex-1 h-10 font-bold bg-slate-800 hover:bg-slate-900 text-white border-none rounded-lg flex items-center justify-center gap-1.5 shadow-sm"
+                  className="w-full h-11 font-bold bg-rose-600 hover:bg-rose-500 text-white border-none rounded-lg flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 cursor-pointer"
                 >
-                  <CreditCard size={15}/> Confirm Exit & Open Gate
+                  <CreditCard size={15}/> Process Check-Out & Verify
                 </Button>
               </div>
             </Form>
@@ -683,11 +840,22 @@ const GateController = () => {
             Close Panel
           </Button>
         ]}
-        width={760}
+        width={920}
         centered
         destroyOnClose
         className="font-sans"
       >
+        <style>{`
+          @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+          }
+          .animate-scan {
+            position: absolute;
+            animation: scan 3s linear infinite;
+          }
+        `}</style>
         {checkoutResult && (() => {
           const isSuccess = checkoutResult.isSuccess || checkoutResult.IsSuccess;
           const messageText = checkoutResult.message || checkoutResult.Message;
@@ -726,75 +894,93 @@ const GateController = () => {
                 />
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column: License Plates & Images Verification */}
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
-                  <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">License Plate & Security Verification</h3>
-                  
-                  <div className="space-y-2 font-mono text-xs">
-                    <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                      <span className="text-slate-500 font-bold">Entered Checkout Plate:</span>
-                      <Tag color="blue" className="font-bold font-mono">{checkOutForm.getFieldValue('plate') || "N/A"}</Tag>
-                    </div>
-                    <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                      <span className="text-slate-500 font-bold">Check-in Plate (DB):</span>
-                      <Tag color="cyan" className="font-bold font-mono">{checkInLicensePlate || "N/A"}</Tag>
-                    </div>
-                    <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                      <span className="text-slate-500 font-bold">Check-out Plate (DB):</span>
-                      <Tag color="purple" className="font-bold font-mono">{checkOutLicensePlate || "N/A"}</Tag>
-                    </div>
-                    <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                      <span className="text-slate-500 font-bold">Plate Match Status:</span>
-                      {isLicensePlateMatched ? (
-                        <Tag color="success" className="font-bold">MATCHED</Tag>
-                      ) : (
-                        <Tag color="error" className="font-bold">MISMATCHED</Tag>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Images side by side */}
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Check-in Image</span>
-                      <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
-                        {checkInImageUrl ? (
-                          <Image
-                            src={checkInImageUrl}
-                            alt="Check-in"
-                            className="w-full h-full object-cover"
-                            fallback="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600"
-                          />
-                        ) : (
-                          <span className="text-[9px] text-slate-500 font-bold uppercase">No Image</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Check-out Image</span>
-                      <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
-                        {exitImagePreviewUrl ? (
-                          <Image
-                            src={exitImagePreviewUrl}
-                            alt="Check-out"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-[9px] text-slate-500 font-bold uppercase">No Image</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column: Billing & Payment */}
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-3">Session Billing & Payment</h3>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                {/* Left Column: License Plates, Images & Session Details (col-span-7) */}
+                <div className="md:col-span-7 space-y-4">
+                  {/* Security Verification panel */}
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
+                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">License Plate & Security Verification</h3>
                     
-                    <Descriptions column={1} size="small" bordered className="bg-white rounded-lg overflow-hidden border border-slate-200/60 font-sans">
+                    <div className="space-y-2 font-mono text-xs">
+                      <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
+                        <span className="text-slate-500 font-bold">Entered Checkout Plate:</span>
+                        <Tag color="blue" className="font-bold font-mono">{checkOutForm.getFieldValue('plate') || "N/A"}</Tag>
+                      </div>
+                      <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
+                        <span className="text-slate-500 font-bold">Check-in Plate (DB):</span>
+                        <Tag color="cyan" className="font-bold font-mono">{checkInLicensePlate || "N/A"}</Tag>
+                      </div>
+                      <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
+                        <span className="text-slate-500 font-bold">Check-out Plate (DB):</span>
+                        <Tag color="purple" className="font-bold font-mono">{checkOutLicensePlate || "N/A"}</Tag>
+                      </div>
+                      <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
+                        <span className="text-slate-500 font-bold">Plate Match Status:</span>
+                        {isLicensePlateMatched ? (
+                          <Tag color="success" className="font-bold">MATCHED</Tag>
+                        ) : (
+                          <Tag color="error" className="font-bold">MISMATCHED</Tag>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Images side by side */}
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Check-in Image</span>
+                        <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
+                          {checkInImageUrl ? (
+                            <Image
+                              src={checkInImageUrl}
+                              alt="Check-in"
+                              className="w-full h-full object-cover"
+                              fallback="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600"
+                            />
+                          ) : (
+                            <span className="text-[9px] text-slate-500 font-bold uppercase">No Image</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Check-out Image</span>
+                        <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
+                          {exitImagePreviewUrl ? (
+                            <Image
+                              src={exitImagePreviewUrl}
+                              alt="Check-out"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[9px] text-slate-500 font-bold uppercase">No Image</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {!isSuccess && (
+                      <div className="mt-4 flex gap-3 pt-2">
+                        <Button 
+                          type="primary"
+                          onClick={() => handleCheckOut(selectedPaymentMethod, checkInLicensePlate)} 
+                          className="flex-1 h-10 font-bold rounded-lg bg-amber-600 hover:bg-amber-500 border-none flex items-center justify-center cursor-pointer text-white"
+                        >
+                          Bỏ qua cảnh báo (Cho xe ra)
+                        </Button>
+                        <Button 
+                          onClick={handleCloseCheckoutResultModal} 
+                          className="flex-1 h-10 font-bold rounded-lg cursor-pointer"
+                        >
+                          Giữ xe lại giải quyết
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Session Details */}
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-3">Session Details</h3>
+                    <Descriptions column={2} size="small" bordered className="bg-white rounded-lg overflow-hidden border border-slate-200/60 font-sans">
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Session ID</span>}>
                         <span className="text-xs font-extrabold text-slate-800">{sessionId || "N/A"}</span>
                       </Descriptions.Item>
@@ -808,18 +994,13 @@ const GateController = () => {
                         <span className="text-xs font-bold text-slate-800">{durationHours || 0} Hours</span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Check-in Time</span>}>
-                        <span className="text-[11px] text-slate-600 font-medium">
+                        <span className="text-[10px] text-slate-600 font-medium">
                           {checkInTime ? new Date(checkInTime).toLocaleString() : "N/A"}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Check-out Time</span>}>
-                        <span className="text-[11px] text-slate-600 font-medium">
+                        <span className="text-[10px] text-slate-600 font-medium">
                           {checkOutTime ? new Date(checkOutTime).toLocaleString() : "N/A"}
-                        </span>
-                      </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Total Fee</span>}>
-                        <span className="text-sm font-extrabold text-rose-600">
-                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Payment Status</span>}>
@@ -829,24 +1010,186 @@ const GateController = () => {
                           <Tag color="warning" className="font-bold m-0">PENDING</Tag>
                         )}
                       </Descriptions.Item>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Total Fee</span>}>
+                        <span className="text-xs font-extrabold text-rose-600">
+                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
+                        </span>
+                      </Descriptions.Item>
                     </Descriptions>
                   </div>
+                </div>
 
-                  {/* VNPay Link Button */}
-                  {isSuccess && !isPaid && paymentUrl && (
-                    <div className="pt-4 border-t border-slate-200 mt-2">
-                      <Button
-                        type="primary"
-                        className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 border-none font-bold rounded-lg flex items-center justify-center gap-1.5 shadow-md text-white"
-                        onClick={() => window.open(paymentUrl, '_blank')}
-                      >
-                        <CreditCard size={16} /> Pay via VNPay (New Tab)
-                      </Button>
-                      <p className="text-[10px] text-slate-405 text-center mt-2 font-medium">
-                        Open payment URL for VNPay to complete transaction. Invoice ID: {invoiceId || "N/A"}
-                      </p>
+                {/* Right Column: Checkout & Payment Center (col-span-5) */}
+                <div className="md:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                      <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Payment Action Center</h3>
+                      <Tag color={selectedPaymentMethod === 'VNPAY' ? 'blue' : 'orange'} className="font-bold font-mono">
+                        {selectedPaymentMethod}
+                      </Tag>
                     </div>
-                  )}
+
+                    {/* Paid Alert */}
+                    {isSuccess && isPaid && (
+                      <div className="space-y-4 py-8 text-center">
+                        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
+                          <Check size={32} className="text-emerald-600" />
+                        </div>
+                        <h4 className="text-lg font-bold text-emerald-800">Thanh toán thành công</h4>
+                        <p className="text-sm text-slate-500 leading-relaxed">Cổng barrier đã mở. Mời xe ra khỏi bãi đỗ.</p>
+                        
+                        {changeDue !== null && changeDue > 0 && (
+                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-800 font-bold max-w-xs mx-auto mt-4">
+                            <span>Tiền thừa thối lại:</span>
+                            <span className="text-base text-amber-700">
+                              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(changeDue)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Unpaid Flow: VNPAY */}
+                    {isSuccess && !isPaid && selectedPaymentMethod === 'VNPAY' && paymentUrl && (
+                      <div className="space-y-5">
+                        <div className="bg-blue-50/50 border border-blue-150 p-4 rounded-xl flex flex-col items-center justify-center shadow-inner relative overflow-hidden">
+                          <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-1">Tổng Số Tiền Thu</span>
+                          <span className="text-2xl font-black text-blue-700">
+                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
+                          </span>
+                        </div>
+
+                        {/* Interactive QR Code Card */}
+                        <div className="relative group flex justify-center bg-white p-4 rounded-xl border border-slate-200 max-w-[240px] mx-auto shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                          {/* Laser Scan line micro-animation */}
+                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-sky-500/80 shadow-[0_0_8px_#0ea5e9] animate-scan pointer-events-none"></div>
+                          
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(paymentUrl)}`}
+                            alt="VNPay QR Code"
+                            className="w-48 h-48 object-contain transition-transform duration-300 group-hover:scale-105"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-2 pt-2">
+                          <Button
+                            type="primary"
+                            icon={<RefreshCw size={14} className={isCheckingStatus ? "animate-spin" : ""} />}
+                            loading={isCheckingStatus}
+                            onClick={handleRefreshPaymentStatus}
+                            className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 border-none font-bold rounded-xl flex items-center justify-center gap-1.5 text-white cursor-pointer transition-all duration-200 transform active:scale-95 shadow-md"
+                          >
+                            Kiểm tra trạng thái thanh toán (F5)
+                          </Button>
+                          <Button
+                            type="link"
+                            size="small"
+                            onClick={() => window.open(paymentUrl, '_blank')}
+                            className="text-xs text-blue-600 hover:text-blue-500 font-bold mt-1"
+                          >
+                            Mở liên kết thanh toán ở tab mới
+                          </Button>
+                        </div>
+                        <p className="text-[10px] text-slate-400 text-center font-medium leading-relaxed">
+                          Hệ thống quét trạng thái tự động mỗi 3 giây. Barrier sẽ tự động mở khi giao dịch thành công.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Unpaid Flow: CASH */}
+                    {isSuccess && !isPaid && selectedPaymentMethod === 'CASH' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-4 flex flex-col items-center justify-center shadow-inner">
+                          <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">Số tiền cần thu</span>
+                          <span className="text-2xl font-black text-amber-700">
+                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2">
+                          <span className="text-xs font-bold text-slate-500 block">Số tiền khách đưa (VNĐ):</span>
+                          <Input
+                            type="number"
+                            placeholder="Nhập số tiền..."
+                            value={cashReceived}
+                            onChange={(e) => setCashReceived(e.target.value)}
+                            className="h-12 bg-white border-slate-200 text-slate-800 rounded-xl font-mono font-bold text-xl px-4 focus:ring-2 focus:ring-blue-500/20"
+                            suffix={<span className="font-bold text-slate-400">VNĐ</span>}
+                          />
+                          
+                          {/* Quick Denominations Grid */}
+                          <div className="grid grid-cols-3 gap-2 pt-2">
+                            <Button 
+                              onClick={() => setCashReceived(totalAmount.toString())}
+                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-850 rounded-lg border-none cursor-pointer transition-colors"
+                            >
+                              Đủ tiền
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                const val = parseFloat(cashReceived) || 0;
+                                setCashReceived((val + 50000).toString());
+                              }}
+                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                            >
+                              +50K
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                const val = parseFloat(cashReceived) || 0;
+                                setCashReceived((val + 100000).toString());
+                              }}
+                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                            >
+                              +100K
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                const val = parseFloat(cashReceived) || 0;
+                                setCashReceived((val + 200000).toString());
+                              }}
+                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                            >
+                              +200K
+                            </Button>
+                            <Button 
+                              onClick={() => {
+                                const val = parseFloat(cashReceived) || 0;
+                                setCashReceived((val + 500000).toString());
+                              }}
+                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                            >
+                              +500K
+                            </Button>
+                            <Button 
+                              onClick={() => setCashReceived('')}
+                              className="h-9 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 rounded-lg border-none cursor-pointer transition-colors"
+                            >
+                              Xóa
+                            </Button>
+                          </div>
+                        </div>
+
+                        {cashReceived && parseFloat(cashReceived) >= totalAmount && (
+                          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800 font-bold shadow-sm animate-fadeIn">
+                            <span>Tiền thừa thối lại:</span>
+                            <span className="text-lg font-black text-emerald-700">
+                              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(parseFloat(cashReceived) - totalAmount)}
+                            </span>
+                          </div>
+                        )}
+
+                        <Button
+                          type="primary"
+                          icon={<Check size={16} />}
+                          onClick={handleConfirmCashPayment}
+                          className="w-full h-12 bg-blue-600 hover:bg-blue-500 border-none font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-md text-white mt-4 cursor-pointer transition-all duration-200 transform active:scale-95"
+                        >
+                          Xác nhận nhận đủ tiền & Mở cổng
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
