@@ -113,6 +113,16 @@ const chunkSlots = (slots, size) => {
   return chunks;
 };
 
+const getDefaultExpectedCheckInTimeParts = () => {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + 30);
+
+  return {
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+  };
+};
+
 const initAuthParkingMap = () => {
   const slots = [];
   
@@ -216,7 +226,8 @@ const ParkingLotMap = () => {
   // Form states for booking
   const [bookingVehicleType, setBookingVehicleType] = useState('Motorcycle');
   const [bookingPlate, setBookingPlate] = useState('');
-  const [bookingDuration, setBookingDuration] = useState('1 Hour');
+  const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
+  const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
 
   // Form states for Manager/Admin reservation
   const [adminPlate, setAdminPlate] = useState('');
@@ -342,7 +353,9 @@ const ParkingLotMap = () => {
       setBookingVehicleType('Car');
     }
     setBookingPlate('');
-    setBookingDuration('1 Hour');
+    const defaultExpectedTime = getDefaultExpectedCheckInTimeParts();
+    setExpectedHour(defaultExpectedTime.hour);
+    setExpectedMinute(defaultExpectedTime.minute);
     setAdminPlate('');
   }, [activeFloorId, selectedSlot]);
 
@@ -489,6 +502,23 @@ const ParkingLotMap = () => {
     }
   };
 
+  const clampTimePart = (value, min, max) => {
+    const numberValue = Number(value);
+    if (Number.isNaN(numberValue)) return min;
+    return Math.min(max, Math.max(min, numberValue));
+  };
+
+  const buildExpectedCheckInIso = () => {
+    const expectedDate = new Date();
+    expectedDate.setHours(Number(expectedHour), Number(expectedMinute), 0, 0);
+
+    if (expectedDate <= new Date()) {
+      expectedDate.setDate(expectedDate.getDate() + 1);
+    }
+
+    return expectedDate.toISOString();
+  };
+
 
   // Driver Booking Submit
   const handleConfirmBookingSubmit = async (e) => {
@@ -535,6 +565,8 @@ const ParkingLotMap = () => {
         finalVehicleTypeId = fallbackTypeId;
       }
 
+      const expectedCheckInTime = buildExpectedCheckInIso();
+
       const config = {
         headers: {
           Authorization: `Bearer ${token}`
@@ -544,7 +576,8 @@ const ParkingLotMap = () => {
       const response = await api.post('/Parking/book', {
         slotId: Number(selectedSlot.slotId),
         licenseVehicle: cleanPlate,
-        typeId: finalVehicleTypeId
+        typeId: finalVehicleTypeId,
+        expectedCheckInTime
       }, config);
 
       setIsBookingModalOpen(false);
@@ -1152,24 +1185,41 @@ const ParkingLotMap = () => {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Estimated Duration</label>
-                  <div className="grid grid-cols-3 gap-2.5">
-                    {['1 Hour', '2 Hours', 'Full Day'].map((duration) => (
-                      <button
-                        key={duration}
-                        type="button"
-                        onClick={() => setBookingDuration(duration)}
-                        className={`py-3.5 px-3 rounded-xl border text-center transition-all text-xs font-bold leading-tight ${
-                          bookingDuration === duration
-                            ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
-                            : 'bg-slate-50/50 border-slate-205 hover:bg-slate-50 text-slate-500 hover:text-slate-800'
-                        }`}
-                      >
-                        {duration}
-                      </button>
-                    ))}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Expected Check-In Time</label>
+                  <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/40 px-4 py-4">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <input
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={String(expectedHour).padStart(2, '0')}
+                        onChange={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
+                        onBlur={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
+                        className="h-16 w-20 rounded-2xl border-2 border-indigo-200 bg-white text-center text-2xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                      />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Hour</span>
+                    </div>
+
+                    <span className="pt-3 text-3xl font-extrabold text-indigo-500">:</span>
+
+                    <div className="flex flex-col items-center gap-1.5">
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        value={String(expectedMinute).padStart(2, '0')}
+                        onChange={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
+                        onBlur={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
+                        className="h-16 w-20 rounded-2xl border-2 border-indigo-200 bg-white text-center text-2xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                      />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Minute</span>
+                    </div>
                   </div>
+
+                  <p className="rounded-xl border border-orange-100 bg-orange-50 px-3.5 py-2.5 text-[11px] font-semibold leading-relaxed text-orange-700">
+                    ⚠️ Lưu ý: Đơn đặt chỗ sẽ tự động hủy nếu bạn không check-in tại cổng trong vòng 15 phút kể từ thời gian đã hẹn.
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3 pt-4 font-sans">
