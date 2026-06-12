@@ -114,12 +114,9 @@ const chunkSlots = (slots, size) => {
 };
 
 const getDefaultExpectedCheckInTimeParts = () => {
-  const date = new Date();
-  date.setMinutes(date.getMinutes() + 30);
-
   return {
-    hour: date.getHours(),
-    minute: date.getMinutes(),
+    hour: 9,
+    minute: 27,
   };
 };
 
@@ -1218,7 +1215,7 @@ const ParkingLotMap = () => {
                   </div>
 
                   <p className="rounded-xl border border-orange-100 bg-orange-50 px-3.5 py-2.5 text-[11px] font-semibold leading-relaxed text-orange-700">
-                    ⚠️ Lưu ý: Đơn đặt chỗ sẽ tự động hủy nếu bạn không check-in tại cổng trong vòng 15 phút kể từ thời gian đã hẹn.
+                    ⚠️ Note: Your reservation will be automatically canceled if you do not check in at the gate within 15 minutes of your scheduled time.
                   </p>
                 </div>
 
