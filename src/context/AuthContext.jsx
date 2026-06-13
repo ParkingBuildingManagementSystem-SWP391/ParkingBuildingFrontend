@@ -49,6 +49,42 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
+
+
+  const loginWithGoogle = async (googleIdToken) => {
+  try {
+    const data = await authService.loginWithGoogle(googleIdToken);
+    
+    if (!data) {
+      throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
+    }
+    
+    const rawRole = data.roleName || data.RoleName || "Registered_Driver";
+    const matchedUser = {
+      username: data.username || data.Username || "Google User",
+      role: rawRole
+    };
+
+    // Cập nhật State cho Frontend
+    setUser(matchedUser);
+    setRole(matchedUser.role);
+
+    // Lưu trữ thông tin
+    const tokenString = data.token || data.Token;
+    if (tokenString) {
+      localStorage.setItem('token', tokenString);
+    }
+    localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
+    localStorage.setItem('spotflow_role', matchedUser.role);
+    localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
+
+    return { success: true, user: matchedUser };
+  } catch (error) {
+    console.error("Lỗi xác thực Google SSO:", error);
+    return { success: false, message: error || "Đăng nhập Google thất bại!" };
+  }
+};
+
   /**
    * Hàm Login kết nối trực tiếp với API Backend thật (.NET)
    */
@@ -148,7 +184,7 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  const value = { user, role, loading, login, loginWithUserData, logout, switchRole, updateUser };
+  const value = { user, role, loading, login,  loginWithGoogle, loginWithUserData, logout, switchRole, updateUser };
 
   return (
     <AuthContext.Provider value={value}>

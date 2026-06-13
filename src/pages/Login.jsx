@@ -4,9 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { message } from 'antd';
 import Logo from '../components/Logo';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
-  const { login } = useAuth(); // Hàm login này giờ đã là hàm async gọi API thật
+  const { login, loginWithGoogle } = useAuth(); 
   const navigate = useNavigate();
 
   // Controlled component states
@@ -50,6 +51,35 @@ const Login = () => {
   };
 
 
+  // 3. Viết hàm callback xử lý khi người dùng chọn tài khoản Google thành công
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setErrorMsg('');
+    
+    // credentialResponse.credential chứa ID Token (JWT) được trả về từ Google
+    const res = await loginWithGoogle(credentialResponse.credential);
+    setLoading(false);
+    
+    if (res.success) {
+      message.success('Đăng nhập qua Google thành công!');
+      
+      // Chuyển hướng người dùng dựa vào quyền (Role) trả về từ Database thật
+      if (res.user.role === 'Admin') {
+        navigate('/dashboard');
+      } else if (res.user.role === 'Staff') {
+        navigate('/staff-management');
+      } else {
+        navigate('/dashboard');
+      }
+    } else {
+      setErrorMsg(res.message || 'Lỗi xác thực Google. Vui lòng thử lại!');
+    }
+  };
+
+  const handleGoogleError = () => {
+    setErrorMsg('Đăng nhập bằng tài khoản Google thất bại!');
+  };
+
   return (
     <div className="min-h-screen w-screen bg-[#F5F5F5] flex items-center justify-center relative overflow-hidden p-4 font-sans select-none">
       
@@ -63,8 +93,7 @@ const Login = () => {
       />
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* 2. THE LOGIN CARD CONTAINER */}
+      
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 sm:p-10 border border-slate-100 z-10 animate-scale-in">
         
         {/* Header Block with Brand logo */}
@@ -76,7 +105,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Dynamic validation error block */}
         {errorMsg && (
           <div className="bg-rose-50 border border-rose-100 text-rose-700 text-xs font-semibold p-3.5 rounded-xl flex items-center gap-2 mb-5">
             <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0"></span>
@@ -84,9 +112,7 @@ const Login = () => {
           </div>
         )}
 
-        {/* Input Form Elements */}
         <form onSubmit={handleFormSubmit} className="space-y-4">
-          
           {/* Identifier input group (Username or Email) */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 block">Username or Email</label>
@@ -123,20 +149,39 @@ const Login = () => {
               </button>
             </div>
           </div>
-
-          {/* Action CTAs */}
+          
           <button 
             type="submit"
             disabled={loading}
             className="w-full h-11 bg-[#1A62FF] hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold rounded-xl transition-all shadow-md shadow-blue-500/10 active:scale-98 flex items-center justify-center gap-1.5 text-sm mt-6"
           >
-            {loading ? 'Logging in...' : 'Login & Continue'}
+            {loading ? 'Logging in...' : 'Login'}
             {!loading && <ArrowRight size={16} />}
           </button>
-
         </form>
 
-        {/* Footer sign up link */}
+        {/* 4. ĐƯỜNG KẺ NGĂN CÁCH VÀ NÚT GOOGLE SSO */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200"></div>
+          </div>
+          <div className="relative flex justify-center text-xs font-medium uppercase">
+            <span className="bg-white px-3 text-slate-400">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap
+            shape="rectangular"
+            theme="outline"
+            size="large"
+            width="384"
+          />
+        </div>
+
         <div className="text-center mt-6">
           <span className="text-xs text-slate-500">
             Don't have an account?{' '}
