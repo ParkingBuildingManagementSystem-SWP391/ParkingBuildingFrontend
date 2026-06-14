@@ -1,0 +1,442 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Table, Input, Select, Button, Tag, Drawer, Spin, message, Space, Tooltip, Popconfirm } from 'antd';
+import { 
+  Search, 
+  Car, 
+  Bike, 
+  RefreshCw, 
+  AlertTriangle, 
+  ShieldAlert, 
+  Key, 
+  Settings, 
+  Info,
+  Clock,
+  User,
+  Unlock
+} from 'lucide-react';
+import { parkingService } from '../../services/parkingService';
+import { managerService } from '../../services/managerService';
+import { useAuth } from '../../context/AuthContext';
+
+const { Option } = Select;
+
+const LiveStatusTable = () => {
+  const { role } = useAuth();
+  const [floors, setFloors] = useState([]);
+  const [selectedFloor, setSelectedFloor] = useState(3); // Default Floor G
+  const [slots, setSlots] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
+
+  // Drawer states
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [slotDetail, setSlotDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Fetch Floors
+  useEffect(() => {
+    const fetchFloors = async () => {
+      try {
+        if (typeof parkingService.getFloors === 'function') {
+          const data = await parkingService.getFloors();
+          if (data && data.length > 0) {
+            setFloors(data.map(f => ({ id: f.floorId || f.id, name: f.floorName || f.name })));
+          }
+        } else {
+          // Fallback static
+          setFloors([
+            { id: 3, name: "Floor G" },
+            { id: 1, name: "Floor B1" },
+            { id: 2, name: "Floor B2" }
+          ]);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch floors", err);
+      }
+    };
+    fetchFloors();
+  }, []);
+
+  // Fetch Slots
+  const fetchSlots = async () => {
+    setLoading(true);
+    try {
+      const data = await parkingService.getSlotsByFloor(selectedFloor);
+      // Map data
+      const mapped = data.map(s => {
+        let type = 'Car';
+        if (s.typeId === 1) type = 'Bicycle';
+        else if (s.typeId === 2) type = 'Motorcycle';
+
+        let statusStr = String(s.slotStatus || '').trim().toLowerCase();
+        let status = 'Available';
+        if (statusStr === '1' || statusStr === 'occupied') status = 'Occupied';
+        if (statusStr === '2' || statusStr === 'reserved') status = 'Reserved';
+
+        const floorObj = floors.find(f => f.id === selectedFloor);
+
+        return {
+          key: s.slotId,
+          slotId: s.slotId,
+          slotName: s.slotName,
+          type: type,
+          status: status,
+          floorName: floorObj ? floorObj.name : `Floor ID: ${selectedFloor}`
+        };
+      });
+      setSlots(mapped);
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to load slots data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedFloor) {
+      fetchSlots();
+    }
+  }, [selectedFloor, floors]); // re-run if floors loaded
+
+  // Filter slots
+  const filteredSlots = useMemo(() => {
+    if (!searchText) return slots;
+    return slots.filter(s => s.slotName.toLowerCase().includes(searchText.toLowerCase()));
+  }, [slots, searchText]);
+
+  // Handle open Drawer
+  const handleManageSlot = async (slot) => {
+    setSelectedSlot(slot);
+    setDrawerVisible(true);
+    setSlotDetail(null);
+
+    if (slot.status === 'Occupied' || slot.status === 'Reserved') {
+      setDetailLoading(true);
+      try {
+        const detail = await managerService.getSlotDetail(slot.slotId);
+        setSlotDetail(detail);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setDetailLoading(false);
+      }
+    }
+  };
+
+  // Mock Manager Actions
+  const handleMockAction = (actionName) => {
+    setActionLoading(true);
+    setTimeout(() => {
+      setActionLoading(false);
+      message.success(`${actionName} applied successfully to slot ${selectedSlot.slotName}. (Simulated)`);
+      setDrawerVisible(false);
+      fetchSlots(); // refresh
+    }, 1000);
+  };
+
+  // Real Force Release Action
+  const handleForceRelease = async () => {
+    setActionLoading(true);
+    try {
+      const plate = slotDetail?.activeSession?.licenseVehicle || 'Unknown';
+      const cleanPlate = plate !== 'Unknown' ? plate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null;
+      
+      const response = await parkingService.checkOutVehicle(null, cleanPlate, null, null);
+      message.success(response.message || `Slot ${selectedSlot.slotName} forcefully released.`);
+      setDrawerVisible(false);
+      fetchSlots();
+    } catch (err) {
+      message.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const columns = [
+    {
+      title: 'Slot ID',
+      dataIndex: 'slotName',
+      key: 'slotName',
+      render: (text) => <span className="font-mono font-extrabold text-blue-700">{text}</span>,
+      sorter: (a, b) => a.slotName.localeCompare(b.slotName)
+    },
+    {
+      title: 'Vehicle Type',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => {
+        let icon = <Car size={16} className="text-slate-600" />;
+        if (type === 'Bicycle') icon = <Bike size={16} className="text-slate-600" />;
+        if (type === 'Motorcycle') icon = <Bike size={16} className="text-slate-600" />; // using bike icon for both currently
+
+        return (
+          <div className="flex items-center gap-2">
+            {icon}
+            <span className="font-medium text-slate-700">{type}</span>
+          </div>
+        );
+      },
+      filters: [
+        { text: 'Car', value: 'Car' },
+        { text: 'Motorcycle', value: 'Motorcycle' },
+        { text: 'Bicycle', value: 'Bicycle' },
+      ],
+      onFilter: (value, record) => record.type.indexOf(value) === 0,
+    },
+    {
+      title: 'Current Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => {
+        let color = 'default';
+        if (status === 'Available') color = 'success';
+        if (status === 'Occupied') color = 'error';
+        if (status === 'Reserved') color = 'warning';
+        return <Tag color={color} className="font-bold border-0 shadow-sm px-2.5 py-0.5">{status.toUpperCase()}</Tag>;
+      },
+      filters: [
+        { text: 'Available', value: 'Available' },
+        { text: 'Occupied', value: 'Occupied' },
+        { text: 'Reserved', value: 'Reserved' },
+      ],
+      onFilter: (value, record) => record.status === value,
+    },
+    {
+      title: 'Level',
+      dataIndex: 'floorName',
+      key: 'floorName',
+      render: (text) => <span className="font-semibold text-slate-600">{text}</span>
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          size="small"
+          onClick={() => handleManageSlot(record)}
+          className="bg-indigo-600 hover:bg-indigo-700 shadow-md flex items-center gap-1.5 rounded-md"
+        >
+          <Settings size={14} />
+          Manage
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 font-sans">
+      
+      {/* Header & Controls */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
+            <ShieldAlert className="text-indigo-600" />
+            Live Operations Grid
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">High-level administrative view for real-time slot monitoring</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Select
+            value={selectedFloor}
+            onChange={(val) => setSelectedFloor(val)}
+            className="w-36 h-9"
+            placeholder="Select Floor"
+          >
+            {floors.map(f => (
+              <Option key={f.id} value={f.id}>{f.name}</Option>
+            ))}
+          </Select>
+
+          <Input
+            placeholder="Search slot..."
+            prefix={<Search size={16} className="text-slate-400" />}
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            className="w-48 h-9 rounded-lg"
+          />
+
+          <Tooltip title="Refresh Data">
+            <Button 
+              icon={<RefreshCw size={16} />} 
+              onClick={fetchSlots} 
+              loading={loading}
+              className="h-9 w-9 flex items-center justify-center rounded-lg text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+            />
+          </Tooltip>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <Table 
+        columns={columns} 
+        dataSource={filteredSlots} 
+        loading={loading}
+        pagination={{ pageSize: 10, showSizeChanger: true }}
+        rowClassName="hover:bg-indigo-50/50 cursor-default"
+        className="border border-slate-100 rounded-xl overflow-hidden"
+      />
+
+      {/* Detail & Action Drawer */}
+      <Drawer
+        title={
+          <div className="flex items-center gap-2 text-indigo-900">
+            <Settings size={18} />
+            <span className="font-extrabold">Terminal: {selectedSlot?.slotName}</span>
+          </div>
+        }
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={400}
+        className="font-sans"
+      >
+        {selectedSlot && (
+          <div className="space-y-6">
+            
+            {/* General Info Card */}
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+              <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-2">
+                <span className="text-slate-500 font-semibold">Location Floor</span>
+                <span className="font-bold text-slate-800">{selectedSlot.floorName}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-2">
+                <span className="text-slate-500 font-semibold">Vehicle Class</span>
+                <span className="font-bold text-slate-800">{selectedSlot.type}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-semibold">State</span>
+                <Tag color={selectedSlot.status === 'Available' ? 'success' : selectedSlot.status === 'Occupied' ? 'error' : 'warning'} className="m-0 font-bold border-0">
+                  {selectedSlot.status.toUpperCase()}
+                </Tag>
+              </div>
+            </div>
+
+            {/* Content based on status */}
+            {(selectedSlot.status === 'Occupied' || selectedSlot.status === 'Reserved') && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider">Occupant Data</h4>
+                
+                {detailLoading ? (
+                  <div className="flex flex-col items-center justify-center p-6 gap-2">
+                    <Spin size="default" />
+                    <span className="text-xs text-slate-500">Retrieving from database...</span>
+                  </div>
+                ) : slotDetail?.activeSession ? (
+                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl space-y-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Car size={16} className="text-blue-600" />
+                      <span className="font-mono text-lg font-black text-blue-800">
+                        {slotDetail.activeSession.licenseVehicle}
+                      </span>
+                    </div>
+
+                    {slotDetail.activeSession.checkInTime && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock size={14} className="text-blue-400" />
+                        <span className="text-slate-600">In: {new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
+                      </div>
+                    )}
+
+                    {slotDetail.activeSession.customer && (
+                      <div className="pt-3 mt-2 border-t border-blue-200/50">
+                        <div className="flex items-center gap-2 text-sm">
+                          <User size={14} className="text-blue-400" />
+                          <span className="font-bold text-slate-700">{slotDetail.activeSession.customer.username}</span>
+                        </div>
+                        <div className="text-xs text-slate-500 pl-6 mt-1">
+                          {slotDetail.activeSession.customer.phoneNumber}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 p-4 rounded-xl text-center text-xs font-medium text-slate-400">
+                    No active session details found.
+                  </div>
+                )}
+
+                {/* Force Release Action */}
+                <div className="pt-4 border-t border-slate-200">
+                  <h4 className="text-xs font-extrabold uppercase text-rose-400 tracking-wider mb-3">Admin Overrides</h4>
+                  <Popconfirm
+                    title="Force release this slot?"
+                    description="This bypasses payment and frees the slot. Use only for errors."
+                    onConfirm={handleForceRelease}
+                    okText="Yes, Force Release"
+                    cancelText="Cancel"
+                    okButtonProps={{ danger: true }}
+                  >
+                    <Button 
+                      danger 
+                      block 
+                      size="large"
+                      loading={actionLoading}
+                      icon={<Unlock size={16} />}
+                      className="font-bold shadow-sm"
+                    >
+                      Force Release (Override)
+                    </Button>
+                  </Popconfirm>
+                  <p className="text-[10px] text-slate-400 text-center mt-2">
+                    Action logged under your Manager ID.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {selectedSlot.status === 'Available' && (
+              <div className="pt-2">
+                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-3">Space Controls</h4>
+                <Space direction="vertical" className="w-full" size="middle">
+                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex flex-col gap-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="font-bold text-amber-800 text-sm">Maintenance Lock</div>
+                        <div className="text-xs text-amber-600 mt-0.5">Prevent new check-ins for repairs.</div>
+                      </div>
+                    </div>
+                    <Button 
+                      block 
+                      loading={actionLoading}
+                      onClick={() => handleMockAction('Maintenance Lock')}
+                      className="bg-amber-500 hover:bg-amber-600 text-white border-0 font-bold"
+                    >
+                      Lock for Maintenance
+                    </Button>
+                  </div>
+
+                  <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 flex flex-col gap-3">
+                    <div className="flex items-start gap-2">
+                      <Key size={16} className="text-purple-500 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="font-bold text-purple-800 text-sm">VIP Reservation</div>
+                        <div className="text-xs text-purple-600 mt-0.5">Hold this slot indefinitely for guests.</div>
+                      </div>
+                    </div>
+                    <Button 
+                      block 
+                      loading={actionLoading}
+                      onClick={() => handleMockAction('VIP Reservation')}
+                      className="bg-purple-600 hover:bg-purple-700 text-white border-0 font-bold"
+                    >
+                      Reserve for VIP
+                    </Button>
+                  </div>
+                </Space>
+              </div>
+            )}
+
+          </div>
+        )}
+      </Drawer>
+    </div>
+  );
+};
+
+export default LiveStatusTable;

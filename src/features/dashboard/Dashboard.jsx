@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { parkingService } from '../../services/mockData';
 import { managerService } from '../../services/managerService';
 import ParkingLotMap from '../parking-map/ParkingLotMap';
+import LiveStatusTable from './LiveStatusTable';
+import IncidentsTable from './IncidentsTable';
 import { 
   ShieldAlert, 
   Car, 
@@ -225,12 +227,14 @@ const Dashboard = () => {
       const width = 380;
       const paddingLeft = 40;
       const paddingTop = 10;
+      const hPadding = 35;
       const chartWidth = width - paddingLeft;
+      const usableWidth = chartWidth - 2 * hPadding;
       const chartHeight = height - paddingTop - 20;
 
       const getPathPoints = (key) => {
         return trafficStats.map((item, idx) => {
-          const x = paddingLeft + (idx / Math.max(1, trafficStats.length - 1)) * chartWidth;
+          const x = paddingLeft + hPadding + (idx / Math.max(1, trafficStats.length - 1)) * usableWidth;
           const val = item[key] || 0;
           const y = height - 20 - (val / maxTraffic) * chartHeight;
           return { x, y };
@@ -285,13 +289,15 @@ const Dashboard = () => {
             {checkOutPath && <path d={checkOutPath} fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
 
             {/* X Axis labels */}
-            {trafficStats.length > 0 && [0, Math.floor(trafficStats.length / 2), trafficStats.length - 1].map((idx) => {
-              if (idx < 0 || idx >= trafficStats.length) return null;
-              const item = trafficStats[idx];
-              const x = paddingLeft + (idx / (trafficStats.length - 1)) * chartWidth;
+            {trafficStats.length > 0 && trafficStats.map((item, idx) => {
+              const x = paddingLeft + hPadding + (idx / Math.max(1, trafficStats.length - 1)) * usableWidth;
+              // To prevent overlap if there are many dates, we could rotate or skip. For now, render all.
+              // If we have more than 7 items, only show a subset or rotate.
+              if (trafficStats.length > 7 && idx % Math.ceil(trafficStats.length / 7) !== 0 && idx !== trafficStats.length - 1) return null;
+              
               return (
-                <text key={idx} x={x} y={height - 4} className="text-[8px] font-bold fill-slate-400" textAnchor="middle">
-                  {item.timeLabel}
+                <text key={idx} x={x} y={height - 2} className="text-[8px] font-bold fill-slate-400" textAnchor="middle">
+                  {item.timeLabel.replace(/^\d{4}-/, '')} 
                 </text>
               );
             })}
@@ -319,10 +325,12 @@ const Dashboard = () => {
       const width = 380;
       const paddingLeft = 50;
       const paddingTop = 10;
+      const hPadding = 35;
       const chartWidth = width - paddingLeft;
+      const usableWidth = chartWidth - 2 * hPadding;
       const chartHeight = height - paddingTop - 20;
 
-      const barWidth = Math.max(4, Math.min(24, (chartWidth / trafficStats.length) * 0.6));
+      const barWidth = Math.max(4, Math.min(24, (usableWidth / trafficStats.length) * 0.6));
       
       return (
         <div className="space-y-2">
@@ -332,7 +340,6 @@ const Dashboard = () => {
               const y = paddingTop + pct * chartHeight;
               const val = maxRevenue * (1 - pct);
               let valStr = val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${Math.round(val / 1000)}k` : Math.round(val);
-              if (maxRevenue === 10000) valStr = "0";
               return (
                 <g key={i}>
                   <line x1={paddingLeft} y1={y} x2={width} y2={y} stroke="#F1F5F9" strokeWidth="1" />
@@ -343,7 +350,7 @@ const Dashboard = () => {
 
             {/* Bars */}
             {trafficStats.map((item, idx) => {
-              const xCenter = paddingLeft + (idx / Math.max(1, trafficStats.length - 1)) * chartWidth;
+              const xCenter = paddingLeft + hPadding + (idx / Math.max(1, trafficStats.length - 1)) * usableWidth;
               const x = xCenter - barWidth / 2;
               const val = item.revenueGenerated || 0;
               const barHeight = (val / maxRevenue) * chartHeight;
@@ -365,13 +372,13 @@ const Dashboard = () => {
             })}
 
             {/* X Axis labels */}
-            {trafficStats.length > 0 && [0, Math.floor(trafficStats.length / 2), trafficStats.length - 1].map((idx) => {
-              if (idx < 0 || idx >= trafficStats.length) return null;
-              const item = trafficStats[idx];
-              const x = paddingLeft + (idx / (trafficStats.length - 1)) * chartWidth;
+            {trafficStats.length > 0 && trafficStats.map((item, idx) => {
+              const x = paddingLeft + hPadding + (idx / Math.max(1, trafficStats.length - 1)) * usableWidth;
+              if (trafficStats.length > 7 && idx % Math.ceil(trafficStats.length / 7) !== 0 && idx !== trafficStats.length - 1) return null;
+              
               return (
-                <text key={idx} x={x} y={height - 4} className="text-[8px] font-bold fill-slate-400" textAnchor="middle">
-                  {item.timeLabel}
+                <text key={idx} x={x} y={height - 2} className="text-[8px] font-bold fill-slate-400" textAnchor="middle">
+                  {item.timeLabel.replace(/^\d{4}-/, '')}
                 </text>
               );
             })}
@@ -627,15 +634,9 @@ const Dashboard = () => {
 
           </div>
         ) : subTab === 'Live Status' ? (
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800">Interactive Parking Map</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Real-time occupancy status per floor & zone</p>
-              </div>
-            </div>
-            <ParkingLotMap />
-          </div>
+          <LiveStatusTable />
+        ) : subTab === 'Incidents' ? (
+          <IncidentsTable />
         ) : subTab === 'Analytics' ? (
           <div className="space-y-6">
             {/* Filter Card */}
