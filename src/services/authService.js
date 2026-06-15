@@ -32,7 +32,7 @@ export const authService = {
 
       // Gửi request lên Backend
       const response = await api.post('/Auth/login', payload);
-      
+
       const data = response.data;
       return {
         token: data.token || data.Token,
@@ -42,10 +42,10 @@ export const authService = {
       };
     } catch (error) {
       // Bóc tách chi tiết lỗi Validation trả về từ .NET (nếu có)
-      const serverMessage = error.response?.data?.error || 
-                            error.response?.data?.title || 
-                            error.response?.data?.message || 
-                            (error.response?.data?.errors ? Object.values(error.response.data.errors).flat().join(', ') : null);
+      const serverMessage = error.response?.data?.error ||
+        error.response?.data?.title ||
+        error.response?.data?.message ||
+        (error.response?.data?.errors ? Object.values(error.response.data.errors).flat().join(', ') : null);
       throw serverMessage || "Đăng nhập thất bại. Vui lòng kiểm tra lại!";
     }
   },
@@ -74,7 +74,7 @@ export const authService = {
         otpCode: otpCode.trim()
       };
       const response = await api.post('/Auth/verify-otp', payload);
-      
+
       const data = response.data;
       return {
         token: data.token || data.Token,
@@ -88,7 +88,31 @@ export const authService = {
     }
   },
 
-  // 4. Hàm Đăng xuất
+  // 4. Hàm Đăng nhập bằng Google
+  loginWithGoogle: async (idToken) => {
+    try {
+      const payload = {
+        idToken: idToken
+      };
+      
+      const response = await api.post('/Auth/google', payload);
+      const data = response.data;
+      
+      return {
+        token: data.token || data.Token,
+        username: data.username || data.Username,
+        email: data.email || data.Email,
+        roleName: data.roleName || data.RoleName
+      };
+    } catch (error) {
+      const serverMessage = error.response?.data?.error || 
+                            error.response?.data?.message || 
+                            error.response?.data?.title;
+      throw serverMessage || "Đăng nhập Google thất bại. Vui lòng thử lại!";
+    }
+  },
+
+  // 5. Hàm Đăng xuất
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('spotflow_user');
