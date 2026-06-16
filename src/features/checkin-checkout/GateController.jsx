@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Input, Select, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { parkingService } from '../../services/parkingService';
+import Webcam from 'react-webcam';
+import Tesseract from 'tesseract.js';
 import { 
   CheckCircle, 
   CreditCard, 
@@ -11,6 +13,166 @@ import {
 } from 'lucide-react';
 import TicketModal from './TicketModal';
 
+
+const scanKeyframes = `
+@keyframes laserScan {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-laser-scan {
+  animation: laserScan 1.5s linear infinite;
+}
+`;
+
+const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, ocrResult, onTurnOn, isWebcamOn, onUpload, onRetry }) => {
+  const webcamRef = React.useRef(null);
+  
+  const theme = {
+    emerald: {
+      border: "border-emerald-500",
+      borderHover: "hover:border-emerald-500 hover:text-emerald-600",
+      bg: "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/40",
+      text: "text-emerald-400",
+      borderSoft: "border-emerald-500/30",
+      shadowHex: "#34d399",
+      bgLaser: "bg-emerald-400"
+    },
+    rose: {
+      border: "border-rose-500",
+      borderHover: "hover:border-rose-500 hover:text-rose-600",
+      bg: "bg-rose-600 hover:bg-rose-500 shadow-rose-600/40",
+      text: "text-rose-400",
+      borderSoft: "border-rose-500/30",
+      shadowHex: "#fb7185",
+      bgLaser: "bg-rose-400"
+    }
+  }[color];
+
+  const handleCaptureClick = () => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      onCapture(imageSrc);
+    }
+  };
+
+  return (
+    <>
+      <style>{scanKeyframes}</style>
+      <div className={`relative aspect-video rounded-lg overflow-hidden bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-slate-500 gap-1.5 group hover:border-slate-700 transition-colors mb-4 ${isWebcamOn ? '' : 'p-2'}`}>
+        {isWebcamOn ? (
+          <>
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              videoConstraints={{ facingMode: "environment" }}
+              className="w-full h-full object-cover"
+            />
+            <div className={`absolute inset-0 pointer-events-none border ${theme.borderSoft}`}>
+              <div className={`absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 ${theme.border}`}></div>
+              <div className={`absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 ${theme.border}`}></div>
+              <div className={`absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 ${theme.border}`}></div>
+              <div className={`absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 ${theme.border}`}></div>
+            </div>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+              <button
+                type="button"
+                onClick={handleCaptureClick}
+                className={`${theme.bg} text-white rounded-full p-3 shadow-lg border-2 border-white/20 transition-all active:scale-95`}
+              >
+                <div className="w-6 h-6 border-2 border-white rounded-full"></div>
+              </button>
+            </div>
+          </>
+        ) : previewUrl ? (
+          <>
+            <img src={previewUrl} alt="Vehicle" className="w-full h-full object-cover rounded-lg" />
+            
+            {isScanning && (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
+                <div className={`w-full h-0.5 ${theme.bgLaser} absolute left-0 animate-laser-scan shadow-[0_0_15px_${theme.shadowHex}]`}></div>
+                <div className="absolute inset-0 bg-blue-500/10 animate-pulse mix-blend-overlay"></div>
+              </div>
+            )}
+
+            {ocrResult && !isScanning && (
+              <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-16 border-2 border-yellow-400 rounded bg-yellow-400/10 flex items-end justify-center pb-1 shadow-[0_0_15px_rgba(250,204,21,0.4)]`}>
+                <div className="absolute -top-3 right-0 bg-yellow-400 text-slate-900 text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                  ALPR 98.5%
+                </div>
+              </div>
+            )}
+
+            <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-slate-900/90 px-2 py-1 rounded flex items-center justify-between text-[10px] font-mono shadow-md">
+              <span className="text-white/60 font-bold uppercase text-[8px]">{type}</span>
+              <span className={`font-semibold truncate max-w-[180px] ${ocrResult && !isScanning ? 'text-yellow-400' : 'text-slate-500'}`}>
+                {isScanning ? 'AI SCANNING...' : (ocrResult || 'LOCAL IMAGE')}
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            <MonitorPlay size={22} className={`text-slate-700 group-hover:${theme.text} transition-colors`} />
+            <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase text-center">{type} Image Preview</span>
+            <span className="text-[8px] text-slate-600 font-bold tracking-widest uppercase">Start camera or upload</span>
+          </>
+        )}
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        {!isWebcamOn && !previewUrl && (
+          <>
+            <Button 
+              onClick={onTurnOn}
+              className={`flex-1 h-10 border-slate-200 ${theme.borderHover} rounded-lg flex items-center justify-center gap-1.5 font-bold shadow-sm`}
+            >
+              Turn On Camera
+            </Button>
+            <Upload
+              accept="image/*"
+              beforeUpload={(file) => {
+                const isImage = file.type.startsWith('image/');
+                if (!isImage) { message.error('You can only upload image files!'); return Upload.LIST_IGNORE; }
+                if (file.size / 1024 / 1024 >= 5) { message.error('Image must be smaller than 5MB!'); return Upload.LIST_IGNORE; }
+                onUpload(file);
+                return false;
+              }}
+              showUploadList={false}
+              className="flex-1 flex"
+            >
+              <Button className="w-full h-10 border-slate-200 hover:border-blue-500 hover:text-blue-600 rounded-lg flex items-center justify-center gap-1.5 font-bold shadow-sm">
+                Upload File
+              </Button>
+            </Upload>
+          </>
+        )}
+        
+        {(isWebcamOn || previewUrl) && !isScanning && (
+          <div className="flex gap-2 w-full">
+            {previewUrl && onRetry && (
+              <Button
+                onClick={onRetry}
+                className="flex-1 h-10 text-blue-500 border-slate-200 hover:text-blue-600 hover:border-blue-500 rounded-lg font-bold"
+              >
+                Retry
+              </Button>
+            )}
+            <Button
+              onClick={onClear}
+              className="flex-1 h-10 text-slate-500 border-slate-200 hover:text-rose-500 hover:border-rose-500 rounded-lg font-bold"
+            >
+              {isWebcamOn ? 'Turn Off Camera' : 'Clear Data'}
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+
 const GateController = () => {
   const [slots, setSlots] = useState([]);
   const [checkInForm] = Form.useForm();
@@ -20,6 +182,50 @@ const GateController = () => {
   // Frontend-only image upload/preview states
   const [entryImagePreviewUrl, setEntryImagePreviewUrl] = useState(null);
   const [exitImagePreviewUrl, setExitImagePreviewUrl] = useState(null);
+
+  const [entryWebcamOn, setEntryWebcamOn] = useState(false);
+  const [entryScanning, setEntryScanning] = useState(false);
+  const [entryOcrResult, setEntryOcrResult] = useState(null);
+
+  const [exitWebcamOn, setExitWebcamOn] = useState(false);
+  const [exitScanning, setExitScanning] = useState(false);
+  const [exitOcrResult, setExitOcrResult] = useState(null);
+
+  const parseLicensePlateFromImage = async (imageSrc) => {
+    try {
+      const result = await Tesseract.recognize(
+        imageSrc,
+        'eng',
+        { logger: m => console.log(m) }
+      );
+      const text = result.data.text;
+      const cleaned = text.replace(/[^A-Z0-9]/ig, '').toUpperCase();
+      
+      const match = cleaned.match(/\d{2}[A-Z0-9]{1,2}\d{4,5}/);
+      if (match) {
+        const raw = match[0];
+        if (raw.length === 7) return `${raw.slice(0,3)}-${raw.slice(3)}`;
+        if (raw.length === 8) return `${raw.slice(0,3)}-${raw.slice(3,6)}.${raw.slice(6)}`;
+        if (raw.length === 9) return `${raw.slice(0,4)}-${raw.slice(4,7)}.${raw.slice(7)}`;
+        return raw;
+      }
+      
+      const blocks = text.split(/[\s\n]+/).map(b => b.replace(/[^A-Z0-9]/ig, '').toUpperCase()).filter(b => b.length >= 3);
+      if (blocks.length > 0) {
+        const combined = blocks.join('');
+        if (combined.length >= 7 && combined.length <= 10) {
+           if (combined.length === 8) return `${combined.slice(0,3)}-${combined.slice(3,6)}.${combined.slice(6)}`;
+           if (combined.length === 9) return `${combined.slice(0,4)}-${combined.slice(4,7)}.${combined.slice(7)}`;
+           return combined;
+        }
+        return combined.slice(0, 9);
+      }
+      return null;
+    } catch (err) {
+      console.error("OCR Error:", err);
+      return null;
+    }
+  };
 
   // Checkout result and verification modal states
   const [checkoutResult, setCheckoutResult] = useState(null);
@@ -451,75 +657,65 @@ const GateController = () => {
             className="shadow-sm border border-slate-200"
             bodyStyle={{ padding: '20px' }}
           >
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-slate-500 gap-1.5 p-2 group hover:border-slate-700 transition-colors mb-4">
-              {entryImagePreviewUrl ? (
-                <img src={entryImagePreviewUrl} alt="Entry uploaded vehicle" className="w-full h-full object-cover rounded-lg" />
-              ) : (
-                <>
-                  <MonitorPlay size={22} className="text-slate-700 group-hover:text-emerald-400 transition-colors" />
-                  <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase text-center">Entry Image Preview</span>
-                  <span className="text-[8px] text-slate-600 font-bold tracking-widest uppercase">Upload vehicle image</span>
-                </>
-              )}
-              {entryImagePreviewUrl && (
-                <div className="absolute inset-0 pointer-events-none border border-emerald-500/30">
-                  <div className="absolute top-2 left-2 w-2 h-2 border-t-2 border-l-2 border-emerald-500"></div>
-                  <div className="absolute top-2 right-2 w-2 h-2 border-t-2 border-r-2 border-emerald-500"></div>
-                  <div className="absolute bottom-2 left-2 w-2 h-2 border-b-2 border-l-2 border-emerald-500"></div>
-                  <div className="absolute bottom-2 right-2 w-2 h-2 border-b-2 border-r-2 border-emerald-500"></div>
-                </div>
-              )}
-              <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-slate-900/90 px-2 py-1 rounded flex items-center justify-between text-[10px] font-mono shadow-md">
-                <span className="text-white/60 font-bold uppercase text-[8px]">ENTRY</span>
-                <span className={`font-semibold truncate max-w-[180px] ${entryImagePreviewUrl ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  {entryImagePreviewUrl ? 'LOCAL UPLOAD' : 'NO IMAGE'}
-                </span>
-              </div>
-            </div>
-
-            {/* Entry Gate local image upload */}
-            <div className="flex gap-3 mb-4">
-              <Upload
-                accept="image/*"
-                beforeUpload={(file) => {
-                  const isImage = file.type.startsWith('image/');
-                  if (!isImage) {
-                    message.error('You can only upload image files!');
-                    return Upload.LIST_IGNORE;
-                  }
-                  const isLt5M = file.size / 1024 / 1024 < 5;
-                  if (!isLt5M) {
-                    message.error('Image must be smaller than 5MB!');
-                    return Upload.LIST_IGNORE;
-                  }
-                  if (entryImagePreviewUrl) {
-                    URL.revokeObjectURL(entryImagePreviewUrl);
-                  }
-                  const url = URL.createObjectURL(file);
-                  setEntryImagePreviewUrl(url);
-                  return false;
-                }}
-                showUploadList={false}
-                className="w-full flex-1"
-              >
-                <Button className="w-full h-10 border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-lg flex items-center justify-center gap-1.5 font-bold shadow-sm">
-                  Upload Entry Image
-                </Button>
-              </Upload>
-              {entryImagePreviewUrl && (
-                <Button
-                  onClick={() => {
-                    if (entryImagePreviewUrl) {
-                      URL.revokeObjectURL(entryImagePreviewUrl);
-                      setEntryImagePreviewUrl(null);
-                    }
-                  }}
-                  className="h-10 text-slate-500 border-slate-200 hover:text-rose-500 hover:border-rose-500 rounded-lg font-bold"
-                >
-                  Clear Image
-                </Button>
-              )}
-            </div>
+            <SmartCamera
+              type="Entry"
+              color="emerald"
+              isWebcamOn={entryWebcamOn}
+              onTurnOn={() => setEntryWebcamOn(true)}
+              previewUrl={entryImagePreviewUrl}
+              isScanning={entryScanning}
+              ocrResult={entryOcrResult}
+              onCapture={async (imageSrc) => {
+                setEntryWebcamOn(false);
+                setEntryImagePreviewUrl(imageSrc);
+                setEntryScanning(true);
+                setEntryOcrResult(null);
+                const plate = await parseLicensePlateFromImage(imageSrc);
+                setEntryScanning(false);
+                if (plate) {
+                  setEntryOcrResult(plate);
+                  checkInForm.setFieldsValue({ plate });
+                  message.success(`ALPR: Detected License Plate ${plate}`);
+                } else {
+                  setEntryOcrResult("UNRECOGNIZED");
+                  message.warning("ALPR: Could not clearly read license plate.");
+                }
+              }}
+              onUpload={async (file) => {
+                const url = URL.createObjectURL(file);
+                setEntryImagePreviewUrl(url);
+                setEntryWebcamOn(false);
+                setEntryScanning(true);
+                setEntryOcrResult(null);
+                const plate = await parseLicensePlateFromImage(url);
+                setEntryScanning(false);
+                if (plate) {
+                  setEntryOcrResult(plate);
+                  checkInForm.setFieldsValue({ plate });
+                  message.success(`ALPR: Detected License Plate ${plate}`);
+                } else {
+                  setEntryOcrResult("UNRECOGNIZED");
+                  message.warning("ALPR: Could not clearly read license plate.");
+                }
+              }}
+              onClear={() => {
+                if (entryImagePreviewUrl) {
+                  URL.revokeObjectURL(entryImagePreviewUrl);
+                  setEntryImagePreviewUrl(null);
+                }
+                setEntryWebcamOn(false);
+                setEntryOcrResult(null);
+                checkInForm.setFieldsValue({ plate: '' });
+              }}
+              onRetry={() => {
+                if (entryImagePreviewUrl) {
+                  URL.revokeObjectURL(entryImagePreviewUrl);
+                  setEntryImagePreviewUrl(null);
+                }
+                setEntryOcrResult(null);
+                setEntryWebcamOn(true);
+              }}
+            />
 
             {/* Check-In Mode Toggle */}
             <div className="p-1 bg-slate-100 border border-slate-200/80 rounded-xl grid grid-cols-2 gap-1 mb-4 shadow-inner">
@@ -647,75 +843,65 @@ const GateController = () => {
             className="shadow-sm border border-slate-200"
             bodyStyle={{ padding: '20px' }}
           >
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-slate-500 gap-1.5 p-2 group hover:border-slate-700 transition-colors mb-4">
-              {exitImagePreviewUrl ? (
-                <img src={exitImagePreviewUrl} alt="Exit uploaded vehicle" className="w-full h-full object-cover rounded-lg" />
-              ) : (
-                <>
-                  <MonitorPlay size={22} className="text-slate-700 group-hover:text-rose-400 transition-colors" />
-                  <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase text-center">Exit Image Preview</span>
-                  <span className="text-[8px] text-slate-600 font-bold tracking-widest uppercase">Upload vehicle image</span>
-                </>
-              )}
-              {exitImagePreviewUrl && (
-                <div className="absolute inset-0 pointer-events-none border border-rose-500/30">
-                  <div className="absolute top-2 left-2 w-2 h-2 border-t-2 border-l-2 border-rose-500"></div>
-                  <div className="absolute top-2 right-2 w-2 h-2 border-t-2 border-r-2 border-rose-500"></div>
-                  <div className="absolute bottom-2 left-2 w-2 h-2 border-b-2 border-l-2 border-rose-500"></div>
-                  <div className="absolute bottom-2 right-2 w-2 h-2 border-b-2 border-r-2 border-rose-500"></div>
-                </div>
-              )}
-              <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-slate-900/90 px-2 py-1 rounded flex items-center justify-between text-[10px] font-mono shadow-md">
-                <span className="text-white/60 font-bold uppercase text-[8px]">EXIT</span>
-                <span className={`font-semibold truncate max-w-[180px] ${exitImagePreviewUrl ? 'text-rose-400' : 'text-slate-500'}`}>
-                  {exitImagePreviewUrl ? 'LOCAL UPLOAD' : 'NO IMAGE'}
-                </span>
-              </div>
-            </div>
-
-            {/* Exit Gate local image upload */}
-            <div className="flex gap-3 mb-4">
-              <Upload
-                accept="image/*"
-                beforeUpload={(file) => {
-                  const isImage = file.type.startsWith('image/');
-                  if (!isImage) {
-                    message.error('You can only upload image files!');
-                    return Upload.LIST_IGNORE;
-                  }
-                  const isLt5M = file.size / 1024 / 1024 < 5;
-                  if (!isLt5M) {
-                    message.error('Image must be smaller than 5MB!');
-                    return Upload.LIST_IGNORE;
-                  }
-                  if (exitImagePreviewUrl) {
-                    URL.revokeObjectURL(exitImagePreviewUrl);
-                  }
-                  const url = URL.createObjectURL(file);
-                  setExitImagePreviewUrl(url);
-                  return false;
-                }}
-                showUploadList={false}
-                className="w-full flex-1"
-              >
-                <Button className="w-full h-10 border-slate-200 hover:border-rose-500 hover:text-rose-600 rounded-lg flex items-center justify-center gap-1.5 font-bold shadow-sm">
-                  Upload Exit Image
-                </Button>
-              </Upload>
-              {exitImagePreviewUrl && (
-                <Button
-                  onClick={() => {
-                    if (exitImagePreviewUrl) {
-                      URL.revokeObjectURL(exitImagePreviewUrl);
-                      setExitImagePreviewUrl(null);
-                    }
-                  }}
-                  className="h-10 text-slate-505 border-slate-200 hover:text-rose-500 hover:border-rose-500 rounded-lg font-bold"
-                >
-                  Clear Image
-                </Button>
-              )}
-            </div>
+            <SmartCamera
+              type="Exit"
+              color="rose"
+              isWebcamOn={exitWebcamOn}
+              onTurnOn={() => setExitWebcamOn(true)}
+              previewUrl={exitImagePreviewUrl}
+              isScanning={exitScanning}
+              ocrResult={exitOcrResult}
+              onCapture={async (imageSrc) => {
+                setExitWebcamOn(false);
+                setExitImagePreviewUrl(imageSrc);
+                setExitScanning(true);
+                setExitOcrResult(null);
+                const plate = await parseLicensePlateFromImage(imageSrc);
+                setExitScanning(false);
+                if (plate) {
+                  setExitOcrResult(plate);
+                  checkOutForm.setFieldsValue({ plate });
+                  message.success(`ALPR: Detected License Plate ${plate}`);
+                } else {
+                  setExitOcrResult("UNRECOGNIZED");
+                  message.warning("ALPR: Could not clearly read license plate.");
+                }
+              }}
+              onUpload={async (file) => {
+                const url = URL.createObjectURL(file);
+                setExitImagePreviewUrl(url);
+                setExitWebcamOn(false);
+                setExitScanning(true);
+                setExitOcrResult(null);
+                const plate = await parseLicensePlateFromImage(url);
+                setExitScanning(false);
+                if (plate) {
+                  setExitOcrResult(plate);
+                  checkOutForm.setFieldsValue({ plate });
+                  message.success(`ALPR: Detected License Plate ${plate}`);
+                } else {
+                  setExitOcrResult("UNRECOGNIZED");
+                  message.warning("ALPR: Could not clearly read license plate.");
+                }
+              }}
+              onClear={() => {
+                if (exitImagePreviewUrl) {
+                  URL.revokeObjectURL(exitImagePreviewUrl);
+                  setExitImagePreviewUrl(null);
+                }
+                setExitWebcamOn(false);
+                setExitOcrResult(null);
+                checkOutForm.setFieldsValue({ plate: '' });
+              }}
+              onRetry={() => {
+                if (exitImagePreviewUrl) {
+                  URL.revokeObjectURL(exitImagePreviewUrl);
+                  setExitImagePreviewUrl(null);
+                }
+                setExitOcrResult(null);
+                setExitWebcamOn(true);
+              }}
+            />
 
             {/* Check-Out Form */}
             <Form
