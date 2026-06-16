@@ -9,6 +9,7 @@ const PaymentSuccess = () => {
 
   // Extract query parameters
   const vnpResponseCode = searchParams.get('vnp_ResponseCode');
+   const vnpTxnRef = searchParams.get('vnp_TxnRef') || '';
   const invoiceId = searchParams.get('invoiceId') || localStorage.getItem('pending_invoice_id');
 
   // Page States: 'polling' | 'success_deposit' | 'success_exit' | 'failed' | 'timeout'
@@ -20,7 +21,17 @@ const PaymentSuccess = () => {
   // Polling logic to confirm with C# Backend
   useEffect(() => {
     if (!invoiceId) {
-      setPaymentState('failed');
+      if (vnpResponseCode === '00') {
+        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng)
+        if (vnpTxnRef.startsWith('DEP')) {
+          setPaymentState('success_deposit');
+          fetchBookingDetails();
+        } else {
+          setPaymentState('success_exit');
+        }
+      } else {
+        setPaymentState('failed');
+      }
       return;
     }
 
@@ -114,18 +125,18 @@ const PaymentSuccess = () => {
   return (
     <div className="min-h-screen w-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-sans select-none relative overflow-hidden">
       {/* Decorative background grid and blurs */}
-      <div 
-        className="absolute inset-0 opacity-[0.02] pointer-events-none" 
-        style={{ 
+      <div
+        className="absolute inset-0 opacity-[0.02] pointer-events-none"
+        style={{
           backgroundImage: 'radial-gradient(#10B981 2px, transparent 2px)',
-          backgroundSize: '24px 24px' 
+          backgroundSize: '24px 24px'
         }}
       />
       <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] bg-emerald-400/5 rounded-full blur-[80px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-sky-500/5 rounded-full blur-[80px] pointer-events-none" />
 
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 z-10 text-center space-y-6">
-        
+
         {/* State 1: Polling backend status */}
         {paymentState === 'polling' && (
           <div className="py-12 space-y-6">

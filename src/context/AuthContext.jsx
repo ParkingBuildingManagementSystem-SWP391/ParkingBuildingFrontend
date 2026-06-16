@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const savedUser = localStorage.getItem('spotflow_user');
         const savedRole = localStorage.getItem('spotflow_role');
-        
+
         if (savedUser && savedUser !== "undefined" && savedRole && savedRole !== "undefined") {
           try {
             // Khối catch riêng biệt để xử lý nếu chuỗi JSON bị lỗi cấu trúc, tránh làm sập app
@@ -52,53 +52,53 @@ export const AuthProvider = ({ children }) => {
 
 
   const loginWithGoogle = async (googleIdToken) => {
-  try {
-    const data = await authService.loginWithGoogle(googleIdToken);
-    
-    if (!data) {
-      throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
+    try {
+      const data = await authService.loginWithGoogle(googleIdToken);
+
+      if (!data) {
+        throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
+      }
+
+      const rawRole = data.roleName || data.RoleName || "Registered_Driver";
+      const matchedUser = {
+        username: data.username || data.Username || "Google User",
+        role: rawRole
+      };
+
+      // Cập nhật State cho Frontend
+      setUser(matchedUser);
+      setRole(matchedUser.role);
+
+      // Lưu trữ thông tin
+      const tokenString = data.token || data.Token;
+      if (tokenString) {
+        localStorage.setItem('token', tokenString);
+      }
+      localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
+      localStorage.setItem('spotflow_role', matchedUser.role);
+      localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
+
+      return { success: true, user: matchedUser };
+    } catch (error) {
+      console.error("Lỗi xác thực Google SSO:", error);
+      return { success: false, message: error || "Đăng nhập Google thất bại!" };
     }
-    
-    const rawRole = data.roleName || data.RoleName || "Registered_Driver";
-    const matchedUser = {
-      username: data.username || data.Username || "Google User",
-      role: rawRole
-    };
-
-    // Cập nhật State cho Frontend
-    setUser(matchedUser);
-    setRole(matchedUser.role);
-
-    // Lưu trữ thông tin
-    const tokenString = data.token || data.Token;
-    if (tokenString) {
-      localStorage.setItem('token', tokenString);
-    }
-    localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
-    localStorage.setItem('spotflow_role', matchedUser.role);
-    localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
-
-    return { success: true, user: matchedUser };
-  } catch (error) {
-    console.error("Lỗi xác thực Google SSO:", error);
-    return { success: false, message: error || "Đăng nhập Google thất bại!" };
-  }
-};
+  };
 
   /**
    * Hàm Login kết nối trực tiếp với API Backend thật (.NET)
    */
   const login = async (usernameOrEmail, password) => {
     try {
-      const data = await authService.login({ 
-        usernameOrEmail: usernameOrEmail, 
-        password: password 
+      const data = await authService.login({
+        usernameOrEmail: usernameOrEmail,
+        password: password
       });
-      
+
       if (!data) {
         throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
       }
-      
+
       const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
       const matchedUser = {
         username: data.username || data.Username || (typeof usernameOrEmail === 'string' ? usernameOrEmail.split('@')[0] : "User"),
@@ -131,13 +131,13 @@ export const AuthProvider = ({ children }) => {
    */
   const loginWithUserData = (data) => {
     if (!data) return;
-    
+
     const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
     const matchedUser = {
       username: data.username || data.Username || data.email?.split('@')[0] || "User",
       role: rawRole
     };
-    
+
     setUser(matchedUser);
     setRole(matchedUser.role);
 
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  const value = { user, role, loading, login,  loginWithGoogle, loginWithUserData, logout, switchRole, updateUser };
+  const value = { user, role, loading, login, loginWithGoogle, loginWithUserData, logout, switchRole, updateUser };
 
   return (
     <AuthContext.Provider value={value}>
