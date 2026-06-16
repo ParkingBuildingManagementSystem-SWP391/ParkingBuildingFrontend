@@ -37,12 +37,12 @@ const Login = () => {
       localStorage.setItem('spotflow_guest_isAuthenticated', 'true');
       
       // Chuyển hướng người dùng dựa vào quyền (Role) trả về từ Database thật
-      if (res.user.role === 'Admin') {
+      if (res.user.role === 'Admin' || res.user.role === 'Manager') {
         navigate('/dashboard');
       } else if (res.user.role === 'Staff') {
-        navigate('/staff-management');
+        navigate('/checkin-checkout');
       } else {
-        navigate('/dashboard'); // Hoặc trang bản đồ /guest-parking-map tùy bạn phân phối
+        navigate('/parking-map');
       }
     } else {
       // Hiển thị nội dung lỗi thật từ Backend (ví dụ: "Tài khoản hoặc mật khẩu không chính xác")
@@ -64,12 +64,12 @@ const Login = () => {
       message.success('Đăng nhập qua Google thành công!');
       
       // Chuyển hướng người dùng dựa vào quyền (Role) trả về từ Database thật
-      if (res.user.role === 'Admin') {
+      if (res.user.role === 'Admin' || res.user.role === 'Manager') {
         navigate('/dashboard');
       } else if (res.user.role === 'Staff') {
-        navigate('/staff-management');
+        navigate('/checkin-checkout');
       } else {
-        navigate('/dashboard');
+        navigate('/parking-map');
       }
     } else {
       setErrorMsg(res.message || 'Lỗi xác thực Google. Vui lòng thử lại!');
