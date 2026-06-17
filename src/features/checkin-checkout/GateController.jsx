@@ -609,7 +609,7 @@ const GateController = () => {
       title: 'Entry Time',
       dataIndex: ['occupiedBy', 'checkInTime'],
       key: 'checkInTime',
-      render: (text) => text ? new Date(text).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'
+      render: (text) => text ? new Date(text).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'
     },
     {
       title: 'Actions',
@@ -778,7 +778,7 @@ const GateController = () => {
               </Form.Item>
 
               {checkInMode === 'walkin' && (
-                <div className="grid grid-cols-2 gap-4 mb-3">
+                <div className="grid grid-cols-1 gap-4 mb-3">
                   <Form.Item
                     name="type"
                     label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Classification</span>}
@@ -792,23 +792,6 @@ const GateController = () => {
                         { value: 'Car', label: 'Standard Car' },
                         { value: 'Motorbike', label: 'Motorbike' },
                         { value: 'Bicycle', label: 'Bicycle' }
-                      ]}
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="floor"
-                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Target Level</span>}
-                    rules={[{ required: true, message: 'Select level!' }]}
-                    initialValue="L1"
-                    className="mb-0"
-                  >
-                    <Select
-                      className="h-10 text-slate-800 rounded-lg font-medium"
-                      options={[
-                        { value: 'B1', label: 'Basement 1' },
-                        { value: 'L1', label: 'Level 1' },
-                        { value: 'L2', label: 'Level 2' }
                       ]}
                     />
                   </Form.Item>
@@ -1181,12 +1164,12 @@ const GateController = () => {
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Check-in Time</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
-                          {checkInTime ? new Date(checkInTime).toLocaleString() : "N/A"}
+                          {checkInTime ? new Date(checkInTime).toLocaleString('vi-VN') : "N/A"}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Check-out Time</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
-                          {checkOutTime ? new Date(checkOutTime).toLocaleString() : "N/A"}
+                          {checkOutTime ? new Date(checkOutTime).toLocaleString('vi-VN') : "N/A"}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Payment Status</span>}>
@@ -1292,22 +1275,22 @@ const GateController = () => {
                           </span>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           <span className="text-xs font-bold text-slate-500 block">Số tiền khách đưa (VNĐ):</span>
                           <Input
                             type="number"
                             placeholder="Nhập số tiền..."
                             value={cashReceived}
                             onChange={(e) => setCashReceived(e.target.value)}
-                            className="h-12 bg-white border-slate-200 text-slate-800 rounded-xl font-mono font-bold text-xl px-4 focus:ring-2 focus:ring-blue-500/20"
-                            suffix={<span className="font-bold text-slate-400">VNĐ</span>}
+                            className="h-14 bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-mono font-bold text-2xl px-5 transition-all focus:bg-white focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 hover:border-slate-300 shadow-sm"
+                            suffix={<span className="font-extrabold text-slate-400 text-sm">VNĐ</span>}
                           />
                           
                           {/* Quick Denominations Grid */}
-                          <div className="grid grid-cols-3 gap-2 pt-2">
+                          <div className="grid grid-cols-3 gap-2.5 pt-2">
                             <Button 
                               onClick={() => setCashReceived(totalAmount.toString())}
-                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-850 rounded-lg border-none cursor-pointer transition-colors"
+                              className="h-10 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
                             >
                               Đủ tiền
                             </Button>
@@ -1316,7 +1299,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 50000).toString());
                               }}
-                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                              className="h-10 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
                             >
                               +50K
                             </Button>
@@ -1325,7 +1308,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 100000).toString());
                               }}
-                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                              className="h-10 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
                             >
                               +100K
                             </Button>
@@ -1334,7 +1317,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 200000).toString());
                               }}
-                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                              className="h-10 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
                             >
                               +200K
                             </Button>
@@ -1343,13 +1326,13 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 500000).toString());
                               }}
-                              className="h-9 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-855 rounded-lg border-none cursor-pointer transition-colors"
+                              className="h-10 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
                             >
                               +500K
                             </Button>
                             <Button 
                               onClick={() => setCashReceived('')}
-                              className="h-9 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 rounded-lg border-none cursor-pointer transition-colors"
+                              className="h-10 text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-100 shadow-sm transition-all"
                             >
                               Xóa
                             </Button>
@@ -1357,9 +1340,9 @@ const GateController = () => {
                         </div>
 
                         {cashReceived && parseFloat(cashReceived) >= totalAmount && (
-                          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800 font-bold shadow-sm animate-fadeIn">
-                            <span>Tiền thừa thối lại:</span>
-                            <span className="text-lg font-black text-emerald-700">
+                          <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between text-xs text-emerald-800 font-bold shadow-sm">
+                            <span className="uppercase tracking-widest text-[10px]">Tiền thừa thối lại:</span>
+                            <span className="text-xl font-black text-emerald-600">
                               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(parseFloat(cashReceived) - totalAmount)}
                             </span>
                           </div>
@@ -1367,11 +1350,11 @@ const GateController = () => {
 
                         <Button
                           type="primary"
-                          icon={<Check size={16} />}
+                          icon={<Check size={18} />}
                           onClick={handleConfirmCashPayment}
-                          className="w-full h-12 bg-blue-600 hover:bg-blue-500 border-none font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-md text-white mt-4 cursor-pointer transition-all duration-200 transform active:scale-95"
+                          className="w-full h-14 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 border-none font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 text-white mt-4 transition-all duration-300 transform hover:-translate-y-0.5"
                         >
-                          Xác nhận nhận đủ tiền & Mở cổng
+                          Xác nhận Đã Thu Tiền & Mở Cổng
                         </Button>
                       </div>
                     )}

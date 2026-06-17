@@ -66,7 +66,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             <div className="flex justify-between">
               <span className="text-slate-500">ENTRY DATE:</span>
               <span className="text-slate-700 font-medium">
-                {new Date(details.checkInTime).toLocaleDateString()}
+                {new Date(details.checkInTime).toLocaleDateString('vi-VN')}
               </span>
             </div>
             <div className="flex justify-between">

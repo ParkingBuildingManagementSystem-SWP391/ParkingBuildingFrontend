@@ -182,7 +182,7 @@ const Login = () => {
           />
         </div>
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-6 flex flex-col items-center gap-3">
           <span className="text-xs text-slate-500">
             Don't have an account?{' '}
             <button 
@@ -193,6 +193,14 @@ const Login = () => {
               Sign Up
             </button>
           </span>
+          
+          <button 
+            type="button"
+            onClick={() => navigate('/parking-map')}
+            className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors underline decoration-slate-300 hover:decoration-slate-400 underline-offset-4 flex items-center gap-1"
+          >
+            Continue as Guest to View Map <ArrowRight size={12} />
+          </button>
         </div>
 
       </div>

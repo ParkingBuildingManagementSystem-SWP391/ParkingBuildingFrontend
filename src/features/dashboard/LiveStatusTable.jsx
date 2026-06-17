@@ -27,6 +27,7 @@ const LiveStatusTable = () => {
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Drawer states
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -97,6 +98,7 @@ const LiveStatusTable = () => {
 
   useEffect(() => {
     if (selectedFloor) {
+      setCurrentPage(1);
       fetchSlots();
     }
   }, [selectedFloor, floors]); // re-run if floors loaded
@@ -276,7 +278,12 @@ const LiveStatusTable = () => {
         columns={columns} 
         dataSource={filteredSlots} 
         loading={loading}
-        pagination={{ pageSize: 10, showSizeChanger: true }}
+        pagination={{ 
+          current: currentPage,
+          pageSize: 10, 
+          showSizeChanger: true,
+          onChange: (page) => setCurrentPage(page)
+        }}
         rowClassName="hover:bg-indigo-50/50 cursor-default"
         className="border border-slate-100 rounded-xl overflow-hidden"
       />
