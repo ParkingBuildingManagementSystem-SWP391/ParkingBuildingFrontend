@@ -19,7 +19,37 @@ import {
   Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Form, InputNumber, Select, message } from 'antd';
+import { Button, InputNumber, message } from 'antd';
+
+const defaultPricingData = [
+  {
+    vehicleTypeId: 1,
+    vehicleType: 'Bicycle',
+    description: 'Xe đạp, xe đạp điện',
+    dayRate: 2000,
+    nightRate: 3000,
+    fullDayRate: 5000,
+    maxHoursPerTurn: null
+  },
+  {
+    vehicleTypeId: 2,
+    vehicleType: 'Motorbike',
+    description: 'Xe máy, xe mô tô',
+    dayRate: 4000,
+    nightRate: 6000,
+    fullDayRate: 10000,
+    maxHoursPerTurn: null
+  },
+  {
+    vehicleTypeId: 3,
+    vehicleType: 'Car',
+    description: 'Xe hơi dưới 7 chỗ',
+    dayRate: 20000,
+    nightRate: 30000,
+    fullDayRate: 50000,
+    maxHoursPerTurn: 4
+  }
+];
 
 const Dashboard = () => {
   const { user, role } = useAuth();
@@ -49,9 +79,8 @@ const Dashboard = () => {
   const [loadingStats, setLoadingStats] = useState(false);
   const [errorStats, setErrorStats] = useState('');
   const [exporting, setExporting] = useState(false);
-  const [pricingForm] = Form.useForm();
-  const [pricingVehicleTypeId, setPricingVehicleTypeId] = useState(3);
-  const [savingPricing, setSavingPricing] = useState(false);
+  const [pricingRows, setPricingRows] = useState(defaultPricingData);
+  const [savingPricingIds, setSavingPricingIds] = useState({});
 
   // Fetch dashboard summary
   const fetchSummary = async () => {
@@ -115,22 +144,30 @@ const Dashboard = () => {
     }
   };
 
-  const handleUpdatePricing = async (values) => {
-    setSavingPricing(true);
+  const handlePricingValueChange = (vehicleTypeId, field, value) => {
+    setPricingRows((prev) => prev.map((row) => (
+      row.vehicleTypeId === vehicleTypeId
+        ? { ...row, [field]: value }
+        : row
+    )));
+  };
+
+  const handleUpdatePricing = async (row) => {
+    setSavingPricingIds((prev) => ({ ...prev, [row.vehicleTypeId]: true }));
     try {
       await managerService.updateVehiclePricing({
-        vehicleTypeId: values.vehicleTypeId,
-        dayRate: values.dayRate,
-        nightRate: values.nightRate,
-        fullDayRate: values.fullDayRate,
-        maxHoursPerTurn: Number(values.vehicleTypeId) === 3 ? values.maxHoursPerTurn : null
+        vehicleTypeId: row.vehicleTypeId,
+        dayRate: row.dayRate,
+        nightRate: row.nightRate,
+        fullDayRate: row.fullDayRate,
+        maxHoursPerTurn: Number(row.vehicleTypeId) === 3 ? row.maxHoursPerTurn : null
       });
-      message.success('Pricing configuration updated successfully.');
+      message.success(`${row.vehicleType} pricing updated successfully.`);
     } catch (err) {
       console.error('handleUpdatePricing error:', err);
       message.error(err.response?.data?.message || err.response?.data?.error || 'Failed to update pricing configuration.');
     } finally {
-      setSavingPricing(false);
+      setSavingPricingIds((prev) => ({ ...prev, [row.vehicleTypeId]: false }));
     }
   };
 
@@ -792,89 +829,89 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <Form
-              form={pricingForm}
-              layout="vertical"
-              onFinish={handleUpdatePricing}
-              initialValues={{
-                vehicleTypeId: 3,
-                dayRate: 0,
-                nightRate: 0,
-                fullDayRate: 0,
-                maxHoursPerTurn: 24
-              }}
-              className="mt-6"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                <Form.Item
-                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vehicle Type</span>}
-                  name="vehicleTypeId"
-                  rules={[{ required: true, message: 'Please select a vehicle type.' }]}
-                >
-                  <Select
-                    size="large"
-                    onChange={(value) => {
-                      setPricingVehicleTypeId(Number(value));
-                      if (Number(value) !== 3) {
-                        pricingForm.setFieldValue('maxHoursPerTurn', null);
-                      }
-                    }}
-                    options={[
-                      { value: 1, label: 'Bicycle' },
-                      { value: 2, label: 'Motorbike' },
-                      { value: 3, label: 'Car' }
-                    ]}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Day Rate</span>}
-                  name="dayRate"
-                  rules={[{ required: true, message: 'Please enter day rate.' }]}
-                >
-                  <InputNumber min={0} className="w-full" size="large" addonAfter="VND" />
-                </Form.Item>
-
-                <Form.Item
-                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Night Rate</span>}
-                  name="nightRate"
-                  rules={[{ required: true, message: 'Please enter night rate.' }]}
-                >
-                  <InputNumber min={0} className="w-full" size="large" addonAfter="VND" />
-                </Form.Item>
-
-                <Form.Item
-                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Day Rate</span>}
-                  name="fullDayRate"
-                  rules={[{ required: true, message: 'Please enter full-day rate.' }]}
-                >
-                  <InputNumber min={0} className="w-full" size="large" addonAfter="VND" />
-                </Form.Item>
-              </div>
-
-              {Number(pricingVehicleTypeId) === 3 && (
-                <div className="max-w-sm">
-                  <Form.Item
-                    label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Max Hours Per Turn</span>}
-                    name="maxHoursPerTurn"
-                    rules={[{ required: true, message: 'Please enter max hours per turn for car pricing.' }]}
-                  >
-                    <InputNumber min={1} max={24} className="w-full" size="large" addonAfter="hours" />
-                  </Form.Item>
-                </div>
-              )}
-
-              <div className="flex justify-end pt-2">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={savingPricing}
-                  className="h-11 px-6 rounded-xl font-bold bg-blue-600"
-                >
-                  Save Pricing
-                </Button>
-              </div>
-            </Form>
+            <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100">
+              <table className="w-full min-w-[920px] border-collapse text-left">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Vehicle Type</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Day Rate</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Night Rate</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Full Day Rate</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Max Hours Per Turn</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {pricingRows.map((row) => (
+                    <tr key={row.vehicleTypeId} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="px-4 py-4 align-middle">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-extrabold text-slate-800">{row.vehicleType}</span>
+                          <span className="text-xs font-medium text-slate-400">{row.description}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        <InputNumber
+                          min={0}
+                          value={row.dayRate}
+                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                          onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'dayRate', value ?? 0)}
+                          addonAfter="VND"
+                          className="w-full"
+                        />
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        <InputNumber
+                          min={0}
+                          value={row.nightRate}
+                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                          onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'nightRate', value ?? 0)}
+                          addonAfter="VND"
+                          className="w-full"
+                        />
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        <InputNumber
+                          min={0}
+                          value={row.fullDayRate}
+                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                          onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'fullDayRate', value ?? 0)}
+                          addonAfter="VND"
+                          className="w-full"
+                        />
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        {row.vehicleTypeId === 3 ? (
+                          <InputNumber
+                            min={1}
+                            max={24}
+                            value={row.maxHoursPerTurn}
+                            onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'maxHoursPerTurn', value ?? 1)}
+                            addonAfter="hours"
+                            className="w-full"
+                          />
+                        ) : (
+                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400">Not applied</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 align-middle text-right">
+                        <Button
+                          type="primary"
+                          loading={Boolean(savingPricingIds[row.vehicleTypeId])}
+                          onClick={() => handleUpdatePricing(row)}
+                          className="h-9 rounded-xl bg-blue-600 px-5 font-bold"
+                        >
+                          Save
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="bg-white border border-slate-100 rounded-2xl py-24 text-center shadow-sm">
