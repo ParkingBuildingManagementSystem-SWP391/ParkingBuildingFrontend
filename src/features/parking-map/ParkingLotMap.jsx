@@ -568,21 +568,38 @@ const ParkingLotMap = () => {
 
       const expectedCheckInTime = buildExpectedCheckInIso();
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-
-      const response = await api.post('/Parking/book', {
-        slotId: Number(selectedSlot.slotId),
+      const response = await parkingService.bookSlot({
+        slotId: selectedSlot.slotId,
+        vehicleTypeId: finalVehicleTypeId,
         licenseVehicle: cleanPlate,
-        typeId: finalVehicleTypeId,
-        expectedCheckInTime
-      }, config);
+        expectedCheckInTime,
+        paymentMethod: 'VNPAY'
+      });
+
+      const responseData = response?.data || response || {};
+      const requiresPayment = Boolean(
+        responseData.requiresPayment ??
+        responseData.RequiresPayment ??
+        responseData.requiresDeposit ??
+        responseData.RequiresDeposit
+      );
+      const paymentUrl = responseData.paymentUrl || responseData.PaymentUrl || responseData.vnpayUrl || responseData.VnPayUrl;
+      const depositAmount = responseData.depositAmount ?? responseData.DepositAmount ?? responseData.amount ?? responseData.Amount;
+      const paymentStatus = responseData.paymentStatus || responseData.PaymentStatus;
 
       setIsBookingModalOpen(false);
-      setAlertBanner(response.data?.message || `Booking confirmed successfully for Slot ${selectedSlot.id}!`);
+      if (requiresPayment && paymentUrl) {
+        const depositText = depositAmount ? ` Deposit: ${Number(depositAmount).toLocaleString('vi-VN')} VND.` : '';
+        setAlertBanner((responseData.message || responseData.Message || 'Booking requires deposit payment.') + depositText);
+        window.location.href = paymentUrl;
+      } else if (requiresPayment) {
+        setAlertBanner(responseData.message || responseData.Message || `Booking reserved for Slot ${selectedSlot.id}. Deposit payment is pending.`);
+      } else {
+        setAlertBanner(responseData.message || responseData.Message || `Booking confirmed successfully for Slot ${selectedSlot.id}!`);
+      }
+      if (paymentStatus) {
+        console.info('Booking payment status:', paymentStatus);
+      }
       setTimeout(() => {
         setAlertBanner(null);
       }, 4000);

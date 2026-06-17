@@ -42,5 +42,23 @@ export const managerService = {
       console.error('exportReport error:', error);
       throw error;
     }
+  },
+
+  updateVehiclePricing: async (data) => {
+    try {
+      const response = await api.put('/Manager/update-pricing', {
+        vehicleTypeId: Number(data.vehicleTypeId),
+        dayRate: Number(data.dayRate),
+        nightRate: Number(data.nightRate),
+        fullDayRate: Number(data.fullDayRate),
+        maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
+          ? Number(data.maxHoursPerTurn)
+          : null
+      });
+      return response.data;
+    } catch (error) {
+      console.error('updateVehiclePricing error:', error);
+      throw error;
+    }
   }
 };

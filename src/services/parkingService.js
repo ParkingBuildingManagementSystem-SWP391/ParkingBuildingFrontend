@@ -13,12 +13,24 @@ export const parkingService = {
   },
 
   // 2. Tài xế đặt chỗ trước qua Web (Book Parking Slot)
-  bookSlot: async (slotId, licenseVehicle, typeId) => {
+  bookSlot: async (slotIdOrPayload, vehicleTypeId, licenseVehicle, expectedCheckInTime, paymentMethod = 'VNPAY') => {
     try {
+      const payload = typeof slotIdOrPayload === 'object' && slotIdOrPayload !== null
+        ? slotIdOrPayload
+        : {
+            slotId: slotIdOrPayload,
+            vehicleTypeId,
+            licenseVehicle,
+            expectedCheckInTime,
+            paymentMethod
+          };
+
       const response = await api.post('/Parking/book', {
-        slotId: parseInt(slotId),
-        licenseVehicle: licenseVehicle.trim().toUpperCase(),
-        typeId: parseInt(typeId)
+        slotId: parseInt(payload.slotId),
+        licenseVehicle: String(payload.licenseVehicle || '').trim().toUpperCase(),
+        typeId: parseInt(payload.vehicleTypeId ?? payload.typeId),
+        expectedCheckInTime: payload.expectedCheckInTime,
+        paymentMethod: payload.paymentMethod || 'VNPAY'
       });
       return response.data;
     } catch (error) {

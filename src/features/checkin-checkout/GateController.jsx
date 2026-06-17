@@ -1042,6 +1042,18 @@ const GateController = () => {
           const invoiceId = checkoutResult.invoiceId || checkoutResult.InvoiceId;
           const isPaid = checkoutResult.isPaid !== undefined ? checkoutResult.isPaid : checkoutResult.IsPaid;
           const paymentUrl = checkoutResult.paymentUrl || checkoutResult.PaymentUrl;
+          const extraAmount = checkoutResult.extraAmount ?? checkoutResult.ExtraAmount ?? checkoutResult.additionalAmount ?? checkoutResult.AdditionalAmount;
+          const isOverGracePeriod = checkoutResult.isOverGracePeriod ?? checkoutResult.IsOverGracePeriod;
+          const hasExtraFeeSignal = !isPaid && (
+            Number(extraAmount || 0) > 0 ||
+            isOverGracePeriod === true ||
+            /extra|additional|grace|quá hạn|thu thêm|phụ thu/i.test(String(messageText || ''))
+          );
+          const amountDueLabel = isPaid
+            ? 'Đã thanh toán - Không cần thu thêm'
+            : hasExtraFeeSignal
+              ? 'Số tiền cần thu thêm'
+              : 'Số tiền cần thu';
 
           return (
             <div className="space-y-6 pt-4">
@@ -1179,7 +1191,7 @@ const GateController = () => {
                           <Tag color="warning" className="font-bold m-0">PENDING</Tag>
                         )}
                       </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Total Fee</span>}>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{amountDueLabel}</span>}>
                         <span className="text-xs font-extrabold text-rose-600">
                           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
                         </span>
@@ -1222,7 +1234,7 @@ const GateController = () => {
                     {isSuccess && !isPaid && selectedPaymentMethod === 'VNPAY' && paymentUrl && (
                       <div className="space-y-5">
                         <div className="bg-blue-50/50 border border-blue-150 p-4 rounded-xl flex flex-col items-center justify-center shadow-inner relative overflow-hidden">
-                          <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-1">Tổng Số Tiền Thu</span>
+                          <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-1">{amountDueLabel}</span>
                           <span className="text-2xl font-black text-blue-700">
                             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
                           </span>
@@ -1269,7 +1281,7 @@ const GateController = () => {
                     {isSuccess && !isPaid && selectedPaymentMethod === 'CASH' && (
                       <div className="space-y-4">
                         <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-4 flex flex-col items-center justify-center shadow-inner">
-                          <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">Số tiền cần thu</span>
+                          <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">{amountDueLabel}</span>
                           <span className="text-2xl font-black text-amber-700">
                             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
                           </span>
