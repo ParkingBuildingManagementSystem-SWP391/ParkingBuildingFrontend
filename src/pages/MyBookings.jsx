@@ -138,10 +138,12 @@ const MyBookings = () => {
         if (item.typeId === 1) vehicleType = 'Bicycle';
         else if (item.typeId === 2) vehicleType = 'Motorcycle';
 
-        // Parse bookedDate and bookedTime from bookingTime DTO property
+        // Parse bookedDate/bookedTime from bookingTime and deadline from expectedCheckInTime when available.
         let bookedDate = 'N/A';
         let bookedTime = 'N/A';
         let deadlineTime = 'N/A';
+        const expectedCheckInTime = item.expectedCheckInTime || item.ExpectedCheckInTime;
+        const deadlineBaseTime = expectedCheckInTime || item.bookingTime;
 
         if (item.bookingTime) {
           const d = new Date(item.bookingTime);
@@ -155,7 +157,13 @@ const MyBookings = () => {
             const mins = String(d.getMinutes()).padStart(2, '0');
             bookedTime = `${hours}:${mins}`;
 
-            const deadline = new Date(d.getTime() + 15 * 60 * 1000);
+          }
+        }
+
+        if (deadlineBaseTime) {
+          const base = new Date(deadlineBaseTime);
+          if (!isNaN(base.getTime())) {
+            const deadline = new Date(base.getTime() + 15 * 60 * 1000);
             const dlHours = String(deadline.getHours()).padStart(2, '0');
             const dlMins = String(deadline.getMinutes()).padStart(2, '0');
             deadlineTime = `${dlHours}:${dlMins}`;
@@ -178,7 +186,11 @@ const MyBookings = () => {
           checkOutTime: item.checkOutTime,
           totalAmount: item.totalAmount,
           paymentStatus: item.paymentStatus,
-          paymentMethod: item.paymentMethod
+          paymentMethod: item.paymentMethod,
+          expectedCheckInTime,
+          depositAmount: item.depositAmount ?? item.DepositAmount,
+          requiresDeposit: item.requiresDeposit ?? item.RequiresDeposit,
+          rawDeadlineBaseTime: deadlineBaseTime
         };
       });
 
@@ -210,21 +222,38 @@ const MyBookings = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Compute remaining minutes label dynamically based on raw booking time
-  const getRemainingMinutesText = (bookingTime) => {
-    if (!bookingTime) return '0m remaining';
+  // Compute remaining minutes label dynamically based on expected check-in time when available.
+  const getRemainingMinutesText = (deadlineBaseTime) => {
+    if (!deadlineBaseTime) return '0m remaining';
     const now = new Date();
-    const booked = new Date(bookingTime);
-    if (isNaN(booked.getTime())) return '0m remaining';
+    const baseTime = new Date(deadlineBaseTime);
+    if (isNaN(baseTime.getTime())) return '0m remaining';
     
     // 15 minutes limit
-    const target = new Date(booked.getTime() + 15 * 60 * 1000);
+    const target = new Date(baseTime.getTime() + 15 * 60 * 1000);
     const diffSeconds = Math.floor((target - now) / 1000);
     if (diffSeconds <= 0) return '0m remaining';
     
     const minutes = Math.ceil(diffSeconds / 60);
     return `${minutes}m remaining`;
   };
+
+  const normalizePaymentStatus = (status) => String(status || '').trim().toLowerCase();
+  const isPaymentCompleted = (status) => ['success', 'paid', 'completed'].includes(normalizePaymentStatus(status));
+  const isDepositPaymentDue = (booking) => (
+    booking.sessionStatus === 'Reserved' &&
+    String(booking.paymentMethod || '').toUpperCase() === 'VNPAY' &&
+    normalizePaymentStatus(booking.paymentStatus) === 'pending'
+  );
+  const isParkingFeePaymentDue = (booking) => (
+    (booking.sessionStatus === 'InProgress' || booking.sessionStatus === 'Occupied') &&
+    !isPaymentCompleted(booking.paymentStatus)
+  );
+  const getVnPayPaymentLabel = (booking) => (
+    isDepositPaymentDue(booking)
+      ? 'Thanh toán tiền cọc (VNPay)'
+      : 'Thanh toán phí đỗ xe (VNPay)'
+  );
 
   // Metrics summary counts
   const totalBookings = stats.totalBookings || bookings.length;
@@ -451,7 +480,7 @@ const MyBookings = () => {
                         <span className="text-xs text-slate-400 font-medium">Arrival Deadline</span>
                         <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.deadlineTime}</span>
                         <span className="text-orange-500 text-xs font-semibold animate-pulse mt-0.5">
-                          {getRemainingMinutesText(booking.rawBookingTime)}
+                          {getRemainingMinutesText(booking.rawDeadlineBaseTime)}
                         </span>
                       </div>
                     </div>
@@ -485,8 +514,28 @@ const MyBookings = () => {
                         <span className="text-sm font-extrabold text-purple-700 mt-0.5">
                           {booking.totalAmount.toLocaleString('vi-VN')} VND
                         </span>
+                        {booking.depositAmount !== null && booking.depositAmount !== undefined && (
+                          <span className="text-[10px] text-amber-600 mt-0.5 font-bold">
+                            Deposit: {Number(booking.depositAmount).toLocaleString('vi-VN')} VND
+                          </span>
+                        )}
                         <span className="text-[10px] text-slate-500 mt-0.5 uppercase font-semibold">
                           {booking.paymentMethod || 'CASH'} - {booking.paymentStatus || 'PENDING'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : booking.depositAmount !== null && booking.depositAmount !== undefined ? (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+                        <CreditCard size={18} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-slate-400 font-medium">Deposit</span>
+                        <span className="text-sm font-extrabold text-amber-700 mt-0.5">
+                          {Number(booking.depositAmount).toLocaleString('vi-VN')} VND
+                        </span>
+                        <span className="text-[10px] text-slate-500 mt-0.5 uppercase font-semibold">
+                          {booking.paymentMethod || 'VNPAY'} - {booking.paymentStatus || 'PENDING'}
                         </span>
                       </div>
                     </div>
@@ -528,12 +577,8 @@ const MyBookings = () => {
                     </button>
                   )}
 
-                  {/* VNPay Payment Button: For InProgress/Occupied sessions that are unpaid, or Reserved sessions waiting for deposit */}
-                  {(((booking.sessionStatus === 'InProgress' || booking.sessionStatus === 'Occupied') && 
-                     booking.paymentStatus !== 'SUCCESS' && booking.paymentStatus !== 'Paid') ||
-                    (booking.sessionStatus === 'Reserved' && 
-                     booking.paymentMethod === 'VNPAY' && 
-                     booking.paymentStatus === 'PENDING')) && (
+                  {/* VNPay Payment Button: separate deposit payment from parking fee payment */}
+                  {(isDepositPaymentDue(booking) || isParkingFeePaymentDue(booking)) && (
                     <button 
                        disabled={payingSessionId === booking.id}
                        onClick={() => handlePayVNPay(booking)}
@@ -544,7 +589,7 @@ const MyBookings = () => {
                       ) : (
                         <CreditCard size={16} />
                       )}
-                      Pay via VNPay
+                      {getVnPayPaymentLabel(booking)}
                     </button>
                   )}
                 </div>

@@ -19,7 +19,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { message } from 'antd';
+import { Button, Form, InputNumber, Select, message } from 'antd';
 
 const Dashboard = () => {
   const { user, role } = useAuth();
@@ -49,6 +49,9 @@ const Dashboard = () => {
   const [loadingStats, setLoadingStats] = useState(false);
   const [errorStats, setErrorStats] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [pricingForm] = Form.useForm();
+  const [pricingVehicleTypeId, setPricingVehicleTypeId] = useState(3);
+  const [savingPricing, setSavingPricing] = useState(false);
 
   // Fetch dashboard summary
   const fetchSummary = async () => {
@@ -109,6 +112,25 @@ const Dashboard = () => {
       message.error("Failed to export report.");
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleUpdatePricing = async (values) => {
+    setSavingPricing(true);
+    try {
+      await managerService.updateVehiclePricing({
+        vehicleTypeId: values.vehicleTypeId,
+        dayRate: values.dayRate,
+        nightRate: values.nightRate,
+        fullDayRate: values.fullDayRate,
+        maxHoursPerTurn: Number(values.vehicleTypeId) === 3 ? values.maxHoursPerTurn : null
+      });
+      message.success('Pricing configuration updated successfully.');
+    } catch (err) {
+      console.error('handleUpdatePricing error:', err);
+      message.error(err.response?.data?.message || err.response?.data?.error || 'Failed to update pricing configuration.');
+    } finally {
+      setSavingPricing(false);
     }
   };
 
@@ -759,6 +781,100 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
+          </div>
+        ) : subTab === 'Pricing' ? (
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+              <DollarSign size={18} className="text-[#2563EB]" />
+              <div>
+                <h3 className="text-base font-bold text-slate-800">Vehicle Pricing Configuration</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Update day, night, full-day, and turn-limit pricing used by the backend.</p>
+              </div>
+            </div>
+
+            <Form
+              form={pricingForm}
+              layout="vertical"
+              onFinish={handleUpdatePricing}
+              initialValues={{
+                vehicleTypeId: 3,
+                dayRate: 0,
+                nightRate: 0,
+                fullDayRate: 0,
+                maxHoursPerTurn: 24
+              }}
+              className="mt-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <Form.Item
+                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vehicle Type</span>}
+                  name="vehicleTypeId"
+                  rules={[{ required: true, message: 'Please select a vehicle type.' }]}
+                >
+                  <Select
+                    size="large"
+                    onChange={(value) => {
+                      setPricingVehicleTypeId(Number(value));
+                      if (Number(value) !== 3) {
+                        pricingForm.setFieldValue('maxHoursPerTurn', null);
+                      }
+                    }}
+                    options={[
+                      { value: 1, label: 'Bicycle' },
+                      { value: 2, label: 'Motorbike' },
+                      { value: 3, label: 'Car' }
+                    ]}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Day Rate</span>}
+                  name="dayRate"
+                  rules={[{ required: true, message: 'Please enter day rate.' }]}
+                >
+                  <InputNumber min={0} className="w-full" size="large" addonAfter="VND" />
+                </Form.Item>
+
+                <Form.Item
+                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Night Rate</span>}
+                  name="nightRate"
+                  rules={[{ required: true, message: 'Please enter night rate.' }]}
+                >
+                  <InputNumber min={0} className="w-full" size="large" addonAfter="VND" />
+                </Form.Item>
+
+                <Form.Item
+                  label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Day Rate</span>}
+                  name="fullDayRate"
+                  rules={[{ required: true, message: 'Please enter full-day rate.' }]}
+                >
+                  <InputNumber min={0} className="w-full" size="large" addonAfter="VND" />
+                </Form.Item>
+              </div>
+
+              {Number(pricingVehicleTypeId) === 3 && (
+                <div className="max-w-sm">
+                  <Form.Item
+                    label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Max Hours Per Turn</span>}
+                    name="maxHoursPerTurn"
+                    rules={[{ required: true, message: 'Please enter max hours per turn for car pricing.' }]}
+                  >
+                    <InputNumber min={1} max={24} className="w-full" size="large" addonAfter="hours" />
+                  </Form.Item>
+                </div>
+              )}
+
+              <div className="flex justify-end pt-2">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={savingPricing}
+                  className="h-11 px-6 rounded-xl font-bold bg-blue-600"
+                >
+                  Save Pricing
+                </Button>
+              </div>
+            </Form>
           </div>
         ) : (
           <div className="bg-white border border-slate-100 rounded-2xl py-24 text-center shadow-sm">
