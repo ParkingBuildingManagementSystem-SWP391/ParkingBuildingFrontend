@@ -92,7 +92,10 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
             
             {isScanning && (
               <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
-                <div className={`w-full h-0.5 ${theme.bgLaser} absolute left-0 animate-laser-scan shadow-[0_0_15px_${theme.shadowHex}]`}></div>
+                <div 
+                  className={`w-full h-0.5 ${theme.bgLaser} absolute left-0 animate-laser-scan`}
+                  style={{ boxShadow: `0 0 15px ${theme.shadowHex}` }}
+                ></div>
                 <div className="absolute inset-0 bg-blue-500/10 animate-pulse mix-blend-overlay"></div>
               </div>
             )}

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Lock, Mail, Phone, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound } from 'lucide-react';
+import { User, Lock, Mail, Phone, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound, ChevronRight } from 'lucide-react';
 import { message } from 'antd';
 import { authService } from '../services/authService';
 
@@ -136,40 +136,36 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-[#F5F5F5] flex items-center justify-center relative overflow-hidden p-4 font-sans select-none">
+    <div 
+      className="min-h-screen w-screen flex items-center justify-center relative overflow-hidden p-4 font-sans select-none bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url('/images/light_blue_parking_map.png')` }}
+    >
+      <style>{`
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+          display: none;
+        }
+      `}</style>
       
-      {/* 1. LAYOUT BACKGROUND ARCHITECTURE */}
-      <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-        style={{ 
-          backgroundImage: 'radial-gradient(#1A62FF 2px, transparent 2px), linear-gradient(to right, #1A62FF 1px, transparent 1px), linear-gradient(to bottom, #1A62FF 1px, transparent 1px)',
-          backgroundSize: '24px 24px, 72px 72px, 72px 72px' 
-        }}
-      />
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Light overlay to soften the background slightly */}
+      <div className="absolute inset-0 bg-white/20 pointer-events-none" />
 
       {/* 2. THE REGISTER CARD CONTAINER */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 sm:p-10 border border-slate-100 z-10 animate-scale-in">
+      <div className="w-full max-w-[420px] bg-white/70 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_10px_40px_-10px_rgba(31,38,135,0.2)] p-8 sm:p-10 border border-white/80 z-10 animate-scale-in relative">
         
-        {/* Header Block with stylized Brand logo */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-[#1A62FF] flex items-center justify-center text-white font-extrabold text-2xl shadow-md shadow-blue-500/20 shrink-0">
-            P
-          </div>
-          <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight leading-snug">
-              {step === 1 ? 'Create an account' : 'Verify your email'}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium">
-              {step === 1 ? 'Sign up for a driver account' : 'Enter the OTP code sent to your inbox'}
-            </p>
-          </div>
+        {/* Header Block */}
+        <div className="space-y-1.5 mb-8 text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#2D3150]">
+            {step === 1 ? 'Create an account' : 'Verify your email'}
+          </h1>
+          <p className="text-sm text-slate-500 font-medium">
+            {step === 1 ? 'Sign up for a driver account' : 'Enter the OTP code sent to your inbox'}
+          </p>
         </div>
 
         {/* Dynamic validation error block */}
         {errorMsg && (
-          <div className="bg-rose-50 border border-rose-100 text-rose-700 text-xs font-semibold p-3.5 rounded-xl flex items-center gap-2 mb-5">
+          <div className="bg-rose-50/80 backdrop-blur-sm border border-rose-200 text-rose-700 text-xs font-semibold p-3.5 rounded-2xl flex items-center gap-2 mb-6 shadow-sm">
             <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0"></span>
             <span>{errorMsg}</span>
           </div>
@@ -180,84 +176,73 @@ const Register = () => {
           <form onSubmit={handleRegisterSubmit} className="space-y-4">
             
             {/* Username Input */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 block">Username <span className="text-rose-500">*</span></label>
-              <div className="relative">
-                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => { setUsername(e.target.value); setErrorMsg(''); }}
-                  required
-                  className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#1A62FF] focus:ring-1 focus:ring-[#1A62FF] focus:bg-white transition-all font-medium"
-                />
-              </div>
+            <div className="relative">
+              <User size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Username *"
+                value={username}
+                onChange={(e) => { setUsername(e.target.value); setErrorMsg(''); }}
+                required
+                className="w-full h-14 pl-14 pr-6 bg-white border-0 text-sm text-slate-800 placeholder-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-[#9D95F5] transition-all font-medium shadow-[0_4px_14px_0_rgba(0,0,0,0.05)]"
+              />
             </div>
 
             {/* Email Input */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 block">Email Address <span className="text-rose-500">*</span></label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="email" 
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setErrorMsg(''); }}
-                  required
-                  className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#1A62FF] focus:ring-1 focus:ring-[#1A62FF] focus:bg-white transition-all font-medium"
-                />
-              </div>
+            <div className="relative">
+              <Mail size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="email" 
+                placeholder="Email Address *"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setErrorMsg(''); }}
+                required
+                className="w-full h-14 pl-14 pr-6 bg-white border-0 text-sm text-slate-800 placeholder-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-[#9D95F5] transition-all font-medium shadow-[0_4px_14px_0_rgba(0,0,0,0.05)]"
+              />
             </div>
 
             {/* Phone Number Input (Optional) */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 block">Phone Number <span className="text-slate-400 font-normal">(Optional)</span></label>
-              <div className="relative">
-                <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="tel" 
-                  placeholder="Enter your phone number"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#1A62FF] focus:ring-1 focus:ring-[#1A62FF] focus:bg-white transition-all font-medium"
-                />
-              </div>
+            <div className="relative">
+              <Phone size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="tel" 
+                placeholder="Phone Number (Optional)"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full h-14 pl-14 pr-6 bg-white border-0 text-sm text-slate-800 placeholder-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-[#9D95F5] transition-all font-medium shadow-[0_4px_14px_0_rgba(0,0,0,0.05)]"
+              />
             </div>
 
             {/* Password Input */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 block">Password <span className="text-rose-500">*</span></label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type={showPassword ? 'text' : 'password'} 
-                  placeholder="Create a password (min. 6 characters)"
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
-                  required
-                  className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#1A62FF] focus:ring-1 focus:ring-[#1A62FF] focus:bg-white transition-all font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
+            <div className="relative">
+              <Lock size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="Password (min. 6 chars) *"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
+                required
+                className="w-full h-14 pl-14 pr-14 bg-white border-0 text-sm text-slate-800 placeholder-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-[#9D95F5] transition-all font-mono shadow-[0_4px_14px_0_rgba(0,0,0,0.05)]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#2D3150] transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
 
             {/* Submit Button */}
-            <button 
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-[#1A62FF] hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold rounded-xl transition-all shadow-md shadow-blue-500/10 active:scale-98 flex items-center justify-center gap-1.5 text-sm mt-6"
-            >
-              {loading ? 'Sending OTP...' : 'Register & Verify'}
-              {!loading && <ArrowRight size={16} />}
-            </button>
+            <div className="pt-2">
+              <button 
+                type="submit"
+                disabled={loading}
+                className="w-full h-14 bg-[#656BE5] hover:bg-[#5258D6] disabled:opacity-50 text-white font-bold rounded-full transition-all shadow-[0_8px_20px_-6px_rgba(101,107,229,0.6)] active:scale-[0.98] flex items-center justify-center text-lg tracking-wide"
+              >
+                {loading ? 'Sending OTP...' : 'Sign Up'}
+              </button>
+            </div>
           </form>
         )}
 
@@ -266,24 +251,19 @@ const Register = () => {
           <form onSubmit={handleOtpSubmit} className="space-y-6">
             
             {/* Read-only Email display */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 block">Verification Email</label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
-                  value={email}
-                  readOnly
-                  className="w-full h-11 pl-10 pr-4 bg-slate-100 border border-slate-200 text-sm rounded-xl text-slate-500 focus:outline-none cursor-not-allowed font-medium"
-                />
-              </div>
+            <div className="relative">
+              <Mail size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                value={email}
+                readOnly
+                className="w-full h-14 pl-14 pr-6 bg-slate-50 border-0 text-sm rounded-full text-slate-500 focus:outline-none cursor-not-allowed font-medium shadow-inner"
+              />
             </div>
 
             {/* OTP Code Blocks */}
-            <div className="space-y-2.5">
-              <label className="text-xs font-semibold text-slate-700 block text-center">6-Digit OTP Code</label>
-              
-              <div className="flex justify-between gap-2 max-w-xs mx-auto" onPaste={handleOtpPaste}>
+            <div className="space-y-4 pt-2">
+              <div className="flex justify-between gap-2 max-w-[280px] mx-auto" onPaste={handleOtpPaste}>
                 {otpValues.map((val, idx) => (
                   <input
                     key={idx}
@@ -293,29 +273,28 @@ const Register = () => {
                     value={val}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="w-11 h-12 text-center text-lg font-bold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1A62FF] focus:ring-1 focus:ring-[#1A62FF] focus:bg-white transition-all font-mono"
+                    className="w-11 h-14 text-center text-xl font-bold bg-white border-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#9D95F5] transition-all font-mono shadow-[0_4px_14px_0_rgba(0,0,0,0.05)] text-slate-800"
                   />
                 ))}
               </div>
             </div>
 
             {/* Actions button */}
-            <div className="space-y-3 pt-2">
+            <div className="pt-6 space-y-3">
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-[#1A62FF] hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold rounded-xl transition-all shadow-md shadow-blue-500/10 active:scale-98 flex items-center justify-center gap-1.5 text-sm"
+                className="w-full h-14 bg-[#656BE5] hover:bg-[#5258D6] disabled:opacity-50 text-white font-bold rounded-full transition-all shadow-[0_8px_20px_-6px_rgba(101,107,229,0.6)] active:scale-[0.98] flex items-center justify-center text-lg tracking-wide"
               >
                 {loading ? 'Verifying...' : 'Verify Code & Sign In'}
-                {!loading && <KeyRound size={16} />}
               </button>
 
               <button 
                 type="button"
                 onClick={() => { setStep(1); setErrorMsg(''); }}
-                className="w-full h-11 bg-transparent hover:bg-slate-55 text-slate-600 font-semibold rounded-xl border border-slate-200 transition-all active:scale-98 flex items-center justify-center gap-1.5 text-sm"
+                className="w-full h-12 bg-white hover:bg-slate-50 text-[#2D3150] font-bold rounded-full transition-all shadow-[0_4px_14px_0_rgba(0,0,0,0.05)] active:scale-[0.98] flex items-center justify-center text-sm tracking-wide"
               >
-                <ArrowLeft size={16} />
+                <ArrowLeft size={16} className="mr-2" />
                 Back to Registration
               </button>
             </div>
@@ -323,15 +302,15 @@ const Register = () => {
         )}
 
         {/* Footer sign in link */}
-        <div className="text-center mt-6 pt-4 border-t border-slate-100">
-          <span className="text-xs text-slate-500">
+        <div className="text-center mt-8">
+          <span className="text-[13px] font-medium text-slate-500 flex items-center justify-center">
             Already have an account?{' '}
             <button 
               type="button"
               onClick={() => navigate('/login')}
-              className="text-[#1A62FF] font-bold hover:underline"
+              className="text-[#656BE5] font-bold hover:text-[#454ACC] transition-colors ml-1 flex items-center"
             >
-              Sign In
+              Log In <ChevronRight size={14} className="ml-0.5" />
             </button>
           </span>
         </div>
