@@ -463,11 +463,11 @@ const MyBookings = () => {
                       <div className="flex flex-col">
                         <span className="text-xs text-slate-400 font-medium">Activity Time</span>
                         <span className="text-xs font-semibold text-slate-700 mt-0.5">
-                          In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkInTime).toLocaleDateString([], {day: '2-digit', month: '2-digit'}) : 'N/A'}
+                          In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkInTime).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'}) : 'N/A'}
                         </span>
                         {booking.checkOutTime && (
                           <span className="text-xs font-semibold text-slate-700 mt-0.5">
-                            Out: {new Date(booking.checkOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkOutTime).toLocaleDateString([], {day: '2-digit', month: '2-digit'})}
+                            Out: {new Date(booking.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkOutTime).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'})}
                           </span>
                         )}
                       </div>

@@ -8,13 +8,11 @@ import MainLayout from './components/MainLayout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
-import GuestParkingMap from './pages/GuestParkingMap';
 import PaymentSuccess from './pages/PaymentSuccess';
 
 // Protected Pages (Admin & Driver Features)
 import StaffManagement from './pages/StaffManagement';
 import MyBookings from './pages/MyBookings';
-import MonthlyPass from './pages/MonthlyPass';
 import Settings from './pages/Settings';
 import Accounts from './pages/Accounts';
 
@@ -31,7 +29,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/map" element={<GuestParkingMap />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
         {/* MainLayout wrapping for both public and protected routes */}
@@ -61,18 +58,16 @@ function App() {
             </Route>
 
             {/* Driver/Customer-only paths */}
-            <Route element={<RoleProtectedRoute allowedRoles={[4]} />}>
+            <Route element={<RoleProtectedRoute allowedRoles={['Driver', 'Member', 'Registered_Driver', 'Customer']} />}>
               <Route path="/my-bookings" element={<MyBookings />} />
-            </Route>
-            <Route element={<RoleProtectedRoute allowedRoles={[4]} />}>
-              <Route path="/monthly-pass" element={<MonthlyPass />} />
             </Route>
             
           </Route>
         </Route>
 
         {/* Unmatched URL redirects */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/parking-map" replace />} />
+        <Route path="*" element={<Navigate to="/parking-map" replace />} />
       </Routes>
     </AuthProvider>
   );

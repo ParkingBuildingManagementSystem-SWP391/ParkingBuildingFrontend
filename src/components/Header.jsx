@@ -81,12 +81,7 @@ const Header = () => {
       icon: <User size={14} className="text-slate-400" />,
       onClick: () => navigate('/settings')
     },
-    ...((role?.toLowerCase() === 'driver' || role?.toLowerCase() === 'member' || role?.toLowerCase() === 'customer' || role?.toLowerCase() === 'registered_driver') ? [{
-      key: 'monthly-pass',
-      label: <span className="text-slate-600 font-medium">Monthly Pass Card</span>,
-      icon: <CreditCard size={14} className="text-slate-400" />,
-      onClick: () => navigate('/monthly-pass')
-    }] : []),
+
     {
       type: 'divider',
     },

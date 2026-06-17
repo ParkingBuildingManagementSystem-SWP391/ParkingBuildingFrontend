@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Bike, 
@@ -173,6 +174,7 @@ const initAuthParkingMap = () => {
 
 const ParkingLotMap = () => {
   const { role, user } = useAuth();
+  const navigate = useNavigate();
 
   const [activeFloorId, setActiveFloorId] = useState(3); // Default to Floor G (FloorId = 3)
   const [searchQuery, setSearchQuery] = useState('');
@@ -247,9 +249,11 @@ const ParkingLotMap = () => {
 
     return sortedBackendSlots.map((s, index) => {
       const slotId = s.slotId || (startSlotId + index);
+      const slotName = s.slotName || '';
+      
       let type = 'Car';
-      if (s.typeId === 1) type = 'Bicycle';
-      else if (s.typeId === 2) type = 'Motorcycle';
+      if (s.typeId === 1 || slotName.startsWith('B-')) type = 'Bicycle';
+      else if (s.typeId === 2 || slotName.startsWith('M-')) type = 'Motorcycle';
       
       let zone = 'Car';
       if (type === 'Bicycle') zone = 'Bicycle';
@@ -476,7 +480,7 @@ const ParkingLotMap = () => {
       if (slot.status === 'Available') {
         sessionStorage.setItem('spotflow_pending_booking_slot', slot.id);
         setPendingBookingSlot(slot.id);
-        setIsAuthModalOpen(true);
+        navigate('/login');
       }
       return;
     }
@@ -791,7 +795,7 @@ const ParkingLotMap = () => {
       <section key={section.key} className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
         <div className="mb-4 flex items-center gap-2">
           {activeFloorId === 3 ? (
-            <Motorcycle size={18} className="text-blue-600" />
+            section.title.toLowerCase().includes('bicycle') || section.title === 'B1' || section.title === 'A1' ? <Bike size={18} className="text-blue-600" /> : <Motorcycle size={18} className="text-blue-600" />
           ) : (
             <Car size={18} className="text-blue-600" />
           )}
@@ -1052,7 +1056,9 @@ const ParkingLotMap = () => {
                   <div className={activeFloorId === 3 ? 'min-w-[1010px]' : 'min-w-[860px]'}>
                   <div className="mb-3 flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-2">
-                      {activeFloorId === 3 ? <Motorcycle size={18} className="text-indigo-650" /> : <Car size={18} className="text-blue-600" />}
+                      {activeFloorId === 3 ? (
+                        <div className="flex items-center gap-1"><Motorcycle size={18} className="text-indigo-650" /><Bike size={18} className="text-blue-600" /></div>
+                      ) : <Car size={18} className="text-blue-600" />}
                       <h3 className="font-extrabold text-slate-808 text-xs uppercase tracking-wider">
                         {activeFloor.name} Floor Map ({activeFloor.desc})
                       </h3>
