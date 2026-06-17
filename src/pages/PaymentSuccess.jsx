@@ -61,6 +61,10 @@ const PaymentSuccess = () => {
           // Pre-exit / Full Payment Success
           setPaymentState('success_exit');
           clearInterval(intervalId);
+        } else if (currentStatus === 'SUCCESS_EXIT') {
+          // Exit Payment Success (already at gate)
+          setPaymentState('success_exit_at_gate');
+          clearInterval(intervalId);
         } else if (currentStatus === 'FAILED') {
           setPaymentState('failed');
           clearInterval(intervalId);
@@ -226,6 +230,41 @@ const PaymentSuccess = () => {
               </div>
               <p className="text-[10px] text-amber-800 font-medium leading-relaxed">
                 Vui lòng di chuyển xe ra khỏi bãi đỗ trước khi hết thời gian ân hạn 20 phút để tránh phát sinh thêm chi phí đỗ xe.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+            >
+              Quay Lại Trang Chủ
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* State 3B: Exit Payment Success at Gate (No countdown) */}
+        {paymentState === 'success_exit_at_gate' && (
+          <div className="space-y-6">
+            <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <CheckCircle2 size={32} className="text-emerald-500 animate-bounce" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Thanh Toán Thành Công!</h2>
+              <p className="text-sm text-slate-500 font-medium px-4">
+                Cảm ơn bạn đã sử dụng dịch vụ đỗ xe. Cổng barrier đang được mở, mời bạn di chuyển xe ra khỏi bãi an toàn!
+              </p>
+            </div>
+
+            {/* Success banner card */}
+            <div className="bg-emerald-50/50 border border-emerald-200/70 rounded-2xl p-5 space-y-2 max-w-xs mx-auto shadow-inner">
+              <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">Trạng Thái Lượt Đỗ</span>
+              <div className="text-xl font-bold text-emerald-600">
+                ĐÃ HOÀN THÀNH
+              </div>
+              <p className="text-[10px] text-emerald-800 font-medium leading-relaxed">
+                Hệ thống đã ghi nhận xe của bạn đã hoàn tất thủ tục và thanh toán thành công tại cổng soát vé.
               </p>
             </div>
 
