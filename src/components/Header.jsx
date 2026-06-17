@@ -169,21 +169,23 @@ const Header = () => {
     if (lowerRole === 'manager' || lowerRole === 'admin') {
       return (
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className={currentPath === '/dashboard' ? activeTabClass : inactiveTabClass}
-          >
-            <LayoutDashboard size={16} />
-            Dashboard
-          </button>
           {lowerRole === 'manager' && (
-            <button
-              onClick={() => navigate('/checkin-checkout')}
-              className={currentPath === '/checkin-checkout' ? activeTabClass : inactiveTabClass}
-            >
-              <ScanLine size={16} />
-              Operations
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className={currentPath === '/dashboard' ? activeTabClass : inactiveTabClass}
+              >
+                <LayoutDashboard size={16} />
+                Dashboard
+              </button>
+              <button
+                onClick={() => navigate('/checkin-checkout')}
+                className={currentPath === '/checkin-checkout' ? activeTabClass : inactiveTabClass}
+              >
+                <ScanLine size={16} />
+                Operations
+              </button>
+            </>
           )}
           <button
             onClick={() => navigate('/parking-map')}
@@ -242,7 +244,7 @@ const Header = () => {
         {/* Brand Text Layout */}
         <div
           className="flex items-center shrink-0 cursor-pointer"
-          onClick={() => navigate(user ? '/dashboard' : '/parking-map')}
+          onClick={() => navigate(user ? (lowerRole === 'admin' ? '/accounts' : '/dashboard') : '/parking-map')}
         >
           <span className={`font-bold text-base tracking-wide ${user ? 'text-white' : 'text-slate-800'}`}>
             Parking Building System

@@ -937,9 +937,16 @@ const Dashboard = () => {
 
   // Render correct dashboard based on role context
   switch (lowerRole) {
-    case 'admin':
     case 'manager':
       return renderManagerDashboard();
+    case 'admin':
+      return (
+        <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+          <ShieldAlert size={48} className="mb-4 text-blue-500 opacity-80" />
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Dashboard Access Restricted</h2>
+          <p className="text-sm">Admin accounts do not use this dashboard. Please use Account Management.</p>
+        </div>
+      );
     default:
       return (
         <div className="min-h-[400px] flex items-center justify-center text-rose-500 font-bold bg-white rounded-xl border border-slate-200 p-6">

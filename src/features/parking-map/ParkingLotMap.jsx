@@ -1002,10 +1002,10 @@ const ParkingLotMap = () => {
         </div>
 
         {/* Right Side Block (Map Interactive Grid - 70% width) */}
-        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden min-h-0 w-full font-sans">
+        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm min-h-0 w-full font-sans relative">
           
           {/* Top Search Bar & Controls */}
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-4 border-b border-slate-100 bg-white/95 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-14 z-40 rounded-t-2xl shadow-sm">
             
             {/* Search bar */}
             <div className="relative w-full sm:max-w-xs">
