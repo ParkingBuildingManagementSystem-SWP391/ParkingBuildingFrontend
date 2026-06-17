@@ -45,7 +45,7 @@ export const parkingService = {
       const response = await api.post('/Parking/check-in', {
         ticketCode: ticketCode ? ticketCode.trim() : null,
         licenseVehicle: licenseVehicle ? licenseVehicle.trim().toUpperCase() : null,
-        checkInImageUrl: checkInImageUrl || null
+        checkInImageUrl: checkInImageUrl || "string"
       });
       return response.data;
     } catch (error) {
@@ -60,7 +60,7 @@ export const parkingService = {
       const response = await api.post('/Parking/walk-in', {
         licenseVehicle: licenseVehicle.trim().toUpperCase(),
         vehicleTypeId: parseInt(vehicleTypeId),
-        checkInImageUrl: checkInImageUrl || null
+        checkInImageUrl: checkInImageUrl || "string"
       });
       return response.data;
     } catch (error) {
