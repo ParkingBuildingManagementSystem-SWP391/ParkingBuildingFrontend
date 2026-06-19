@@ -87,10 +87,10 @@ export const parkingService = {
   },
 
   // 6. Ghi nhận thanh toán tiền mặt (CASH)
-  processCashPayment: async (sessionId, amountReceived) => {
+  processCashPayment: async (ticketCode, amountReceived) => {
     try {
       const response = await api.post('/Payments/cash', {
-        sessionId: parseInt(sessionId),
+        ticketCode: ticketCode,
         amountReceived: parseFloat(amountReceived)
       });
       return response.data;

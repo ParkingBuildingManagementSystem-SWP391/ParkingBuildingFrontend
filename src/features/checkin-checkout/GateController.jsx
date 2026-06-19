@@ -439,11 +439,11 @@ const GateController = () => {
 
   // Cash payment confirmation handler
   const handleConfirmCashPayment = async () => {
-    const sessionId = checkoutResult?.sessionId || checkoutResult?.SessionId;
+    const ticketCode = checkoutResult?.ticketCode || checkoutResult?.TicketCode;
     const totalAmount = checkoutResult?.totalAmount || checkoutResult?.TotalAmount || 0;
     
-    if (!sessionId) {
-      message.error("Invalid session ID!");
+    if (!ticketCode) {
+      message.error("Invalid ticket code!");
       return;
     }
     
@@ -454,7 +454,7 @@ const GateController = () => {
     }
     
     try {
-      const res = await parkingService.processCashPayment(sessionId, amount);
+      const res = await parkingService.processCashPayment(ticketCode, amount);
       if (res && res.success) {
         message.success(res.message || "Cash payment recorded successfully!");
         setChangeDue(res.changeDue);
