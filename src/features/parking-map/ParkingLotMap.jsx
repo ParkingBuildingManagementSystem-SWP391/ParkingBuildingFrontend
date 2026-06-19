@@ -115,9 +115,11 @@ const chunkSlots = (slots, size) => {
 };
 
 const getDefaultExpectedCheckInTimeParts = () => {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() + 30); // Default to 30 mins in the future, not realtime
   return {
-    hour: 9,
-    minute: 27,
+    hour: d.getHours(),
+    minute: d.getMinutes(),
   };
 };
 
@@ -511,15 +513,42 @@ const ParkingLotMap = () => {
 
   const buildExpectedCheckInIso = () => {
     const expectedDate = new Date();
-    expectedDate.setHours(Number(expectedHour), Number(expectedMinute), 0, 0);
+    expectedDate.setHours(expectedHour, expectedMinute, 0, 0);
 
     if (expectedDate <= new Date()) {
       expectedDate.setDate(expectedDate.getDate() + 1);
     }
 
-    return expectedDate.toISOString();
+    // Format as Local Time string (YYYY-MM-DDTHH:mm:ss) to avoid UTC shift issues in Backend
+    const year = expectedDate.getFullYear();
+    const month = String(expectedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(expectedDate.getDate()).padStart(2, '0');
+    const hours = String(expectedDate.getHours()).padStart(2, '0');
+    const mins = String(expectedDate.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${mins}:00`;
   };
 
+
+  const getEstimatedDeposit = () => {
+    // Lấy cấu hình giá từ loại xe đang chọn (ví dụ lấy từ thông tin Slot hoặc mock cấu hình)
+    // Giả định mức giá mặc định nếu chưa lấy được từ DB:
+    const rates = {
+      Car: { day: 10000, night: 15000 },       // Ví dụ xe hơi
+      Motorcycle: { day: 5000, night: 8000 },   // Xe máy
+      Bicycle: { day: 0, night: 0 }             // Xe đạp không cần cọc
+    };
+
+    const currentVehicleRates = rates[bookingVehicleType] || { day: 0, night: 0 };
+    
+    // Kiểm tra ca hẹn đến dựa trên giờ đã chọn (Expected Hour)
+    const isNightShift = expectedHour >= 18 || expectedHour < 6;
+    
+    const estimatedAmount = isNightShift ? currentVehicleRates.night : currentVehicleRates.day;
+    const shiftText = isNightShift ? "Ca Đêm (18:00 - 06:00)" : "Ca Ngày (06:00 - 18:00)";
+    
+    return { estimatedAmount, shiftText };
+  };
 
   // Driver Booking Submit
   const handleConfirmBookingSubmit = async (e) => {
@@ -606,8 +635,11 @@ const ParkingLotMap = () => {
 
       onFloorChange(activeFloorId);
     } catch (err) {
-      console.error("Booking Error Response:", err.response?.data || err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error || "Failed to reserve parking slot.";
+      console.error("Booking Error Response:", err);
+      // Bắt chi tiết lỗi từ Backend
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err || "Đặt chỗ thất bại.";
+      
+      // Hiển thị dạng modal alert hoặc toast chuyên nghiệp
       message.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -1237,6 +1269,19 @@ const ParkingLotMap = () => {
                     </div>
                   </div>
 
+                  {/* Preview Tiền cọc động */}
+                  {bookingVehicleType !== 'Bicycle' && (
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-between text-xs text-amber-800">
+                      <div>
+                        <span className="font-semibold block">Tiền cọc giữ chỗ ước tính:</span>
+                        <span className="text-[10px] text-amber-600 font-medium">({getEstimatedDeposit().shiftText})</span>
+                      </div>
+                      <span className="text-sm font-extrabold text-amber-700">
+                        {getEstimatedDeposit().estimatedAmount.toLocaleString('vi-VN')} VND
+                      </span>
+                    </div>
+                  )}
+
                   <p className="rounded-xl border border-orange-100 bg-orange-50 px-3.5 py-2.5 text-[11px] font-semibold leading-relaxed text-orange-700">
                     ⚠️ Note: Your reservation will be automatically canceled if you do not check in at the gate within 15 minutes of your scheduled time.
                   </p>
@@ -1302,10 +1347,7 @@ const ParkingLotMap = () => {
                   <span className="text-slate-400 font-semibold">Classification Type</span>
                   <span className="font-extrabold text-slate-700 capitalize">{selectedSlot.type} Slot</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-450 font-semibold">Hourly Base Rate</span>
-                  <span className="font-extrabold text-slate-700">{hourlyRateLabel(selectedSlot.type)}/hr</span>
-                </div>
+
                 <div className="flex justify-between items-center pt-2 border-t border-slate-200">
                   <span className="text-slate-400 font-semibold">Current State</span>
                   <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${

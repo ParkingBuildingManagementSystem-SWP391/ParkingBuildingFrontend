@@ -46,6 +46,12 @@ const PaymentSuccess = () => {
     const maxAttempts = 15; // Max 30 seconds
 
     const pollStatus = async () => {
+      if (attempts >= maxAttempts) {
+        setPaymentState('timeout');
+        clearInterval(intervalId);
+        return;
+      }
+
       attempts++;
       setLoadingText(`Đang đối khớp trạng thái hóa đơn... (Lần ${attempts}/${maxAttempts})`);
       try {
@@ -61,11 +67,12 @@ const PaymentSuccess = () => {
           // Pre-exit / Full Payment Success
           setPaymentState('success_exit');
           clearInterval(intervalId);
+        } else if (currentStatus === 'SUCCESS_EXIT') {
+          // MỚI: Thanh toán trực tiếp tại quầy BOT -> Ra bãi ngay
+          setPaymentState('success_exit_bot');
+          clearInterval(intervalId);
         } else if (currentStatus === 'FAILED') {
           setPaymentState('failed');
-          clearInterval(intervalId);
-        } else if (attempts >= maxAttempts) {
-          setPaymentState('timeout');
           clearInterval(intervalId);
         }
       } catch (err) {
@@ -226,6 +233,41 @@ const PaymentSuccess = () => {
               </div>
               <p className="text-[10px] text-amber-800 font-medium leading-relaxed">
                 Vui lòng di chuyển xe ra khỏi bãi đỗ trước khi hết thời gian ân hạn 20 phút để tránh phát sinh thêm chi phí đỗ xe.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+            >
+              Quay Lại Trang Chủ
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* State 3.1: Checkout at BOT Success */}
+        {paymentState === 'success_exit_bot' && (
+          <div className="space-y-6">
+            <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <CheckCircle2 size={32} className="text-emerald-500 animate-bounce" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Thanh Toán Tại Cổng Thành Công!</h2>
+              <p className="text-sm text-slate-500 font-medium px-4">
+                Giao dịch của bạn đã được ghi nhận. Cổng barrier đang mở.
+              </p>
+            </div>
+
+            {/* Hộp trạng thái ra cổng lập tức (Không có đếm ngược ân hạn) */}
+            <div className="bg-emerald-50/50 border border-emerald-200/70 rounded-2xl p-5 space-y-2 max-w-xs mx-auto shadow-inner">
+              <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">Trạng Thái Ra Cổng</span>
+              <div className="text-xl font-black text-emerald-600 uppercase">
+                MỜI XE RA KHỎI BÃI
+              </div>
+              <p className="text-[10px] text-emerald-800 font-medium leading-relaxed">
+                Bạn đã hoàn tất thanh toán tại quầy kiểm soát (BOT). Vui lòng di chuyển xe ra ngoài ngay lập tức.
               </p>
             </div>
 
