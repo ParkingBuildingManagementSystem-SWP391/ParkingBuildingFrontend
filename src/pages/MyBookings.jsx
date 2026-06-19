@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { parkingService } from '../services/parkingService';
 
 import { 
   MapPin, 
@@ -22,11 +23,12 @@ const MyBookings = () => {
   const { user } = useAuth();
 
   // Active filter tab: 'All' | 'Active' | 'Expired'
-  const [activeTab, setActiveTab] = useState('All');
+  const [activeTab, setActiveTab] = useState('Active');
   
   // Loading and Error states
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Ticking count state
   const [tick, setTick] = useState(0);
@@ -118,7 +120,9 @@ const MyBookings = () => {
         }
       };
       
-      const response = await api.get('/Parking/my-bookings', config);
+      // Add cache-buster to prevent browser/Cloudflare from returning stale 'Reserved' data
+      const timestamp = new Date().getTime();
+      const response = await api.get(`/Parking/my-bookings?t=${timestamp}`, config);
       
       // Map properties from .NET DTO response
       const dashboard = response.data || {};
@@ -146,7 +150,9 @@ const MyBookings = () => {
         const deadlineBaseTime = expectedCheckInTime || item.bookingTime;
 
         if (item.bookingTime) {
-          const d = new Date(item.bookingTime);
+          // BE sends UTC time. Ensure we append 'Z' if missing so JS parses it as UTC, converting to local VN time.
+          const raw = String(item.bookingTime);
+          const d = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
           if (!isNaN(d.getTime())) {
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -161,7 +167,8 @@ const MyBookings = () => {
         }
 
         if (deadlineBaseTime) {
-          const base = new Date(deadlineBaseTime);
+          const rawBase = String(deadlineBaseTime);
+          const base = new Date(rawBase.endsWith('Z') ? rawBase : rawBase + 'Z');
           if (!isNaN(base.getTime())) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
             const dlHours = String(deadline.getHours()).padStart(2, '0');
@@ -171,22 +178,22 @@ const MyBookings = () => {
         }
 
         return {
-          id: item.sessionId || idx + 1,
-          ticketId: item.ticketCode || item.ticket?.ticketCode || `TKT-${item.sessionId || idx + 1}`,
+          id: item.sessionId || item.SessionId || idx + 1,
+          ticketId: item.ticketCode || item.TicketCode || item.ticket?.ticketCode || item.Ticket?.TicketCode || `TKT-${item.sessionId || item.SessionId || idx + 1}`,
           vehicleType: vehicleType,
-          status: isActiveSession(item.sessionStatus) ? 'Active' : 'Cancelled / Expired',
-          sessionStatus: item.sessionStatus || 'Expired',
-          location: `${item.floorName || item.slot?.floor?.floorName || 'Floor'} - ${item.slotName || item.slot?.slotName || 'Slot'}`,
+          status: isActiveSession(item.sessionStatus || item.SessionStatus) ? 'Active' : 'Cancelled / Expired',
+          sessionStatus: item.sessionStatus || item.SessionStatus || 'Expired',
+          location: `${item.floorName || item.FloorName || item.slot?.floor?.floorName || 'Floor'} - ${item.slotName || item.SlotName || item.slot?.slotName || 'Slot'}`,
           bookedDate: bookedDate,
           bookedTime: bookedTime,
           deadlineTime: deadlineTime,
-          contact: item.licenseVehicle || 'N/A',
-          rawBookingTime: item.bookingTime,
-          checkInTime: item.checkInTime,
-          checkOutTime: item.checkOutTime,
-          totalAmount: item.totalAmount,
-          paymentStatus: item.paymentStatus,
-          paymentMethod: item.paymentMethod,
+          contact: item.licenseVehicle || item.LicenseVehicle || 'N/A',
+          rawBookingTime: item.bookingTime || item.BookingTime,
+          checkInTime: item.checkInTime || item.CheckInTime,
+          checkOutTime: item.checkOutTime || item.CheckOutTime,
+          totalAmount: item.totalAmount || item.TotalAmount,
+          paymentStatus: item.paymentStatus || item.PaymentStatus,
+          paymentMethod: item.paymentMethod || item.PaymentMethod,
           expectedCheckInTime,
           depositAmount: item.depositAmount ?? item.DepositAmount,
           requiresDeposit: item.requiresDeposit ?? item.RequiresDeposit,
@@ -280,18 +287,37 @@ const MyBookings = () => {
     setIsCancelConfirmOpen(true);
   };
 
-  // Confirm booking cancellation
-  const handleConfirmCancel = () => {
+  // Confirm booking cancellation via Backend API
+  const handleConfirmCancel = async () => {
     if (targetBookingId !== null) {
-      setBookings(prevBookings => 
-        prevBookings.map(b => 
-          b.id === targetBookingId 
-            ? { ...b, status: 'Cancelled / Expired', sessionStatus: 'Canceled' } 
-            : b
-        )
-      );
-      setIsCancelConfirmOpen(false);
-      setTargetBookingId(null);
+      setLoading(true);
+      setError('');
+      setSuccessMessage('');
+      try {
+        // 1. Gọi API hủy đặt chỗ lên Backend
+        const response = await parkingService.cancelBooking(targetBookingId);
+        
+        // 2. Đóng Modal xác nhận hủy
+        setIsCancelConfirmOpen(false);
+        setTargetBookingId(null);
+
+        // 3. Hiển thị thông báo thành công từ Backend (Có chứa cảnh báo tịch thu cọc theo yêu cầu BE)
+        setSuccessMessage(response.message || "Hủy đặt chỗ thành công.");
+
+        // 4. Reload lại toàn bộ danh sách đơn đặt để cập nhật hóa đơn, trạng thái mới nhất
+        await fetchMyBookings();
+        
+        // Tự động ẩn thông báo sau 5 giây
+        setTimeout(() => setSuccessMessage(''), 5000);
+      } catch (err) {
+        console.error("Cancel booking error:", err);
+        const errorMessage = typeof err === 'string' ? err : "Không thể hủy đơn đặt chỗ này. Vui lòng thử lại.";
+        setError(errorMessage);
+        setIsCancelConfirmOpen(false);
+        setTargetBookingId(null);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -395,21 +421,49 @@ const MyBookings = () => {
 
       {/* 4. BOOKING TICKET CONTAINER */}
       <div className="space-y-4">
-        {loading ? (
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
+            <AlertCircle className="shrink-0 mt-0.5" size={20} />
+            <div className="flex-1">
+              <h4 className="font-bold text-sm">Action Failed</h4>
+              <p className="text-sm text-rose-600 mt-0.5">{error}</p>
+            </div>
+            <button onClick={() => setError('')} className="p-1 hover:bg-rose-100 rounded-lg transition-colors">
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* Success Banner */}
+        {successMessage && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
+            <CheckCircle2 className="shrink-0 mt-0.5" size={20} />
+            <div className="flex-1">
+              <h4 className="font-bold text-sm">Action Successful</h4>
+              <p className="text-sm text-emerald-600 mt-0.5">{successMessage}</p>
+            </div>
+            <button onClick={() => setSuccessMessage('')} className="p-1 hover:bg-emerald-100 rounded-lg transition-colors">
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* List of Bookings */}
+        {loading && bookings.length === 0 ? (
           <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
             <div className="w-8 h-8 rounded-full border-4 border-slate-900 border-t-transparent animate-spin mx-auto mb-3"></div>
             <h3 className="text-slate-700 font-bold text-base">Loading bookings...</h3>
           </div>
-        ) : error ? (
-          <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
-            <AlertCircle size={40} className="text-red-500 mx-auto mb-3" />
-            <h3 className="text-slate-700 font-bold text-base">{error}</h3>
-          </div>
         ) : filteredBookings.length === 0 ? (
           <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
-            <Info size={40} className="text-slate-350 mx-auto mb-3" />
-            <h3 className="text-slate-700 font-bold text-base">No reservations found</h3>
-            <p className="text-xs text-slate-555 mt-1">There are no bookings matching the selected filter.</p>
+            <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+              <QrCode size={32} />
+            </div>
+            <h3 className="text-slate-800 font-bold text-base mb-1">No bookings found</h3>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto">
+              You haven't made any parking reservations in this category yet.
+            </p>
           </div>
         ) : (
           filteredBookings.map((booking, index) => (

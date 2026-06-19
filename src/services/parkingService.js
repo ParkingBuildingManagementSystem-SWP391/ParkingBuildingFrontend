@@ -138,5 +138,16 @@ export const parkingService = {
       }
       throw errorMsg;
     }
+  },
+
+  // 9. Tài xế hủy đặt chỗ trước khi Check-in
+  cancelBooking: async (sessionId) => {
+    try {
+      const response = await api.post(`/Parking/cancel-booking/${sessionId}`);
+      return response.data; // Trả về { isSuccess: true, message: "..." }
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Hủy đặt chỗ thất bại.";
+      throw serverMessage;
+    }
   }
 };
