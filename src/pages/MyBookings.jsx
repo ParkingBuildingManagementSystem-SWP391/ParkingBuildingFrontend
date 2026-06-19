@@ -23,7 +23,7 @@ const MyBookings = () => {
   const { user } = useAuth();
 
   // Active filter tab: 'All' | 'Active' | 'Expired'
-  const [activeTab, setActiveTab] = useState('Active');
+  const [activeTab, setActiveTab] = useState('All');
   
   // Loading and Error states
   const [loading, setLoading] = useState(true);
@@ -100,11 +100,6 @@ const MyBookings = () => {
 
   // Fetch bookings function
   const fetchMyBookings = async () => {
-    // Structural validation check for driver role (target roleId === 4)
-    if (user && user.roleId !== undefined && Number(user.roleId) !== 4) {
-      return;
-    }
-
     const token = localStorage.getItem('token');
     if (!token) {
       setError("No token found. Please log in.");
@@ -299,12 +294,22 @@ const MyBookings = () => {
         
         // 2. Đóng Modal xác nhận hủy
         setIsCancelConfirmOpen(false);
-        setTargetBookingId(null);
-
-        // 3. Hiển thị thông báo thành công từ Backend (Có chứa cảnh báo tịch thu cọc theo yêu cầu BE)
         setSuccessMessage(response.message || "Hủy đặt chỗ thành công.");
 
-        // 4. Reload lại toàn bộ danh sách đơn đặt để cập nhật hóa đơn, trạng thái mới nhất
+        // 3. OPTIMISTIC UI UPDATE: Cập nhật state trực tiếp để UI phản hồi ngay lập tức
+        setBookings(prevBookings => prevBookings.map(booking => {
+          if (booking.id === targetBookingId) {
+            return {
+              ...booking,
+              sessionStatus: 'Canceled',
+              status: 'Cancelled / Expired'
+            };
+          }
+          return booking;
+        }));
+        setTargetBookingId(null);
+
+        // 4. Gọi fetchMyBookings ngầm để đồng bộ dữ liệu chính xác (hóa đơn, trạng thái)
         await fetchMyBookings();
         
         // Tự động ẩn thông báo sau 5 giây
@@ -438,7 +443,7 @@ const MyBookings = () => {
         {/* Success Banner */}
         {successMessage && (
           <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
-            <CheckCircle2 className="shrink-0 mt-0.5" size={20} />
+            <CheckCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
               <h4 className="font-bold text-sm">Action Successful</h4>
               <p className="text-sm text-emerald-600 mt-0.5">{successMessage}</p>
