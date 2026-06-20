@@ -534,9 +534,9 @@ const ParkingLotMap = () => {
     // Lấy cấu hình giá từ loại xe đang chọn (ví dụ lấy từ thông tin Slot hoặc mock cấu hình)
     // Giả định mức giá mặc định nếu chưa lấy được từ DB:
     const rates = {
-      Car: { day: 10000, night: 15000 },       // Ví dụ xe hơi
-      Motorcycle: { day: 5000, night: 8000 },   // Xe máy
-      Bicycle: { day: 0, night: 0 }             // Xe đạp không cần cọc
+      Car: { day: 20000, night: 30000 },
+      Motorcycle: { day: 4000, night: 6000 },
+      Bicycle: { day: 2000, night: 3000 }
     };
 
     const currentVehicleRates = rates[bookingVehicleType] || { day: 0, night: 0 };

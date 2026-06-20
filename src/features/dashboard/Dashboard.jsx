@@ -248,7 +248,7 @@ const Dashboard = () => {
 
     const getFormattedDate = () => {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date().toLocaleDateString('vi-VN', options);
+      return new Date().toLocaleDateString('en-US', options);
     };
 
     const subNavItems = [

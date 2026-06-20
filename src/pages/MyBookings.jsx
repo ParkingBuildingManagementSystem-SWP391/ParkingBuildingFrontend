@@ -327,100 +327,112 @@ const MyBookings = () => {
   };
 
   return (
-    <div className="space-y-6 font-sans select-none pb-12">
+    <div className="space-y-8 font-sans select-none pb-12">
       
       {/* 1. PAGE HEADER */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">My Bookings</h1>
-          <p className="text-slate-500 text-sm mt-1">View and manage your parking reservations</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">My Bookings</h1>
+          <p className="text-slate-500 text-sm mt-1">Manage your parking reservations and history</p>
         </div>
       </div>
 
-      {/* 2. OVERVIEW STATISTICS ROW (4 Balanced summary cards) */}
+      {/* 2. OVERVIEW STATISTICS ROW (4 Balanced Glassmorphism cards) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         
         {/* Total Bookings Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-sm text-slate-500 font-medium block">Total Bookings</span>
-            <span className="text-3xl font-bold text-slate-900 block">{totalBookings}</span>
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
+          <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-blue-500/10 blur-2xl"></div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Total Bookings</span>
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-400 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <Ticket size={18} />
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <Ticket size={24} />
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-black text-slate-800 tracking-tight">{totalBookings}</span>
           </div>
         </div>
 
         {/* Active Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-sm text-slate-500 font-medium block">Active</span>
-            <span className="text-3xl font-bold text-green-600 block">{activeCount}</span>
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
+          <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl"></div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Active</span>
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <CheckCircle size={18} />
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0">
-            <CheckCircle size={24} />
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-black text-slate-800 tracking-tight">{activeCount}</span>
+            <span className="text-sm text-slate-400 font-bold mb-1">sessions</span>
           </div>
         </div>
 
         {/* Expired Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-sm text-slate-500 font-medium block">Expired</span>
-            <span className="text-3xl font-bold text-slate-900 block">{expiredCount}</span>
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
+          <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-slate-500/10 blur-2xl"></div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Expired</span>
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-slate-400 to-slate-300 text-white flex items-center justify-center shadow-lg shadow-slate-400/20">
+              <XCircle size={18} />
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-505 flex items-center justify-center shrink-0">
-            <XCircle size={24} />
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-black text-slate-800 tracking-tight">{expiredCount}</span>
           </div>
         </div>
 
         {/* Total Spent Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-sm text-slate-500 font-medium block">Total Spent</span>
-            <span className="text-2xl font-bold text-purple-600 block">
-              {totalSpent.toLocaleString('vi-VN')} VND
-            </span>
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
+          <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-indigo-500/10 blur-2xl"></div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Total Spent</span>
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <CreditCard size={18} />
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-            <CreditCard size={24} />
+          <div className="flex items-end gap-2">
+            <span className="text-2xl xl:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 tracking-tight">
+              {totalSpent.toLocaleString('vi-VN')}
+            </span>
+            <span className="text-xs text-slate-400 font-bold mb-1.5">VND</span>
           </div>
         </div>
 
       </div>
 
-      {/* 3. STATUS FILTER TABS */}
-      <div className="flex items-center gap-3">
+      {/* 3. STATUS FILTER TABS (Segmented Control Design) */}
+      <div className="inline-flex items-center bg-slate-100/80 backdrop-blur-xl p-1 rounded-xl shadow-inner border border-slate-200/50">
         <button
           onClick={() => setActiveTab('All')}
-          className={`px-5 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 ${
+          className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
             activeTab === 'All'
-              ? 'bg-black border-black text-white shadow-sm'
-              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900'
+              ? 'bg-white text-indigo-600 shadow-[0_2px_8px_rgb(0,0,0,0.08)]'
+              : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          All ({totalBookings})
+          All
         </button>
-
         <button
           onClick={() => setActiveTab('Active')}
-          className={`px-5 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 ${
+          className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
             activeTab === 'Active'
-              ? 'bg-black border-black text-white shadow-sm'
-              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900'
+              ? 'bg-white text-indigo-600 shadow-[0_2px_8px_rgb(0,0,0,0.08)]'
+              : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          Active ({activeCount})
+          Active
         </button>
-
         <button
           onClick={() => setActiveTab('Expired')}
-          className={`px-5 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 ${
+          className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
             activeTab === 'Expired'
-              ? 'bg-black border-black text-white shadow-sm'
-              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900'
+              ? 'bg-white text-indigo-600 shadow-[0_2px_8px_rgb(0,0,0,0.08)]'
+              : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          Expired ({expiredCount})
+          Expired
         </button>
       </div>
 
@@ -428,7 +440,7 @@ const MyBookings = () => {
       <div className="space-y-4">
         {/* Error Banner */}
         {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
+          <div className="bg-rose-50/80 backdrop-blur-md border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
             <AlertCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
               <h4 className="font-bold text-sm">Action Failed</h4>
@@ -442,7 +454,7 @@ const MyBookings = () => {
 
         {/* Success Banner */}
         {successMessage && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
+          <div className="bg-emerald-50/80 backdrop-blur-md border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
             <CheckCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
               <h4 className="font-bold text-sm">Action Successful</h4>
@@ -456,234 +468,187 @@ const MyBookings = () => {
 
         {/* List of Bookings */}
         {loading && bookings.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
-            <div className="w-8 h-8 rounded-full border-4 border-slate-900 border-t-transparent animate-spin mx-auto mb-3"></div>
-            <h3 className="text-slate-700 font-bold text-base">Loading bookings...</h3>
+          <div className="bg-white/60 backdrop-blur-md border border-white rounded-3xl py-20 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="w-10 h-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin mx-auto mb-4"></div>
+            <h3 className="text-slate-700 font-bold text-base">Loading your reservations...</h3>
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
-            <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
-              <QrCode size={32} />
+          <div className="bg-white/60 backdrop-blur-md border border-white rounded-3xl py-20 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center">
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-5 shadow-inner">
+              <QrCode size={40} />
             </div>
-            <h3 className="text-slate-800 font-bold text-base mb-1">No bookings found</h3>
-            <p className="text-sm text-slate-500 max-w-sm mx-auto">
+            <h3 className="text-slate-800 font-extrabold text-lg mb-2">No bookings found</h3>
+            <p className="text-sm text-slate-500 max-w-sm">
               You haven't made any parking reservations in this category yet.
             </p>
           </div>
         ) : (
-          filteredBookings.map((booking, index) => (
-            <div 
-              key={booking.id}
-              className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm mb-4"
-            >
-              
-              {/* Top Info Bar (Badge Row) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-black">{index + 1}</span>
-                  <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-50 text-green-700 border border-green-100">
-                    {booking.vehicleType}
-                  </span>
-                  <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg ${
-                    isActiveSession(booking.sessionStatus)
-                      ? 'bg-green-600 text-white'
-                      : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {booking.sessionStatus || booking.status}
-                  </span>
-                </div>
-                <span className="text-slate-400 text-xs font-mono">
-                  Ticket ID: {booking.ticketId}
-                </span>
-              </div>
-
-              {/* Thin Divider */}
-              <hr className="border-slate-100 mb-6" />
-
-              {/* Content block: Metadata grid on left, action buttons on right */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                
-                {/* Metadata Core Grid (Flexible multi-column Layout) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6 flex-1">
+          <div className="space-y-4">
+            {filteredBookings.map((booking, index) => (
+              <div 
+                key={booking.id}
+                className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white shadow-[0_4px_20px_rgb(0,0,0,0.03)] p-5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow"
+              >
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                   
-                  {/* Column 1 (Location) */}
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
-                      <MapPin size={18} />
+                  {/* Left: ID & Main Info */}
+                  <div className="flex items-center gap-4 w-full lg:w-[320px] shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex flex-col items-center justify-center shrink-0 shadow-inner">
+                      <span className="text-[10px] font-bold text-indigo-400">ID</span>
+                      <span className="text-sm font-black text-indigo-700">{index + 1}</span>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-slate-400 font-medium">Location</span>
-                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.location}</span>
+                    
+                    <div>
+                      <div className="flex items-center flex-wrap gap-2 mb-1">
+                        <span className="font-extrabold text-slate-800 text-base">{booking.location}</span>
+                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-slate-100 text-slate-600">
+                          {booking.vehicleType}
+                        </span>
+                        <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
+                          isActiveSession(booking.sessionStatus)
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {booking.sessionStatus || booking.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                        <span className="flex items-center gap-1"><Ticket size={12} className="text-slate-400"/> {booking.ticketId}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-300 hidden sm:block"></span>
+                        <span className="flex items-center gap-1"><CalendarIcon size={12} className="text-slate-400"/> {booking.bookedDate} {booking.bookedTime}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Column 2 (Booked At) */}
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
-                      <CalendarIcon size={18} />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-slate-400 font-medium">Booked At</span>
-                      <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.bookedDate}</span>
-                      <span className="text-xs text-slate-500 mt-0.5">{booking.bookedTime}</span>
-                    </div>
-                  </div>
-
-                  {/* Column 3 (Arrival Deadline or Activity Time) */}
-                  {booking.sessionStatus === 'Reserved' ? (
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 border border-orange-100">
-                        <Clock size={18} className="text-orange-500" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-slate-400 font-medium">Arrival Deadline</span>
-                        <span className="text-sm font-semibold text-slate-800 mt-0.5">{booking.deadlineTime}</span>
-                        <span className="text-orange-500 text-xs font-semibold animate-pulse mt-0.5">
-                          {getRemainingMinutesText(booking.rawDeadlineBaseTime)}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100">
-                        <Clock size={18} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-slate-400 font-medium">Activity Time</span>
-                        <span className="text-xs font-semibold text-slate-700 mt-0.5">
-                          In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkInTime).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'}) : 'N/A'}
-                        </span>
-                        {booking.checkOutTime && (
-                          <span className="text-xs font-semibold text-slate-700 mt-0.5">
-                            Out: {new Date(booking.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date(booking.checkOutTime).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'})}
+                  {/* Middle: Status Metrics */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 flex-1 w-full bg-slate-50/50 p-3 lg:p-0 rounded-xl lg:bg-transparent lg:px-12 border-x border-transparent lg:border-slate-100/50">
+                    
+                    {/* Time Metric */}
+                    <div className="flex flex-col items-start min-w-[110px]">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        {booking.sessionStatus === 'Reserved' ? 'Deadline' : 'Activity'}
+                      </span>
+                      {booking.sessionStatus === 'Reserved' ? (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-sm font-bold text-slate-700">{booking.deadlineTime}</span>
+                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-100 text-orange-600 animate-pulse">
+                            {getRemainingMinutesText(booking.rawDeadlineBaseTime)}
                           </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Column 4 (Billing Info) */}
-                  {booking.totalAmount !== null && booking.totalAmount !== undefined ? (
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
-                        <CreditCard size={18} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-slate-400 font-medium">Billing</span>
-                        <span className="text-sm font-extrabold text-purple-700 mt-0.5">
-                          {booking.totalAmount.toLocaleString('vi-VN')} VND
-                        </span>
-                        {booking.depositAmount !== null && booking.depositAmount !== undefined && (
-                          <span className="text-[10px] text-amber-600 mt-0.5 font-bold">
-                            Deposit: {Number(booking.depositAmount).toLocaleString('vi-VN')} VND
-                          </span>
-                        )}
-                        <span className="text-[10px] text-slate-500 mt-0.5 uppercase font-semibold">
-                          {booking.paymentMethod || 'CASH'} - {booking.paymentStatus || 'PENDING'}
-                        </span>
-                      </div>
-                    </div>
-                  ) : booking.depositAmount !== null && booking.depositAmount !== undefined ? (
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
-                        <CreditCard size={18} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-slate-400 font-medium">Deposit</span>
-                        <span className="text-sm font-extrabold text-amber-700 mt-0.5">
-                          {Number(booking.depositAmount).toLocaleString('vi-VN')} VND
-                        </span>
-                        <span className="text-[10px] text-slate-500 mt-0.5 uppercase font-semibold">
-                          {booking.paymentMethod || 'VNPAY'} - {booking.paymentStatus || 'PENDING'}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-300 flex items-center justify-center shrink-0 border border-slate-100">
-                        <CreditCard size={18} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-slate-400 font-medium">Billing</span>
-                        <span className="text-xs font-medium text-slate-400 mt-0.5">No Invoice</span>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-
-                {/* Action Buttons Block (Right-Aligned Column) */}
-                <div className="flex flex-col gap-2 shrink-0 w-full lg:w-auto sm:min-w-[140px]">
-                  <button 
-                    onClick={() => {
-                      setTargetBooking(booking);
-                      setIsQrOpen(true);
-                    }}
-                    className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    <QrCode size={16} />
-                    View QR
-                  </button>
-
-                  {/* Cancel button: Only for Reserved bookings that have not been paid/checked-in */}
-                  {booking.sessionStatus === 'Reserved' && (
-                    <button 
-                       onClick={() => handleCancelClick(booking.id)}
-                       className="w-full bg-[#D91B5C] text-white hover:bg-rose-700 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 active:scale-[0.98] cursor-pointer"
-                    >
-                      <X size={16} />
-                      Cancel
-                    </button>
-                  )}
-
-                  {/* VNPay Payment Button: separate deposit payment from parking fee payment */}
-                  {(isDepositPaymentDue(booking) || isParkingFeePaymentDue(booking)) && (
-                    <button 
-                       disabled={payingSessionId === booking.id}
-                       onClick={() => handlePayVNPay(booking)}
-                       className="w-full bg-emerald-600 text-white hover:bg-emerald-500 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/10 active:scale-[0.98] cursor-pointer disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
-                    >
-                      {payingSessionId === booking.id ? (
-                        <span className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                        </div>
                       ) : (
-                        <CreditCard size={16} />
+                        <div className="text-xs font-semibold text-slate-600 space-y-0.5">
+                          <div className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) : 'N/A'}
+                          </div>
+                          {booking.checkOutTime && (
+                            <div className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                              Out: {new Date(booking.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                          )}
+                        </div>
                       )}
-                      {getVnPayPaymentLabel(booking)}
+                    </div>
+
+                    {/* Financial Metric */}
+                    <div className="flex flex-col items-start min-w-[110px]">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Billing</span>
+                      {booking.totalAmount !== null && booking.totalAmount !== undefined ? (
+                        <div>
+                          <span className="text-sm font-black text-indigo-700 block">
+                            {booking.totalAmount.toLocaleString('vi-VN')} đ
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">
+                            {booking.paymentMethod || 'CASH'} - {booking.paymentStatus || 'PENDING'}
+                          </span>
+                        </div>
+                      ) : booking.depositAmount !== null && booking.depositAmount !== undefined ? (
+                        <div>
+                          <span className="text-sm font-black text-amber-600 block">
+                            {Number(booking.depositAmount).toLocaleString('vi-VN')} đ
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">
+                            DEP - {booking.paymentStatus || 'PENDING'}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-bold text-slate-400">No Invoice</span>
+                      )}
+                    </div>
+                    
+                    {/* Plate Metric */}
+                    <div className="flex flex-col items-start hidden sm:flex">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Plate</span>
+                      <span className="text-sm font-bold text-slate-700 bg-slate-200/50 px-2 py-0.5 rounded-md border border-slate-200">
+                        {booking.contact}
+                      </span>
+                    </div>
+
+                  </div>
+
+                  {/* Right: Actions */}
+                  <div className="flex flex-wrap items-center lg:justify-end gap-2 w-full lg:w-[220px] shrink-0 mt-2 lg:mt-0">
+                    <button 
+                      onClick={() => {
+                        setTargetBooking(booking);
+                        setIsQrOpen(true);
+                      }}
+                      className="flex-1 lg:flex-none h-10 px-4 bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                    >
+                      <QrCode size={14} /> View QR
                     </button>
-                  )}
+
+                    {booking.sessionStatus === 'Reserved' && (
+                      <button 
+                         onClick={() => handleCancelClick(booking.id)}
+                         className="flex-1 lg:flex-none h-10 px-4 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                      >
+                        <X size={14} /> Cancel
+                      </button>
+                    )}
+
+                    {(isDepositPaymentDue(booking) || isParkingFeePaymentDue(booking)) && (
+                      <button 
+                         disabled={payingSessionId === booking.id}
+                         onClick={() => handlePayVNPay(booking)}
+                         className="flex-1 lg:flex-none w-full sm:w-auto h-10 px-5 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {payingSessionId === booking.id ? (
+                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                          <CreditCard size={14} />
+                        )}
+                        Pay Now
+                      </button>
+                    )}
+                  </div>
+
                 </div>
-
               </div>
-
-              {/* Full-width Contact Section (Inner Banner) */}
-              <div className="bg-blue-50/60 rounded-lg p-3 flex items-center gap-2 mt-4">
-                <Info size={16} className="text-blue-700 shrink-0" />
-                <span className="text-blue-700 text-sm font-medium">Contact: {booking.contact}</span>
-              </div>
-
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
 
       {/* 5. DYNAMIC CUSTOM REACTION CONFIRMATION MODAL OVERLAY */}
       {isCancelConfirmOpen && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 animate-scale-in relative">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgb(0,0,0,0.1)] max-w-sm w-full p-6 border border-white animate-scale-in relative">
             <button 
               onClick={() => setIsCancelConfirmOpen(false)}
-              className="absolute top-4 right-4 h-7 w-7 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
+              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center rounded-xl transition-all"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
 
-            <div className="space-y-4 pt-2 text-center">
-              <div className="w-12 h-12 bg-rose-50 border border-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                <AlertCircle size={24} />
+            <div className="space-y-5 pt-2 text-center">
+              <div className="w-14 h-14 bg-rose-50 border border-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                <AlertCircle size={28} />
               </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-extrabold text-slate-800">Cancel Parking Booking?</h3>
-                <p className="text-xs text-slate-500 leading-normal">
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-extrabold text-slate-800">Cancel Booking?</h3>
+                <p className="text-xs text-slate-500 leading-relaxed px-2">
                   Are you sure you want to cancel this reservation? Expired tickets release spots back to the building map grids immediately.
                 </p>
               </div>
@@ -691,13 +656,13 @@ const MyBookings = () => {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => setIsCancelConfirmOpen(false)}
-                  className="flex-1 h-10 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-xs transition-all"
+                  className="flex-1 h-11 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-sm transition-all"
                 >
                   No, Keep it
                 </button>
                 <button
                   onClick={handleConfirmCancel}
-                  className="flex-1 h-10 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-rose-600/10 active:scale-[0.98]"
+                  className="flex-1 h-11 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-rose-500/20 active:scale-[0.98]"
                 >
                   Yes, Cancel
                 </button>
@@ -709,27 +674,27 @@ const MyBookings = () => {
 
       {/* 6. DYNAMIC QR DISPLAY MODAL OVERLAY */}
       {isQrOpen && targetBooking && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 animate-scale-in relative text-center">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgb(0,0,0,0.1)] max-w-sm w-full p-6 border border-white animate-scale-in relative text-center">
             <button 
               onClick={() => {
                 setIsQrOpen(false);
                 setTargetBooking(null);
               }}
-              className="absolute top-4 right-4 h-7 w-7 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
+              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center rounded-xl transition-all"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
 
             <div className="space-y-5 pt-2">
-              <div className="space-y-1">
-                <h3 className="text-base font-extrabold text-slate-800">Parking Booking Ticket</h3>
-                <p className="text-xs text-slate-550">Scan at entrance scan readers or camera checkpoints</p>
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-extrabold text-slate-800">Parking Ticket</h3>
+                <p className="text-xs text-slate-500">Scan at entrance readers or camera checkpoints</p>
               </div>
 
-              <div className="bg-slate-50 border border-slate-100 p-6 rounded-xl inline-block shadow-sm">
+              <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl inline-block shadow-inner">
                 {/* Real thermal QR block */}
-                <div className="w-40 h-40 bg-white border border-slate-200 rounded-lg p-1.5 mx-auto flex items-center justify-center">
+                <div className="w-40 h-40 bg-white border border-slate-200 rounded-xl p-2 mx-auto flex items-center justify-center shadow-sm">
                   <img
                     src={qrUrl}
                     alt={`QR Code for Ticket ${targetBooking.ticketId}`}
@@ -738,8 +703,10 @@ const MyBookings = () => {
                 </div>
               </div>
 
-              <div className="text-xs font-mono font-bold text-indigo-600 tracking-wide uppercase">
-                Ticket ID: {targetBooking.ticketId}
+              <div className="bg-indigo-50 border border-indigo-100 rounded-xl py-2 px-4 inline-block mx-auto">
+                <div className="text-xs font-mono font-black text-indigo-700 tracking-widest uppercase">
+                  ID: {targetBooking.ticketId}
+                </div>
               </div>
 
               <button
@@ -747,7 +714,7 @@ const MyBookings = () => {
                   setIsQrOpen(false);
                   setTargetBooking(null);
                 }}
-                className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-all"
+                className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-slate-900/20 active:scale-[0.98]"
               >
                 Close Ticket
               </button>
