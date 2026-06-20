@@ -734,7 +734,7 @@ const GateController = () => {
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                 }`}
               >
-                Walk-In Check-In
+                Check-In
               </button>
               <button
                 type="button"
@@ -773,7 +773,7 @@ const GateController = () => {
 
               <Form.Item
                 name="plate"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{checkInMode === 'reservation' ? 'License Plate Number (Optional verification)' : 'License Plate Number'}</span>}
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">License Plate Number</span>}
                 rules={[{ required: checkInMode === 'walkin', message: 'Please input plate number!' }]}
                 className="mb-3"
               >
@@ -789,14 +789,11 @@ const GateController = () => {
                     initialValue="Car"
                     className="mb-0"
                   >
-                    <Select
-                      className="h-10 text-slate-800 rounded-lg font-medium"
-                      options={[
-                        { value: 'Car', label: 'Standard Car' },
-                        { value: 'Motorbike', label: 'Motorbike' },
-                        { value: 'Bicycle', label: 'Bicycle' }
-                      ]}
-                    />
+                    <Radio.Group className="flex w-full" buttonStyle="solid">
+                      <Radio.Button value="Car" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">Car</Radio.Button>
+                      <Radio.Button value="Motorbike" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">Motorbike</Radio.Button>
+                      <Radio.Button value="Bicycle" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">Bicycle</Radio.Button>
+                    </Radio.Group>
                   </Form.Item>
                 </div>
               )}
@@ -898,20 +895,20 @@ const GateController = () => {
               className="space-y-4"
             >
               <Form.Item
+                name="ticketCode"
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code</span>}
+                className="mb-2"
+              >
+                <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500" />
+              </Form.Item>
+
+              <Form.Item
                 name="plate"
                 label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">License Plate Number</span>}
                 rules={[{ required: true, message: 'Please input plate number!' }]}
                 className="mb-2"
               >
                 <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg uppercase font-bold focus:bg-white focus:border-rose-500" />
-              </Form.Item>
-
-              <Form.Item
-                name="ticketCode"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code (Optional)</span>}
-                className="mb-2"
-              >
-                <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500" />
               </Form.Item>
 
               <Form.Item
@@ -922,11 +919,15 @@ const GateController = () => {
               >
                 <Radio.Group className="w-full" buttonStyle="solid">
                   <div className="grid grid-cols-2 gap-3 w-full">
-                    <Radio.Button value="CASH" className="h-10 flex items-center justify-center font-bold rounded-lg border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-colors cursor-pointer">
-                      <CreditCard size={14} className="mr-1.5 text-rose-500" /> Cash (Tiền mặt)
+                    <Radio.Button value="CASH" className="h-10 text-center font-bold rounded-lg border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-colors cursor-pointer">
+                      <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
+                        <CreditCard size={15} className="text-rose-500" /> Cash (Tiền mặt)
+                      </span>
                     </Radio.Button>
-                    <Radio.Button value="VNPAY" className="h-10 flex items-center justify-center font-bold rounded-lg border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer">
-                      <CreditCard size={14} className="mr-1.5 text-emerald-500" /> VNPay (QR Code)
+                    <Radio.Button value="VNPAY" className="h-10 text-center font-bold rounded-lg border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer">
+                      <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
+                        <CreditCard size={15} className="text-emerald-500" /> VNPay (QR Code)
+                      </span>
                     </Radio.Button>
                   </div>
                 </Radio.Group>
