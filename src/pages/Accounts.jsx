@@ -114,7 +114,7 @@ const Accounts = () => {
   // Dynamic Date subtitle
   const getFormattedDate = () => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date().toLocaleDateString('vi-VN', options);
+    return new Date().toLocaleDateString('en-US', options);
   };
 
   // Helper mapping role tags for readable view

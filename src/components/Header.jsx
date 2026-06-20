@@ -15,7 +15,8 @@ import {
   Settings,
   ScanLine,
   CreditCard,
-  UserCog
+  UserCog,
+  UserPlus
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -185,23 +186,32 @@ const Header = () => {
                 <ScanLine size={16} />
                 Operations
               </button>
+              <button
+                onClick={() => navigate('/parking-map')}
+                className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}
+              >
+                <Map size={16} />
+                Parking Map
+              </button>
             </>
           )}
-          <button
-            onClick={() => navigate('/parking-map')}
-            className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}
-          >
-            <Map size={16} />
-            Parking Map
-          </button>
           {lowerRole === 'admin' && (
-            <button
-              onClick={() => navigate('/accounts')}
-              className={currentPath === '/accounts' ? activeTabClass : inactiveTabClass}
-            >
-              <UserCog size={16} />
-              Account Management
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/create-account')}
+                className={currentPath === '/create-account' ? activeTabClass : inactiveTabClass}
+              >
+                <UserPlus size={16} />
+                Create Account
+              </button>
+              <button
+                onClick={() => navigate('/accounts')}
+                className={currentPath === '/accounts' ? activeTabClass : inactiveTabClass}
+              >
+                <UserCog size={16} />
+                Account Management
+              </button>
+            </>
           )}
         </div>
       );
