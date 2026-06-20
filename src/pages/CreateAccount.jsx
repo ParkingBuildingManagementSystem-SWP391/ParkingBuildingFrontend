@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserPlus, Mail, Phone, Lock, Shield, CheckCircle, AlertCircle, X, User } from 'lucide-react';
-import api from '../services/api';
+import { adminService } from '../services/adminService';
 
 const CreateAccount = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const CreateAccount = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const roles = ['Admin', 'Manager', 'Staff', 'Driver'];
+  const roles = ['Admin', 'Manager', 'Staff', 'Registered_Driver'];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,8 +31,8 @@ const CreateAccount = () => {
     setSuccess('');
 
     try {
-      // Endpoint: POST /api/Admin/create-user
-      const response = await api.post('/Admin/create-user', formData);
+      // Endpoint: POST /api/Admin/create-user (moved to adminService)
+      const response = await adminService.createUser(formData);
       // Depending on API structure, 200/201 success or success property
       if (response.status === 200 || response.status === 201 || response.data?.success) {
         setSuccess(`Account '${formData.username}' was created successfully!`);
@@ -210,8 +210,8 @@ const CreateAccount = () => {
                     </div>
                   )}
                   <Shield size={24} className={`mb-2 ${formData.roleName === role ? 'text-indigo-600' : 'text-slate-400'}`} />
-                  <span className={`text-sm font-bold ${formData.roleName === role ? 'text-indigo-900' : 'text-slate-600'}`}>
-                    {role}
+                  <span className={`text-sm font-bold text-center ${formData.roleName === role ? 'text-indigo-900' : 'text-slate-600'}`}>
+                    {role.replace('_', ' ')}
                   </span>
                 </button>
               ))}
