@@ -1170,8 +1170,8 @@ const ParkingLotMap = () => {
 
       {/* 3. CREATE BOOKING MODAL (Drivers Only) */}
       {isBookingModalOpen && selectedSlot && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-105 animate-scale-in relative font-sans">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[95vh] overflow-y-auto border border-slate-105 animate-scale-in relative font-sans">
             
             <button 
               onClick={() => setIsBookingModalOpen(false)}
