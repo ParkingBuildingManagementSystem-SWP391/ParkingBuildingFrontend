@@ -179,13 +179,7 @@ const Header = () => {
                 <LayoutDashboard size={16} />
                 Dashboard
               </button>
-              <button
-                onClick={() => navigate('/checkin-checkout')}
-                className={currentPath === '/checkin-checkout' ? activeTabClass : inactiveTabClass}
-              >
-                <ScanLine size={16} />
-                Operations
-              </button>
+
               <button
                 onClick={() => navigate('/parking-map')}
                 className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}

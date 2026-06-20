@@ -912,7 +912,7 @@ const ParkingLotMap = () => {
       <div className="space-y-3">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 mb-1">Interactive Parking Map</h1>
-          <p className="text-sm text-slate-500">Real-time slot availability from SQL Server database â€” click any slot to manage</p>
+          <p className="text-sm text-slate-500">Real-time slot availability from SQL Server database - click any slot to manage</p>
         </div>
         
         {/* Status Legends Row */}
@@ -1180,7 +1180,7 @@ const ParkingLotMap = () => {
               <X size={18} />
             </button>
 
-            <div className="p-6 sm:p-8 space-y-6">
+            <div className="p-5 sm:p-6 space-y-4">
               
               <div className="space-y-1">
                 <h3 className="text-xl font-extrabold text-slate-805">Book Parking Slot</h3>
@@ -1200,7 +1200,7 @@ const ParkingLotMap = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleConfirmBookingSubmit} className="space-y-4">
+              <form onSubmit={handleConfirmBookingSubmit} className="space-y-3">
                 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider">Vehicle Type</label>
@@ -1239,7 +1239,7 @@ const ParkingLotMap = () => {
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Expected Check-In Time</label>
-                  <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/40 px-4 py-4">
+                  <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/40 px-3 py-3">
                     <div className="flex flex-col items-center gap-1.5">
                       <input
                         type="number"
@@ -1248,12 +1248,12 @@ const ParkingLotMap = () => {
                         value={String(expectedHour).padStart(2, '0')}
                         onChange={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
                         onBlur={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
-                        className="h-16 w-20 rounded-2xl border-2 border-indigo-200 bg-white text-center text-2xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                        className="h-12 w-16 rounded-xl border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                       />
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Hour</span>
                     </div>
 
-                    <span className="pt-3 text-3xl font-extrabold text-indigo-500">:</span>
+                    <span className="pt-2 text-2xl font-extrabold text-indigo-500">:</span>
 
                     <div className="flex flex-col items-center gap-1.5">
                       <input
@@ -1263,7 +1263,7 @@ const ParkingLotMap = () => {
                         value={String(expectedMinute).padStart(2, '0')}
                         onChange={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
                         onBlur={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
-                        className="h-16 w-20 rounded-2xl border-2 border-indigo-200 bg-white text-center text-2xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                        className="h-12 w-16 rounded-xl border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                       />
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Minute</span>
                     </div>
@@ -1271,7 +1271,7 @@ const ParkingLotMap = () => {
 
                   {/* Preview Tiền cọc động */}
                   {bookingVehicleType !== 'Bicycle' && (
-                    <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-between text-xs text-amber-800">
+                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-between text-xs text-amber-800">
                       <div>
                         <span className="font-semibold block">Tiền cọc giữ chỗ ước tính:</span>
                         <span className="text-[10px] text-amber-600 font-medium">({getEstimatedDeposit().shiftText})</span>
@@ -1282,16 +1282,16 @@ const ParkingLotMap = () => {
                     </div>
                   )}
 
-                  <p className="rounded-xl border border-orange-100 bg-orange-50 px-3.5 py-2.5 text-[11px] font-semibold leading-relaxed text-orange-700">
+                  <p className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700">
                     ⚠️ Note: Your reservation will be automatically canceled if you do not check in at the gate within 15 minutes of your scheduled time.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 pt-4 font-sans">
+                <div className="flex items-center gap-3 pt-3 font-sans">
                   <button
                     type="button"
                     onClick={() => setIsBookingModalOpen(false)}
-                    className="flex-1 h-11 border border-slate-200 hover:bg-slate-55 text-slate-600 hover:text-slate-800 font-bold rounded-xl transition-all text-sm"
+                    className="flex-1 h-10 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-bold rounded-xl transition-all text-sm"
                   >
                     Cancel
                   </button>
