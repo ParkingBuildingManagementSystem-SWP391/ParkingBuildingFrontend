@@ -690,22 +690,12 @@ const ParkingLotMap = () => {
       }
       vehicleTypeId = Number(vehicleTypeId);
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-
-      // Call API directly to make sure we pass the headers & payload correctly
-      const response = await api.post('/Parking/walk-in', {
-        licenseVehicle: cleanPlate,
-        vehicleTypeId: vehicleTypeId,
-        checkInImageUrl: null
-      }, config);
-
+      // Gọi qua phương thức của parkingService đã được định dạng bằng FormData
+      const response = await parkingService.walkInCheckIn(cleanPlate, vehicleTypeId, null);
+      
       setIsDetailsModalOpen(false);
       
-      const successMsg = response.data?.message || `Slot ${selectedSlot.id} is now occupied by ${cleanPlate}.`;
+      const successMsg = response?.message || `Slot ${selectedSlot.id} is now occupied by ${cleanPlate}.`;
       setAlertBanner(successMsg);
       
       setTimeout(() => {
