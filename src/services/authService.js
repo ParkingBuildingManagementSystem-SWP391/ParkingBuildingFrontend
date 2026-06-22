@@ -92,7 +92,12 @@ export const authService = {
   loginWithGoogle: async (idToken) => {
     try {
       const payload = {
-        idToken: idToken
+        idToken: idToken,
+        IdToken: idToken,
+        token: idToken,
+        Token: idToken,
+        credential: idToken,
+        Credential: idToken
       };
       
       const response = await api.post('/Auth/google', payload);
