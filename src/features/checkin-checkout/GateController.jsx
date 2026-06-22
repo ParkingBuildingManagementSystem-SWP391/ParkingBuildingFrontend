@@ -106,7 +106,7 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
           </>
         ) : previewUrl ? (
           <>
-            <img src={previewUrl} alt="Vehicle" className="w-full h-full object-cover rounded-lg" />
+            <img src={previewUrl} alt="Vehicle" className="w-full h-full object-contain bg-slate-950 rounded-lg" />
             
             {isScanning && (
               <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
@@ -118,17 +118,9 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
               </div>
             )}
 
-            {ocrResult && !isScanning && (
-              <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-16 border-2 border-yellow-400 rounded bg-yellow-400/10 flex items-end justify-center pb-1 shadow-[0_0_15px_rgba(250,204,21,0.4)]`}>
-                <div className="absolute -top-3 right-0 bg-yellow-400 text-slate-900 text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
-                  ALPR 98.5%
-                </div>
-              </div>
-            )}
-
-            <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-slate-900/90 px-2 py-1 rounded flex items-center justify-between text-[10px] font-mono shadow-md">
-              <span className="text-white/60 font-bold uppercase text-[8px]">{type}</span>
-              <span className={`font-semibold truncate max-w-[180px] ${ocrResult && !isScanning ? 'text-yellow-400' : 'text-slate-500'}`}>
+            <div className={`absolute bottom-1.5 left-1.5 right-1.5 ${ocrResult === 'Cần kiểm tra' ? 'bg-orange-500/90 text-white' : 'bg-slate-900/90'} px-2 py-1 rounded flex items-center justify-between text-[10px] font-mono shadow-md`}>
+              <span className="text-white/80 font-bold uppercase text-[8px]">{type}</span>
+              <span className={`font-semibold truncate max-w-[180px] ${ocrResult === 'Cần kiểm tra' ? 'text-white' : (ocrResult && !isScanning ? 'text-yellow-400' : 'text-slate-500')}`}>
                 {isScanning ? 'AI SCANNING...' : (ocrResult || 'LOCAL IMAGE')}
               </span>
             </div>
