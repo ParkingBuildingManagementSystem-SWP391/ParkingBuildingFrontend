@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  Bike, 
-  Car, 
-  Info, 
-  X, 
-  Search, 
-  Plus, 
-  Minus, 
-  CheckCircle, 
-  Coins, 
-  ShieldCheck, 
-  UserCheck, 
+import {
+  Bike,
+  Car,
+  Info,
+  X,
+  Search,
+  Plus,
+  Minus,
+  CheckCircle,
+  Coins,
+  ShieldCheck,
+  UserCheck,
   AlertTriangle,
   ChevronLeft,
   ChevronRight
@@ -27,16 +27,16 @@ import motorbikeIcon from '../../assets/vehicles/motorbike.png';
 
 
 const Motorcycle = ({ size = 18, className = '' }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     className={className}
   >
     <circle cx="5" cy="18" r="3" />
@@ -125,7 +125,7 @@ const getDefaultExpectedCheckInTimeParts = () => {
 
 const initAuthParkingMap = () => {
   const slots = [];
-  
+
   // Simulated Fallback Data (Floor G - FloorId 3)
   for (let i = 1; i <= 60; i++) {
     slots.push({
@@ -183,11 +183,11 @@ const ParkingLotMap = () => {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [loadingMap, setLoadingMap] = useState(false);
   const [errorMap, setErrorMap] = useState('');
-  
+
   // Guest view states
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [pendingBookingSlot, setPendingBookingSlot] = useState(null);
-  
+
   // Stateful slots
   const [authSlots, setAuthSlots] = useState(() => initAuthParkingMap());
 
@@ -252,11 +252,11 @@ const ParkingLotMap = () => {
     return sortedBackendSlots.map((s, index) => {
       const slotId = s.slotId || (startSlotId + index);
       const slotName = s.slotName || '';
-      
+
       let type = 'Car';
       if (s.typeId === 1 || slotName.startsWith('B-')) type = 'Bicycle';
       else if (s.typeId === 2 || slotName.startsWith('M-')) type = 'Motorcycle';
-      
+
       let zone = 'Car';
       if (type === 'Bicycle') zone = 'Bicycle';
       else if (type === 'Motorcycle') zone = 'Motorcycle';
@@ -293,10 +293,10 @@ const ParkingLotMap = () => {
     try {
       const data = await parkingService.getSlotsByFloor(floorId);
       const floorMeta = floors.find(f => f.id === floorId) || floors[0];
-      
+
       if (data && data.length > 0) {
         const mapped = mapBackendSlotsToUI(data, floorId, floorMeta.name);
-        
+
         // Compute available count
         const availCount = mapped.filter(s => s.status === 'Available').length;
         setFloorAvailableCounts(prev => ({
@@ -378,7 +378,7 @@ const ParkingLotMap = () => {
       }
     }
   }, [user, role, authSlots, pendingBookingSlot]);
-  
+
   // Counts & Progress computed dynamically based on actual database slots
   const currentFloorSlots = useMemo(() => {
     return authSlots.filter(s => s.floorId === activeFloorId);
@@ -540,13 +540,13 @@ const ParkingLotMap = () => {
     };
 
     const currentVehicleRates = rates[bookingVehicleType] || { day: 0, night: 0 };
-    
+
     // Kiểm tra ca hẹn đến dựa trên giờ đã chọn (Expected Hour)
     const isNightShift = expectedHour >= 18 || expectedHour < 6;
-    
+
     const estimatedAmount = isNightShift ? currentVehicleRates.night : currentVehicleRates.day;
     const shiftText = isNightShift ? "Ca Đêm (18:00 - 06:00)" : "Ca Ngày (06:00 - 18:00)";
-    
+
     return { estimatedAmount, shiftText };
   };
 
@@ -638,7 +638,7 @@ const ParkingLotMap = () => {
       console.error("Booking Error Response:", err);
       // Bắt chi tiết lỗi từ Backend
       const errMsg = err.response?.data?.message || err.response?.data?.error || err || "Đặt chỗ thất bại.";
-      
+
       // Hiển thị dạng modal alert hoặc toast chuyên nghiệp
       message.error(errMsg);
     } finally {
@@ -692,12 +692,12 @@ const ParkingLotMap = () => {
 
       // Gọi qua phương thức của parkingService đã được định dạng bằng FormData
       const response = await parkingService.walkInCheckIn(cleanPlate, vehicleTypeId, null);
-      
+
       setIsDetailsModalOpen(false);
-      
+
       const successMsg = response?.message || `Slot ${selectedSlot.id} is now occupied by ${cleanPlate}.`;
       setAlertBanner(successMsg);
-      
+
       setTimeout(() => {
         setAlertBanner(null);
       }, 4000);
@@ -721,7 +721,7 @@ const ParkingLotMap = () => {
     try {
       const plate = slotDetail?.activeSession?.licenseVehicle || selectedSlot.occupiedBy?.plate || 'Unknown';
       const cleanPlate = plate !== 'Unknown' ? plate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null;
-      
+
       const response = await parkingService.checkOutVehicle(
         null,
         cleanPlate,
@@ -731,10 +731,10 @@ const ParkingLotMap = () => {
 
 
       setIsDetailsModalOpen(false);
-      const invoiceText = response.totalAmount !== undefined 
-        ? ` Fee processed: ${response.totalAmount.toLocaleString('vi-VN')} đ.` 
+      const invoiceText = response.totalAmount !== undefined
+        ? ` Fee processed: ${response.totalAmount.toLocaleString('vi-VN')} đ.`
         : '';
-      
+
       setAlertBanner((response.message || `Slot ${selectedSlot.id} released successfully.`) + invoiceText);
       setTimeout(() => {
         setAlertBanner(null);
@@ -830,11 +830,13 @@ const ParkingLotMap = () => {
     const leftBottom = section.slots.slice(10, 15);
     const rightBottom = section.slots.slice(15, 20);
 
+    const isBicycleZone = section.slots.some(s => normalizeVehicleType(s.type) === 'bicycle');
+
     return (
       <section key={section.key} className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
         <div className="mb-4 flex items-center gap-2">
           {activeFloorId === 3 ? (
-            section.title.toLowerCase().includes('bicycle') || section.title === 'B1' || section.title === 'A1' ? <Bike size={18} className="text-blue-600" /> : <Motorcycle size={18} className="text-blue-600" />
+            isBicycleZone ? <Bike size={18} className="text-blue-600" /> : <Motorcycle size={18} className="text-blue-600" />
           ) : (
             <Car size={18} className="text-blue-600" />
           )}
@@ -900,7 +902,7 @@ const ParkingLotMap = () => {
 
       {/* 1. Sub-Header Section (Legends) */}
       <div className="space-y-3">
-        {/* Title has been moved to Header.jsx */ }
+        {/* Title has been moved to Header.jsx */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-sm font-semibold text-slate-600">
@@ -936,15 +938,15 @@ const ParkingLotMap = () => {
 
       {/* 2. Main Two-Column Layout Panel */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        
+
 
 
         {/* Main Map Block (Full width) */}
         <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm min-h-0 w-full font-sans relative">
-          
+
           {/* Top Search Bar & Controls */}
           <div className="p-4 border-b border-slate-100 bg-white flex flex-col xl:flex-row items-center justify-between gap-4 z-10 rounded-t-2xl">
-            
+
             {/* Horizontal Floor Pills */}
             <div className="flex items-center gap-3 overflow-x-auto w-full xl:w-auto scrollbar-hide">
               {floors.map((f) => {
@@ -954,11 +956,10 @@ const ParkingLotMap = () => {
                   <button
                     key={f.id}
                     onClick={() => onFloorChange(f.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all duration-200 whitespace-nowrap ${
-                      isSelected
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all duration-200 whitespace-nowrap ${isSelected
                         ? 'bg-blue-50 border-blue-500 text-blue-600 font-semibold shadow-sm'
                         : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium'
-                    }`}
+                      }`}
                   >
                     <span>{f.name}</span>
                     <span className={`text-xs ${isSelected ? 'text-blue-400 font-medium' : 'text-slate-500'}`}>
@@ -973,15 +974,15 @@ const ParkingLotMap = () => {
               {/* Search bar */}
               <div className="relative w-full sm:w-[240px]">
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Search by slot ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 text-sm rounded-full placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
                 />
                 {searchQuery && (
-                  <button 
+                  <button
                     onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
@@ -990,23 +991,23 @@ const ParkingLotMap = () => {
                 )}
               </div>
 
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={handleZoomOut} 
-                className="h-10 w-10 border border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-lg text-slate-500 transition-all active:scale-95 bg-white"
-              >
-                <Minus size={16} />
-              </button>
-              <span className="text-xs font-mono font-bold text-slate-650 min-w-[48px] text-center bg-white border border-slate-200 py-2.5 px-3 rounded-lg">
-                {zoomLevel}%
-              </span>
-              <button 
-                onClick={handleZoomIn} 
-                className="h-10 w-10 border border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-lg text-slate-500 transition-all active:scale-95 bg-white"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleZoomOut}
+                  className="h-10 w-10 border border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-lg text-slate-500 transition-all active:scale-95 bg-white"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="text-xs font-mono font-bold text-slate-650 min-w-[48px] text-center bg-white border border-slate-200 py-2.5 px-3 rounded-lg">
+                  {zoomLevel}%
+                </span>
+                <button
+                  onClick={handleZoomIn}
+                  className="h-10 w-10 border border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-lg text-slate-500 transition-all active:scale-95 bg-white"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
 
             </div>
           </div>
@@ -1030,33 +1031,33 @@ const ParkingLotMap = () => {
                 <span className="text-sm font-medium">No slots found on {activeFloor.name}.</span>
               </div>
             ) : (
-              <div 
+              <div
                 className="transition-transform duration-200 origin-top-left"
                 style={{ transform: `scale(${zoomLevel / 100})` }}
               >
                 <div className="w-full min-w-0 overflow-x-auto rounded-3xl border border-slate-200 bg-white p-4 shadow-inner">
                   <div className={activeFloorId === 3 ? 'min-w-[1010px]' : 'min-w-[860px]'}>
-                  <div className="mb-3 flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
-                    <div className="flex items-center gap-2">
-                      {activeFloorId === 3 ? (
-                        <div className="flex items-center gap-1"><Motorcycle size={18} className="text-indigo-650" /><Bike size={18} className="text-blue-600" /></div>
-                      ) : <Car size={18} className="text-blue-600" />}
-                      <h3 className="font-extrabold text-slate-808 text-xs uppercase tracking-wider">
-                        {activeFloor.name} Floor Map ({activeFloor.desc})
-                      </h3>
+                    <div className="mb-3 flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
+                      <div className="flex items-center gap-2">
+                        {activeFloorId === 3 ? (
+                          <div className="flex items-center gap-1"><Motorcycle size={18} className="text-indigo-650" /><Bike size={18} className="text-blue-600" /></div>
+                        ) : <Car size={18} className="text-blue-600" />}
+                        <h3 className="font-extrabold text-slate-808 text-xs uppercase tracking-wider">
+                          {activeFloor.name} Floor Map ({activeFloor.desc})
+                        </h3>
+                      </div>
+                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-700">
+                        {showingZoneText}
+                      </span>
                     </div>
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-700">
-                      {showingZoneText}
-                    </span>
-                  </div>
 
-                  {activeFloorId === 3 ? (
-                    <div className="space-y-5">
-                      {visibleZones.map(renderZoneSection)}
-                    </div>
-                  ) : (
-                    renderCarFloorSection()
-                  )}
+                    {activeFloorId === 3 ? (
+                      <div className="space-y-5">
+                        {visibleZones.map(renderZoneSection)}
+                      </div>
+                    ) : (
+                      renderCarFloorSection()
+                    )}
                   </div>
                 </div>
               </div>
@@ -1065,7 +1066,7 @@ const ParkingLotMap = () => {
 
           {/* Zone Navigation */}
           <div className="p-4 bg-white border-t border-slate-100 flex flex-col gap-3">
-            
+
             {/* Zone Controls */}
             {totalPages > 1 && (
               <div className="flex w-full items-center justify-center gap-3">
@@ -1105,8 +1106,8 @@ const ParkingLotMap = () => {
       {isBookingModalOpen && selectedSlot && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[95vh] overflow-y-auto border border-slate-105 animate-scale-in relative font-sans">
-            
-            <button 
+
+            <button
               onClick={() => setIsBookingModalOpen(false)}
               className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-650 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
             >
@@ -1114,7 +1115,7 @@ const ParkingLotMap = () => {
             </button>
 
             <div className="p-5 sm:p-6 space-y-4">
-              
+
               <div className="space-y-1">
                 <h3 className="text-xl font-extrabold text-slate-805">Book Parking Slot</h3>
                 <p className="text-xs text-slate-500">Configure your reservation session in the real database</p>
@@ -1134,7 +1135,7 @@ const ParkingLotMap = () => {
               </div>
 
               <form onSubmit={handleConfirmBookingSubmit} className="space-y-3">
-                
+
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider">Vehicle Type</label>
                   <select
@@ -1158,7 +1159,7 @@ const ParkingLotMap = () => {
                     <label className="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider">License Plate Number</label>
                     <div className="relative">
                       <Car size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input 
+                      <input
                         type="text"
                         required
                         placeholder="e.g., 29A-12345"
@@ -1228,7 +1229,7 @@ const ParkingLotMap = () => {
                   >
                     Cancel
                   </button>
-                  
+
                   <button
                     type="submit"
                     disabled={submitting}
@@ -1250,8 +1251,8 @@ const ParkingLotMap = () => {
       {isDetailsModalOpen && selectedSlot && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-105 animate-scale-in relative font-sans">
-            
-            <button 
+
+            <button
               onClick={() => setIsDetailsModalOpen(false)}
               className="absolute top-4 right-4 h-8 w-8 text-slate-404 hover:text-slate-655 hover:bg-slate-50 flex items-center justify-center rounded-lg transition-all"
             >
@@ -1259,7 +1260,7 @@ const ParkingLotMap = () => {
             </button>
 
             <div className="p-6 sm:p-8 space-y-6">
-              
+
               <div className="space-y-1">
                 <h3 className="text-xl font-extrabold text-slate-808 flex items-center gap-2">
                   {selectedSlot.type === 'Bicycle' && <Bike className="text-blue-505" size={20} />}
@@ -1283,20 +1284,19 @@ const ParkingLotMap = () => {
 
                 <div className="flex justify-between items-center pt-2 border-t border-slate-200">
                   <span className="text-slate-400 font-semibold">Current State</span>
-                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
-                    selectedSlot.status === 'Available'
+                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${selectedSlot.status === 'Available'
                       ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                       : selectedSlot.status === 'Occupied'
-                      ? 'bg-rose-50 text-rose-600 border border-rose-100'
-                      : 'bg-amber-50 text-amber-600 border border-amber-100'
-                  }`}>
+                        ? 'bg-rose-50 text-rose-600 border border-rose-100'
+                        : 'bg-amber-50 text-amber-600 border border-amber-100'
+                    }`}>
                     {selectedSlot.status}
                   </span>
                 </div>
               </div>
 
               {/* Conditional Actions based on current status */}
-              
+
               {/* STATUS: OCCUPIED / RESERVED */}
               {(selectedSlot.status === 'Occupied' || selectedSlot.status === 'Reserved') && (
                 <div className="space-y-4">
@@ -1386,7 +1386,7 @@ const ParkingLotMap = () => {
                   <form onSubmit={handleAdminReserveSubmit} className="space-y-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Assign License Plate (Walk-in)</label>
-                      <input 
+                      <input
                         type="text"
                         required
                         placeholder="e.g. 29A-888.88"
