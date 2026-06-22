@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Input, Select, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { parkingService } from '../../services/parkingService';
 import Webcam from 'react-webcam';
-import Tesseract from 'tesseract.js';
 import { 
   CheckCircle, 
   CreditCard, 
@@ -12,6 +11,25 @@ import {
   Check
 } from 'lucide-react';
 import TicketModal from './TicketModal';
+
+const dataURLtoFile = (dataurl, filename) => {
+  try {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    let bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new File([u8arr], filename, { type: mime });
+  } catch (err) {
+    console.error("Failed to convert captured webcam image:", err);
+    return null;
+  }
+};
 
 
 const scanKeyframes = `
@@ -194,42 +212,6 @@ const GateController = () => {
   const [exitScanning, setExitScanning] = useState(false);
   const [exitOcrResult, setExitOcrResult] = useState(null);
 
-  const parseLicensePlateFromImage = async (imageSrc) => {
-    try {
-      const result = await Tesseract.recognize(
-        imageSrc,
-        'eng',
-        { logger: m => console.log(m) }
-      );
-      const text = result.data.text;
-      const cleaned = text.replace(/[^A-Z0-9]/ig, '').toUpperCase();
-      
-      const match = cleaned.match(/\d{2}[A-Z0-9]{1,2}\d{4,5}/);
-      if (match) {
-        const raw = match[0];
-        if (raw.length === 7) return `${raw.slice(0,3)}-${raw.slice(3)}`;
-        if (raw.length === 8) return `${raw.slice(0,3)}-${raw.slice(3,6)}.${raw.slice(6)}`;
-        if (raw.length === 9) return `${raw.slice(0,4)}-${raw.slice(4,7)}.${raw.slice(7)}`;
-        return raw;
-      }
-      
-      const blocks = text.split(/[\s\n]+/).map(b => b.replace(/[^A-Z0-9]/ig, '').toUpperCase()).filter(b => b.length >= 3);
-      if (blocks.length > 0) {
-        const combined = blocks.join('');
-        if (combined.length >= 7 && combined.length <= 10) {
-           if (combined.length === 8) return `${combined.slice(0,3)}-${combined.slice(3,6)}.${combined.slice(6)}`;
-           if (combined.length === 9) return `${combined.slice(0,4)}-${combined.slice(4,7)}.${combined.slice(7)}`;
-           return combined;
-        }
-        return combined.slice(0, 9);
-      }
-      return null;
-    } catch (err) {
-      console.error("OCR Error:", err);
-      return null;
-    }
-  };
-
   // Checkout result and verification modal states
   const [checkoutResult, setCheckoutResult] = useState(null);
   const [isCheckoutResultModalOpen, setIsCheckoutResultModalOpen] = useState(false);
@@ -327,11 +309,13 @@ const GateController = () => {
   // Perform Check-in (Supports both Walk-in and Reservation QR code)
   const handleCheckInSubmit = async (values) => {
     try {
+      const tempImageUrl = values.tempImageUrl || null;
+
       if (checkInMode === 'walkin') {
-        const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 1;
+        const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 3;
         
         // Call walk-in check-in API
-        const response = await parkingService.walkInCheckIn(values.plate, vehicleTypeId, null);
+        const response = await parkingService.walkInCheckIn(values.plate, vehicleTypeId, tempImageUrl);
         
         if (response && response.isSuccess) {
           const ticket = {
@@ -351,6 +335,7 @@ const GateController = () => {
             URL.revokeObjectURL(entryImagePreviewUrl);
             setEntryImagePreviewUrl(null);
           }
+          setEntryOcrResult(null);
           fetchActiveParkedVehicles();
         } else {
           message.error(response?.message || "Check-in failed.");
@@ -360,7 +345,7 @@ const GateController = () => {
         const ticketCode = values.ticketCode;
         const licenseVehicle = values.plate;
         
-        const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, null);
+        const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
         
         if (response) {
           message.success(response.message || "Reservation QR Check-in successful! Barrier opened.");
@@ -369,6 +354,7 @@ const GateController = () => {
             URL.revokeObjectURL(entryImagePreviewUrl);
             setEntryImagePreviewUrl(null);
           }
+          setEntryOcrResult(null);
           fetchActiveParkedVehicles();
         } else {
           message.error("Check-in failed. Please verify QR Ticket Code.");
@@ -384,6 +370,7 @@ const GateController = () => {
   const handleCheckOut = async (paymentMethod = 'CASH', plateToUse = null) => {
     const plate = plateToUse || checkOutForm.getFieldValue('plate');
     const ticketCode = checkOutForm.getFieldValue('ticketCode');
+    const tempImageUrl = checkOutForm.getFieldValue('tempImageUrl') || null;
     if (!plate) {
       message.error("Please input license plate number!");
       return;
@@ -398,7 +385,7 @@ const GateController = () => {
       const result = await parkingService.checkOutVehicle(
         ticketCode ? ticketCode.trim() : null, 
         plate, 
-        null, 
+        tempImageUrl,
         null, 
         paymentMethod
       );
@@ -673,15 +660,31 @@ const GateController = () => {
                 setEntryImagePreviewUrl(imageSrc);
                 setEntryScanning(true);
                 setEntryOcrResult(null);
-                const plate = await parseLicensePlateFromImage(imageSrc);
-                setEntryScanning(false);
-                if (plate) {
-                  setEntryOcrResult(plate);
-                  checkInForm.setFieldsValue({ plate });
-                  message.success(`ALPR: Detected License Plate ${plate}`);
-                } else {
-                  setEntryOcrResult("UNRECOGNIZED");
-                  message.warning("ALPR: Could not clearly read license plate.");
+                checkInForm.setFieldValue('tempImageUrl', null);
+                try {
+                  const file = dataURLtoFile(imageSrc, "entry_capture.jpg");
+                  if (!file) throw new Error("Invalid captured image.");
+
+                  const type = checkInForm.getFieldValue('type') || 'Car';
+                  const typeId = VEHICLE_TYPE_MAP[type] || 3;
+                  const result = await parkingService.recognizeLicensePlate(file, typeId);
+
+                  if (result?.isSuccess && result.predictedPlate) {
+                    setEntryOcrResult(result.predictedPlate);
+                    setEntryImagePreviewUrl(result.imageUrl);
+                    checkInForm.setFieldsValue({
+                      plate: result.predictedPlate,
+                      tempImageUrl: result.rawImageUrl
+                    });
+                    message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                  } else {
+                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                  }
+                } catch (err) {
+                  console.error("Entry recognition error:", err);
+                  message.warning(`${err?.message || String(err)} Please enter the plate manually.`);
+                } finally {
+                  setEntryScanning(false);
                 }
               }}
               onUpload={async (file) => {
@@ -690,15 +693,29 @@ const GateController = () => {
                 setEntryWebcamOn(false);
                 setEntryScanning(true);
                 setEntryOcrResult(null);
-                const plate = await parseLicensePlateFromImage(url);
-                setEntryScanning(false);
-                if (plate) {
-                  setEntryOcrResult(plate);
-                  checkInForm.setFieldsValue({ plate });
-                  message.success(`ALPR: Detected License Plate ${plate}`);
-                } else {
-                  setEntryOcrResult("UNRECOGNIZED");
-                  message.warning("ALPR: Could not clearly read license plate.");
+                checkInForm.setFieldValue('tempImageUrl', null);
+                try {
+                  const type = checkInForm.getFieldValue('type') || 'Car';
+                  const typeId = VEHICLE_TYPE_MAP[type] || 3;
+                  const result = await parkingService.recognizeLicensePlate(file, typeId);
+
+                  if (result?.isSuccess && result.predictedPlate) {
+                    URL.revokeObjectURL(url);
+                    setEntryOcrResult(result.predictedPlate);
+                    setEntryImagePreviewUrl(result.imageUrl);
+                    checkInForm.setFieldsValue({
+                      plate: result.predictedPlate,
+                      tempImageUrl: result.rawImageUrl
+                    });
+                    message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                  } else {
+                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                  }
+                } catch (err) {
+                  console.error("Entry recognition error:", err);
+                  message.warning(`${err?.message || String(err)} Please enter the plate manually.`);
+                } finally {
+                  setEntryScanning(false);
                 }
               }}
               onClear={() => {
@@ -708,7 +725,7 @@ const GateController = () => {
                 }
                 setEntryWebcamOn(false);
                 setEntryOcrResult(null);
-                checkInForm.setFieldsValue({ plate: '' });
+                checkInForm.setFieldsValue({ plate: '', tempImageUrl: null });
               }}
               onRetry={() => {
                 if (entryImagePreviewUrl) {
@@ -716,6 +733,7 @@ const GateController = () => {
                   setEntryImagePreviewUrl(null);
                 }
                 setEntryOcrResult(null);
+                checkInForm.setFieldValue('tempImageUrl', null);
                 setEntryWebcamOn(true);
               }}
             />
@@ -760,6 +778,10 @@ const GateController = () => {
               requiredMark={false}
               className="space-y-3"
             >
+              <Form.Item name="tempImageUrl" noStyle>
+                <Input type="hidden" />
+              </Form.Item>
+
               {checkInMode === 'reservation' && (
                 <Form.Item
                   name="ticketCode"
@@ -839,15 +861,28 @@ const GateController = () => {
                 setExitImagePreviewUrl(imageSrc);
                 setExitScanning(true);
                 setExitOcrResult(null);
-                const plate = await parseLicensePlateFromImage(imageSrc);
-                setExitScanning(false);
-                if (plate) {
-                  setExitOcrResult(plate);
-                  checkOutForm.setFieldsValue({ plate });
-                  message.success(`ALPR: Detected License Plate ${plate}`);
-                } else {
-                  setExitOcrResult("UNRECOGNIZED");
-                  message.warning("ALPR: Could not clearly read license plate.");
+                checkOutForm.setFieldValue('tempImageUrl', null);
+                try {
+                  const file = dataURLtoFile(imageSrc, "exit_capture.jpg");
+                  if (!file) throw new Error("Invalid captured image.");
+
+                  const result = await parkingService.recognizeLicensePlate(file, 3);
+                  if (result?.isSuccess && result.predictedPlate) {
+                    setExitOcrResult(result.predictedPlate);
+                    setExitImagePreviewUrl(result.imageUrl);
+                    checkOutForm.setFieldsValue({
+                      plate: result.predictedPlate,
+                      tempImageUrl: result.rawImageUrl
+                    });
+                    message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                  } else {
+                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                  }
+                } catch (err) {
+                  console.error("Exit recognition error:", err);
+                  message.warning(`${err?.message || String(err)} Please enter the plate manually.`);
+                } finally {
+                  setExitScanning(false);
                 }
               }}
               onUpload={async (file) => {
@@ -856,15 +891,26 @@ const GateController = () => {
                 setExitWebcamOn(false);
                 setExitScanning(true);
                 setExitOcrResult(null);
-                const plate = await parseLicensePlateFromImage(url);
-                setExitScanning(false);
-                if (plate) {
-                  setExitOcrResult(plate);
-                  checkOutForm.setFieldsValue({ plate });
-                  message.success(`ALPR: Detected License Plate ${plate}`);
-                } else {
-                  setExitOcrResult("UNRECOGNIZED");
-                  message.warning("ALPR: Could not clearly read license plate.");
+                checkOutForm.setFieldValue('tempImageUrl', null);
+                try {
+                  const result = await parkingService.recognizeLicensePlate(file, 3);
+                  if (result?.isSuccess && result.predictedPlate) {
+                    URL.revokeObjectURL(url);
+                    setExitOcrResult(result.predictedPlate);
+                    setExitImagePreviewUrl(result.imageUrl);
+                    checkOutForm.setFieldsValue({
+                      plate: result.predictedPlate,
+                      tempImageUrl: result.rawImageUrl
+                    });
+                    message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                  } else {
+                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                  }
+                } catch (err) {
+                  console.error("Exit recognition error:", err);
+                  message.warning(`${err?.message || String(err)} Please enter the plate manually.`);
+                } finally {
+                  setExitScanning(false);
                 }
               }}
               onClear={() => {
@@ -874,7 +920,7 @@ const GateController = () => {
                 }
                 setExitWebcamOn(false);
                 setExitOcrResult(null);
-                checkOutForm.setFieldsValue({ plate: '' });
+                checkOutForm.setFieldsValue({ plate: '', tempImageUrl: null });
               }}
               onRetry={() => {
                 if (exitImagePreviewUrl) {
@@ -882,6 +928,7 @@ const GateController = () => {
                   setExitImagePreviewUrl(null);
                 }
                 setExitOcrResult(null);
+                checkOutForm.setFieldValue('tempImageUrl', null);
                 setExitWebcamOn(true);
               }}
             />
@@ -894,6 +941,10 @@ const GateController = () => {
               requiredMark={false}
               className="space-y-4"
             >
+              <Form.Item name="tempImageUrl" noStyle>
+                <Input type="hidden" />
+              </Form.Item>
+
               <Form.Item
                 name="ticketCode"
                 label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code</span>}

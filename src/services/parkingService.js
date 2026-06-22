@@ -39,13 +39,29 @@ export const parkingService = {
     }
   },
 
+  recognizeLicensePlate: async (imageFile, vehicleTypeId) => {
+    try {
+      const formData = new FormData();
+      formData.append('imageFile', imageFile);
+      formData.append('vehicleTypeId', vehicleTypeId);
+
+      const response = await api.post('/Parking/recognize', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "License plate recognition failed.";
+      throw serverMessage;
+    }
+  },
+
   // 3. Nhân viên quét xe tại cổng vào bãi (Check-in cho khách đã đặt trước)
   checkInVehicle: async (ticketCode, licenseVehicle, checkInImageUrl) => {
     try {
       const response = await api.post('/Parking/check-in', {
         ticketCode: ticketCode ? ticketCode.trim() : null,
         licenseVehicle: licenseVehicle ? licenseVehicle.trim().toUpperCase() : null,
-        checkInImageUrl: checkInImageUrl || "string"
+        checkInImageUrl: checkInImageUrl || null
       });
       return response.data;
     } catch (error) {
@@ -60,7 +76,7 @@ export const parkingService = {
       const response = await api.post('/Parking/walk-in', {
         licenseVehicle: licenseVehicle.trim().toUpperCase(),
         vehicleTypeId: parseInt(vehicleTypeId),
-        checkInImageUrl: checkInImageUrl || "string"
+        checkInImageUrl: checkInImageUrl || null
       });
       return response.data;
     } catch (error) {
