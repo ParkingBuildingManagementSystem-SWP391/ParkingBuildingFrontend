@@ -183,11 +183,22 @@ const Login = () => {
         </div>
 
         {/* Footer Link */}
-        <div className="text-center">
-          <span className="text-[13px] text-[#7A859E] font-medium">Don't have an account? </span>
-          <Link to="/register" className="text-[13px] font-bold text-[#4B0082] hover:text-[#3B82F6] transition-colors tracking-wide">
-            Sign Up
-          </Link>
+        <div className="text-center space-y-3">
+          <div>
+            <span className="text-[13px] text-[#7A859E] font-medium">Don't have an account? </span>
+            <Link to="/register" className="text-[13px] font-bold text-[#4B0082] hover:text-[#3B82F6] transition-colors tracking-wide">
+              Sign Up
+            </Link>
+          </div>
+          <div>
+            <Link 
+              to="/parking-map" 
+              onClick={() => localStorage.setItem('spotflow_guest_isAuthenticated', 'true')} 
+              className="text-[13px] font-bold text-slate-500 hover:text-blue-600 transition-colors underline decoration-slate-300 underline-offset-4"
+            >
+              Continue as Guest to View Parking Map
+            </Link>
+          </div>
         </div>
 
       </div>

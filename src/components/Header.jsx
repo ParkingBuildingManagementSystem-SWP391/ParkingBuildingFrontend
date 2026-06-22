@@ -51,7 +51,7 @@ const Header = () => {
       return getFormattedDate();
     }
     if (location.pathname === '/parking-map') {
-      return 'Real-time slot availability from SQL Server database';
+      return 'Real-time parking slot availability map';
     }
     if (location.pathname === '/accounts') {
       return 'Manage system user accounts and permissions';
@@ -73,7 +73,7 @@ const Header = () => {
 
   return (
     <header className="w-full h-[96px] flex items-center justify-between px-8 bg-white border-b border-slate-100 select-none">
-      
+
       {/* Left: Dynamic Page Title */}
       <div className="flex-1 flex flex-col pt-2">
         <h1 className="text-[22px] font-extrabold text-slate-900 tracking-tight">{getPageTitle()}</h1>
@@ -82,7 +82,7 @@ const Header = () => {
 
       {/* Right: Actions & Indicators */}
       <div className="flex items-center gap-6">
-        
+
         {/* Active Indicator */}
         <div className="hidden sm:flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#34C759]"></div>
@@ -107,7 +107,7 @@ const Header = () => {
         </button>
 
         {/* Dark Mode Toggle */}
-        <button 
+        <button
           onClick={toggleDarkMode}
           className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-[#FF9500] hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)]"
         >

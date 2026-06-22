@@ -11,6 +11,7 @@ import Unauthorized from './pages/Unauthorized';
 import PaymentSuccess from './pages/PaymentSuccess';
 
 // Protected Pages (Admin & Driver Features)
+import Introduction from './pages/Introduction';
 import StaffManagement from './pages/StaffManagement';
 import MyBookings from './pages/MyBookings';
 import Settings from './pages/Settings';
@@ -36,6 +37,7 @@ function App() {
         <Route element={<MainLayout />}>
           {/* Public parking map */}
           <Route path="/parking-map" element={<ParkingLotMap />} />
+          <Route path="/about" element={<Introduction />} />
 
           {/* ĐUST SỬA: Đổi tên roles thành viết hoa chữ cái đầu cho khớp chuẩn với Database của bạn */}
           {/* Shell wrapping authenticated workspaces */}
