@@ -625,10 +625,7 @@ const GateController = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gate Control Terminal</h1>
-        <p className="text-slate-500 text-sm mt-0.5">Simultaneous entry and exit lanes control center</p>
-      </div>
+
 
       {/* TOP ROW - TWO COLUMN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

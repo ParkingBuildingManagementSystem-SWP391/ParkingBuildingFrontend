@@ -1,312 +1,121 @@
-import React from 'react';
-import { Layout, Select, Avatar, Dropdown, Space, message } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import {
-  ChevronDown, 
-  LogOut, 
-  User, 
-  ShieldCheck, 
-  UserCheck, 
-  Contact,
-  Map,
-  Calendar as CalendarIcon,
-  LayoutDashboard,
-  Users,
-  Settings,
-  ScanLine,
-  CreditCard,
-  UserCog,
-  UserPlus
-} from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
-const { Header: AntHeader } = Layout;
+import {
+  LogOut, User, Sun, Moon, Search, Bell, Settings, ChevronDown, Activity
+} from 'lucide-react';
 
 const Header = () => {
-  const { user, role, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogoutClick = () => {
-    logout();
-    message.info('Logged out of system successfully');
-    navigate('/login');
-  };
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
 
-  const getRoleBadge = (userRole) => {
-    const baseClass = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all duration-200 shadow-sm";
-    const lowerUserRole = userRole?.toLowerCase();
-    
-    switch (lowerUserRole) {
-      case 'admin':
-        return (
-          <span className={`${baseClass} bg-rose-50 text-rose-600 border-rose-200`}>
-            <ShieldCheck size={12} className="text-rose-500 shrink-0" />
-            Admin
-          </span>
-        );
-      case 'manager':
-        return (
-          <span className={`${baseClass} bg-purple-50 text-purple-600 border-purple-200`}>
-            <ShieldCheck size={12} className="text-purple-500 shrink-0" />
-            Manager
-          </span>
-        );
-      case 'staff':
-        return (
-          <span className={`${baseClass} bg-indigo-50 text-indigo-600 border-indigo-200`}>
-            <UserCheck size={12} className="text-indigo-500 shrink-0" />
-            Staff
-          </span>
-        );
-      case 'driver':
-      case 'member':
-      case 'registered_driver':
-      case 'customer':
-        return (
-          <span className={`${baseClass} bg-emerald-50 text-emerald-700 border-emerald-200`}>
-            <Contact size={12} className="text-emerald-600 shrink-0" />
-            Driver
-          </span>
-        );
-      default:
-        return null;
+  const toggleDarkMode = () => {
+    const root = document.documentElement;
+    if (root.classList.contains('dark')) {
+      root.classList.remove('dark');
+      setIsDarkMode(false);
+    } else {
+      root.classList.add('dark');
+      setIsDarkMode(true);
     }
   };
 
-  // Profile menu items dropdown
-  const profileMenuItems = [
-    {
-      key: 'profile',
-      label: <span className="text-slate-600 font-medium">My Account Settings</span>,
-      icon: <User size={14} className="text-slate-400" />,
-      onClick: () => navigate('/settings')
-    },
-
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      label: <span className="text-slate-500 font-normal">Sign Out</span>,
-      icon: <LogOut size={14} className="text-slate-400" />,
-      onClick: handleLogoutClick,
-    },
-  ];
-
-  // Dynamic horizontal tab selector based on active role
-  const getTabs = () => {
-    const commonTabClass = "px-4 py-2 font-medium flex items-center gap-2 text-sm transition-all duration-200 rounded-lg";
-    const activeTabClass = user
-      ? `${commonTabClass} bg-white text-[#2563EB] shadow-sm font-bold`
-      : `${commonTabClass} bg-[#2563EB] text-white shadow-sm font-bold`;
-    const inactiveTabClass = user
-      ? `${commonTabClass} bg-transparent text-white/80 hover:text-white hover:bg-white/10`
-      : `${commonTabClass} bg-transparent text-slate-600 hover:text-[#2563EB] hover:bg-slate-100`;
-
-    const currentPath = location.pathname;
-    const lowerRole = role?.toLowerCase();
-
-    // Guest view: only Parking Map is allowed
-    if (!user) {
-      return (
-        <div className="flex items-center gap-1.5 bg-slate-100/50 border border-slate-200/50 rounded-xl p-1">
-          <button
-            onClick={() => navigate('/parking-map')}
-            className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}
-          >
-            <Map size={16} />
-            Parking Map
-          </button>
-        </div>
-      );
-    }
-
-    // Role 1: "Driver" (Driver View) -> Allowed Tabs: Parking Map, My Bookings
-    if (lowerRole === 'driver' || lowerRole === 'member' || lowerRole === 'registered_driver' || lowerRole === 'customer') {
-      return (
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
-          <button
-            onClick={() => navigate('/parking-map')}
-            className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}
-          >
-            <Map size={16} />
-            Parking Map
-          </button>
-          <button
-            onClick={() => navigate('/my-bookings')}
-            className={currentPath === '/my-bookings' ? activeTabClass : inactiveTabClass}
-          >
-            <CalendarIcon size={16} />
-            My Bookings
-          </button>
-        </div>
-      );
-    }
-
-    // Role 2: "Parking Staff" -> Allowed Tabs: Parking Map, Operations
-    if (lowerRole === 'staff') {
-      return (
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
-          <button
-            onClick={() => navigate('/parking-map')}
-            className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}
-          >
-            <Map size={16} />
-            Parking Map
-          </button>
-          <button
-            onClick={() => navigate('/checkin-checkout')}
-            className={currentPath === '/checkin-checkout' ? activeTabClass : inactiveTabClass}
-          >
-            <ScanLine size={16} />
-            Operations
-          </button>
-        </div>
-      );
-    }
-
-    // Role 3: "Parking Manager" & Role 4: "System Admin"
-    if (lowerRole === 'manager' || lowerRole === 'admin') {
-      return (
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1">
-          {lowerRole === 'manager' && (
-            <>
-              <button
-                onClick={() => navigate('/dashboard')}
-                className={currentPath === '/dashboard' ? activeTabClass : inactiveTabClass}
-              >
-                <LayoutDashboard size={16} />
-                Dashboard
-              </button>
-
-              <button
-                onClick={() => navigate('/parking-map')}
-                className={currentPath === '/parking-map' ? activeTabClass : inactiveTabClass}
-              >
-                <Map size={16} />
-                Parking Map
-              </button>
-            </>
-          )}
-          {lowerRole === 'admin' && (
-            <>
-              <button
-                onClick={() => navigate('/create-account')}
-                className={currentPath === '/create-account' ? activeTabClass : inactiveTabClass}
-              >
-                <UserPlus size={16} />
-                Create Account
-              </button>
-              <button
-                onClick={() => navigate('/accounts')}
-                className={currentPath === '/accounts' ? activeTabClass : inactiveTabClass}
-              >
-                <UserCog size={16} />
-                Account Management
-              </button>
-            </>
-          )}
-        </div>
-      );
-    }
-
-    return null;
+  const getFormattedDate = () => {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date().toLocaleDateString('en-US', options);
   };
 
-  const getInitials = (name) => {
-    if (!name) return 'US';
-    const cleanName = name.replace(/\s+/g, ' ').trim();
-    const parts = cleanName.split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/parking-map': return 'Live Map';
+      case '/dashboard': return 'Manager Dashboard';
+      case '/accounts': return 'User Management';
+      case '/create-account': return 'Create Account';
+      case '/my-bookings': return 'My Bookings';
+      case '/checkin-checkout': return 'Gate Control';
+      case '/settings': return 'Account Settings';
+      default: return 'User Management'; // Defaulting to the mockup title
     }
-    return name.slice(0, 2).toUpperCase();
   };
 
-  const roleLabels = {
-    driver: 'Driver',
-    member: 'Driver',
-    registered_driver: 'Driver',
-    customer: 'Driver',
-    staff: 'Parking Staff',
-    manager: 'Parking Manager',
-    admin: 'System Admin'
+  const getPageSubtitle = () => {
+    if (location.pathname === '/dashboard') {
+      return getFormattedDate();
+    }
+    if (location.pathname === '/parking-map') {
+      return 'Real-time slot availability from SQL Server database';
+    }
+    if (location.pathname === '/accounts') {
+      return 'Manage system user accounts and permissions';
+    }
+    if (location.pathname === '/settings') {
+      return 'Configure your personal profile details, system preferences, and administrative tools';
+    }
+    if (location.pathname === '/checkin-checkout') {
+      return 'Simultaneous entry and exit lanes control center';
+    }
+    if (location.pathname === '/create-account') {
+      return 'Provision new users and grant system access roles';
+    }
+    if (location.pathname === '/my-bookings') {
+      return 'Manage your parking reservations and history';
+    }
+    return 'Manage system user accounts and permissions';
   };
 
   return (
-    <AntHeader
-      className={`w-full px-5 py-3 flex items-center justify-between h-14 sticky top-0 z-50 shadow-md select-none border-none ${
-        !user ? 'bg-white border-b border-slate-100' : ''
-      }`}
-      style={{ backgroundColor: user ? '#2563EB' : '#FFFFFF', padding: '0 20px', lineHeight: 'normal' }}
-    >
+    <header className="w-full h-[96px] flex items-center justify-between px-8 bg-white border-b border-slate-100 select-none">
       
-      {/* Left Side (Brand Text & Navigation Tabs) */}
-      <div className="flex items-center gap-5">
+      {/* Left: Dynamic Page Title */}
+      <div className="flex-1 flex flex-col pt-2">
+        <h1 className="text-[22px] font-extrabold text-slate-900 tracking-tight">{getPageTitle()}</h1>
+        <p className="text-[13px] text-slate-500 font-medium">{getPageSubtitle()}</p>
+      </div>
+
+      {/* Right: Actions & Indicators */}
+      <div className="flex items-center gap-6">
         
-        {/* Brand Text Layout */}
-        <div
-          className="flex items-center shrink-0 cursor-pointer"
-          onClick={() => navigate(user ? (lowerRole === 'admin' ? '/accounts' : '/dashboard') : '/parking-map')}
-        >
-          <span className={`font-bold text-base tracking-wide ${user ? 'text-white' : 'text-slate-800'}`}>
-            Parking Building System
+        {/* Active Indicator */}
+        <div className="hidden sm:flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#34C759]"></div>
+          <span className="text-[13px] font-bold text-slate-800">3 <span className="font-medium text-slate-500">active</span></span>
+        </div>
+
+        {/* Occupancy Indicator */}
+        <div className="hidden sm:flex items-center gap-2">
+          <Activity size={16} className="text-[#4B6BFB]" />
+          <span className="text-[13px] font-medium text-slate-500">Occupancy</span>
+          <span className="text-[13px] font-bold text-[#34C759]">29%</span>
+        </div>
+
+        <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+        {/* Notifications */}
+        <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative">
+          <Bell size={18} strokeWidth={2} />
+          <span className="absolute -top-1 -right-1 w-[18px] h-[18px] bg-[#FF3B30] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+            2
           </span>
-        </div>
+        </button>
 
-        {/* Vertical Divider */}
-        <div className={`h-6 w-px hidden md:block ${user ? 'bg-white/20' : 'bg-slate-200'}`}></div>
-
-        {/* Horizontal Navigation Tabs Selector */}
-        <div className="hidden md:block">
-          {getTabs()}
-        </div>
-
-      </div>
-
-      {/* Right Side (User Profile & Presentation Switcher / Guest Public View Header) */}
-      <div className="flex items-center gap-4">
-        
-        {user ? (
-          <>
-            {/* Static Role Display Badge */}
-            <div className="flex items-center gap-1.5 bg-white/10 text-white font-semibold text-xs px-3.5 py-2 rounded-xl border border-white/10 select-none">
-              <span>{roleLabels[role?.toLowerCase()] || role}</span>
-            </div>
-
-            {/* Circular Avatar Initials */}
-            <div className="flex items-center pl-3 border-l border-white/20">
-              <Dropdown menu={{ items: profileMenuItems }} trigger={['click']} placement="bottomRight">
-                <div className="cursor-pointer group flex items-center hover:opacity-90 transition-all select-none">
-                  <div className="w-9 h-9 rounded-full bg-white text-[#2563EB] font-bold flex items-center justify-center text-sm border border-white/20 shadow-md shrink-0 transition-transform group-hover:scale-105">
-                    {getInitials(user.username || user.name)}
-                  </div>
-                </div>
-              </Dropdown>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center gap-4">
-            {/* Public view warning banner */}
-            <div className="flex items-center gap-2 text-slate-500 font-medium text-xs sm:text-sm bg-slate-50 border border-slate-100 py-1.5 px-3 rounded-lg">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-              <span>Public view — read only</span>
-            </div>
-            
-            {/* Royal blue Sign In button */}
-            <button 
-              onClick={() => navigate('/login')}
-              className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition-all shadow-md shadow-blue-500/10 active:scale-98"
-            >
-              Sign In
-            </button>
-          </div>
-        )}
+        {/* Dark Mode Toggle */}
+        <button 
+          onClick={toggleDarkMode}
+          className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-[#FF9500] hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)]"
+        >
+          {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
       </div>
-
-    </AntHeader>
+    </header>
   );
 };
 
