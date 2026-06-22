@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit } from 'lucide-react';
+import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock, Unlock } from 'lucide-react';
 import { message, Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 
@@ -367,26 +367,19 @@ const Accounts = () => {
     }, 3500);
   };
 
+  const totalCount = filteredAccounts.length;
+  const activeCount = filteredAccounts.filter(a => a.status === 'Active').length;
+  const lockedCount = filteredAccounts.filter(a => a.status !== 'Active').length;
+
   return (
-    <div className="space-y-6 select-none font-sans pb-12">
+    <div className="space-y-8 select-none font-sans pb-12 w-full">
       {/* Floating Success Alert Toast */}
       {alertMessage && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-xl z-50 flex items-center gap-2 border border-emerald-500 animate-bounce font-sans">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-xl z-50 flex items-center gap-2 border border-emerald-500 animate-bounce">
           <CheckCircle size={18} />
           <span>{alertMessage}</span>
         </div>
       )}
-
-      {/* A. Header Section */}
-      <div className="flex items-center gap-3">
-        <div className="p-3 bg-[#1A62FF]/10 text-[#1A62FF] rounded-2xl shadow-sm">
-          <Users size={28} />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Account Management</h1>
-          <p className="text-sm text-slate-500 mt-1">{getFormattedDate()}</p>
-        </div>
-      </div>
 
       {/* Error / Offline Banner */}
       {errorBanner && (
@@ -396,223 +389,183 @@ const Accounts = () => {
         </div>
       )}
 
-      {/* B. Summary Stat Cards Row (4 Columns Layout) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Admins Card */}
-        <div className="bg-white p-5 rounded-2xl border-l-4 border-[#1A62FF] border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Admins</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{adminCount} Admins</span>
+      {/* A. Top Stats Cards Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* Total Users */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-[#EEF2FF] flex items-center justify-center text-[#4B6BFB]">
+            <Users size={24} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="text-3xl font-extrabold text-slate-800">{totalCount}</h3>
+            <p className="text-[13px] font-medium text-slate-500">Total Users</p>
+          </div>
         </div>
 
-        {/* Managers Card */}
-        <div className="bg-white p-5 rounded-2xl border-l-4 border-[#FFC107] border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Managers</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{managerCount} Managers</span>
+        {/* Active Users */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
+            <CheckCircle size={24} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="text-3xl font-extrabold text-slate-800">{activeCount}</h3>
+            <p className="text-[13px] font-medium text-slate-500">Active</p>
+          </div>
         </div>
 
-        {/* Staff Card */}
-        <div className="bg-white p-5 rounded-2xl border-l-4 border-[#00C853] border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Staff</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{staffCount} Staff</span>
-        </div>
-
-        {/* Drivers Card */}
-        <div className="bg-white p-5 rounded-2xl border-l-4 border-slate-400 border-y border-r border-slate-100 shadow-sm flex flex-col justify-between min-h-[100px]">
-          <span className="text-xs text-slate-404 font-semibold uppercase tracking-wider font-sans">Drivers</span>
-          <span className="text-2xl font-bold text-slate-800 mt-2 font-sans">{userCount} Drivers</span>
+        {/* Locked Users */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-[#FFF1F2] flex items-center justify-center text-[#F43F5E]">
+            <Lock size={24} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="text-3xl font-extrabold text-slate-800">{lockedCount}</h3>
+            <p className="text-[13px] font-medium text-slate-500">Locked</p>
+          </div>
         </div>
       </div>
 
-      {/* C. "All Accounts" Table Container */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+      {/* B. Table Section */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] pt-6 pb-2">
         
-        {/* Table Header Section with Title & Controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        {/* Table Header & Controls */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 px-8">
           <div>
-            <h2 className="text-lg font-bold text-slate-800 font-sans">All Accounts</h2>
-            <p className="text-xs text-slate-400 mt-0.5 font-sans">Manage permissions and view status details</p>
+            <h2 className="text-[22px] font-extrabold text-slate-900">All Users</h2>
+            <p className="text-[13px] text-slate-500 font-medium mt-1">{totalCount} accounts found</p>
           </div>
 
-          {/* Filtering controls stacked side-by-side */}
-          <div className="flex flex-wrap items-center gap-3 font-sans">
-            {/* Text Search Input */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input */}
             <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search name, email, phone..."
+                placeholder="Search name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 w-64 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:border-[#1A62FF] focus:bg-white transition-all font-medium"
+                className="pl-11 pr-4 py-2.5 w-[280px] bg-slate-50 border border-slate-100 rounded-2xl text-[13px] placeholder-slate-400 focus:outline-none focus:border-blue-300 focus:bg-white transition-all font-medium"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-404 hover:text-slate-605"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   <X size={14} />
                 </button>
               )}
             </div>
-
-            {/* Custom Roles select dropdown */}
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-650 focus:outline-none focus:border-[#1A62FF] focus:bg-white font-medium cursor-pointer transition-all"
-            >
-              <option value="All Roles">All Roles</option>
-              <option value="Admin">Admin</option>
-              <option value="Manager">Manager</option>
-              <option value="Staff">Staff</option>
-              <option value="Driver">Driver</option>
-            </select>
-
-            {/* Custom Statuses select dropdown */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-600 focus:outline-none focus:border-[#1A62FF] focus:bg-white font-medium cursor-pointer transition-all"
-            >
-              <option value="All Statuses">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
           </div>
         </div>
 
         {/* Data Table */}
-        <div className="overflow-x-auto font-sans">
+        <div className="overflow-x-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <div className="w-8 h-8 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
-              <span className="text-xs font-semibold text-slate-500">Loading accounts from Database...</span>
+              <span className="text-[13px] font-semibold text-slate-500">Loading accounts...</span>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 text-xs font-bold text-slate-404 uppercase tracking-wider">
-                  <th className="py-4 px-3">#</th>
-                  <th className="py-4 px-4">Name / Email</th>
-                  <th className="py-4 px-4">Phone Number</th>
-                  <th className="py-4 px-4">Current Role</th>
-                  <th className="py-4 px-4">Status</th>
-                  <th className="py-4 px-4">Joined</th>
-                  <th className="py-4 px-4 text-right">Actions</th>
+                <tr className="border-b border-slate-100 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                  <th className="py-4 px-8 font-extrabold">User</th>
+                  <th className="py-4 px-4 font-extrabold">Email</th>
+                  <th className="py-4 px-4 font-extrabold">Role</th>
+                  <th className="py-4 px-4 font-extrabold">Status</th>
+                  <th className="py-4 px-4 font-extrabold">Created</th>
+                  <th className="py-4 px-8 text-right font-extrabold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50 text-sm">
+              <tbody className="text-[13px]">
                 {filteredAccounts.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-12 text-slate-404 font-medium">
+                    <td colSpan={6} className="text-center py-12 text-slate-400 font-medium text-[13px]">
                       No accounts found matching the search criteria.
                     </td>
                   </tr>
                 ) : (
                   filteredAccounts.map((item, index) => {
                     const initials = getInitials(item.name);
-                    const isSystemAdmin = item.roleId === 1;
+                    
+                    // Determine Role Badges
+                    let roleBadge = null;
+                    if (item.roleId === 1) {
+                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FFE4E6] text-[#E11D48]">admin</span>;
+                    } else if (item.roleId === 5) {
+                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#F3E8FF] text-[#9333EA]">manager</span>;
+                    } else if (item.roleId === 2) {
+                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#DBEAFE] text-[#2563EB]">staff</span>;
+                    } else {
+                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#D1FAE5] text-[#059669]">user</span>;
+                    }
+
+                    // Determine Status Badges
+                    const isActive = item.status === 'Active';
+                    const statusBadge = isActive 
+                      ? <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-[#A7F3D0] text-[#059669] bg-[#ECFDF5]">active</span>
+                      : <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-[#FECDD3] text-[#E11D48] bg-[#FFF1F2]">locked</span>;
+
+                    // Avatar Background Color (Using predefined distinct colors)
+                    const avatarColors = ['bg-[#F43F5E]', 'bg-[#8B5CF6]', 'bg-[#3B82F6]', 'bg-[#10B981]', 'bg-[#F59E0B]'];
+                    const avatarBg = avatarColors[item.id % avatarColors.length];
 
                     return (
-                      <tr key={item.id} className="hover:bg-slate-50/40 transition-colors group">
-                        {/* # Column */}
-                        <td className="py-4 px-3 text-slate-400 font-mono">{index + 1}</td>
-
-                        {/* Name / Email Column */}
-                        <td className="py-4 px-4">
+                      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-0 group">
+                        
+                        {/* User Column */}
+                        <td className="py-4 px-8">
                           <div className="flex items-center gap-3">
-                            {/* Circular initial avatar */}
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm shrink-0 ${getAvatarBg(item.roleId)}`}>
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-[12px] shadow-sm ${avatarBg}`}>
                               {initials}
                             </div>
-                            <div className="flex flex-col">
-                              <span className="text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">{item.name}</span>
-                              <span className="text-xs text-slate-404">{item.email}</span>
-                            </div>
+                            <span className="text-slate-800 font-bold">{item.name}</span>
                           </div>
                         </td>
 
-                        {/* Phone Number Column */}
-                        <td className="py-4 px-4 font-mono font-medium text-slate-600">
-                          {item.phoneNumber || 'N/A'}
+                        {/* Email Column */}
+                        <td className="py-4 px-4 font-medium text-slate-500">
+                          {item.email}
                         </td>
 
-                        {/* Current Role badge column */}
+                        {/* Role Column */}
                         <td className="py-4 px-4">
-                          {item.roleId === 1 && (
-                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                              Admin
-                            </span>
-                          )}
-                          {item.roleId === 5 && (
-                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
-                              Manager
-                            </span>
-                          )}
-                          {item.roleId === 2 && (
-                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                              Staff
-                            </span>
-                          )}
-                          {item.roleId === 4 && (
-                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                              Driver
-                            </span>
-                          )}
+                          {roleBadge}
                         </td>
 
-                        {/* Status Column with Switch Toggle */}
-                        <td className="py-4 px-4 font-medium">
-                          <div className="flex items-center gap-3">
-                            <Switch 
-                              checked={item.status === 'Active'}
-                              onChange={() => handleToggleUserStatus(item.id, item.status)}
-                              className={item.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-300'}
-                              size="small"
-                            />
-                            {item.status === 'Active' ? (
-                              <span className="text-emerald-600 font-semibold text-sm">
-                                Active
-                              </span>
-                            ) : (
-                              <span className="text-rose-500 font-semibold text-sm">
-                                Inactive
-                              </span>
-                            )}
-                          </div>
+                        {/* Status Column */}
+                        <td className="py-4 px-4">
+                          {statusBadge}
                         </td>
 
-                        {/* Joined Date Column */}
-                        <td className="py-4 px-4 text-slate-500 font-medium">{item.joined}</td>
+                        {/* Created Column */}
+                        <td className="py-4 px-4 text-slate-500 font-medium">
+                          {item.joined}
+                        </td>
 
                         {/* Actions Column */}
-                        <td className="py-4 px-4 text-right">
+                        <td className="py-4 px-8 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {/* Edit Info Button */}
                             <button
                               onClick={() => openEditModal(item)}
-                              className="bg-slate-50 text-slate-600 hover:bg-slate-100 p-2 rounded-xl text-sm font-medium transition-all duration-205 border border-slate-200 shadow-sm flex items-center gap-1.5"
-                              title="Edit Profile Info"
+                              className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
+                              title="Edit Info"
                             >
                               <Edit size={14} />
-                              <span>Edit Info</span>
                             </button>
-
-                            {isSystemAdmin ? (
-                              <button
-                                disabled
-                                className="bg-slate-50 text-slate-404 px-4 py-2 rounded-xl text-sm font-medium cursor-not-allowed border border-slate-100"
-                              >
-                                Change Role
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => openModal(item)}
-                                className="bg-blue-50 text-[#1A62FF] hover:bg-[#1A62FF] hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border border-blue-100/10 shadow-sm"
-                              >
-                                Change Role
-                              </button>
-                            )}
+                            
+                            {/* Toggle Lock / Unlock */}
+                            <button
+                              onClick={() => handleToggleUserStatus(item.id, item.status)}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
+                                isActive 
+                                  ? 'bg-[#E11D48] text-white hover:bg-[#BE123C]' 
+                                  : 'bg-[#059669] text-white hover:bg-[#047857]'
+                              }`}
+                              title={isActive ? "Lock User" : "Unlock User"}
+                            >
+                              {isActive ? <Lock size={14} /> : <Unlock size={14} />}
+                            </button>
                           </div>
                         </td>
                       </tr>

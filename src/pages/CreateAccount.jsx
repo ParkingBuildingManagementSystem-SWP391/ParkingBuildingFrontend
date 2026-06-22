@@ -66,16 +66,6 @@ const CreateAccount = () => {
 
   return (
     <div className="space-y-8 font-sans select-none pb-12 max-w-3xl mx-auto mt-6">
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Create Account</h1>
-          <p className="text-slate-500 text-sm mt-1">Provision new users and grant system access roles</p>
-        </div>
-        <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100 shadow-inner">
-          <UserPlus className="text-indigo-600" size={28} />
-        </div>
-      </div>
 
       {/* FORM CARD */}
       <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">

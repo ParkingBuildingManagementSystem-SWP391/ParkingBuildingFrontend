@@ -456,12 +456,7 @@ const Dashboard = () => {
       <div className="space-y-6 select-none font-sans pb-12">
         {/* A. Sub-Header & Sub-Navigation */}
         <div className="space-y-4 font-sans">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Manager Dashboard</h1>
-              <p className="text-sm text-slate-500 mt-0.5">{getFormattedDate()}</p>
-            </div>
-          </div>
+
 
           {/* Sub-Navigation Pills */}
           <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-100">

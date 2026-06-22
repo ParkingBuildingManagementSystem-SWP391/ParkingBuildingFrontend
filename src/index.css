@@ -3,8 +3,58 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 140 25% 95%; /* Light pastel greenish-blue */
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 142 60% 45%; /* Main Green from the image */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 140 30% 92%;
+    --secondary-foreground: 142 60% 35%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 142 60% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 140 20% 88%;
+    --input: 140 20% 88%;
+    --ring: 142 60% 45%;
+    --radius: 1.5rem; /* Large rounded corners as seen in the image */
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142 60% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 142 60% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 142 60% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
   body {
-    @apply bg-[#F5F5F5] text-slate-800 overflow-x-hidden;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-family: 'Inter', sans-serif;
   }
 }
@@ -16,72 +66,33 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(79, 70, 229, 0.2);
-  border-radius: 9999px;
+  @apply bg-primary/20 rounded-full transition-colors;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 70, 229, 0.4);
+  @apply bg-primary/40;
 }
 
-/* Glassmorphism panel styling for light mode */
+/* Glassmorphism styling */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  @apply bg-card/80 backdrop-blur-md border border-border shadow-sm;
 }
 
-/* Antd override to align with tailwind font-family and light mode styling */
-.ant-layout {
-  background: transparent !important;
+/* Hide scrollbar for elements with scrollbar-hide class */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-.ant-layout-sider {
-  background: #ffffff !important;
-  border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
-}
-
-.ant-menu {
-  background: transparent !important;
-  border-inline-end: none !important;
-}
-
-.ant-menu-item {
-  border-radius: 8px !important;
-  margin-inline: 8px !important;
-  width: calc(100% - 16px) !important;
-}
-
-.ant-menu-item-selected {
-  background-color: #eef2ff !important; /* Tailwind Indigo 50 */
-  color: #4f46e5 !important;
-}
-
-.ant-card {
-  background: #ffffff !important;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
-  color: #1e293b !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
-}
-
-.ant-card-head {
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
-  color: #0f172a !important;
-  font-weight: 700 !important;
-}
-
-/* Pulse animation for active simulation status */
-@keyframes activePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.15); }
-}
-
-.pulse-indicator {
-  animation: activePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Hide Microsoft Edge native password reveal icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
 }

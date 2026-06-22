@@ -329,13 +329,7 @@ const MyBookings = () => {
   return (
     <div className="space-y-8 font-sans select-none pb-12">
       
-      {/* 1. PAGE HEADER */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">My Bookings</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage your parking reservations and history</p>
-        </div>
-      </div>
+
 
       {/* 2. OVERVIEW STATISTICS ROW (4 Balanced Glassmorphism cards) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -521,17 +515,17 @@ const MyBookings = () => {
                   </div>
 
                   {/* Middle: Status Metrics */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 flex-1 w-full bg-slate-50/50 p-3 lg:p-0 rounded-xl lg:bg-transparent lg:px-12 border-x border-transparent lg:border-slate-100/50">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1 w-full bg-slate-50/50 p-3 lg:p-0 rounded-xl lg:bg-transparent lg:px-8 border-x border-transparent lg:border-slate-100/50">
                     
                     {/* Time Metric */}
-                    <div className="flex flex-col items-start min-w-[110px]">
+                    <div className="flex flex-col items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                         {booking.sessionStatus === 'Reserved' ? 'Deadline' : 'Activity'}
                       </span>
                       {booking.sessionStatus === 'Reserved' ? (
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="text-sm font-bold text-slate-700">{booking.deadlineTime}</span>
-                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-100 text-orange-600 animate-pulse">
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="text-sm font-bold text-slate-700 block leading-none">{booking.deadlineTime}</span>
+                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-orange-100 text-orange-600 animate-pulse inline-block">
                             {getRemainingMinutesText(booking.rawDeadlineBaseTime)}
                           </span>
                         </div>
@@ -552,7 +546,7 @@ const MyBookings = () => {
                     </div>
 
                     {/* Financial Metric */}
-                    <div className="flex flex-col items-start min-w-[110px]">
+                    <div className="flex flex-col items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Billing</span>
                       {booking.totalAmount !== null && booking.totalAmount !== undefined ? (
                         <div>

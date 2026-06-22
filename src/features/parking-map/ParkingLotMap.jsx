@@ -908,28 +908,30 @@ const ParkingLotMap = () => {
         </div>
       )}
 
-      {/* 1. Sub-Header Section */}
+      {/* 1. Sub-Header Section (Legends) */}
       <div className="space-y-3">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">Interactive Parking Map</h1>
-          <p className="text-sm text-slate-500">Real-time slot availability from SQL Server database - click any slot to manage</p>
-        </div>
-        
-        {/* Status Legends Row */}
+        {/* Title has been moved to Header.jsx */ }
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div className="flex flex-wrap items-center gap-5">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-655">
-              <span className="w-3 h-3 rounded-full bg-[#00C853] inline-block shadow-sm"></span>
-              <span>Available ({availableCount})</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-sm font-semibold text-slate-600">
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#00C853]"></span>
+              Available: <span className="text-emerald-600 font-bold">{availableCount}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-655">
-              <span className="w-3 h-3 rounded-full bg-[#FF1744] inline-block shadow-sm"></span>
-              <span>Occupied ({occupiedCount})</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-sm font-semibold text-slate-600">
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#FF1744]"></span>
+              Occupied: <span className="text-rose-600 font-bold">{occupiedCount}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-655">
-              <span className="w-3 h-3 rounded-full bg-[#FFC107] inline-block shadow-sm"></span>
-              <span>Reserved ({reservedCount})</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-sm font-semibold text-slate-600">
+              <span className="w-2.5 h-2.5 rounded-sm bg-[#FFC107]"></span>
+              Reserved: <span className="text-amber-500 font-bold">{reservedCount}</span>
             </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-sm font-semibold text-slate-600">
+              <span className="w-2.5 h-2.5 rounded-sm bg-slate-500"></span>
+              Maintenance: <span className="text-slate-600 font-bold">0</span>
+            </div>
+          </div>
+          <div className="flex items-center px-4 py-1.5 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-600">
+            Total Slots: <span className="text-slate-900 font-bold ml-1">{totalCount}</span>
           </div>
         </div>
       </div>
@@ -945,121 +947,59 @@ const ParkingLotMap = () => {
       {/* 2. Main Two-Column Layout Panel */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         
-        {/* Left Side Block (Floor Manager - 30% width) */}
-        <div className="w-full lg:w-[30%] flex flex-col gap-6 shrink-0 font-sans">
-          
-          {/* Select Floor Stack */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-            <h2 className="text-xs font-extrabold text-slate-404 tracking-widest uppercase">Select Parking Level</h2>
-            <div className="flex flex-col gap-3">
-              {floors.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => onFloorChange(f.id)}
-                  className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 ${
-                    activeFloorId === f.id
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10 font-bold scale-[1.01]'
-                      : 'bg-white border-slate-100 hover:border-blue-400 hover:bg-slate-50/55 font-medium'
-                  }`}
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-semibold">{f.name}</span>
-                    <span className={`text-[11px] ${activeFloorId === f.id ? 'text-blue-100' : 'text-slate-500'}`}>{f.desc}</span>
-                  </div>
-                  <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                    activeFloorId === f.id
-                      ? 'bg-white/20 text-white'
-                      : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                  }`}>
-                    {floorAvailableCounts[f.id] !== undefined ? floorAvailableCounts[f.id] : 0} free
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Floor Stats Card */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-5 w-full">
-            <div className="flex items-center justify-between pb-1">
-              <h2 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">FLOOR STATS</h2>
-              <Info size={14} className="text-slate-400" />
-            </div>
 
-            <div className="space-y-3.5">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Total Slots</span>
-                <span className="font-bold text-slate-800">{totalCount}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-505 font-medium flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#00C853] inline-block"></span>
-                  Available
-                </span>
-                <span className="font-bold text-emerald-600">{availableCount}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-505 font-medium flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF1744] inline-block"></span>
-                  Occupied
-                </span>
-                <span className="font-bold text-rose-600">{occupiedCount}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-555 font-medium flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#FFC107] inline-block"></span>
-                  Reserved
-                </span>
-                <span className="font-bold text-amber-500">{reservedCount}</span>
-              </div>
-            </div>
-
-            {/* Progress Bar occupancy */}
-            <div className="space-y-2 pt-2">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-slate-500">Occupancy Rate</span>
-                <span className="text-blue-600">{occupancyRate}%</span>
-              </div>
-              <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-600 rounded-full transition-all duration-500" 
-                  style={{ width: `${occupancyRate}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Side Block (Map Interactive Grid - 70% width) */}
+        {/* Main Map Block (Full width) */}
         <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm min-h-0 w-full font-sans relative">
           
           {/* Top Search Bar & Controls */}
-          <div className="p-4 border-b border-slate-100 bg-white/95 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-14 z-40 rounded-t-2xl shadow-sm">
+          <div className="p-4 border-b border-slate-100 bg-white flex flex-col xl:flex-row items-center justify-between gap-4 z-10 rounded-t-2xl">
             
-            {/* Search bar */}
-            <div className="relative w-full sm:max-w-xs">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Search by slot ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 text-sm rounded-lg placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
-              />
-              {searchQuery && (
-                <button 
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X size={14} />
-                </button>
-              )}
+            {/* Horizontal Floor Pills */}
+            <div className="flex items-center gap-3 overflow-x-auto w-full xl:w-auto scrollbar-hide">
+              {floors.map((f) => {
+                const isSelected = activeFloorId === f.id;
+                const freeCount = floorAvailableCounts[f.id] !== undefined ? floorAvailableCounts[f.id] : 0;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => onFloorChange(f.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all duration-200 whitespace-nowrap ${
+                      isSelected
+                        ? 'bg-blue-50 border-blue-500 text-blue-600 font-semibold shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium'
+                    }`}
+                  >
+                    <span>{f.name}</span>
+                    <span className={`text-xs ${isSelected ? 'text-blue-400 font-medium' : 'text-slate-500'}`}>
+                      ({freeCount} free)
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Zoom Controls */}
+            <div className="flex items-center gap-4 w-full xl:w-auto justify-end xl:ml-auto shrink-0">
+              {/* Search bar */}
+              <div className="relative w-full sm:w-[240px]">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search by slot ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 text-sm rounded-full placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
             <div className="flex items-center gap-3">
               <button 
                 onClick={handleZoomOut} 
@@ -1078,7 +1018,10 @@ const ParkingLotMap = () => {
               </button>
             </div>
 
+            </div>
           </div>
+
+
 
           {/* Scrollable Maps Zone */}
           <div className="flex-1 overflow-auto p-4 bg-slate-50/20 relative">

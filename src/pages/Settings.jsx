@@ -138,11 +138,6 @@ const Settings = () => {
         </div>
       )}
 
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Account Settings</h1>
-        <p className="text-sm text-slate-500">Configure your personal profile details, system preferences, and administrative tools</p>
-      </div>
 
       {/* Main Form Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -286,13 +281,6 @@ const Settings = () => {
                 </span>
               </div>
 
-              <div className="flex justify-between items-center py-0.5 border-t border-slate-50 pt-3">
-                <span className="text-slate-400 font-semibold">System Tier</span>
-                <span className="font-bold text-slate-750 text-slate-800 flex items-center gap-1">
-                  <CreditCard size={14} className="text-[#2563EB]" />
-                  Monthly Member
-                </span>
-              </div>
 
               <div className="flex justify-between items-center py-0.5 border-t border-slate-50 pt-3">
                 <span className="text-slate-400 font-semibold">Account Status</span>
