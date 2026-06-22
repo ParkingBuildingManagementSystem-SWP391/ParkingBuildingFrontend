@@ -56,12 +56,15 @@ export const parkingService = {
   },
 
   // 3. Nhân viên quét xe tại cổng vào bãi (Check-in cho khách đã đặt trước)
-  checkInVehicle: async (ticketCode, licenseVehicle, checkInImageUrl) => {
+  checkInVehicle: async (ticketCode, licenseVehicle, imageUrl) => {
     try {
-      const response = await api.post('/Parking/check-in', {
-        ticketCode: ticketCode ? ticketCode.trim() : null,
-        licenseVehicle: licenseVehicle ? licenseVehicle.trim().toUpperCase() : null,
-        checkInImageUrl: checkInImageUrl || null
+      const formData = new FormData();
+      if (ticketCode) formData.append('ticketCode', ticketCode.trim());
+      if (licenseVehicle) formData.append('licenseVehicle', licenseVehicle.trim().toUpperCase());
+      if (imageUrl) formData.append('imageUrl', imageUrl);
+
+      const response = await api.post('/Parking/check-in', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
     } catch (error) {
@@ -71,12 +74,15 @@ export const parkingService = {
   },
 
   // 4. Nhân viên check-in cho khách vãng lai (Walk-in - Không đặt trước)
-  walkInCheckIn: async (licenseVehicle, vehicleTypeId, checkInImageUrl) => {
+  walkInCheckIn: async (licenseVehicle, vehicleTypeId, imageUrl) => {
     try {
-      const response = await api.post('/Parking/walk-in', {
-        licenseVehicle: licenseVehicle.trim().toUpperCase(),
-        vehicleTypeId: parseInt(vehicleTypeId),
-        checkInImageUrl: checkInImageUrl || null
+      const formData = new FormData();
+      if (licenseVehicle) formData.append('licenseVehicle', licenseVehicle.trim().toUpperCase());
+      formData.append('vehicleTypeId', parseInt(vehicleTypeId));
+      if (imageUrl) formData.append('imageUrl', imageUrl);
+
+      const response = await api.post('/Parking/walk-in', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
     } catch (error) {
@@ -86,14 +92,17 @@ export const parkingService = {
   },
 
   // 5. Nhân viên quét xe cho xe ra cổng (Check-out - Tính phí & giải phóng slot)
-  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'CASH') => {
+  checkOutVehicle: async (ticketCode, checkoutLicensePlate, imageUrl, sessionId, paymentMethod = 'CASH') => {
     try {
-      const response = await api.post('/Parking/check-out', {
-        ticketCode: ticketCode ? ticketCode.trim() : null,
-        checkoutLicensePlate: checkoutLicensePlate ? checkoutLicensePlate.trim().toUpperCase() : null,
-        checkOutImageUrl: checkOutImageUrl || null,
-        sessionId: sessionId ? parseInt(sessionId) : null,
-        paymentMethod: paymentMethod
+      const formData = new FormData();
+      if (ticketCode) formData.append('ticketCode', ticketCode.trim());
+      if (checkoutLicensePlate) formData.append('checkoutLicensePlate', checkoutLicensePlate.trim().toUpperCase());
+      if (imageUrl) formData.append('imageUrl', imageUrl);
+      if (sessionId) formData.append('sessionId', parseInt(sessionId));
+      formData.append('paymentMethod', paymentMethod);
+
+      const response = await api.post('/Parking/check-out', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
     } catch (error) {
