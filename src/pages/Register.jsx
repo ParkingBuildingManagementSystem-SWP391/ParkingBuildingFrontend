@@ -258,8 +258,8 @@ const Register = () => {
             {/* Social Buttons */}
             <div className="flex justify-center gap-4 mb-8">
               {/* Custom Google Button Wrapper */}
-              <div className="w-12 h-12 rounded-full bg-white shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-[#F1F5F9] flex items-center justify-center hover:scale-105 transition-transform overflow-hidden relative">
-                <div className="absolute inset-0 opacity-0 cursor-pointer">
+              <div className="w-12 h-12 rounded-full bg-white shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-[#F1F5F9] flex items-center justify-center hover:scale-105 transition-transform relative">
+                <div className="absolute inset-0 z-10 opacity-[0.01] flex items-center justify-center cursor-pointer" style={{ clipPath: 'circle(50%)' }}>
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
