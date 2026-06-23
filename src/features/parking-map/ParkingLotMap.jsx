@@ -100,6 +100,51 @@ const getSlotVehicleAlt = (slot) => {
   return 'Motorbike';
 };
 
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'Available':
+      return 'Còn trống';
+    case 'Occupied':
+      return 'Đã có xe';
+    case 'Reserved':
+      return 'Đã đặt trước';
+    case 'Maintenance':
+      return 'Bảo trì';
+    default:
+      return status;
+  }
+};
+
+const getFloorDisplayName = (floorName) => {
+  if (!floorName) return '';
+  return String(floorName).replace(/^Floor\s*/i, 'Tầng ');
+};
+
+const getFloorDescriptionLabel = (description) => {
+  const value = String(description || '').trim().toLowerCase();
+  if (value === 'motorbike & bicycle parking') return 'Xe máy & xe đạp';
+  if (value === 'car parking only') return 'Chỉ đỗ ô tô';
+  return description;
+};
+
+const getVehicleTypeLabel = (type) => {
+  switch (type) {
+    case 'Bicycle':
+      return 'Xe đạp';
+    case 'Motorcycle':
+      return 'Xe máy';
+    case 'Car':
+      return 'Ô tô';
+    default:
+      return type;
+  }
+};
+
+const getZoneDisplayName = (zoneName) => {
+  if (!zoneName) return '';
+  return `Khu ${zoneName}`;
+};
+
 const getDerivedZoneName = (slot, index) => {
   const explicitZone = slot?.zoneName || slot?.zone || slot?.area;
   if (explicitZone && !['car', 'motorcycle', 'bicycle'].includes(String(explicitZone).trim().toLowerCase())) {
@@ -516,8 +561,8 @@ const ParkingLotMap = () => {
   const visibleZoneEndIndex = Math.min(visibleZoneStartIndex + zonesPerPage, zoneSections.length);
   const visibleZones = zoneSections.slice(visibleZoneStartIndex, visibleZoneEndIndex);
   const showingZoneText = zoneSections.length > 0
-    ? `Showing zones ${visibleZoneStartIndex + 1}-${visibleZoneEndIndex} of ${zoneSections.length}`
-    : 'No zones to show';
+    ? `Đang hiển thị khu ${visibleZoneStartIndex + 1}-${visibleZoneEndIndex} / ${zoneSections.length}`
+    : 'Không có khu để hiển thị';
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -669,13 +714,13 @@ const ParkingLotMap = () => {
 
       setIsBookingModalOpen(false);
       if (requiresPayment && paymentUrl) {
-        const depositText = depositAmount ? ` Deposit: ${Number(depositAmount).toLocaleString('vi-VN')} VND.` : '';
-        setAlertBanner((responseData.message || responseData.Message || 'Booking requires deposit payment.') + depositText);
+        const depositText = depositAmount ? ` Tiền cọc: ${Number(depositAmount).toLocaleString('vi-VN')} VND.` : '';
+        setAlertBanner((responseData.message || responseData.Message || 'Cần thanh toán tiền cọc để hoàn tất đặt chỗ.') + depositText);
         window.location.href = paymentUrl;
       } else if (requiresPayment) {
-        setAlertBanner(responseData.message || responseData.Message || `Booking reserved for Slot ${selectedSlot.id}. Deposit payment is pending.`);
+        setAlertBanner(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
       } else {
-        setAlertBanner(responseData.message || responseData.Message || `Booking confirmed successfully for Slot ${selectedSlot.id}!`);
+        setAlertBanner(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} thành công!`);
       }
       if (paymentStatus) {
         console.info('Booking payment status:', paymentStatus);
@@ -746,7 +791,7 @@ const ParkingLotMap = () => {
 
       setIsDetailsModalOpen(false);
 
-      const successMsg = response?.message || `Slot ${selectedSlot.id} is now occupied by ${cleanPlate}.`;
+      const successMsg = response?.message || `Chỗ ${selectedSlot.id} hiện đã được xe ${cleanPlate} sử dụng.`;
       setAlertBanner(successMsg);
 
       setTimeout(() => {
@@ -783,10 +828,10 @@ const ParkingLotMap = () => {
 
       setIsDetailsModalOpen(false);
       const invoiceText = response.totalAmount !== undefined
-        ? ` Fee processed: ${response.totalAmount.toLocaleString('vi-VN')} đ.`
+        ? ` Phí đã xử lý: ${response.totalAmount.toLocaleString('vi-VN')} đ.`
         : '';
 
-      setAlertBanner((response.message || `Slot ${selectedSlot.id} released successfully.`) + invoiceText);
+      setAlertBanner((response.message || `Chỗ ${selectedSlot.id} đã được giải phóng thành công.`) + invoiceText);
       setTimeout(() => {
         setAlertBanner(null);
       }, 5000);
@@ -835,7 +880,7 @@ const ParkingLotMap = () => {
         </div>
 
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[9px] font-bold py-1 px-2 rounded shadow-lg whitespace-nowrap z-30 pointer-events-none transition-all">
-          Status: {slot.status} ({slot.type})
+          Trạng thái: {getStatusLabel(slot.status)} ({getVehicleTypeLabel(slot.type)})
         </div>
       </div>
     );
@@ -861,15 +906,6 @@ const ParkingLotMap = () => {
       <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${verticalWidthClass} ${horizontalHeightClass} bg-slate-200/95`} />
       <div className="absolute left-1/2 top-5 bottom-5 -translate-x-1/2 border-l-2 border-dashed border-white/95" />
       <div className="absolute left-7 right-7 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-white/95" />
-      <span className="absolute left-8 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/85 px-4 py-1 text-[13px] font-extrabold text-slate-700 shadow-sm">
-        Driveway
-      </span>
-      <span className="absolute right-8 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/85 px-4 py-1 text-[13px] font-extrabold text-slate-700 shadow-sm">
-        Driveway
-      </span>
-      <span className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap rounded-full bg-white/90 px-4 py-1 text-[13px] font-extrabold text-slate-700 shadow-sm">
-        Driveway
-      </span>
     </div>
   );
 
@@ -890,7 +926,7 @@ const ParkingLotMap = () => {
             <Car size={18} className="text-blue-600" />
           )}
           <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-800">
-            Zone {section.title}
+            {getZoneDisplayName(section.title)}
           </h3>
         </div>
 
@@ -917,7 +953,7 @@ const ParkingLotMap = () => {
         <div className="mb-3 flex items-center gap-2">
           <Car size={18} className="text-blue-600" />
           <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-800">
-            Zone {title}
+            {getZoneDisplayName(title)}
           </h3>
         </div>
         <div className="relative grid grid-cols-[minmax(360px,1fr)_76px_minmax(360px,1fr)] grid-rows-[auto_56px_auto] items-stretch gap-4">
@@ -956,23 +992,23 @@ const ParkingLotMap = () => {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-[#00C853]"></span>
-              Available: <span className="text-emerald-600 font-bold">{availableCount}</span>
+              Còn trống: <span className="text-emerald-600 font-bold">{availableCount}</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-[#FF1744]"></span>
-              Occupied: <span className="text-rose-600 font-bold">{occupiedCount}</span>
+              Đã có xe: <span className="text-rose-600 font-bold">{occupiedCount}</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-[#FFC107]"></span>
-              Reserved: <span className="text-amber-500 font-bold">{reservedCount}</span>
+              Đã đặt trước: <span className="text-amber-500 font-bold">{reservedCount}</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-slate-500"></span>
-              Maintenance: <span className="text-slate-600 font-bold">0</span>
+              Bảo trì: <span className="text-slate-600 font-bold">0</span>
             </div>
           </div>
           <div className="flex items-center px-4 py-1.5 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-600">
-            Total Slots: <span className="text-slate-900 font-bold ml-1">{totalCount}</span>
+            Tổng số chỗ: <span className="text-slate-900 font-bold ml-1">{totalCount}</span>
           </div>
         </div>
       </div>
@@ -1010,9 +1046,9 @@ const ParkingLotMap = () => {
                         : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium'
                       }`}
                   >
-                    <span>{f.name}</span>
+                    <span>{getFloorDisplayName(f.name)}</span>
                     <span className={`text-xs ${isSelected ? 'text-blue-400 font-medium' : 'text-slate-500'}`}>
-                      ({freeCount} free)
+                      ({freeCount} còn trống)
                     </span>
                   </button>
                 );
@@ -1025,7 +1061,7 @@ const ParkingLotMap = () => {
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search by slot ID..."
+                  placeholder="Tìm theo mã chỗ đỗ..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 text-sm rounded-full placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
@@ -1069,7 +1105,7 @@ const ParkingLotMap = () => {
               <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10">
                 <div className="flex flex-col items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
-                  <span className="text-xs font-semibold text-slate-500">Loading slots from Database...</span>
+                  <span className="text-xs font-semibold text-slate-500">Đang tải chỗ đỗ từ cơ sở dữ liệu...</span>
                 </div>
               </div>
             )}
@@ -1077,7 +1113,7 @@ const ParkingLotMap = () => {
             {filteredSlots.length === 0 ? (
               <div className="flex flex-col items-center justify-center min-h-[260px] text-slate-400 gap-2">
                 <Info size={24} />
-                <span className="text-sm font-medium">No slots found on {activeFloor.name}.</span>
+                <span className="text-sm font-medium">Không tìm thấy chỗ đỗ trên {getFloorDisplayName(activeFloor.name)}.</span>
               </div>
             ) : (
               <div
@@ -1092,7 +1128,7 @@ const ParkingLotMap = () => {
                           <div className="flex items-center gap-1"><Motorcycle size={18} className="text-indigo-650" /><Bike size={18} className="text-blue-600" /></div>
                         ) : <Car size={18} className="text-blue-600" />}
                         <h3 className="font-extrabold text-slate-808 text-xs uppercase tracking-wider">
-                          {activeFloor.name} Floor Map ({activeFloor.desc})
+                          Sơ đồ {getFloorDisplayName(activeFloor.name)} ({getFloorDescriptionLabel(activeFloor.desc)})
                         </h3>
                       </div>
                       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-700">
@@ -1125,7 +1161,7 @@ const ParkingLotMap = () => {
                   className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all"
                 >
                   <ChevronLeft size={16} />
-                  Previous
+                  Trước
                 </button>
                 <span className="min-w-[160px] text-center text-xs font-extrabold text-slate-600">
                   {showingZoneText}
@@ -1135,7 +1171,7 @@ const ParkingLotMap = () => {
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-55 active:scale-95 disabled:opacity-40 transition-all"
                 >
-                  Next
+                  Sau
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -1143,7 +1179,7 @@ const ParkingLotMap = () => {
 
             <div className="w-full bg-[#1A62FF] text-white font-medium text-center text-xs sm:text-sm px-4 py-3 rounded-xl shadow-md flex items-center justify-center gap-2 leading-relaxed">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white animate-pulse"></span>
-              <span className="min-w-0 break-words">{availableCount} slots available right now — click any green slot to book your space</span>
+              <span className="min-w-0 break-words">{availableCount} chỗ còn trống ngay lúc này — nhấn vào chỗ màu xanh để đặt chỗ</span>
             </div>
           </div>
 
@@ -1166,19 +1202,19 @@ const ParkingLotMap = () => {
             <div className="p-5 sm:p-6 space-y-4">
 
               <div className="space-y-1">
-                <h3 className="text-xl font-extrabold text-slate-805">Book Parking Slot</h3>
-                <p className="text-xs text-slate-500">Configure your reservation session in the real database</p>
+                <h3 className="text-xl font-extrabold text-slate-805">Đặt chỗ đỗ xe</h3>
+                <p className="text-xs text-slate-500">Cấu hình phiên đặt chỗ trong cơ sở dữ liệu thực</p>
               </div>
 
               <div className="bg-sky-50 border border-sky-100 rounded-xl p-3.5 text-sky-850 text-xs font-semibold flex items-start gap-2.5">
                 <Info size={16} className="text-sky-600 shrink-0 mt-0.5" />
                 <div>
-                  <span>You are reserving Slot: </span>
+                  <span>Bạn đang đặt chỗ: </span>
                   <span className="font-mono font-extrabold text-blue-600">{selectedSlot.id}</span>
-                  <span> on </span>
-                  <span className="font-bold text-slate-800">{activeFloor.name}</span>
+                  <span> tại </span>
+                  <span className="font-bold text-slate-800">{getFloorDisplayName(activeFloor.name)}</span>
                   <span className="text-sky-655 font-medium block mt-0.5">
-                    Selected slot classification: {selectedSlot.type} (DB Slot ID: {selectedSlot.slotId || selectedSlot.dbSlotId})
+                    Phân loại chỗ đã chọn: {getVehicleTypeLabel(selectedSlot.type)} (Mã chỗ DB: {selectedSlot.slotId || selectedSlot.dbSlotId})
                   </span>
                 </div>
               </div>
@@ -1186,7 +1222,7 @@ const ParkingLotMap = () => {
               <form onSubmit={handleConfirmBookingSubmit} className="space-y-3">
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider">Vehicle Type</label>
+                  <label className="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider">Loại xe</label>
                   <select
                     value={bookingVehicleType}
                     onChange={(e) => setBookingVehicleType(e.target.value)}
@@ -1194,18 +1230,18 @@ const ParkingLotMap = () => {
                   >
                     {activeFloorId === 3 ? (
                       <>
-                        <option value="Motorcycle">Motorcycle</option>
-                        <option value="Bicycle">Bicycle</option>
+                        <option value="Motorcycle">Xe máy</option>
+                        <option value="Bicycle">Xe đạp</option>
                       </>
                     ) : (
-                      <option value="Car">Car</option>
+                      <option value="Car">Ô tô</option>
                     )}
                   </select>
                 </div>
 
                 {bookingVehicleType !== 'Bicycle' && (
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider">License Plate Number</label>
+                    <label className="text-[10px] font-extrabold uppercase text-slate-450 tracking-wider">Biển số xe</label>
                     <div className="relative">
                       <Car size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
@@ -1221,7 +1257,7 @@ const ParkingLotMap = () => {
                 )}
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Expected Check-In Time</label>
+                  <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Thời gian dự kiến vào bãi</label>
                   <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/40 px-3 py-3">
                     <div className="flex flex-col items-center gap-1.5">
                       <input
@@ -1233,7 +1269,7 @@ const ParkingLotMap = () => {
                         onBlur={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
                         className="h-12 w-16 rounded-xl border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Hour</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Giờ</span>
                     </div>
 
                     <span className="pt-2 text-2xl font-extrabold text-indigo-500">:</span>
@@ -1248,7 +1284,7 @@ const ParkingLotMap = () => {
                         onBlur={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
                         className="h-12 w-16 rounded-xl border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Minute</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Phút</span>
                     </div>
                   </div>
 
@@ -1266,7 +1302,7 @@ const ParkingLotMap = () => {
                   )}
 
                   <p className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700">
-                    ⚠️ Note: Your reservation will be automatically canceled if you do not check in at the gate within 15 minutes of your scheduled time.
+                    ⚠️ Lưu ý: Lịch đặt chỗ sẽ tự động bị hủy nếu bạn không check-in tại cổng trong vòng 15 phút sau thời gian dự kiến.
                   </p>
                 </div>
 
@@ -1276,7 +1312,7 @@ const ParkingLotMap = () => {
                     onClick={() => setIsBookingModalOpen(false)}
                     className="flex-1 h-10 border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-bold rounded-xl transition-all text-sm"
                   >
-                    Cancel
+                    Hủy
                   </button>
 
                   <button
@@ -1284,7 +1320,7 @@ const ParkingLotMap = () => {
                     disabled={submitting}
                     className="flex-1 h-11 bg-blue-600 hover:bg-blue-750 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 text-sm"
                   >
-                    {submitting ? 'Processing...' : 'Confirm Booking'}
+                    {submitting ? 'Đang xử lý...' : 'Xác nhận đặt chỗ'}
                   </button>
                 </div>
 
@@ -1315,31 +1351,31 @@ const ParkingLotMap = () => {
                   {selectedSlot.type === 'Bicycle' && <Bike className="text-blue-505" size={20} />}
                   {selectedSlot.type === 'Motorcycle' && <Motorcycle className="text-indigo-505" size={20} />}
                   {selectedSlot.type === 'Car' && <Car className="text-indigo-650" size={20} />}
-                  <span>Slot Control: {selectedSlot.id}</span>
+                  <span>Điều khiển chỗ: {selectedSlot.id}</span>
                 </h3>
-                <p className="text-xs text-slate-505">Supervisor workspace management terminal</p>
+                <p className="text-xs text-slate-505">Bảng điều khiển vận hành cho nhân viên quản lý</p>
               </div>
 
               {/* General Metadata Panel */}
               <div className="bg-slate-50 border border-slate-205 rounded-xl p-4 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400 font-semibold">Location Floor</span>
-                  <span className="font-extrabold text-slate-700">{selectedSlot.floor}</span>
+                  <span className="text-slate-400 font-semibold">Tầng</span>
+                  <span className="font-extrabold text-slate-700">{getFloorDisplayName(selectedSlot.floor)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400 font-semibold">Classification Type</span>
-                  <span className="font-extrabold text-slate-700 capitalize">{selectedSlot.type} Slot</span>
+                  <span className="text-slate-400 font-semibold">Phân loại</span>
+                  <span className="font-extrabold text-slate-700 capitalize">Chỗ {getVehicleTypeLabel(selectedSlot.type)}</span>
                 </div>
 
                 <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                  <span className="text-slate-400 font-semibold">Current State</span>
+                  <span className="text-slate-400 font-semibold">Trạng thái hiện tại</span>
                   <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${selectedSlot.status === 'Available'
                       ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                       : selectedSlot.status === 'Occupied'
                         ? 'bg-rose-50 text-rose-600 border border-rose-100'
                         : 'bg-amber-50 text-amber-600 border border-amber-100'
                     }`}>
-                    {selectedSlot.status}
+                    {getStatusLabel(selectedSlot.status)}
                   </span>
                 </div>
               </div>
@@ -1351,58 +1387,58 @@ const ParkingLotMap = () => {
                 <div className="space-y-4">
                   <div className="bg-slate-50 border border-slate-205 rounded-xl p-4 space-y-3">
                     <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Occupancy Mode</span>
-                      <span className="font-mono text-xs text-slate-800 bg-white px-2.5 py-1 rounded border border-slate-205 font-extrabold shadow-sm">{selectedSlot.status}</span>
+                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Trạng thái sử dụng</span>
+                      <span className="font-mono text-xs text-slate-800 bg-white px-2.5 py-1 rounded border border-slate-205 font-extrabold shadow-sm">{getStatusLabel(selectedSlot.status)}</span>
                     </div>
 
                     {fetchingDetail ? (
                       <div className="flex items-center justify-center py-4 gap-2">
                         <div className="w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-                        <span className="text-xs text-slate-505 font-medium">Fetching database details...</span>
+                        <span className="text-xs text-slate-505 font-medium">Đang tải chi tiết từ cơ sở dữ liệu...</span>
                       </div>
                     ) : slotDetail?.activeSession ? (
                       <div className="space-y-2.5 pt-1 text-xs">
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium">Vehicle License Plate:</span>
+                          <span className="text-slate-500 font-medium">Biển số xe:</span>
                           <span className="font-mono font-bold text-slate-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 text-sm">{slotDetail.activeSession.licenseVehicle}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium">Vehicle Type:</span>
-                          <span className="font-semibold text-slate-700 capitalize">{slotDetail.activeSession.vehicleTypeName}</span>
+                          <span className="text-slate-500 font-medium">Loại xe:</span>
+                          <span className="font-semibold text-slate-700 capitalize">{getVehicleTypeLabel(slotDetail.activeSession.vehicleTypeName)}</span>
                         </div>
                         {slotDetail.activeSession.checkInTime && (
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">Actual Check-In Time:</span>
+                            <span className="text-slate-500 font-medium">Thời gian vào thực tế:</span>
                             <span className="font-semibold text-slate-700">{new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.bookingTime && (
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">Pre-booking Time:</span>
+                            <span className="text-slate-500 font-medium">Thời gian đặt trước:</span>
                             <span className="font-semibold text-slate-700">{new Date(slotDetail.activeSession.bookingTime).toLocaleString('vi-VN')}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.customer && (
                           <div className="pt-2 border-t border-dashed border-slate-200 space-y-2">
-                            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Customer Profile</div>
+                            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Hồ sơ khách hàng</div>
                             <div className="flex justify-between items-center">
-                              <span className="text-slate-500 font-medium">Full Name:</span>
+                              <span className="text-slate-500 font-medium">Họ tên:</span>
                               <span className="font-bold text-slate-800">{slotDetail.activeSession.customer.username}</span>
                             </div>
                             {slotDetail.activeSession.customer.email && (
                               <div className="flex justify-between items-center">
-                                <span className="text-slate-500 font-medium">Email Address:</span>
+                                <span className="text-slate-500 font-medium">Email:</span>
                                 <span className="font-semibold text-slate-700">{slotDetail.activeSession.customer.email}</span>
                               </div>
                             )}
                             {slotDetail.activeSession.customer.phoneNumber && (
                               <div className="flex justify-between items-center">
-                                <span className="text-slate-500 font-medium">Phone Contact:</span>
+                                <span className="text-slate-500 font-medium">Số điện thoại:</span>
                                 <span className="font-mono font-bold text-slate-700">{slotDetail.activeSession.customer.phoneNumber}</span>
                               </div>
                             )}
                             <div className="flex justify-between items-center">
-                              <span className="text-slate-500 font-medium">Membership Class:</span>
+                              <span className="text-slate-500 font-medium">Hạng thành viên:</span>
                               <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">{slotDetail.activeSession.customer.customerType || "Registered Driver"}</span>
                             </div>
                           </div>
@@ -1410,7 +1446,7 @@ const ParkingLotMap = () => {
                       </div>
                     ) : (
                       <div className="text-center text-slate-400 py-3 text-xs font-medium">
-                        No occupant info retrieved.
+                        Chưa lấy được thông tin người sử dụng chỗ.
                       </div>
                     )}
                   </div>
@@ -1423,7 +1459,7 @@ const ParkingLotMap = () => {
                       className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-500/10 text-sm transition-all"
                     >
                       <UserCheck size={16} />
-                      {submitting ? 'Releasing...' : 'Check-out Vehicle & Clear Slot'}
+                      {submitting ? 'Đang giải phóng...' : 'Cho xe ra & giải phóng chỗ'}
                     </button>
                   )}
                 </div>
@@ -1434,7 +1470,7 @@ const ParkingLotMap = () => {
                 <div className="space-y-4">
                   <form onSubmit={handleAdminReserveSubmit} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Assign License Plate (Walk-in)</label>
+                      <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Nhập biển số xe vãng lai</label>
                       <input
                         type="text"
                         required
@@ -1451,7 +1487,7 @@ const ParkingLotMap = () => {
                         disabled={submitting}
                         className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md text-sm"
                       >
-                        {submitting ? 'Processing...' : 'Check-in Vehicle'}
+                        {submitting ? 'Đang xử lý...' : 'Cho xe vào'}
                       </button>
                     </div>
                   </form>

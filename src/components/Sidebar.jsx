@@ -3,31 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Map, Calendar as CalendarIcon, LayoutDashboard,
-  UserPlus, ScanLine, LogOut, Users, ShieldCheck, Settings
+  UserPlus, ScanLine, Users
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const { user, role, logout } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogoutClick = () => {
-    logout();
-    navigate('/login');
-  };
-
   const currentPath = location.pathname;
   const lowerRole = role?.toLowerCase();
-
-  const getInitials = (name) => {
-    if (!name) return 'US';
-    const cleanName = name.replace(/\s+/g, ' ').trim();
-    const parts = cleanName.split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
 
   const NavButton = ({ path, icon: Icon, label }) => {
     const isActive = currentPath === path;
@@ -52,8 +37,8 @@ const Sidebar = () => {
     if (!user) {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Public</h4>
-          <NavButton path="/parking-map" icon={Map} label="Parking Map" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Công khai</h4>
+          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
         </div>
       );
     }
@@ -61,9 +46,9 @@ const Sidebar = () => {
     if (['driver', 'member', 'registered_driver', 'customer'].includes(lowerRole)) {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Driver Services</h4>
-          <NavButton path="/parking-map" icon={Map} label="Parking Map" />
-          <NavButton path="/my-bookings" icon={CalendarIcon} label="My Bookings" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Dịch vụ</h4>
+          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
+          <NavButton path="/my-bookings" icon={CalendarIcon} label="Lịch đặt chỗ của tôi" />
         </div>
       );
     }
@@ -71,9 +56,9 @@ const Sidebar = () => {
     if (lowerRole === 'staff') {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Operations</h4>
-          <NavButton path="/checkin-checkout" icon={ScanLine} label="Gate Control" />
-          <NavButton path="/parking-map" icon={Map} label="Parking Map" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Vận hành</h4>
+          <NavButton path="/checkin-checkout" icon={ScanLine} label="Điều khiển cổng" />
+          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
         </div>
       );
     }
@@ -81,9 +66,9 @@ const Sidebar = () => {
     if (lowerRole === 'manager') {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Management</h4>
-          <NavButton path="/dashboard" icon={LayoutDashboard} label="Dashboard" />
-          <NavButton path="/parking-map" icon={Map} label="Parking Map" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Quản lý</h4>
+          <NavButton path="/dashboard" icon={LayoutDashboard} label="Bảng điều khiển" />
+          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
         </div>
       );
     }
@@ -92,9 +77,9 @@ const Sidebar = () => {
       return (
         <>
           <div className="mb-6">
-            <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Administration</h4>
-            <NavButton path="/accounts" icon={Users} label="User Management" />
-            <NavButton path="/create-account" icon={UserPlus} label="Create Account" />
+            <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Quản trị</h4>
+            <NavButton path="/accounts" icon={Users} label="Quản lý người dùng" />
+            <NavButton path="/create-account" icon={UserPlus} label="Tạo tài khoản" />
           </div>
 
         </>
@@ -117,11 +102,11 @@ const Sidebar = () => {
             P
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-[15px] tracking-tight text-slate-900 leading-tight">
-              Parking Building
+            <span className="font-extrabold text-[15px] tracking-tight text-slate-900 leading-tight uppercase">
+              HỆ THỐNG
             </span>
-            <span className="text-[11px] font-medium text-slate-500">
-              Management System
+            <span className="text-[11px] font-extrabold tracking-tight text-slate-500 leading-tight uppercase">
+              QUẢN LÍ BÃI ĐỖ XE
             </span>
           </div>
         </div>
@@ -131,40 +116,6 @@ const Sidebar = () => {
       <div className="flex-1 py-6 pr-4 overflow-y-auto">
         {renderTabs()}
       </div>
-
-      {/* Bottom User Profile Section */}
-      {user && (
-        <div className="p-4 border-t border-slate-100">
-          <div className="flex items-center justify-between">
-            <div
-              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => navigate('/settings')}
-              title="Account Settings"
-            >
-              {/* Circular Avatar */}
-              <div className="w-9 h-9 rounded-full bg-[#FF4B6E] flex items-center justify-center text-white text-[11px] font-bold shadow-sm">
-                {getInitials(user.username || user.name)}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[13px] font-bold text-slate-900 truncate max-w-[100px]">
-                  {user.username || user.name}
-                </span>
-                <span className="text-[11px] font-medium text-slate-500 capitalize">
-                  {role || 'User'}
-                </span>
-              </div>
-            </div>
-            {/* Logout Icon */}
-            <button
-              onClick={handleLogoutClick}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              title="Logout"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
-      )}
     </aside>
   );
 };
