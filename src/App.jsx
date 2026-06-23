@@ -17,6 +17,7 @@ import MyBookings from './pages/MyBookings';
 import Settings from './pages/Settings';
 import Accounts from './pages/Accounts';
 import CreateAccount from './pages/CreateAccount';
+import ParkingSessionManager from './pages/ParkingSessionManager';
 
 // Feature Components (Dashboard, Parking Map, Check-in counter)
 import Dashboard from './features/dashboard/Dashboard';
@@ -54,6 +55,11 @@ function App() {
               <Route path="/staff-management" element={<StaffManagement />} />
               <Route path="/accounts" element={<Accounts />} />
               <Route path="/create-account" element={<CreateAccount />} />
+            </Route>
+
+            {/* Admin/Manager parking session management */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Admin', 'Manager']} />}>
+              <Route path="/admin/parking-sessions" element={<ParkingSessionManager />} />
             </Route>
 
             {/* Staff/Manager operations paths */}

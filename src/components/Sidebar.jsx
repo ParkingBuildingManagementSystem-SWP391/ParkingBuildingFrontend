@@ -69,6 +69,7 @@ const Sidebar = () => {
           <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Quản lý</h4>
           <NavButton path="/dashboard" icon={LayoutDashboard} label="Bảng điều khiển" />
           <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
+          <NavButton path="/admin/parking-sessions" icon={CalendarIcon} label="Quản lý phiên đỗ" />
         </div>
       );
     }
@@ -80,6 +81,7 @@ const Sidebar = () => {
             <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Quản trị</h4>
             <NavButton path="/accounts" icon={Users} label="Quản lý người dùng" />
             <NavButton path="/create-account" icon={UserPlus} label="Tạo tài khoản" />
+            <NavButton path="/admin/parking-sessions" icon={CalendarIcon} label="Quản lý phiên đỗ" />
           </div>
 
         </>
