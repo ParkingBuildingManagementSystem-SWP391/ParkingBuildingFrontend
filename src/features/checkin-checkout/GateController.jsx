@@ -659,24 +659,30 @@ const GateController = () => {
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
                   const result = await parkingService.recognizeLicensePlate(file, typeId);
 
-                  if (result?.isSuccess && result.predictedPlate) {
-                    setEntryImagePreviewUrl(result.rawImageUrl || result.imageUrl);
-                    const confidence = result.confidence !== undefined ? result.confidence : 1.0;
+                  const isSuccess = result?.isSuccess || result?.IsSuccess;
+                  const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
+                  const imageUrl = result?.imageUrl || result?.ImageUrl;
+                  const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
+                  const msg = result?.message || result?.Message;
+
+                  if (isSuccess && predictedPlate) {
+                    setEntryImagePreviewUrl(rawImageUrl || imageUrl);
+                    const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
                     
                     if (confidence < 0.85) {
                       setEntryOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
-                      setEntryOcrResult(result.predictedPlate);
+                      setEntryOcrResult(predictedPlate);
                       checkInForm.setFieldsValue({
-                        plate: result.predictedPlate,
-                        tempImageUrl: result.rawImageUrl
+                        plate: predictedPlate,
+                        tempImageUrl: rawImageUrl
                       });
-                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
                       // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
                       try {
-                        const checkRes = await parkingService.scanCheckIn(null, result.predictedPlate);
+                        const checkRes = await parkingService.scanCheckIn(null, predictedPlate);
                         if (checkRes && checkRes.isSuccess) {
                           // Tự chuyển sang chế độ Reservation và điền mã vé QR
                           setCheckInMode('reservation');
@@ -693,7 +699,7 @@ const GateController = () => {
                     }
                   } else {
                     setEntryOcrResult('Cần kiểm tra');
-                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                    message.warning(msg || "ALPR: Could not clearly read license plate. Please enter it manually.");
                   }
                 } catch (err) {
                   console.error("Entry recognition error:", err);
@@ -715,25 +721,31 @@ const GateController = () => {
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
                   const result = await parkingService.recognizeLicensePlate(file, typeId);
 
-                  if (result?.isSuccess && result.predictedPlate) {
+                  const isSuccess = result?.isSuccess || result?.IsSuccess;
+                  const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
+                  const imageUrl = result?.imageUrl || result?.ImageUrl;
+                  const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
+                  const msg = result?.message || result?.Message;
+
+                  if (isSuccess && predictedPlate) {
                     URL.revokeObjectURL(url);
-                    setEntryImagePreviewUrl(result.rawImageUrl || result.imageUrl);
-                    const confidence = result.confidence !== undefined ? result.confidence : 1.0;
+                    setEntryImagePreviewUrl(rawImageUrl || imageUrl);
+                    const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
                     
                     if (confidence < 0.85) {
                       setEntryOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
-                      setEntryOcrResult(result.predictedPlate);
+                      setEntryOcrResult(predictedPlate);
                       checkInForm.setFieldsValue({
-                        plate: result.predictedPlate,
-                        tempImageUrl: result.rawImageUrl
+                        plate: predictedPlate,
+                        tempImageUrl: rawImageUrl
                       });
-                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
                       // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
                       try {
-                        const checkRes = await parkingService.scanCheckIn(null, result.predictedPlate);
+                        const checkRes = await parkingService.scanCheckIn(null, predictedPlate);
                         if (checkRes && checkRes.isSuccess) {
                           setCheckInMode('reservation');
                           checkInForm.setFieldsValue({
@@ -748,7 +760,7 @@ const GateController = () => {
                     }
                   } else {
                     setEntryOcrResult('Cần kiểm tra');
-                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                    message.warning(msg || "ALPR: Could not clearly read license plate. Please enter it manually.");
                   }
                 } catch (err) {
                   console.error("Entry recognition error:", err);
@@ -918,24 +930,30 @@ const GateController = () => {
                   const file = dataURLtoFile(imageSrc, "exit_capture.jpg");
                   if (!file) throw new Error("Invalid captured image.");
                   const result = await parkingService.recognizeLicensePlate(file, 3);
-                  if (result?.isSuccess && result.predictedPlate) {
-                    setExitImagePreviewUrl(result.rawImageUrl || result.imageUrl);
-                    const confidence = result.confidence !== undefined ? result.confidence : 1.0;
+                  const isSuccess = result?.isSuccess || result?.IsSuccess;
+                  const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
+                  const imageUrl = result?.imageUrl || result?.ImageUrl;
+                  const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
+                  const msg = result?.message || result?.Message;
+
+                  if (isSuccess && predictedPlate) {
+                    setExitImagePreviewUrl(rawImageUrl || imageUrl);
+                    const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
                     
                     if (confidence < 0.85) {
                       setExitOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
-                      setExitOcrResult(result.predictedPlate);
+                      setExitOcrResult(predictedPlate);
                       checkOutForm.setFieldsValue({
-                        plate: result.predictedPlate,
-                        tempImageUrl: result.rawImageUrl
+                        plate: predictedPlate,
+                        tempImageUrl: rawImageUrl
                       });
-                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
                       // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
                       try {
-                        const scanRes = await parkingService.scanCheckOut(null, result.predictedPlate);
+                        const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
                         if (scanRes && scanRes.isSuccess) {
                           // Mở Popup modal hiển thị thông tin đối soát & thanh toán trực tiếp
                           setCheckoutResult(scanRes);
@@ -953,7 +971,7 @@ const GateController = () => {
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
-                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                    message.warning(msg || "ALPR: Could not clearly read license plate. Please enter it manually.");
                   }
                 } catch (err) {
                   console.error("Exit recognition error:", err);
@@ -972,25 +990,31 @@ const GateController = () => {
                 checkOutForm.setFieldValue('tempImageUrl', null);
                 try {
                   const result = await parkingService.recognizeLicensePlate(file, 3);
-                  if (result?.isSuccess && result.predictedPlate) {
+                  const isSuccess = result?.isSuccess || result?.IsSuccess;
+                  const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
+                  const imageUrl = result?.imageUrl || result?.ImageUrl;
+                  const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
+                  const msg = result?.message || result?.Message;
+
+                  if (isSuccess && predictedPlate) {
                     URL.revokeObjectURL(url);
-                    setExitImagePreviewUrl(result.rawImageUrl || result.imageUrl);
-                    const confidence = result.confidence !== undefined ? result.confidence : 1.0;
+                    setExitImagePreviewUrl(rawImageUrl || imageUrl);
+                    const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
 
                     if (confidence < 0.85) {
                       setExitOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
-                      setExitOcrResult(result.predictedPlate);
+                      setExitOcrResult(predictedPlate);
                       checkOutForm.setFieldsValue({
-                        plate: result.predictedPlate,
-                        tempImageUrl: result.rawImageUrl
+                        plate: predictedPlate,
+                        tempImageUrl: rawImageUrl
                       });
-                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
                       // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
                       try {
-                        const scanRes = await parkingService.scanCheckOut(null, result.predictedPlate);
+                        const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
                         if (scanRes && scanRes.isSuccess) {
                           setCheckoutResult(scanRes);
                           setIsCheckoutResultModalOpen(true);
@@ -1006,7 +1030,7 @@ const GateController = () => {
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
-                    message.warning(result?.message || "ALPR: Could not clearly read license plate. Please enter it manually.");
+                    message.warning(msg || "ALPR: Could not clearly read license plate. Please enter it manually.");
                   }
                 } catch (err) {
                   console.error("Exit recognition error:", err);
