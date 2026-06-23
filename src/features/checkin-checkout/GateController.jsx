@@ -193,6 +193,7 @@ const GateController = () => {
   const [checkInMode, setCheckInMode] = useState('walkin'); // 'walkin' or 'reservation'
 
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
+  const qrInputRef = React.useRef(null);
 
   // Frontend-only image upload/preview states
   const [entryImagePreviewUrl, setEntryImagePreviewUrl] = useState(null);
@@ -963,23 +964,10 @@ const GateController = () => {
                         });
                         message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
-                        // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
-                        try {
-                          const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
-                          if (scanRes && scanRes.isSuccess) {
-                            // Mở Popup modal hiển thị thông tin đối soát & thanh toán trực tiếp
-                            setCheckoutResult(scanRes);
-                            setIsCheckoutResultModalOpen(true);
-                            
-                            if (scanRes.isPaid) {
-                              message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
-                            }
-                          }
-                        } catch (err) {
-                          // Báo lỗi nếu xe không có phiên đỗ hợp lệ trong bãi đỗ
-                          message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
-                        }
-                        // ------------------------------------------------------
+                        // Mở khóa ô nhập QR và tự động Focus chuột để nhân viên quét QR vé
+                        setTimeout(() => {
+                          qrInputRef.current?.focus();
+                        }, 100);
                       }
                     }
                   } else {
@@ -1036,21 +1024,10 @@ const GateController = () => {
                         });
                         message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
-                        // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
-                        try {
-                          const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
-                          if (scanRes && scanRes.isSuccess) {
-                            setCheckoutResult(scanRes);
-                            setIsCheckoutResultModalOpen(true);
-                            
-                            if (scanRes.isPaid) {
-                              message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
-                            }
-                          }
-                        } catch (err) {
-                          message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
-                        }
-                        // ------------------------------------------------------
+                        // Mở khóa ô nhập QR và tự động Focus chuột để nhân viên quét QR vé
+                        setTimeout(() => {
+                          qrInputRef.current?.focus();
+                        }, 100);
                       }
                     }
                   } else {
@@ -1099,10 +1076,21 @@ const GateController = () => {
 
               <Form.Item
                 name="ticketCode"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code</span>}
+                label={
+                  <div className="flex justify-between items-center w-full">
+                    <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Ticket / QR Code</span>
+                    {!exitOcrResult && <span className="text-[10px] text-amber-500 font-bold normal-case">⚠️ Quét biển số xe trước</span>}
+                  </div>
+                }
                 className="mb-2"
               >
-                <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500" />
+                <Input 
+                  ref={qrInputRef}
+                  disabled={!exitOcrResult} 
+                  onPressEnter={() => checkOutForm.submit()}
+                  placeholder={exitOcrResult ? "Quét hoặc nhập mã vé rồi bấm Enter..." : "Chờ quét biển số xe..."} 
+                  className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500 disabled:opacity-60 disabled:cursor-not-allowed" 
+                />
               </Form.Item>
 
               <Form.Item
@@ -1150,8 +1138,9 @@ const GateController = () => {
             <div className="flex gap-2 mt-3">
               <Button 
                 type="dashed"
+                disabled={!exitOcrResult}
                 onClick={() => setIsQrPopupOpen(true)} // Mở popup camera quét QR vé cổng ra
-                className="w-full h-10 border-rose-300 text-rose-600 font-bold"
+                className="w-full h-10 border-rose-300 text-rose-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 [Quét Mã QR Vé Cổng Ra]
               </Button>
