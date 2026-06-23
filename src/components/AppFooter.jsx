@@ -10,8 +10,8 @@ const AppFooter = () => {
           textClassName="text-sm text-foreground font-bold transition-colors"
         />
         <div className="flex flex-col sm:items-end text-center sm:text-right leading-relaxed">
-          <span>© 2026 Parking Building Management System. All rights reserved.</span>
-          <span className="text-[10px] uppercase tracking-wider mt-0.5 opacity-70">Version 1.0.0 · Developed by Team 5</span>
+          <span>© 2026 Hệ thống quản lý bãi đỗ xe. Mọi quyền được bảo lưu.</span>
+          <span className="text-[10px] uppercase tracking-wider mt-0.5 opacity-70">Phiên bản 1.0.0 · Phát triển bởi Nhóm 5</span>
         </div>
       </div>
     </footer>
