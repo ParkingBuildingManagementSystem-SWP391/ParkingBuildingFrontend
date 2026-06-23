@@ -45,9 +45,7 @@ export const parkingService = {
       formData.append('imageFile', imageFile);
       formData.append('vehicleTypeId', vehicleTypeId);
 
-      const response = await api.post('/Parking/recognize', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await api.post('/Parking/recognize', formData);
       return response.data;
     } catch (error) {
       const serverMessage = error.response?.data?.message || error.response?.data?.error || "License plate recognition failed.";
