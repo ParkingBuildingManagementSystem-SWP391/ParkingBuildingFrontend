@@ -929,7 +929,12 @@ const GateController = () => {
                 try {
                   const file = dataURLtoFile(imageSrc, "exit_capture.jpg");
                   if (!file) throw new Error("Invalid captured image.");
-                  const result = await parkingService.recognizeLicensePlate(file, 3);
+                  
+                  const currentPlate = checkOutForm.getFieldValue('plate') || '';
+                  const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
+                  const typeId = isBike ? 1 : 3;
+
+                  const result = await parkingService.recognizeLicensePlate(file, typeId);
                   const isSuccess = result?.isSuccess || result?.IsSuccess;
                   const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
                   const imageUrl = result?.imageUrl || result?.ImageUrl;
@@ -944,30 +949,38 @@ const GateController = () => {
                       setExitOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
-                      setExitOcrResult(predictedPlate);
-                      checkOutForm.setFieldsValue({
-                        plate: predictedPlate,
-                        tempImageUrl: rawImageUrl
-                      });
-                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                      if (isBike) {
+                        // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
+                        setExitOcrResult(currentPlate);
+                        checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
+                        message.success("Đã chụp ảnh xe đạp ra bãi.");
+                      } else {
+                        // XE CƠ GIỚI: Đọc biển số và tự động đối soát
+                        setExitOcrResult(predictedPlate);
+                        checkOutForm.setFieldsValue({
+                          plate: predictedPlate,
+                          tempImageUrl: rawImageUrl
+                        });
+                        message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
-                      // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
-                      try {
-                        const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
-                        if (scanRes && scanRes.isSuccess) {
-                          // Mở Popup modal hiển thị thông tin đối soát & thanh toán trực tiếp
-                          setCheckoutResult(scanRes);
-                          setIsCheckoutResultModalOpen(true);
-                          
-                          if (scanRes.isPaid) {
-                            message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
+                        // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
+                        try {
+                          const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
+                          if (scanRes && scanRes.isSuccess) {
+                            // Mở Popup modal hiển thị thông tin đối soát & thanh toán trực tiếp
+                            setCheckoutResult(scanRes);
+                            setIsCheckoutResultModalOpen(true);
+                            
+                            if (scanRes.isPaid) {
+                              message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
+                            }
                           }
+                        } catch (err) {
+                          // Báo lỗi nếu xe không có phiên đỗ hợp lệ trong bãi đỗ
+                          message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
                         }
-                      } catch (err) {
-                        // Báo lỗi nếu xe không có phiên đỗ hợp lệ trong bãi đỗ
-                        message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
+                        // ------------------------------------------------------
                       }
-                      // ------------------------------------------------------
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
@@ -989,7 +1002,11 @@ const GateController = () => {
                 setExitOcrResult(null);
                 checkOutForm.setFieldValue('tempImageUrl', null);
                 try {
-                  const result = await parkingService.recognizeLicensePlate(file, 3);
+                  const currentPlate = checkOutForm.getFieldValue('plate') || '';
+                  const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
+                  const typeId = isBike ? 1 : 3;
+
+                  const result = await parkingService.recognizeLicensePlate(file, typeId);
                   const isSuccess = result?.isSuccess || result?.IsSuccess;
                   const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
                   const imageUrl = result?.imageUrl || result?.ImageUrl;
@@ -1005,28 +1022,36 @@ const GateController = () => {
                       setExitOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
-                      setExitOcrResult(predictedPlate);
-                      checkOutForm.setFieldsValue({
-                        plate: predictedPlate,
-                        tempImageUrl: rawImageUrl
-                      });
-                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                      if (isBike) {
+                        // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
+                        setExitOcrResult(currentPlate);
+                        checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
+                        message.success("Đã chụp ảnh xe đạp ra bãi.");
+                      } else {
+                        // XE CƠ GIỚI: Đọc biển số và tự động đối soát
+                        setExitOcrResult(predictedPlate);
+                        checkOutForm.setFieldsValue({
+                          plate: predictedPlate,
+                          tempImageUrl: rawImageUrl
+                        });
+                        message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
-                      // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
-                      try {
-                        const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
-                        if (scanRes && scanRes.isSuccess) {
-                          setCheckoutResult(scanRes);
-                          setIsCheckoutResultModalOpen(true);
-                          
-                          if (scanRes.isPaid) {
-                            message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
+                        // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
+                        try {
+                          const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
+                          if (scanRes && scanRes.isSuccess) {
+                            setCheckoutResult(scanRes);
+                            setIsCheckoutResultModalOpen(true);
+                            
+                            if (scanRes.isPaid) {
+                              message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
+                            }
                           }
+                        } catch (err) {
+                          message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
                         }
-                      } catch (err) {
-                        message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
+                        // ------------------------------------------------------
                       }
-                      // ------------------------------------------------------
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
