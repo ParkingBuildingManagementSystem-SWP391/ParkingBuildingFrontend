@@ -56,12 +56,12 @@ export const parkingService = {
   },
 
   // 3. Nhân viên quét xe tại cổng vào bãi (Check-in cho khách đã đặt trước)
-  checkInVehicle: async (ticketCode, licenseVehicle, imageUrl) => {
+  checkInVehicle: async (ticketCode, licenseVehicle, checkInImageUrl) => {
     try {
       const formData = new FormData();
-      if (ticketCode) formData.append('ticketCode', ticketCode.trim());
-      if (licenseVehicle) formData.append('licenseVehicle', licenseVehicle.trim().toUpperCase());
-      if (imageUrl) formData.append('imageUrl', imageUrl);
+      if (ticketCode) formData.append('TicketCode', ticketCode.trim());
+      if (licenseVehicle) formData.append('LicenseVehicle', licenseVehicle.trim().toUpperCase());
+      if (checkInImageUrl) formData.append('ImageUrl', checkInImageUrl);
 
       const response = await api.post('/Parking/check-in', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -74,12 +74,12 @@ export const parkingService = {
   },
 
   // 4. Nhân viên check-in cho khách vãng lai (Walk-in - Không đặt trước)
-  walkInCheckIn: async (licenseVehicle, vehicleTypeId, imageUrl) => {
+  walkInCheckIn: async (licenseVehicle, vehicleTypeId, checkInImageUrl) => {
     try {
       const formData = new FormData();
-      if (licenseVehicle) formData.append('licenseVehicle', licenseVehicle.trim().toUpperCase());
-      formData.append('vehicleTypeId', parseInt(vehicleTypeId));
-      if (imageUrl) formData.append('imageUrl', imageUrl);
+      if (licenseVehicle) formData.append('LicenseVehicle', licenseVehicle.trim().toUpperCase());
+      formData.append('VehicleTypeId', parseInt(vehicleTypeId));
+      if (checkInImageUrl) formData.append('ImageUrl', checkInImageUrl);
 
       const response = await api.post('/Parking/walk-in', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -92,14 +92,14 @@ export const parkingService = {
   },
 
   // 5. Nhân viên quét xe cho xe ra cổng (Check-out - Tính phí & giải phóng slot)
-  checkOutVehicle: async (ticketCode, checkoutLicensePlate, imageUrl, sessionId, paymentMethod = 'CASH') => {
+  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'CASH') => {
     try {
       const formData = new FormData();
-      if (ticketCode) formData.append('ticketCode', ticketCode.trim());
-      if (checkoutLicensePlate) formData.append('checkoutLicensePlate', checkoutLicensePlate.trim().toUpperCase());
-      if (imageUrl) formData.append('imageUrl', imageUrl);
-      if (sessionId) formData.append('sessionId', parseInt(sessionId));
-      formData.append('paymentMethod', paymentMethod);
+      if (ticketCode) formData.append('TicketCode', ticketCode.trim());
+      if (checkoutLicensePlate) formData.append('CheckoutLicensePlate', checkoutLicensePlate.trim().toUpperCase());
+      if (checkOutImageUrl) formData.append('ImageUrl', checkOutImageUrl);
+      if (sessionId) formData.append('SessionId', parseInt(sessionId));
+      formData.append('PaymentMethod', paymentMethod);
 
       const response = await api.post('/Parking/check-out', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
