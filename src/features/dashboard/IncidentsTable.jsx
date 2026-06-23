@@ -20,45 +20,45 @@ const MOCK_INCIDENTS = [
     id: 'INC-20231015-01',
     severity: 'Critical',
     timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 mins ago
-    type: 'License Plate Mismatch',
-    description: 'Vehicle exiting at Gate 1 does not match the check-in license plate records.',
-    location: 'Exit Gate 1',
+    type: 'Biển số không khớp',
+    description: 'Xe ra tại Cổng 1 không khớp với biển số đã ghi nhận lúc vào bãi.',
+    location: 'Cổng ra 1',
     status: 'Open'
   },
   {
     id: 'INC-20231015-02',
     severity: 'Warning',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 48 hours ago
-    type: 'Overstay Limit Reached',
-    description: 'Vehicle 29A-12345 has been parked for over 48 hours continuously.',
-    location: 'Floor B1 - Slot A2-14',
+    type: 'Vượt giới hạn thời gian đỗ',
+    description: 'Xe 29A-12345 đã đỗ liên tục quá 48 giờ.',
+    location: 'Tầng B1 - Chỗ A2-14',
     status: 'Open'
   },
   {
     id: 'INC-20231015-03',
     severity: 'Critical',
     timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
-    type: 'Barrier Force-Opened',
-    description: 'Entry Gate 2 barrier was forced open manually without authorization.',
-    location: 'Entry Gate 2',
+    type: 'Barrier bị mở cưỡng bức',
+    description: 'Barrier Cổng vào 2 bị mở thủ công khi chưa được phép.',
+    location: 'Cổng vào 2',
     status: 'Open'
   },
   {
     id: 'INC-20231014-04',
     severity: 'Info',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-    type: 'Sensor Anomaly',
-    description: 'Slot sensor reporting intermittent connection.',
-    location: 'Floor G - Slot C1-05',
+    type: 'Bất thường cảm biến',
+    description: 'Cảm biến chỗ đỗ báo kết nối chập chờn.',
+    location: 'Tầng G - Chỗ C1-05',
     status: 'Resolved'
   },
   {
     id: 'INC-20231014-05',
     severity: 'Warning',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
-    type: 'Payment Failed Repeatedly',
-    description: 'Customer attempted VNPay transaction 3 times unsuccessfully.',
-    location: 'Exit Gate 2',
+    type: 'Thanh toán thất bại nhiều lần',
+    description: 'Khách hàng thực hiện giao dịch VNPay 3 lần nhưng không thành công.',
+    location: 'Cổng ra 2',
     status: 'Open'
   }
 ];
@@ -96,40 +96,40 @@ const IncidentsTable = () => {
         inc.id === id ? { ...inc, status: 'Resolved' } : inc
       ));
       setResolvingId(null);
-      message.success(`Incident ${id} marked as resolved.`);
+      message.success(`Sự cố ${id} đã được đánh dấu là đã xử lý.`);
     }, 800);
   };
 
   // Tag rendering helpers
   const getSeverityTag = (severity) => {
     switch (severity) {
-      case 'Critical': return <Tag icon={<AlertCircle size={14} className="mr-1" />} color="error" className="m-0 font-bold px-2 py-0.5 border-0">CRITICAL</Tag>;
-      case 'Warning': return <Tag icon={<AlertTriangle size={14} className="mr-1" />} color="warning" className="m-0 font-bold px-2 py-0.5 border-0">WARNING</Tag>;
-      case 'Info': return <Tag icon={<Info size={14} className="mr-1" />} color="processing" className="m-0 font-bold px-2 py-0.5 border-0">INFO</Tag>;
+      case 'Critical': return <Tag icon={<AlertCircle size={14} className="mr-1" />} color="error" className="m-0 font-bold px-2 py-0.5 border-0">NGHIÊM TRỌNG</Tag>;
+      case 'Warning': return <Tag icon={<AlertTriangle size={14} className="mr-1" />} color="warning" className="m-0 font-bold px-2 py-0.5 border-0">CẢNH BÁO</Tag>;
+      case 'Info': return <Tag icon={<Info size={14} className="mr-1" />} color="processing" className="m-0 font-bold px-2 py-0.5 border-0">THÔNG TIN</Tag>;
       default: return <Tag color="default">{severity}</Tag>;
     }
   };
 
   const getStatusTag = (status) => {
-    if (status === 'Resolved') return <Tag icon={<CheckCircle2 size={14} className="mr-1" />} color="success" className="m-0 font-bold border-0">RESOLVED</Tag>;
-    return <Tag color="default" className="m-0 font-bold border border-slate-200 text-slate-500 bg-slate-50">OPEN</Tag>;
+    if (status === 'Resolved') return <Tag icon={<CheckCircle2 size={14} className="mr-1" />} color="success" className="m-0 font-bold border-0">ĐÃ XỬ LÝ</Tag>;
+    return <Tag color="default" className="m-0 font-bold border border-slate-200 text-slate-500 bg-slate-50">ĐANG MỞ</Tag>;
   };
 
   const columns = [
     {
-      title: 'Incident ID',
+      title: 'Mã sự cố',
       dataIndex: 'id',
       key: 'id',
       render: (text) => <span className="font-mono font-extrabold text-rose-700">{text}</span>,
     },
     {
-      title: 'Severity',
+      title: 'Mức độ',
       dataIndex: 'severity',
       key: 'severity',
       render: (severity) => getSeverityTag(severity),
     },
     {
-      title: 'Details',
+      title: 'Chi tiết',
       key: 'details',
       render: (_, record) => (
         <div className="flex flex-col gap-1 max-w-md">
@@ -139,7 +139,7 @@ const IncidentsTable = () => {
       )
     },
     {
-      title: 'Location & Time',
+      title: 'Vị trí & thời gian',
       key: 'locationTime',
       render: (_, record) => (
         <div className="flex flex-col gap-1.5 text-xs text-slate-600">
@@ -153,30 +153,30 @@ const IncidentsTable = () => {
       )
     },
     {
-      title: 'Status',
+      title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
       render: (status) => getStatusTag(status),
     },
     {
-      title: 'Action',
+      title: 'Thao tác',
       key: 'action',
       render: (_, record) => {
         if (record.status === 'Resolved') {
-          return <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1"><CheckCircle2 size={14} /> Handled</span>;
+          return <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1"><CheckCircle2 size={14} /> Đã xử lý</span>;
         }
 
         return (
           <Space>
-            <Tooltip title="View Camera Evidence">
-              <Button icon={<Camera size={14} />} size="small" className="text-slate-500 border-slate-200" onClick={() => message.info("Mock feature: Camera evidence viewer would open here.")} />
+            <Tooltip title="Xem bằng chứng camera">
+              <Button icon={<Camera size={14} />} size="small" className="text-slate-500 border-slate-200" onClick={() => message.info("Tính năng mô phỏng: màn hình bằng chứng camera sẽ mở tại đây.")} />
             </Tooltip>
             <Popconfirm
-              title="Mark as Resolved?"
-              description="Confirm that this incident has been handled."
+              title="Đánh dấu đã xử lý?"
+              description="Xác nhận sự cố này đã được xử lý."
               onConfirm={() => handleResolve(record.id)}
-              okText="Confirm"
-              cancelText="Cancel"
+              okText="Xác nhận"
+              cancelText="Hủy"
             >
               <Button 
                 type="primary" 
@@ -184,7 +184,7 @@ const IncidentsTable = () => {
                 loading={resolvingId === record.id}
                 className="bg-emerald-600 hover:bg-emerald-700 border-0 font-bold shadow-sm"
               >
-                Resolve
+                Xử lý
               </Button>
             </Popconfirm>
           </Space>
@@ -205,9 +205,9 @@ const IncidentsTable = () => {
         <div>
           <h3 className="text-xl font-bold text-rose-900 flex items-center gap-2">
             <Activity className="text-rose-600" />
-            Security & Alerts Log
+            Nhật ký an ninh & cảnh báo
           </h3>
-          <p className="text-xs text-slate-500 mt-1">Real-time monitoring of building anomalies and system flags</p>
+          <p className="text-xs text-slate-500 mt-1">Theo dõi bất thường và cảnh báo hệ thống theo thời gian thực</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -217,32 +217,32 @@ const IncidentsTable = () => {
               onClick={() => setFilterSeverity('All')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${filterSeverity === 'All' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              Active Alerts
+              Cảnh báo đang mở
             </button>
             <button 
               onClick={() => setFilterSeverity('Critical')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${filterSeverity === 'Critical' ? 'bg-rose-100 shadow-sm text-rose-800' : 'text-slate-500 hover:text-rose-600'}`}
             >
-              Critical
+              Nghiêm trọng
               {criticalCount > 0 && <span className="bg-rose-500 text-white px-1.5 rounded-full text-[10px]">{criticalCount}</span>}
             </button>
             <button 
               onClick={() => setFilterSeverity('Warning')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${filterSeverity === 'Warning' ? 'bg-amber-100 shadow-sm text-amber-800' : 'text-slate-500 hover:text-amber-600'}`}
             >
-              Warning
+              Cảnh báo
               {warningCount > 0 && <span className="bg-amber-500 text-white px-1.5 rounded-full text-[10px]">{warningCount}</span>}
             </button>
             <button 
               onClick={() => setFilterSeverity('Resolved')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${filterSeverity === 'Resolved' ? 'bg-emerald-100 shadow-sm text-emerald-800' : 'text-slate-500 hover:text-emerald-600'}`}
             >
-              Resolved
+              Đã xử lý
             </button>
           </div>
 
           <Input
-            placeholder="Search incident..."
+            placeholder="Tìm sự cố..."
             prefix={<Search size={16} className="text-slate-400" />}
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
