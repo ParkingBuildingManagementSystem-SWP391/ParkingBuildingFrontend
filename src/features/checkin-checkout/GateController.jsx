@@ -653,8 +653,6 @@ const GateController = () => {
                 try {
                   const file = dataURLtoFile(imageSrc, "entry_capture.jpg");
                   if (!file) throw new Error("Invalid captured image.");
-                  checkInForm.setFieldValue('tempImageUrl', file);
-
                   const type = checkInForm.getFieldValue('type') || 'Car';
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
                   const result = await parkingService.recognizeLicensePlate(file, typeId);
@@ -668,7 +666,10 @@ const GateController = () => {
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
                       setEntryOcrResult(result.predictedPlate);
-                      checkInForm.setFieldValue('plate', result.predictedPlate);
+                      checkInForm.setFieldsValue({
+                        plate: result.predictedPlate,
+                        tempImageUrl: result.rawImageUrl
+                      });
                       message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
                     }
                   } else {
@@ -691,7 +692,6 @@ const GateController = () => {
                 setEntryOcrResult(null);
                 checkInForm.setFieldValue('tempImageUrl', null);
                 try {
-                  checkInForm.setFieldValue('tempImageUrl', file);
                   const type = checkInForm.getFieldValue('type') || 'Car';
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
                   const result = await parkingService.recognizeLicensePlate(file, typeId);
@@ -706,7 +706,10 @@ const GateController = () => {
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
                       setEntryOcrResult(result.predictedPlate);
-                      checkInForm.setFieldValue('plate', result.predictedPlate);
+                      checkInForm.setFieldsValue({
+                        plate: result.predictedPlate,
+                        tempImageUrl: result.rawImageUrl
+                      });
                       message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
                     }
                   } else {
@@ -868,8 +871,6 @@ const GateController = () => {
                 try {
                   const file = dataURLtoFile(imageSrc, "exit_capture.jpg");
                   if (!file) throw new Error("Invalid captured image.");
-                  checkOutForm.setFieldValue('tempImageUrl', file);
-
                   const result = await parkingService.recognizeLicensePlate(file, 3);
                   if (result?.isSuccess && result.predictedPlate) {
                     setExitImagePreviewUrl(result.rawImageUrl || result.imageUrl);
@@ -880,7 +881,10 @@ const GateController = () => {
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
                       setExitOcrResult(result.predictedPlate);
-                      checkOutForm.setFieldValue('plate', result.predictedPlate);
+                      checkOutForm.setFieldsValue({
+                        plate: result.predictedPlate,
+                        tempImageUrl: result.rawImageUrl
+                      });
                       message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
                     }
                   } else {
@@ -903,7 +907,6 @@ const GateController = () => {
                 setExitOcrResult(null);
                 checkOutForm.setFieldValue('tempImageUrl', null);
                 try {
-                  checkOutForm.setFieldValue('tempImageUrl', file);
                   const result = await parkingService.recognizeLicensePlate(file, 3);
                   if (result?.isSuccess && result.predictedPlate) {
                     URL.revokeObjectURL(url);
@@ -915,7 +918,10 @@ const GateController = () => {
                       message.warning("ALPR: Low confidence. Please verify plate manually.");
                     } else {
                       setExitOcrResult(result.predictedPlate);
-                      checkOutForm.setFieldValue('plate', result.predictedPlate);
+                      checkOutForm.setFieldsValue({
+                        plate: result.predictedPlate,
+                        tempImageUrl: result.rawImageUrl
+                      });
                       message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
                     }
                   } else {
