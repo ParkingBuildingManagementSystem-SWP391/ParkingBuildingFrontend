@@ -519,14 +519,8 @@ const ParkingLotMap = () => {
       expectedDate.setDate(expectedDate.getDate() + 1);
     }
 
-    // Format as Local Time string (YYYY-MM-DDTHH:mm:ss) to avoid UTC shift issues in Backend
-    const year = expectedDate.getFullYear();
-    const month = String(expectedDate.getMonth() + 1).padStart(2, '0');
-    const day = String(expectedDate.getDate()).padStart(2, '0');
-    const hours = String(expectedDate.getHours()).padStart(2, '0');
-    const mins = String(expectedDate.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${mins}:00`;
+    // Send the standard UTC ISO string. The backend treats it as UTC and computes the time diff correctly.
+    return expectedDate.toISOString();
   };
 
 
