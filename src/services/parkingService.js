@@ -45,10 +45,18 @@ export const parkingService = {
       formData.append('imageFile', imageFile);
       formData.append('vehicleTypeId', vehicleTypeId);
 
-      const response = await api.post('/Parking/recognize', formData);
+      // GHI ĐÈ HEADER MULTIPART/FORM-DATA ĐỂ TRÁNH LỖI 400
+      const response = await api.post('/Parking/recognize', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
-      const serverMessage = error.response?.data?.message || error.response?.data?.error || "License plate recognition failed.";
+      // IN CHI TIẾT LỖI RA CONSOLE ĐỂ BẤM F12 XEM ĐƯỢC NGAY (LỖI CLOUDINARY, DB, HỆ THỐNG...)
+      console.warn("RECOGNIZE API ERROR DETAIL:", error.response?.data || error);
+      const serverMessage = error.response?.data?.message || 
+                            error.response?.data?.Message || 
+                            error.response?.data?.error || 
+                            "License plate recognition failed.";
       throw serverMessage;
     }
   },
