@@ -17,7 +17,7 @@ const Login = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!usernameOrEmail || !password) {
-      setErrorMsg('Please enter both username or email and password.');
+      setErrorMsg('Vui lòng nhập email/tên đăng nhập và mật khẩu.');
       return;
     }
 
@@ -40,7 +40,7 @@ const Login = () => {
         navigate('/parking-map');
       }
     } else {
-      setErrorMsg(res.message || 'Authentication error. Please try again.');
+      setErrorMsg(res.message || 'Lỗi xác thực. Vui lòng thử lại.');
     }
   };
 
@@ -62,12 +62,12 @@ const Login = () => {
         navigate('/parking-map');
       }
     } else {
-      setErrorMsg(res.message || 'Google authentication failed.');
+      setErrorMsg(res.message || 'Xác thực Google thất bại.');
     }
   };
 
   const handleGoogleError = () => {
-    setErrorMsg('Google login was unsuccessful.');
+    setErrorMsg('Đăng nhập Google không thành công.');
   };
 
   return (
@@ -82,8 +82,8 @@ const Login = () => {
         
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-extrabold text-[#2A2B4E] mb-2 font-sans tracking-tight">Welcome Back!</h1>
-          <p className="text-sm font-medium text-[#7A859E]">Login to continue</p>
+          <h1 className="text-3xl font-extrabold text-[#2A2B4E] mb-2 font-sans tracking-tight">Chào mừng trở lại!</h1>
+          <p className="text-sm font-medium text-[#7A859E]">Đăng nhập để tiếp tục</p>
         </div>
 
         {/* Error Message */}
@@ -103,7 +103,7 @@ const Login = () => {
             </div>
             <input
               type="text"
-              placeholder="Email"
+              placeholder="Email hoặc tên đăng nhập"
               value={usernameOrEmail}
               onChange={(e) => setUsernameOrEmail(e.target.value)}
               disabled={loading}
@@ -118,7 +118,7 @@ const Login = () => {
             </div>
             <input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
+              placeholder="Mật khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
@@ -136,7 +136,7 @@ const Login = () => {
           {/* Forgot Password */}
           <div className="flex justify-end pt-1">
             <a href="#" className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
-              Forgot Password?
+              Quên mật khẩu?
             </a>
           </div>
 
@@ -149,7 +149,7 @@ const Login = () => {
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
             ) : (
-              'Login'
+              'Đăng nhập'
             )}
           </button>
         </form>
@@ -157,7 +157,7 @@ const Login = () => {
         {/* Divider */}
         <div className="mt-8 mb-6 flex items-center justify-center relative">
           <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-[#E2E8F0] to-transparent"></div>
-          <span className="relative bg-white px-4 text-xs font-medium text-[#9AA5BE]">or continue with</span>
+          <span className="relative bg-white px-4 text-xs font-medium text-[#9AA5BE]">hoặc tiếp tục với</span>
         </div>
 
         {/* Social Buttons */}
@@ -185,9 +185,9 @@ const Login = () => {
         {/* Footer Link */}
         <div className="text-center space-y-3">
           <div>
-            <span className="text-[13px] text-[#7A859E] font-medium">Don't have an account? </span>
+            <span className="text-[13px] text-[#7A859E] font-medium">Chưa có tài khoản? </span>
             <Link to="/register" className="text-[13px] font-bold text-[#4B0082] hover:text-[#3B82F6] transition-colors tracking-wide">
-              Sign Up
+              Đăng ký
             </Link>
           </div>
           <div>
@@ -196,7 +196,7 @@ const Login = () => {
               onClick={() => localStorage.setItem('spotflow_guest_isAuthenticated', 'true')} 
               className="text-[13px] font-bold text-slate-500 hover:text-blue-600 transition-colors underline decoration-slate-300 underline-offset-4"
             >
-              Continue as Guest to View Parking Map
+              Tiếp tục với tư cách khách để xem bản đồ bãi đỗ
             </Link>
           </div>
         </div>

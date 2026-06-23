@@ -91,7 +91,7 @@ const Dashboard = () => {
       setSummary(data);
     } catch (err) {
       console.error("fetchSummary error:", err);
-      setErrorSummary("Failed to load real-time dashboard data.");
+      setErrorSummary("Không thể tải dữ liệu bảng điều khiển theo thời gian thực.");
     } finally {
       setLoadingSummary(false);
     }
@@ -112,7 +112,7 @@ const Dashboard = () => {
       setTrafficStats(data);
     } catch (err) {
       console.error("fetchTrafficStats error:", err);
-      setErrorStats("Failed to load traffic statistics.");
+      setErrorStats("Không thể tải thống kê lượt xe.");
     } finally {
       setLoadingStats(false);
     }
@@ -135,10 +135,10 @@ const Dashboard = () => {
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      message.success(`Report exported successfully as ${format}`);
+      message.success(`Đã xuất báo cáo thành công dưới dạng ${format}`);
     } catch (err) {
       console.error("Export error:", err);
-      message.error("Failed to export report.");
+      message.error("Không thể xuất báo cáo.");
     } finally {
       setExporting(false);
     }
@@ -162,10 +162,10 @@ const Dashboard = () => {
         fullDayRate: row.fullDayRate,
         maxHoursPerTurn: Number(row.vehicleTypeId) === 3 ? row.maxHoursPerTurn : null
       });
-      message.success(`${row.vehicleType} pricing updated successfully.`);
+      message.success(`Đã cập nhật cấu hình giá cho ${getVehicleTypeLabel(row.vehicleType)}.`);
     } catch (err) {
       console.error('handleUpdatePricing error:', err);
-      message.error(err.response?.data?.message || err.response?.data?.error || 'Failed to update pricing configuration.');
+      message.error(err.response?.data?.message || err.response?.data?.error || 'Không thể cập nhật cấu hình giá.');
     } finally {
       setSavingPricingIds((prev) => ({ ...prev, [row.vehicleTypeId]: false }));
     }
@@ -219,6 +219,14 @@ const Dashboard = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
 
+  const getVehicleTypeLabel = (type) => {
+    const normalized = String(type || '').toLowerCase();
+    if (normalized === 'car') return 'Ô tô';
+    if (normalized === 'motorbike' || normalized === 'motorcycle') return 'Xe máy';
+    if (normalized === 'bicycle' || normalized === 'bike') return 'Xe đạp';
+    return type || 'Không xác định';
+  };
+
   // ----------------------------------------------------
   // MANAGER & ADMIN DASHBOARD
   // ----------------------------------------------------
@@ -229,7 +237,7 @@ const Dashboard = () => {
       return (
         <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium font-sans">
           <Loader2 className="h-8 w-8 text-[#2563EB] animate-spin mb-3" />
-          <span>Fetching real-time building statistics...</span>
+          <span>Đang tải thống kê bãi đỗ theo thời gian thực...</span>
         </div>
       );
     }
@@ -240,7 +248,7 @@ const Dashboard = () => {
           <ShieldAlert size={36} className="mb-2 animate-bounce" />
           <span>{errorSummary}</span>
           <button onClick={fetchSummary} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-blue-700 transition-all">
-            Retry Connection
+            Thử kết nối lại
           </button>
         </div>
       );
@@ -248,17 +256,17 @@ const Dashboard = () => {
 
     const getFormattedDate = () => {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date().toLocaleDateString('en-US', options);
+      return new Date().toLocaleDateString('vi-VN', options);
     };
 
     const subNavItems = [
-      { id: 'Overview', label: 'Overview' },
-      { id: 'Live Status', label: 'Live Status' },
-      { id: 'Incidents', label: 'Incidents' },
-      { id: 'Analytics', label: 'Analytics' },
-      { id: 'Slot Management', label: 'Slot Management' },
-      { id: 'Pricing', label: 'Pricing' },
-      { id: 'Staff Logs', label: 'Staff Logs' }
+      { id: 'Overview', label: 'Tổng quan' },
+      { id: 'Live Status', label: 'Trạng thái trực tiếp' },
+      { id: 'Incidents', label: 'Sự cố' },
+      { id: 'Analytics', label: 'Phân tích' },
+      { id: 'Slot Management', label: 'Quản lý chỗ đỗ' },
+      { id: 'Pricing', label: 'Bảng giá' },
+      { id: 'Staff Logs', label: 'Nhật ký nhân viên' }
     ];
 
     // Vehicles distribution calculations
@@ -366,11 +374,11 @@ const Dashboard = () => {
           <div className="flex items-center justify-center gap-6 pt-2 border-t border-slate-100/60 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-0.5 bg-[#2563EB] inline-block border-t-2 border-[#2563EB]"></span>
-              <span className="text-slate-600">Check-In</span>
+              <span className="text-slate-600">Vào bãi</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-0.5 bg-[#F97316] inline-block border-t-2 border-[#F97316]"></span>
-              <span className="text-slate-600">Check-Out</span>
+              <span className="text-slate-600">Ra bãi</span>
             </div>
           </div>
         </div>
@@ -446,7 +454,7 @@ const Dashboard = () => {
           {/* Legend */}
           <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-100/60 text-xs font-semibold">
             <span className="w-3.5 h-3.5 bg-[#10B981] rounded-sm block"></span>
-            <span className="text-slate-600">Revenue (VND)</span>
+            <span className="text-slate-600">Doanh thu (VND)</span>
           </div>
         </div>
       );
@@ -485,7 +493,7 @@ const Dashboard = () => {
               {/* Card 1: Total Vehicles Current */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md transition-shadow duration-250">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Total Vehicles Current</span>
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Tổng xe hiện tại</span>
                   <span className="text-3xl font-extrabold text-slate-800 block">{summary?.occupiedSlotsCount || 0}</span>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2563EB] shrink-0">
@@ -496,7 +504,7 @@ const Dashboard = () => {
               {/* Card 2: Daily Revenue */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md transition-shadow duration-250">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Daily Revenue</span>
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Doanh thu hôm nay</span>
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-extrabold text-slate-800">{formatVND(summary?.todayRevenue || 0)}</span>
                   </div>
@@ -509,7 +517,7 @@ const Dashboard = () => {
               {/* Card 3: Overall Occupancy Rate */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md transition-shadow duration-250">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Overall Occupancy Rate</span>
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Tỷ lệ lấp đầy tổng thể</span>
                   <span className="text-3xl font-extrabold text-slate-800 block">{((summary?.occupancyRate) || 0).toFixed(1)}%</span>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-[#8B5CF6] shrink-0">
@@ -520,7 +528,7 @@ const Dashboard = () => {
               {/* Card 4: Available Slots */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md transition-shadow duration-250">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Available Slots</span>
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Chỗ trống</span>
                   <span className="text-3xl font-extrabold text-slate-800 block">{summary?.availableSlotsCount || 0}</span>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-[#F97316] shrink-0">
@@ -536,8 +544,8 @@ const Dashboard = () => {
               {/* Left Column: Vehicles Distribution */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">Vehicles in Building</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Distribution of vehicles currently parked</p>
+                  <h3 className="text-lg font-bold text-slate-800">Xe đang trong bãi</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Phân bổ các loại xe đang đỗ</p>
                 </div>
                 
                 <div className="flex flex-col items-center justify-center py-6">
@@ -591,12 +599,12 @@ const Dashboard = () => {
                       )}
                       
                       {/* Center Text labels */}
-                      <text x="160" y="100" textAnchor="middle" className="text-slate-400 text-[10px] font-bold uppercase tracking-wider fill-slate-400">Total</text>
+                      <text x="160" y="100" textAnchor="middle" className="text-slate-400 text-[10px] font-bold uppercase tracking-wider fill-slate-400">Tổng</text>
                       <text x="160" y="120" textAnchor="middle" className="text-slate-800 text-lg font-extrabold font-sans fill-slate-800">{totalInBuilding}</text>
                     </svg>
                   ) : (
                     <div className="text-center py-12 text-slate-400 font-semibold text-xs">
-                      No vehicles currently parked in building.
+                      Hiện không có xe nào đang đỗ trong bãi.
                     </div>
                   )}
 
@@ -604,15 +612,15 @@ const Dashboard = () => {
                   <div className="flex items-center justify-center flex-wrap gap-4 mt-4 pt-4 border-t border-slate-100/60 w-full">
                     <div className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-full bg-[#10B981] block"></span>
-                      <span className="text-xs text-slate-600 font-medium">Car: {carDetail.inBuildingCount} ({carPercent}%)</span>
+                      <span className="text-xs text-slate-600 font-medium">Ô tô: {carDetail.inBuildingCount} ({carPercent}%)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-full bg-[#2563EB] block"></span>
-                      <span className="text-xs text-slate-600 font-medium">Motorcycle: {bikeDetail.inBuildingCount} ({bikePercent}%)</span>
+                      <span className="text-xs text-slate-600 font-medium">Xe máy: {bikeDetail.inBuildingCount} ({bikePercent}%)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-full bg-[#8B5CF6] block"></span>
-                      <span className="text-xs text-slate-600 font-medium">Bicycle: {bicycleDetail.inBuildingCount} ({bicyclePercent}%)</span>
+                      <span className="text-xs text-slate-600 font-medium">Xe đạp: {bicycleDetail.inBuildingCount} ({bicyclePercent}%)</span>
                     </div>
                   </div>
                 </div>
@@ -621,18 +629,18 @@ const Dashboard = () => {
               {/* Right Column: Building Details & Current Shift */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">Building Operations Summary</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Sales summary and building volume metrics</p>
+                  <h3 className="text-lg font-bold text-slate-800">Tóm tắt vận hành bãi đỗ</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Tổng hợp doanh thu và lưu lượng trong bãi</p>
                 </div>
                 
                 <div className="divide-y divide-slate-100 space-y-4 py-4">
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-slate-500 font-semibold">Total Revenue (All-time):</span>
+                    <span className="text-sm text-slate-500 font-semibold">Tổng doanh thu:</span>
                     <span className="text-sm font-extrabold text-slate-800">{formatVND(summary?.totalRevenue || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-slate-500 font-semibold">Reserved Slots Volume:</span>
-                    <span className="text-sm font-extrabold text-amber-600">{summary?.reservedSlotsCount || 0} Slots</span>
+                    <span className="text-sm text-slate-500 font-semibold">Số chỗ đã đặt trước:</span>
+                    <span className="text-sm font-extrabold text-amber-600">{summary?.reservedSlotsCount || 0} chỗ</span>
                   </div>
                 </div>
               </div>
@@ -642,19 +650,19 @@ const Dashboard = () => {
             {/* D. Floor Occupancy Status Table (Full Width) */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
               <div>
-                <h3 className="text-lg font-bold text-slate-800">Floor Occupancy Status</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Real-time status per building level</p>
+                <h3 className="text-lg font-bold text-slate-800">Trạng thái lấp đầy theo tầng</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Trạng thái theo thời gian thực của từng tầng</p>
               </div>
 
               <div className="overflow-x-auto mt-4">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">FLOOR</th>
-                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">TOTAL SLOTS</th>
-                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">OCCUPIED</th>
-                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">AVAILABLE</th>
-                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">OCCUPANCY RATE</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">TẦNG</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">TỔNG CHỖ</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">ĐANG ĐỖ</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">CÒN TRỐNG</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">TỶ LỆ LẤP ĐẦY</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100/60">
@@ -697,11 +705,11 @@ const Dashboard = () => {
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                 <Filter size={18} className="text-[#2563EB]" />
-                <h3 className="text-base font-bold text-slate-800">Traffic & Revenue Query Filters</h3>
+                <h3 className="text-base font-bold text-slate-800">Bộ lọc lưu lượng và doanh thu</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start Date</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày bắt đầu</label>
                   <input
                     type="date"
                     value={startDate}
@@ -710,7 +718,7 @@ const Dashboard = () => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">End Date</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày kết thúc</label>
                   <input
                     type="date"
                     value={endDate}
@@ -719,27 +727,27 @@ const Dashboard = () => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Group By</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nhóm theo</label>
                   <select
                     value={groupBy}
                     onChange={(e) => setGroupBy(e.target.value)}
                     className="w-full h-11 px-3 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all font-semibold text-slate-700"
                   >
-                    <option value="DAY">By Day</option>
-                    <option value="HOUR">By Hour</option>
+                    <option value="DAY">Theo ngày</option>
+                    <option value="HOUR">Theo giờ</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vehicle Type</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Loại xe</label>
                   <select
                     value={vehicleTypeId}
                     onChange={(e) => setVehicleTypeId(e.target.value)}
                     className="w-full h-11 px-3 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all font-semibold text-slate-700"
                   >
-                    <option value="">All Vehicles</option>
-                    <option value="3">Car</option>
-                    <option value="2">Motorbike</option>
-                    <option value="1">Bicycle</option>
+                    <option value="">Tất cả xe</option>
+                    <option value="3">Ô tô</option>
+                    <option value="2">Xe máy</option>
+                    <option value="1">Xe đạp</option>
                   </select>
                 </div>
               </div>
@@ -749,9 +757,9 @@ const Dashboard = () => {
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                 <Download size={18} className="text-[#10B981]" />
-                <h3 className="text-base font-bold text-slate-800">Export Historical Reports</h3>
+                <h3 className="text-base font-bold text-slate-800">Xuất báo cáo lịch sử</h3>
               </div>
-              <p className="text-xs text-slate-400">Download formatted Excel spreadsheet or PDF report for the selected date range and filters.</p>
+              <p className="text-xs text-slate-400">Tải báo cáo Excel hoặc PDF theo khoảng ngày và bộ lọc đã chọn.</p>
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
                   disabled={exporting}
@@ -759,7 +767,7 @@ const Dashboard = () => {
                   className="h-11 px-6 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-emerald-700 active:scale-98 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                  Export Excel Spreadsheet
+                  Xuất file Excel
                 </button>
                 <button
                   disabled={exporting}
@@ -767,7 +775,7 @@ const Dashboard = () => {
                   className="h-11 px-6 bg-rose-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-rose-700 active:scale-98 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                  Export PDF Document
+                  Xuất file PDF
                 </button>
               </div>
             </div>
@@ -776,7 +784,7 @@ const Dashboard = () => {
             {loadingStats ? (
               <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-slate-400">
                 <Loader2 size={32} className="animate-spin text-blue-600 mb-2" />
-                <span className="text-xs font-semibold">Loading traffic flow and revenue charts...</span>
+                <span className="text-xs font-semibold">Đang tải biểu đồ lưu lượng và doanh thu...</span>
               </div>
             ) : errorStats ? (
               <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center text-rose-500 font-bold">
@@ -786,15 +794,15 @@ const Dashboard = () => {
             ) : trafficStats.length === 0 ? (
               <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center text-slate-400 font-semibold">
                 <BarChart3 size={32} className="mx-auto mb-2" />
-                <span>No transit data found for the selected filter configuration.</span>
+                <span>Không tìm thấy dữ liệu lượt xe cho bộ lọc đã chọn.</span>
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Traffic flow SVG chart */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-800">Traffic Activity Over Time</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">Check-in vs Check-out volumes</p>
+                    <h3 className="text-lg font-bold text-slate-800">Hoạt động xe theo thời gian</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">So sánh lượt vào và lượt ra</p>
                   </div>
                   <div className="py-6">
                     {renderTrafficChart()}
@@ -804,8 +812,8 @@ const Dashboard = () => {
                 {/* Revenue SVG chart */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-800">Revenue Generation</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">Financial gains mapped over selected intervals</p>
+                    <h3 className="text-lg font-bold text-slate-800">Doanh thu phát sinh</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">Doanh thu theo khoảng thời gian đã chọn</p>
                   </div>
                   <div className="py-6">
                     {renderRevenueChart()}
@@ -819,8 +827,8 @@ const Dashboard = () => {
             <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
               <DollarSign size={18} className="text-[#2563EB]" />
               <div>
-                <h3 className="text-base font-bold text-slate-800">Vehicle Pricing Configuration</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Update day, night, full-day, and turn-limit pricing used by the backend.</p>
+                <h3 className="text-base font-bold text-slate-800">Cấu hình giá theo loại xe</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Cập nhật giá ban ngày, ban đêm, cả ngày và giới hạn giờ mỗi lượt.</p>
               </div>
             </div>
 
@@ -828,12 +836,12 @@ const Dashboard = () => {
               <table className="w-full min-w-[920px] border-collapse text-left">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Vehicle Type</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Day Rate</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Night Rate</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Full Day Rate</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Max Hours Per Turn</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right">Action</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Loại xe</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Giá ban ngày</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Giá ban đêm</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Giá cả ngày</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Giờ tối đa mỗi lượt</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
@@ -841,7 +849,7 @@ const Dashboard = () => {
                     <tr key={row.vehicleTypeId} className="hover:bg-slate-50/70 transition-colors">
                       <td className="px-4 py-4 align-middle">
                         <div className="flex flex-col">
-                          <span className="text-sm font-extrabold text-slate-800">{row.vehicleType}</span>
+                          <span className="text-sm font-extrabold text-slate-800">{getVehicleTypeLabel(row.vehicleType)}</span>
                           <span className="text-xs font-medium text-slate-400">{row.description}</span>
                         </div>
                       </td>
@@ -885,11 +893,11 @@ const Dashboard = () => {
                             max={24}
                             value={row.maxHoursPerTurn}
                             onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'maxHoursPerTurn', value ?? 1)}
-                            addonAfter="hours"
+                            addonAfter="giờ"
                             className="w-full"
                           />
                         ) : (
-                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400">Not applied</span>
+                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400">Không áp dụng</span>
                         )}
                       </td>
                       <td className="px-4 py-4 align-middle text-right">
@@ -899,7 +907,7 @@ const Dashboard = () => {
                           onClick={() => handleUpdatePricing(row)}
                           className="h-9 rounded-xl bg-blue-600 px-5 font-bold"
                         >
-                          Save
+                          Lưu
                         </Button>
                       </td>
                     </tr>
@@ -910,9 +918,9 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="bg-white border border-slate-100 rounded-2xl py-24 text-center shadow-sm">
-            <h3 className="text-slate-700 font-bold text-lg">{subTab} Workspace</h3>
+            <h3 className="text-slate-700 font-bold text-lg">{subNavItems.find((item) => item.id === subTab)?.label || subTab}</h3>
             <p className="text-xs text-slate-400 mt-2 max-w-sm mx-auto">
-              This module is active in manager view. Real-time updates and logs are simulated.
+              Module này đang hoạt động trong giao diện quản lý. Dữ liệu cập nhật và nhật ký hiện đang được mô phỏng.
             </p>
           </div>
         )}
@@ -925,7 +933,7 @@ const Dashboard = () => {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-400 font-medium font-sans">
         <div className="h-8 w-8 rounded-full border-4 border-slate-200 border-t-[#2563EB] animate-spin mb-3"></div>
-        <span>Loading map workspace...</span>
+        <span>Đang tải khu vực bản đồ...</span>
       </div>
     );
   }
@@ -938,8 +946,8 @@ const Dashboard = () => {
       return (
         <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
           <ShieldAlert size={48} className="mb-4 text-blue-500 opacity-80" />
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Dashboard Access Restricted</h2>
-          <p className="text-sm">Admin accounts do not use this dashboard. Please use Account Management.</p>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Không có quyền truy cập bảng điều khiển</h2>
+          <p className="text-sm">Tài khoản Admin không sử dụng bảng điều khiển này. Vui lòng dùng Quản lý tài khoản.</p>
         </div>
       );
     default:
