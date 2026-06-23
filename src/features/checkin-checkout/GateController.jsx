@@ -1,17 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card, Form, Input, Select, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Form, Input, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { parkingService } from '../../services/parkingService';
 import Webcam from 'react-webcam';
-import { Html5Qrcode } from 'html5-qrcode';
 import { 
   CheckCircle, 
   CreditCard, 
   Sparkles, 
   MonitorPlay,
   RefreshCw,
-  Check,
-  QrCode,
-  Car
+  Check
 } from 'lucide-react';
 import TicketModal from './TicketModal';
 
@@ -196,9 +193,8 @@ const GateController = () => {
   const [checkOutForm] = Form.useForm();
   const [checkInMode, setCheckInMode] = useState('walkin'); // 'walkin' or 'reservation'
 
-  const [qrPopupTarget, setQrPopupTarget] = useState(null);
-  const [activeSessions, setActiveSessions] = useState([]);
-  const qrScannerRef = useRef(null);
+  const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
+  const qrInputRef = React.useRef(null);
 
   // Frontend-only image upload/preview states
   const [entryImagePreviewUrl, setEntryImagePreviewUrl] = useState(null);
@@ -430,139 +426,6 @@ const GateController = () => {
   const handleCheckOutSubmit = (values) => {
     handleCheckOut(values.paymentMethod || 'CASH');
   };
-
-  const loadActiveSessionsForQr = async () => {
-    try {
-      const data = await parkingService.getActiveSessions();
-      const sessions = Array.isArray(data) ? data : (data?.data || data?.Data || []);
-      setActiveSessions(sessions || []);
-    } catch (err) {
-      console.error("Lỗi lấy danh sách phiên đỗ xe:", err);
-    }
-  };
-
-  const handleCheckInQrScan = async (ticketCode) => {
-    if (!ticketCode) return;
-    try {
-      setCheckInMode('reservation');
-      checkInForm.setFieldsValue({ ticketCode });
-      const response = await parkingService.scanCheckIn(ticketCode);
-      if (response) {
-        message.success(response.message || response.Message || "Quét QR check-in thành công. Cổng vào đã mở.");
-        checkInForm.resetFields();
-        fetchActiveParkedVehicles();
-      }
-    } catch (err) {
-      console.error("QR check-in error:", err);
-      message.error(String(err));
-    }
-  };
-
-  const handleCheckOutQrScan = async (ticketCode) => {
-    if (!ticketCode) return;
-    try {
-      checkOutForm.setFieldsValue({ ticketCode });
-      const response = await parkingService.scanCheckOut(ticketCode);
-      if (response) {
-        setCheckoutResult(response);
-        setIsCheckoutResultModalOpen(true);
-        const isPaid = response.isPaid !== undefined ? response.isPaid : response.IsPaid;
-        message.success(response.message || response.Message || "Quét QR check-out thành công.");
-        if (isPaid) {
-          fetchActiveParkedVehicles();
-        }
-      }
-    } catch (err) {
-      console.error("QR check-out error:", err);
-      message.error(String(err));
-    }
-  };
-
-  const handleQrSessionPick = async (session) => {
-    const ticketCode = session?.ticketCode || session?.TicketCode;
-    if (!ticketCode) {
-      message.error("Phiên đỗ xe không có mã vé hợp lệ.");
-      return;
-    }
-
-    if (qrPopupTarget === 'checkin') {
-      checkInForm.setFieldsValue({ ticketCode });
-      await handleCheckInQrScan(ticketCode);
-    } else {
-      checkOutForm.setFieldsValue({ ticketCode });
-      await handleCheckOutQrScan(ticketCode);
-    }
-    setQrPopupTarget(null);
-  };
-
-  useEffect(() => {
-    let isCancelled = false;
-    let hasScanned = false;
-
-    const stopQrScanner = async () => {
-      const scanner = qrScannerRef.current;
-      if (!scanner) return;
-
-      try {
-        if (scanner.isScanning) {
-          await scanner.stop();
-        }
-        await scanner.clear();
-      } catch (err) {
-        console.error("Lỗi tắt camera QR:", err);
-      } finally {
-        if (qrScannerRef.current === scanner) {
-          qrScannerRef.current = null;
-        }
-      }
-    };
-
-    if (!qrPopupTarget) {
-      stopQrScanner();
-      return undefined;
-    }
-
-    loadActiveSessionsForQr();
-
-    const scanner = new Html5Qrcode("qr-reader-element");
-    qrScannerRef.current = scanner;
-
-    scanner
-      .start(
-        { facingMode: "environment" },
-        {
-          fps: 15,
-          qrbox: { width: 260, height: 260 },
-        },
-        async (decodedText) => {
-          if (hasScanned || isCancelled) return;
-          hasScanned = true;
-          message.success(`Quét thành công mã QR: ${decodedText}`);
-
-          if (qrPopupTarget === 'checkin') {
-            checkInForm.setFieldsValue({ ticketCode: decodedText });
-            await handleCheckInQrScan(decodedText);
-          } else {
-            checkOutForm.setFieldsValue({ ticketCode: decodedText });
-            await handleCheckOutQrScan(decodedText);
-          }
-
-          setQrPopupTarget(null);
-        },
-        () => {
-          // Ignore scanning noise while camera is searching for a QR code.
-        }
-      )
-      .catch((err) => {
-        console.error("Không thể truy cập Camera:", err);
-        message.error("Lỗi mở camera. Vui lòng cấp quyền truy cập camera cho trình duyệt!");
-      });
-
-    return () => {
-      isCancelled = true;
-      stopQrScanner();
-    };
-  }, [qrPopupTarget]);
 
   // Cash payment confirmation handler
   const handleConfirmCashPayment = async () => {
@@ -1033,7 +896,7 @@ const GateController = () => {
               <div className="flex gap-2 mt-3">
                 <Button 
                   type="dashed"
-                  onClick={() => setQrPopupTarget('checkin')}
+                  onClick={() => message.info('Vui lòng nhập hoặc quét mã QR/mã vé vào ô Mã vé / mã QR.')}
                   className="w-full h-10 border-indigo-300 text-indigo-600 font-bold"
                 >
                   Quét mã QR
@@ -1075,7 +938,12 @@ const GateController = () => {
                 try {
                   const file = dataURLtoFile(imageSrc, "exit_capture.jpg");
                   if (!file) throw new Error("Ảnh chụp không hợp lệ.");
-                  const result = await parkingService.recognizeLicensePlate(file, 3);
+
+                  const currentPlate = checkOutForm.getFieldValue('plate') || '';
+                  const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
+                  const typeId = isBike ? 1 : 3;
+
+                  const result = await parkingService.recognizeLicensePlate(file, typeId);
                   const isSuccess = result?.isSuccess || result?.IsSuccess;
                   const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
                   const imageUrl = result?.imageUrl || result?.ImageUrl;
@@ -1090,30 +958,25 @@ const GateController = () => {
                       setExitOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Độ tin cậy thấp. Vui lòng kiểm tra biển số thủ công.");
                     } else {
-                      setExitOcrResult(predictedPlate);
-                      checkOutForm.setFieldsValue({
-                        plate: predictedPlate,
-                        tempImageUrl: rawImageUrl
-                      });
-                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                      if (isBike) {
+                        // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
+                        setExitOcrResult(currentPlate);
+                        checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
+                        message.success("Đã chụp ảnh xe đạp ra bãi.");
+                      } else {
+                        // XE CƠ GIỚI: Đọc biển số và tự động đối soát
+                        setExitOcrResult(predictedPlate);
+                        checkOutForm.setFieldsValue({
+                          plate: predictedPlate,
+                          tempImageUrl: rawImageUrl
+                        });
+                        message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
-                      // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
-                      try {
-                        const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
-                        if (scanRes && scanRes.isSuccess) {
-                          // Mở Popup modal hiển thị thông tin đối soát & thanh toán trực tiếp
-                          setCheckoutResult(scanRes);
-                          setIsCheckoutResultModalOpen(true);
-                          
-                          if (scanRes.isPaid) {
-                            message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
-                          }
-                        }
-                      } catch (err) {
-                        // Báo lỗi nếu xe không có phiên đỗ hợp lệ trong bãi đỗ
-                        message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
+                        // Mở khóa ô nhập QR và tự động Focus chuột để nhân viên quét QR vé
+                        setTimeout(() => {
+                          qrInputRef.current?.focus();
+                        }, 100);
                       }
-                      // ------------------------------------------------------
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
@@ -1135,7 +998,11 @@ const GateController = () => {
                 setExitOcrResult(null);
                 checkOutForm.setFieldValue('tempImageUrl', null);
                 try {
-                  const result = await parkingService.recognizeLicensePlate(file, 3);
+                  const currentPlate = checkOutForm.getFieldValue('plate') || '';
+                  const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
+                  const typeId = isBike ? 1 : 3;
+
+                  const result = await parkingService.recognizeLicensePlate(file, typeId);
                   const isSuccess = result?.isSuccess || result?.IsSuccess;
                   const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
                   const imageUrl = result?.imageUrl || result?.ImageUrl;
@@ -1151,28 +1018,25 @@ const GateController = () => {
                       setExitOcrResult('Cần kiểm tra');
                       message.warning("ALPR: Độ tin cậy thấp. Vui lòng kiểm tra biển số thủ công.");
                     } else {
-                      setExitOcrResult(predictedPlate);
-                      checkOutForm.setFieldsValue({
-                        plate: predictedPlate,
-                        tempImageUrl: rawImageUrl
-                      });
-                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                      if (isBike) {
+                        // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
+                        setExitOcrResult(currentPlate);
+                        checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
+                        message.success("Đã chụp ảnh xe đạp ra bãi.");
+                      } else {
+                        // XE CƠ GIỚI: Đọc biển số và tự động đối soát
+                        setExitOcrResult(predictedPlate);
+                        checkOutForm.setFieldsValue({
+                          plate: predictedPlate,
+                          tempImageUrl: rawImageUrl
+                        });
+                        message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
 
-                      // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
-                      try {
-                        const scanRes = await parkingService.scanCheckOut(null, predictedPlate);
-                        if (scanRes && scanRes.isSuccess) {
-                          setCheckoutResult(scanRes);
-                          setIsCheckoutResultModalOpen(true);
-                          
-                          if (scanRes.isPaid) {
-                            message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
-                          }
-                        }
-                      } catch (err) {
-                        message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
+                        // Mở khóa ô nhập QR và tự động Focus chuột để nhân viên quét QR vé
+                        setTimeout(() => {
+                          qrInputRef.current?.focus();
+                        }, 100);
                       }
-                      // ------------------------------------------------------
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
@@ -1220,10 +1084,21 @@ const GateController = () => {
 
               <Form.Item
                 name="ticketCode"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Mã vé / mã QR</span>}
+                label={
+                  <div className="flex justify-between items-center w-full">
+                    <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Mã vé / mã QR</span>
+                    {!exitOcrResult && <span className="text-[10px] text-amber-500 font-bold normal-case">⚠️ Quét biển số xe trước</span>}
+                  </div>
+                }
                 className="mb-2"
               >
-                <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500" />
+                <Input
+                  ref={qrInputRef}
+                  disabled={!exitOcrResult}
+                  onPressEnter={() => checkOutForm.submit()}
+                  placeholder={exitOcrResult ? "Quét hoặc nhập mã vé rồi bấm Enter..." : "Chờ quét biển số xe..."}
+                  className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                />
               </Form.Item>
 
               <Form.Item
@@ -1271,8 +1146,9 @@ const GateController = () => {
             <div className="flex gap-2 mt-3">
               <Button 
                 type="dashed"
-                onClick={() => setQrPopupTarget('checkout')}
-                className="w-full h-10 border-rose-300 text-rose-600 font-bold"
+                disabled={!exitOcrResult}
+                onClick={() => setIsQrPopupOpen(true)}
+                className="w-full h-10 border-rose-300 text-rose-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Quét mã QR
               </Button>
@@ -1311,92 +1187,37 @@ const GateController = () => {
       </Card>
 
       <Modal
-        title={
-          <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg border-b pb-3">
-            <QrCode className="text-indigo-600 animate-pulse" size={24} />
-            <span>
-              {qrPopupTarget === 'checkin'
-                ? 'Quét mã QR vé đặt chỗ - Cổng vào'
-                : 'Quét mã QR vé - Cổng ra'}
-            </span>
-          </div>
-        }
-        open={qrPopupTarget !== null}
-        onCancel={() => setQrPopupTarget(null)}
+        title="Quét mã QR vé - Cổng ra"
+        open={isQrPopupOpen}
+        onCancel={() => setIsQrPopupOpen(false)}
         footer={null}
-        width={600}
+        width={520}
         centered
         destroyOnClose
       >
-        <div className="space-y-6 pt-4">
-          <div className="relative overflow-hidden rounded-2xl border-4 border-slate-900 bg-slate-950 aspect-[4/3] shadow-2xl flex flex-col justify-center">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_8px_cyan] z-10"></div>
-            <div id="qr-reader-element" className="w-full h-full"></div>
-          </div>
-
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <div className="flex justify-between items-center mb-3">
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Chọn nhanh để test khi không có camera
-              </h4>
-              <span className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">
-                Chế độ test
-              </span>
-            </div>
-
-            <div className="max-h-40 overflow-y-auto space-y-2 pr-1">
-              {activeSessions
-                .filter((session) =>
-                  qrPopupTarget === 'checkin'
-                    ? (session.sessionStatus || session.SessionStatus) === 'Reserved'
-                    : (session.sessionStatus || session.SessionStatus) === 'InProgress'
-                )
-                .map((session) => {
-                  const sessionId = session.sessionId || session.SessionId;
-                  const ticketCode = session.ticketCode || session.TicketCode;
-                  const licenseVehicle = session.licenseVehicle || session.LicenseVehicle || 'N/A';
-                  const vehicleTypeName = session.vehicleTypeName || session.VehicleTypeName || 'N/A';
-
-                  return (
-                    <div
-                      key={sessionId || ticketCode}
-                      onClick={() => handleQrSessionPick(session)}
-                      className="flex justify-between items-center p-3 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-lg cursor-pointer transition-all duration-200 shadow-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-100 text-indigo-700 rounded-md">
-                          <Car size={16} />
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-800 text-sm">
-                            {licenseVehicle}
-                          </div>
-                          <div className="text-xs text-slate-500 font-mono">
-                            Vé: {ticketCode || 'N/A'}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-100 text-indigo-700">
-                          {getVehicleTypeLabel(vehicleTypeName)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-
-              {activeSessions.filter((session) =>
-                qrPopupTarget === 'checkin'
-                  ? (session.sessionStatus || session.SessionStatus) === 'Reserved'
-                  : (session.sessionStatus || session.SessionStatus) === 'InProgress'
-              ).length === 0 && (
-                <div className="text-center py-4 text-slate-400 text-xs">
-                  Không tìm thấy phiên phù hợp trong database.
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="space-y-4 pt-2">
+          <Alert
+            message="Nhập hoặc quét mã vé"
+            description="Sau khi camera đã nhận diện biển số, hãy quét mã QR bằng máy quét ngoài hoặc nhập mã vé rồi nhấn Enter để xử lý check-out."
+            type="info"
+            showIcon
+            className="rounded-xl"
+          />
+          <Input
+            autoFocus
+            placeholder="Quét hoặc nhập mã vé rồi bấm Enter..."
+            className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500"
+            onPressEnter={(e) => {
+              const ticketCode = e.target.value?.trim();
+              if (!ticketCode) {
+                message.error('Vui lòng nhập mã vé / mã QR!');
+                return;
+              }
+              checkOutForm.setFieldsValue({ ticketCode });
+              setIsQrPopupOpen(false);
+              checkOutForm.submit();
+            }}
+          />
         </div>
       </Modal>
 
