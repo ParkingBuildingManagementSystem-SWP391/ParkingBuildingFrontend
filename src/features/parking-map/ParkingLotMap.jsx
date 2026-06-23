@@ -57,6 +57,7 @@ const DB_FLOORS = [
 const vehicleIconMap = {
   car: carIcon,
   motorbike: motorbikeIcon,
+  bicycle: motorbikeIcon,
 };
 
 const statusStyleMap = {
@@ -87,7 +88,16 @@ const canonicalStatusLabel = {
 };
 
 const getSlotVehicleIcon = (slot) => {
+  const typeId = Number(slot?.typeId);
+  if (typeId === 3) return carIcon;
+  if (typeId === 1 || typeId === 2) return motorbikeIcon;
   return vehicleIconMap[normalizeVehicleType(slot?.type)] || null;
+};
+
+const getSlotVehicleAlt = (slot) => {
+  const typeId = Number(slot?.typeId);
+  if (typeId === 3 || normalizeVehicleType(slot?.type) === 'car') return 'Car';
+  return 'Motorbike';
 };
 
 const getDerivedZoneName = (slot, index) => {
@@ -195,11 +205,7 @@ const ParkingLotMap = () => {
   const [floors, setFloors] = useState(DB_FLOORS);
 
   // Available free slots count for sidebar badges
-  const [floorAvailableCounts, setFloorAvailableCounts] = useState({
-    3: 1200,
-    1: 100,
-    2: 100
-  });
+  const [floorAvailableCounts, setFloorAvailableCounts] = useState({});
 
   // Modal triggers
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -282,6 +288,10 @@ const ParkingLotMap = () => {
     });
   };
 
+  const getAvailableSlotCount = (slots) => {
+    return slots.filter(s => s.status === 'Available').length;
+  };
+
 
   // Implement explicit onFloorChange event handler executing API with DB Floor ID
   const onFloorChange = async (floorId) => {
@@ -298,7 +308,7 @@ const ParkingLotMap = () => {
         const mapped = mapBackendSlotsToUI(data, floorId, floorMeta.name);
 
         // Compute available count
-        const availCount = mapped.filter(s => s.status === 'Available').length;
+        const availCount = getAvailableSlotCount(mapped);
         setFloorAvailableCounts(prev => ({
           ...prev,
           [floorId]: availCount
@@ -326,26 +336,73 @@ const ParkingLotMap = () => {
 
   // Trigger initial fetch when component mounts or dynamic floors are loaded
   useEffect(() => {
-    // Try to load dynamic floors if API exists (otherwise fallback is already set to DB_FLOORS)
-    const loadDynamicFloors = async () => {
+    const loadInitialFloorData = async () => {
+      let floorList = DB_FLOORS;
+
       if (typeof parkingService.getFloors === 'function') {
         try {
           const data = await parkingService.getFloors();
           if (data && data.length > 0) {
-            setFloors(data.map(f => ({
+            floorList = data.map(f => ({
               id: f.floorId || f.id,
               name: f.floorName || f.name,
               capacity: f.capacity || 100,
               desc: (f.floorId || f.id) === 3 ? "Motorbike & Bicycle Parking" : "Car Parking Only"
-            })));
+            }));
+            setFloors(floorList);
           }
         } catch (e) {
           console.warn("Failed to fetch dynamic floors, using static mapping.", e);
         }
       }
+
+      setLoadingMap(true);
+      setErrorMap('');
+
+      try {
+        const summaries = await Promise.all(
+          floorList.map(async (floor) => {
+            try {
+              const data = await parkingService.getSlotsByFloor(floor.id);
+              const mapped = Array.isArray(data) ? mapBackendSlotsToUI(data, floor.id, floor.name) : [];
+              return {
+                floorId: floor.id,
+                mapped,
+                availCount: getAvailableSlotCount(mapped)
+              };
+            } catch (err) {
+              console.error(`Failed to fetch floor ${floor.id}:`, err);
+              return {
+                floorId: floor.id,
+                mapped: null,
+                availCount: undefined
+              };
+            }
+          })
+        );
+
+        const successfulSummaries = summaries.filter(summary => Array.isArray(summary.mapped));
+        setFloorAvailableCounts(prev => ({
+          ...prev,
+          ...Object.fromEntries(successfulSummaries.map(summary => [summary.floorId, summary.availCount]))
+        }));
+
+        setAuthSlots(prev => {
+          const fetchedFloorIds = new Set(successfulSummaries.map(summary => summary.floorId));
+          const existingSlots = prev.filter(slot => !fetchedFloorIds.has(slot.floorId));
+          const fetchedSlots = successfulSummaries.flatMap(summary => summary.mapped);
+          return [...existingSlots, ...fetchedSlots];
+        });
+
+        if (successfulSummaries.length < floorList.length) {
+          setErrorMap('Offline Mode: Displaying simulated offline layout.');
+        }
+      } finally {
+        setLoadingMap(false);
+      }
     };
-    loadDynamicFloors();
-    onFloorChange(activeFloorId);
+
+    loadInitialFloorData();
   }, []);
 
   // Synchronize dynamic booking form selection on floor/slot updates
@@ -767,11 +824,9 @@ const ParkingLotMap = () => {
             {vehicleIcon ? (
               <img
                 src={vehicleIcon}
-                alt={`${slot.type} vehicle`}
+                alt={getSlotVehicleAlt(slot)}
                 className={`${iconSizeClass} object-contain`}
               />
-            ) : normalizeVehicleType(slot.type) === 'bicycle' ? (
-              <Bike size={34} className="text-slate-700" />
             ) : null}
           </div>
           <span className="max-w-full truncate text-xs font-mono font-extrabold tracking-wide text-center leading-tight">
@@ -945,7 +1000,7 @@ const ParkingLotMap = () => {
             <div className="flex items-center gap-3 overflow-x-auto w-full xl:w-auto scrollbar-hide">
               {floors.map((f) => {
                 const isSelected = activeFloorId === f.id;
-                const freeCount = floorAvailableCounts[f.id] !== undefined ? floorAvailableCounts[f.id] : 0;
+                const freeCount = floorAvailableCounts[f.id] !== undefined ? floorAvailableCounts[f.id] : '...';
                 return (
                   <button
                     key={f.id}
