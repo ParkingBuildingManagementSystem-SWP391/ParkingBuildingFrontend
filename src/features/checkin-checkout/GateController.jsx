@@ -192,6 +192,8 @@ const GateController = () => {
   const [checkOutForm] = Form.useForm();
   const [checkInMode, setCheckInMode] = useState('walkin'); // 'walkin' or 'reservation'
 
+  const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
+
   // Frontend-only image upload/preview states
   const [entryImagePreviewUrl, setEntryImagePreviewUrl] = useState(null);
   const [exitImagePreviewUrl, setExitImagePreviewUrl] = useState(null);
@@ -670,7 +672,24 @@ const GateController = () => {
                         plate: result.predictedPlate,
                         tempImageUrl: result.rawImageUrl
                       });
-                      message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+
+                      // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
+                      try {
+                        const checkRes = await parkingService.scanCheckIn(null, result.predictedPlate);
+                        if (checkRes && checkRes.isSuccess) {
+                          // Tự chuyển sang chế độ Reservation và điền mã vé QR
+                          setCheckInMode('reservation');
+                          checkInForm.setFieldsValue({
+                            ticketCode: checkRes.ticketCode || checkRes.TicketCode
+                          });
+                          message.success(`Phát hiện đặt chỗ của tài xế: ${checkRes.driverName || "N/A"}`);
+                        }
+                      } catch (err) {
+                        // Không có lịch đặt trước -> Giữ nguyên chế độ Walk-in
+                        setCheckInMode('walkin');
+                      }
+                      // ----------------------------------------------------
                     }
                   } else {
                     setEntryOcrResult('Cần kiểm tra');
@@ -710,7 +729,22 @@ const GateController = () => {
                         plate: result.predictedPlate,
                         tempImageUrl: result.rawImageUrl
                       });
-                      message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+
+                      // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
+                      try {
+                        const checkRes = await parkingService.scanCheckIn(null, result.predictedPlate);
+                        if (checkRes && checkRes.isSuccess) {
+                          setCheckInMode('reservation');
+                          checkInForm.setFieldsValue({
+                            ticketCode: checkRes.ticketCode || checkRes.TicketCode
+                          });
+                          message.success(`Phát hiện đặt chỗ của tài xế: ${checkRes.driverName || "N/A"}`);
+                        }
+                      } catch (err) {
+                        setCheckInMode('walkin');
+                      }
+                      // ----------------------------------------------------
                     }
                   } else {
                     setEntryOcrResult('Cần kiểm tra');
@@ -836,6 +870,18 @@ const GateController = () => {
                 </Button>
               </div>
             </Form>
+
+            {checkInMode === 'reservation' && (
+              <div className="flex gap-2 mt-3">
+                <Button 
+                  type="dashed"
+                  onClick={() => setIsQrPopupOpen(true)} 
+                  className="w-full h-10 border-indigo-300 text-indigo-600 font-bold"
+                >
+                  [Quét Mã QR Đặt Chỗ]
+                </Button>
+              </div>
+            )}
           </Card>
         </div>
 
@@ -885,7 +931,25 @@ const GateController = () => {
                         plate: result.predictedPlate,
                         tempImageUrl: result.rawImageUrl
                       });
-                      message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+
+                      // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
+                      try {
+                        const scanRes = await parkingService.scanCheckOut(null, result.predictedPlate);
+                        if (scanRes && scanRes.isSuccess) {
+                          // Mở Popup modal hiển thị thông tin đối soát & thanh toán trực tiếp
+                          setCheckoutResult(scanRes);
+                          setIsCheckoutResultModalOpen(true);
+                          
+                          if (scanRes.isPaid) {
+                            message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
+                          }
+                        }
+                      } catch (err) {
+                        // Báo lỗi nếu xe không có phiên đỗ hợp lệ trong bãi đỗ
+                        message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
+                      }
+                      // ------------------------------------------------------
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
@@ -922,7 +986,23 @@ const GateController = () => {
                         plate: result.predictedPlate,
                         tempImageUrl: result.rawImageUrl
                       });
-                      message.success(`ALPR: Detected License Plate ${result.predictedPlate}`);
+                      message.success(`ALPR: Nhận diện biển số: ${result.predictedPlate}`);
+
+                      // --- BỔ SUNG TỰ ĐỘNG ĐỐI CHIẾU CHECK-OUT BẰNG BIỂN SỐ ---
+                      try {
+                        const scanRes = await parkingService.scanCheckOut(null, result.predictedPlate);
+                        if (scanRes && scanRes.isSuccess) {
+                          setCheckoutResult(scanRes);
+                          setIsCheckoutResultModalOpen(true);
+                          
+                          if (scanRes.isPaid) {
+                            message.success("Xe đã thanh toán trước qua App di động. Mời xe ra!");
+                          }
+                        }
+                      } catch (err) {
+                        message.warning("Không tìm thấy xe đang đỗ. Vui lòng quét mã QR hoặc gõ mã vé!");
+                      }
+                      // ------------------------------------------------------
                     }
                   } else {
                     setExitOcrResult('Cần kiểm tra');
@@ -1017,6 +1097,16 @@ const GateController = () => {
                 </Button>
               </div>
             </Form>
+
+            <div className="flex gap-2 mt-3">
+              <Button 
+                type="dashed"
+                onClick={() => setIsQrPopupOpen(true)} // Mở popup camera quét QR vé cổng ra
+                className="w-full h-10 border-rose-300 text-rose-600 font-bold"
+              >
+                [Quét Mã QR Vé Cổng Ra]
+              </Button>
+            </div>
           </Card>
         </div>
 

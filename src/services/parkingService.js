@@ -174,5 +174,33 @@ export const parkingService = {
       const serverMessage = error.response?.data?.message || error.response?.data?.error || "Hủy đặt chỗ thất bại.";
       throw serverMessage;
     }
+  },
+
+  // Quét đối chiếu QR hoặc biển số tại cổng vào
+  scanCheckIn: async (ticketCode, detectedPlate = null) => {
+    try {
+      const url = detectedPlate 
+        ? `/Parking/scan-checkin/${ticketCode}?detectedPlate=${encodeURIComponent(detectedPlate)}`
+        : `/Parking/scan-checkin/${ticketCode}`;
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Quét QR check-in thất bại.";
+      throw serverMessage;
+    }
+  },
+
+  // Quét đối chiếu QR hoặc biển số tại cổng ra
+  scanCheckOut: async (ticketCode, detectedPlate = null) => {
+    try {
+      const url = detectedPlate 
+        ? `/Parking/scan-checkout/${ticketCode}?detectedPlate=${encodeURIComponent(detectedPlate)}`
+        : `/Parking/scan-checkout/${ticketCode}`;
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Quét QR check-out thất bại.";
+      throw serverMessage;
+    }
   }
 };
