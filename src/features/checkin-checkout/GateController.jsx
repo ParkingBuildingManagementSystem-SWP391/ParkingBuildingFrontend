@@ -11,6 +11,8 @@ import {
   Check
 } from 'lucide-react';
 import TicketModal from './TicketModal';
+import QrScannerModal from './QrScannerModal';
+
 
 const dataURLtoFile = (dataurl, filename) => {
   try {
@@ -194,7 +196,24 @@ const GateController = () => {
   const [checkInMode, setCheckInMode] = useState('walkin'); // 'walkin' or 'reservation'
 
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
+  const [isLocalQrScannerOpen, setIsLocalQrScannerOpen] = useState(false);
+  const [qrScannerTarget, setQrScannerTarget] = useState('entry'); // 'entry' or 'exit'
   const qrInputRef = React.useRef(null);
+
+  const handleLocalQrScanSuccess = (decodedText) => {
+    if (qrScannerTarget === 'entry') {
+      checkInForm.setFieldsValue({ ticketCode: decodedText });
+      message.success(`Đã nhận diện mã đặt chỗ: ${decodedText}`);
+    } else {
+      checkOutForm.setFieldsValue({ ticketCode: decodedText });
+      message.success(`Đã nhận diện mã vé: ${decodedText}`);
+      // Auto submit check-out
+      setTimeout(() => {
+        checkOutForm.submit();
+      }, 500);
+    }
+  };
+
 
   // Frontend-only image upload/preview states
   const [entryImagePreviewUrl, setEntryImagePreviewUrl] = useState(null);
@@ -317,13 +336,19 @@ const GateController = () => {
       if (checkInMode === 'walkin') {
         const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 3;
         
+        let finalPlate = values.plate;
+        // Xe đạp: tự sinh biển ảo nếu nhân viên để trống
+        if (vehicleTypeId === 1 && !finalPlate) {
+          finalPlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        }
+
         // Call walk-in check-in API
-        const response = await parkingService.walkInCheckIn(values.plate, vehicleTypeId, tempImageUrl);
+        const response = await parkingService.walkInCheckIn(finalPlate, vehicleTypeId, tempImageUrl);
         
         if (response && response.isSuccess) {
           const ticket = {
             id: response.data?.ticketCode || response.data?.TicketCode || "N/A",
-            plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || values.plate,
+            plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || finalPlate,
             type: values.type,
             slotId: response.data?.slotName || response.data?.SlotName || "N/A",
             checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString()
@@ -854,13 +879,25 @@ const GateController = () => {
                 </Form.Item>
               )}
 
-              <Form.Item
-                name="plate"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Biển số xe</span>}
-                rules={[{ required: checkInMode === 'walkin', message: 'Vui lòng nhập biển số xe!' }]}
-                className="mb-3"
-              >
-                <Input onChange={handlePlateChange} placeholder="e.g. 30A-123.45" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500" />
+              <Form.Item noStyle shouldUpdate={(prev, curr) => prev.type !== curr.type}>
+                {({ getFieldValue }) => {
+                  const type = getFieldValue('type') || 'Car';
+                  const isRequired = checkInMode === 'walkin' && type !== 'Bicycle';
+                  return (
+                    <Form.Item
+                      name="plate"
+                      label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Biển số xe</span>}
+                      rules={[{ required: isRequired, message: 'Vui lòng nhập biển số xe!' }]}
+                      className="mb-3"
+                    >
+                      <Input
+                        onChange={handlePlateChange}
+                        placeholder={type === 'Bicycle' ? 'Không bắt buộc — Tự động tạo cho xe đạp' : 'e.g. 30A-123.45'}
+                        className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500"
+                      />
+                    </Form.Item>
+                  );
+                }}
               </Form.Item>
 
               {checkInMode === 'walkin' && (
@@ -896,10 +933,13 @@ const GateController = () => {
               <div className="flex gap-2 mt-3">
                 <Button 
                   type="dashed"
-                  onClick={() => message.info('Vui lòng nhập hoặc quét mã QR/mã vé vào ô Mã vé / mã QR.')}
+                  onClick={() => {
+                    setQrScannerTarget('entry');
+                    setIsLocalQrScannerOpen(true);
+                  }}
                   className="w-full h-10 border-indigo-300 text-indigo-600 font-bold"
                 >
-                  Quét mã QR
+                  Quét mã QR bằng Camera
                 </Button>
               </div>
             )}
@@ -1147,10 +1187,21 @@ const GateController = () => {
               <Button 
                 type="dashed"
                 disabled={!exitOcrResult}
-                onClick={() => setIsQrPopupOpen(true)}
-                className="w-full h-10 border-rose-300 text-rose-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => {
+                  setQrScannerTarget('exit');
+                  setIsLocalQrScannerOpen(true);
+                }}
+                className="flex-1 h-10 border-rose-300 text-rose-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Quét mã QR
+                Quét QR bằng Camera
+              </Button>
+              <Button 
+                type="default"
+                disabled={!exitOcrResult}
+                onClick={() => setIsQrPopupOpen(true)}
+                className="flex-1 h-10 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Nhập mã thủ công / máy quét ngoài
               </Button>
             </div>
           </Card>
@@ -1220,6 +1271,14 @@ const GateController = () => {
           />
         </div>
       </Modal>
+
+      {/* Local Webcam QR Scanner Modal */}
+      <QrScannerModal
+        isOpen={isLocalQrScannerOpen}
+        onClose={() => setIsLocalQrScannerOpen(false)}
+        onScanSuccess={handleLocalQrScanSuccess}
+        title={qrScannerTarget === 'entry' ? "Quét QR Đặt Chỗ - Cổng Vào" : "Quét QR Vé - Cổng Ra"}
+      />
 
       {/* Checkin Ticket Modal Popup */}
       <TicketModal

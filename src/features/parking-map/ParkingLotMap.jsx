@@ -763,13 +763,22 @@ const ParkingLotMap = () => {
     setSubmitting(true);
     try {
       // Làm sạch biển số xe
-      const cleanPlate = adminPlate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().trim();
+      let cleanPlate = adminPlate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().trim();
 
-      // Validate license plate length (between 7 and 9 alphanumeric characters)
-      if (cleanPlate.length < 7 || cleanPlate.length > 9) {
-        message.warning("Biển số xe không hợp lệ. Vui lòng nhập từ 7 đến 9 ký tự chữ và số.");
-        setSubmitting(false);
-        return;
+      const isBikeSlot = selectedSlot.type === 'Bicycle' || Number(selectedSlot.typeId) === 1;
+
+      if (isBikeSlot) {
+        // Xe đạp: tự sinh biển ảo nếu để trống
+        if (!cleanPlate) {
+          cleanPlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        }
+      } else {
+        // Xe cơ giới: bắt buộc 7-9 ký tự
+        if (cleanPlate.length < 7 || cleanPlate.length > 9) {
+          message.warning("Biển số xe không hợp lệ. Vui lòng nhập từ 7 đến 9 ký tự chữ và số.");
+          setSubmitting(false);
+          return;
+        }
       }
 
       // Robust fallback mapping mechanism for typeId (force map if undefined/null/NaN/0)
@@ -1470,11 +1479,17 @@ const ParkingLotMap = () => {
                 <div className="space-y-4">
                   <form onSubmit={handleAdminReserveSubmit} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">Nhập biển số xe vãng lai</label>
+                      <label className="text-[10px] font-extrabold uppercase text-slate-455 tracking-wider">
+                        {selectedSlot.type === 'Bicycle'
+                          ? 'Biển số xe đạp (Không bắt buộc)'
+                          : 'Nhập biển số xe vãng lai'}
+                      </label>
                       <input
                         type="text"
-                        required
-                        placeholder="e.g. 29A-888.88"
+                        required={selectedSlot.type !== 'Bicycle'}
+                        placeholder={selectedSlot.type === 'Bicycle'
+                          ? 'Để trống → Tự tạo biển số ảo BIKE_XXXXXXXX'
+                          : 'e.g. 29A-888.88'}
                         value={adminPlate}
                         onChange={(e) => setAdminPlate(e.target.value)}
                         className="w-full h-11 px-3.5 bg-slate-50 border border-slate-205 text-sm rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all uppercase font-mono font-bold"
