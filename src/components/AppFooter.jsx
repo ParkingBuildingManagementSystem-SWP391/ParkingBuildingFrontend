@@ -9,8 +9,7 @@ const AppFooter = () => {
       <div className="max-w-[1600px] mx-auto w-full px-6 py-3 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-slate-500">
         <div className="flex items-center gap-3">
           <Logo
-            showText={false}
-            imageClassName="h-6 sm:h-7"
+            size="small"
           />
           <span className="text-sm text-slate-800 font-bold">
             {t('footer.systemName')}

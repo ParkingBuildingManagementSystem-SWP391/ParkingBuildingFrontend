@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  LogOut, Sun, Moon, Bell, Settings, ChevronDown, Languages
+  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages
 } from 'lucide-react';
 
 const Header = () => {
@@ -54,13 +54,34 @@ const Header = () => {
   }, []);
 
   const getInitials = (name) => {
-    if (!name) return 'US';
+    if (!name) return 'TK';
     const cleanName = name.replace(/\s+/g, ' ').trim();
     const parts = cleanName.split(' ');
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-    return cleanName.slice(0, 2).toUpperCase();
+    return cleanName[0]?.toUpperCase() || 'TK';
+  };
+
+  const getDisplayName = () => (
+    user?.fullName
+    || user?.name
+    || user?.username
+    || user?.email
+    || 'Tài khoản'
+  );
+
+  const getDisplayRole = () => (
+    user?.role
+    || user?.userRole
+    || user?.roles?.[0]
+    || role
+    || 'Người dùng'
+  );
+
+  const handleGoHome = () => {
+    setIsUserMenuOpen(false);
+    navigate('/');
   };
 
   const handleGoToProfile = () => {
@@ -71,6 +92,10 @@ const Header = () => {
   const handleLogout = () => {
     setIsUserMenuOpen(false);
     logout();
+    navigate('/login');
+  };
+
+  const handleLogin = () => {
     navigate('/login');
   };
 
@@ -131,28 +156,35 @@ const Header = () => {
           </span>
         </button>
 
-        {user && (
+        {user ? (
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
               className="flex items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 text-left shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50"
             >
               <div className="w-9 h-9 rounded-full bg-[#FF4B6E] flex items-center justify-center text-white text-[11px] font-bold shadow-sm">
-                {getInitials(user.username || user.name)}
+                {getInitials(getDisplayName())}
               </div>
               <div className="hidden lg:flex flex-col leading-tight">
                 <span className="max-w-[120px] truncate text-[13px] font-bold text-slate-900">
-                  {user.username || user.name}
+                  {getDisplayName()}
                 </span>
                 <span className="max-w-[120px] truncate text-[11px] font-medium text-slate-500">
-                  {role || t('header.userRole')}
+                  {getDisplayRole() || t('header.userRole')}
                 </span>
               </div>
               <ChevronDown size={15} className={`text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg">
+                <button
+                  onClick={handleGoHome}
+                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  <Home size={15} className="text-slate-400" />
+                  Trang chủ
+                </button>
                 <button
                   onClick={handleGoToProfile}
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
@@ -170,6 +202,14 @@ const Header = () => {
               </div>
             )}
           </div>
+        ) : (
+          <button
+            onClick={handleLogin}
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-bold text-slate-700 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50"
+          >
+            <LogIn size={16} className="text-slate-400" />
+            Đăng nhập
+          </button>
         )}
 
       </div>

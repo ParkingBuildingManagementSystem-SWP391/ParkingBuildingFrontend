@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Logo from './Logo';
 import {
   Map, Calendar as CalendarIcon, LayoutDashboard,
   UserPlus, ScanLine, Users, Activity, AlertTriangle,
@@ -103,23 +104,13 @@ const Sidebar = () => {
 
       {/* Brand Logo Header */}
       <div className="h-24 flex items-center px-6 border-b border-slate-100">
-        <div
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={() => navigate(user ? (lowerRole === 'admin' ? '/accounts' : '/dashboard') : '/parking-map')}
+        <Link
+          to="/"
+          className="flex items-center gap-3 rounded-2xl transition-colors hover:bg-slate-50"
+          aria-label="Về trang chủ"
         >
-          {/* Square Blue Logo with White P */}
-          <div className="w-10 h-10 rounded-[10px] bg-[#4B6BFB] flex items-center justify-center text-white font-extrabold text-xl shadow-[0_4px_10px_rgba(75,107,251,0.3)]">
-            P
-          </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-[15px] tracking-tight text-slate-900 leading-tight uppercase">
-              {t('sidebar.systemName')}
-            </span>
-            <span className="text-[11px] font-extrabold tracking-tight text-slate-500 leading-tight uppercase">
-              {t('sidebar.systemDesc')}
-            </span>
-          </div>
-        </div>
+          <Logo />
+        </Link>
       </div>
 
       {/* Navigation Links */}
