@@ -45,20 +45,20 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
   // Handle start/stop scanner based on device selection and open state
   useEffect(() => {
     if (!isOpen || !selectedDevice) {
-      stopScanner();
+      stopScanner(false);
       return;
     }
 
     startScanner(selectedDevice);
 
     return () => {
-      stopScanner();
+      stopScanner(true);
     };
   }, [isOpen, selectedDevice]);
 
   const startScanner = (deviceId) => {
     // Stop any active scanner first
-    stopScanner();
+    stopScanner(false);
 
     // Small delay to ensure DOM element is ready
     setTimeout(() => {
@@ -78,8 +78,11 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
           },
           (decodedText) => {
             message.success("Quét mã QR thành công!");
-            onScanSuccess(decodedText);
-            onClose();
+            // Dừng camera trước rồi mới đóng modal và gọi callback
+            stopScanner(false).then(() => {
+              onScanSuccess(decodedText);
+              onClose();
+            });
           },
           (errorMessage) => {
             // Constant scanning feedback, ignore
@@ -95,18 +98,23 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
     }, 100);
   };
 
-  const stopScanner = () => {
+  const stopScanner = (isUnmounting = false) => {
     if (qrScannerRef.current && qrScannerRef.current.isScanning) {
-      qrScannerRef.current.stop()
+      return qrScannerRef.current.stop()
         .then(() => {
           qrScannerRef.current = null;
-          setIsScanning(false);
+          if (!isUnmounting) {
+            setIsScanning(false);
+          }
         })
         .catch((err) => {
-          console.error("Failed to stop QR scanner", err);
+          console.warn("Failed to stop QR scanner", err);
+          qrScannerRef.current = null;
         });
     }
+    return Promise.resolve();
   };
+
 
   const handleDeviceChange = (value) => {
     setSelectedDevice(value);
