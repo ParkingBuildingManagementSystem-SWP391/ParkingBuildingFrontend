@@ -189,7 +189,62 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
 };
 
 
+const BookingCheckInModal = ({ isOpen, onClose, data }) => {
+  if (!data) return null;
+
+  return (
+    <Modal
+      title={<span className="font-extrabold text-slate-800 text-base uppercase tracking-wider">Xác Nhận Đặt Chỗ Cổng Vào</span>}
+      open={isOpen}
+      onCancel={onClose}
+      footer={[
+        <Button 
+          key="ok" 
+          type="primary" 
+          onClick={onClose}
+          className="h-10 bg-emerald-600 hover:bg-emerald-500 border-none font-bold rounded-lg px-6 shadow-md"
+        >
+          Xác Nhận & Mở Barrier
+        </Button>
+      ]}
+      centered
+      width={480}
+      destroyOnClose
+    >
+      <div className="space-y-4 py-3">
+        {/* Vị trí ô đỗ được làm nổi bật */}
+        <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-center shadow-inner">
+          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">Vị Trí Ô Đỗ Được Gán</span>
+          <span className="text-4xl font-black text-emerald-700 tracking-wide">{data.slotName || data.SlotName || "N/A"}</span>
+        </div>
+
+        {/* Bảng chi tiết thông tin */}
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
+          <div className="flex justify-between border-b border-slate-200/50 pb-2 text-xs">
+            <span className="text-slate-400 font-bold uppercase tracking-wider">Tên Tài Xế</span>
+            <span className="text-slate-800 font-black">{data.driverName || data.DriverName || data.fullName || data.FullName || "N/A"}</span>
+          </div>
+          <div className="flex justify-between border-b border-slate-200/50 pb-2 text-xs">
+            <span className="text-slate-400 font-bold uppercase tracking-wider">Số Điện Thoại</span>
+            <span className="text-slate-800 font-bold font-mono">{data.driverPhone || data.DriverPhone || data.phoneNumber || data.PhoneNumber || "N/A"}</span>
+          </div>
+          <div className="flex justify-between border-b border-slate-200/50 pb-2 text-xs">
+            <span className="text-slate-400 font-bold uppercase tracking-wider">Biển Số Xe</span>
+            <span className="text-slate-800 font-black font-mono">{data.licenseVehicle || data.LicenseVehicle || "N/A"}</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-slate-400 font-bold uppercase tracking-wider">Loại Phương Tiện</span>
+            <span className="text-slate-800 font-bold">{data.vehicleTypeName || data.VehicleTypeName || data.vehicleType || "Car"}</span>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+
 const GateController = () => {
+
   const [slots, setSlots] = useState([]);
   const [checkInForm] = Form.useForm();
   const [checkOutForm] = Form.useForm();
@@ -198,6 +253,8 @@ const GateController = () => {
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
   const [isLocalQrScannerOpen, setIsLocalQrScannerOpen] = useState(false);
   const [qrScannerTarget, setQrScannerTarget] = useState('entry'); // 'entry' or 'exit'
+  const [isCheckInConfirmOpen, setIsCheckInConfirmOpen] = useState(false);
+  const [bookingCheckInData, setBookingCheckInData] = useState(null);
   const qrInputRef = React.useRef(null);
 
   const handleLocalQrScanSuccess = (decodedText) => {
@@ -375,7 +432,12 @@ const GateController = () => {
         
         const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
         
-        if (response) {
+        const isSuccess = response?.isSuccess || response?.IsSuccess || response?.success || (response && !response.error);
+        if (isSuccess) {
+          // Lưu dữ liệu trả về từ API và hiển thị Popup thông tin tài xế + vị trí đỗ
+          setBookingCheckInData(response.data || response);
+          setIsCheckInConfirmOpen(true);
+          
           message.success(response.message || "Check-in bằng QR đặt chỗ thành công! Barrier đã mở.");
           checkInForm.resetFields();
           if (entryImagePreviewUrl) {
@@ -385,7 +447,7 @@ const GateController = () => {
           setEntryOcrResult(null);
           fetchActiveParkedVehicles();
         } else {
-          message.error("Check-in thất bại. Vui lòng kiểm tra mã QR/mã vé.");
+          message.error(response?.message || "Check-in thất bại. Vui lòng kiểm tra mã QR/mã vé.");
         }
       }
     } catch (err) {
@@ -444,6 +506,44 @@ const GateController = () => {
     } catch (err) {
       console.error("Check-out Error:", err);
       message.error(String(err));
+    }
+  };
+
+  const [isSwitchingPayment, setIsSwitchingPayment] = useState(false);
+
+  const handleSwitchPaymentMethodInModal = async (newMethod) => {
+    if (isSwitchingPayment) return;
+    
+    const plate = checkOutForm.getFieldValue('plate');
+    const ticketCode = checkOutForm.getFieldValue('ticketCode');
+    const tempImageUrl = checkOutForm.getFieldValue('tempImageUrl') || null;
+
+    setIsSwitchingPayment(true);
+    setSelectedPaymentMethod(newMethod);
+
+    try {
+      const result = await parkingService.checkOutVehicle(
+        ticketCode ? ticketCode.trim() : null,
+        plate,
+        tempImageUrl,
+        null,
+        newMethod
+      );
+      setCheckoutResult(result);
+      
+      const isPaid = result.isPaid !== undefined ? result.isPaid : result.IsPaid;
+      const totalAmt = result.totalAmount || result.TotalAmount || 0;
+      
+      if (newMethod === 'CASH') {
+        setCashReceived(totalAmt.toString());
+      }
+      
+      message.success(`Đã chuyển sang thanh toán bằng ${newMethod === 'VNPAY' ? 'VNPay' : 'Tiền mặt'}`);
+    } catch (err) {
+      console.error("Switch payment method error:", err);
+      message.error("Lỗi khi chuyển phương thức thanh toán: " + String(err));
+    } finally {
+      setIsSwitchingPayment(false);
     }
   };
 
@@ -1280,6 +1380,17 @@ const GateController = () => {
         title={qrScannerTarget === 'entry' ? "Quét QR Đặt Chỗ - Cổng Vào" : "Quét QR Vé - Cổng Ra"}
       />
 
+      {/* Booking Check-In Confirmation Modal */}
+      <BookingCheckInModal
+        isOpen={isCheckInConfirmOpen}
+        onClose={() => {
+          setIsCheckInConfirmOpen(false);
+          setBookingCheckInData(null);
+        }}
+        data={bookingCheckInData}
+      />
+
+
       {/* Checkin Ticket Modal Popup */}
       <TicketModal
         isOpen={isTicketOpen}
@@ -1511,11 +1622,23 @@ const GateController = () => {
                 {/* Right Column: Checkout & Payment Center (col-span-5) */}
                 <div className="md:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
                   <div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                    <div className="flex flex-col gap-2 border-b border-slate-100 pb-3 mb-4">
                       <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Khu vực xử lý thanh toán</h3>
-                      <Tag color={selectedPaymentMethod === 'VNPAY' ? 'blue' : 'orange'} className="font-bold font-mono">
-                        {selectedPaymentMethod}
-                      </Tag>
+                      <Radio.Group 
+                        value={selectedPaymentMethod} 
+                        onChange={(e) => handleSwitchPaymentMethodInModal(e.target.value)}
+                        disabled={isSwitchingPayment}
+                        size="small"
+                        buttonStyle="solid"
+                        className="w-full flex"
+                      >
+                        <Radio.Button value="CASH" className="flex-1 text-center font-bold">
+                          Tiền mặt
+                        </Radio.Button>
+                        <Radio.Button value="VNPAY" className="flex-1 text-center font-bold">
+                          VNPay QR
+                        </Radio.Button>
+                      </Radio.Group>
                     </div>
 
                     {/* Paid Alert */}
@@ -1602,6 +1725,7 @@ const GateController = () => {
                             placeholder="Nhập số tiền..."
                             value={cashReceived}
                             onChange={(e) => setCashReceived(e.target.value)}
+                            onPressEnter={handleConfirmCashPayment}
                             className="h-14 bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-mono font-bold text-2xl px-5 transition-all focus:bg-white focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 hover:border-slate-300 shadow-sm"
                             suffix={<span className="font-extrabold text-slate-400 text-sm">VNĐ</span>}
                           />
