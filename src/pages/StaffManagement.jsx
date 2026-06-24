@@ -1,41 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Table, Avatar, Tag, Button } from 'antd';
 import { Users, UserPlus, Shield, UserCheck } from 'lucide-react';
-import { PRESET_USERS } from '../services/mockData';
+import { adminService } from '../services/adminService';
 
 const StaffManagement = () => {
-  const staffMembers = [
-    {
-      key: '1',
-      name: 'Sarah Connor',
-      avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sarah',
-      email: 'sarah.c@spotflow.com',
-      role: 'Staff Attendant',
-      shift: 'Day Shift (06:00 AM - 02:00 PM)',
-      zone: 'Zone A Ground Level',
-      status: 'Active'
-    },
-    {
-      key: '2',
-      name: 'Marcus Wright',
-      avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Marcus',
-      email: 'marcus.w@spotflow.com',
-      role: 'Staff Attendant',
-      shift: 'Night Shift (02:00 PM - 10:00 PM)',
-      zone: 'Zone B Basement 1',
-      status: 'On Leave'
-    },
-    {
-      key: '3',
-      name: 'John Connor',
-      avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=John',
-      email: 'john.c@spotflow.com',
-      role: 'Supervisor',
-      shift: 'Flexible Shift',
-      zone: 'All Floors',
-      status: 'Active'
-    }
-  ];
+  const [staffMembers, setStaffMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const mapUserToStaff = (user) => ({
+    key: user.id || user.Id || user.userId || user.UserId || user.email || user.Email,
+    name: user.name || user.Name || user.username || user.Username || 'N/A',
+    avatar: user.avatar || user.Avatar || '',
+    email: user.email || user.Email || 'N/A',
+    role: user.roleName || user.RoleName || user.role || user.Role || 'Staff',
+    zone: user.zone || user.Zone || user.assignedZone || user.AssignedZone || 'N/A',
+    status: user.status || user.Status || (user.isActive === false || user.IsActive === false ? 'Inactive' : 'Active')
+  });
+
+  useEffect(() => {
+    const loadStaff = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const response = await adminService.getAllUsers();
+        const rawUsers = Array.isArray(response.data) ? response.data : (response.data?.data || response.data?.Data || []);
+        const staff = rawUsers
+          .filter((user) => String(user.roleName || user.RoleName || user.role || user.Role || '').toLowerCase() === 'staff')
+          .map(mapUserToStaff);
+        setStaffMembers(staff);
+      } catch (err) {
+        console.error('loadStaff error:', err);
+        setError('Chưa thể tải danh sách nhân viên từ backend.');
+        setStaffMembers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStaff();
+  }, []);
 
   const columns = [
     {
@@ -85,6 +89,7 @@ const StaffManagement = () => {
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Staff Management Directory</h1>
           <p className="text-slate-400 text-sm mt-1">Review parking attendants, schedules, and active zones</p>
+          {error && <p className="text-rose-400 text-sm mt-2 font-semibold">{error}</p>}
         </div>
         <Button
           type="primary"
@@ -99,7 +104,9 @@ const StaffManagement = () => {
         <Table
           columns={columns}
           dataSource={staffMembers}
+          loading={loading}
           pagination={false}
+          locale={{ emptyText: error ? 'Không có dữ liệu nhân viên để hiển thị.' : 'Chưa có dữ liệu nhân viên.' }}
           className="custom-antd-table"
         />
       </Card>

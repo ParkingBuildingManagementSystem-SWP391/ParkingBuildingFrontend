@@ -60,21 +60,15 @@ const LiveStatusTable = () => {
   useEffect(() => {
     const fetchFloors = async () => {
       try {
-        if (typeof parkingService.getFloors === 'function') {
-          const data = await parkingService.getFloors();
-          if (data && data.length > 0) {
-            setFloors(data.map(f => ({ id: f.floorId || f.id, name: f.floorName || f.name })));
-          }
-        } else {
-          // Fallback static
-          setFloors([
-            { id: 3, name: "Tầng G" },
-            { id: 1, name: "Tầng B1" },
-            { id: 2, name: "Tầng B2" }
-          ]);
+        const data = await parkingService.getFloors();
+        const mappedFloors = Array.isArray(data) ? data.map(f => ({ id: f.floorId || f.id, name: f.floorName || f.name })) : [];
+        setFloors(mappedFloors);
+        if (mappedFloors.length > 0 && !mappedFloors.some((floor) => floor.id === selectedFloor)) {
+          setSelectedFloor(mappedFloors[0].id);
         }
       } catch (err) {
         console.warn("Failed to fetch floors", err);
+        setFloors([]);
       }
     };
     fetchFloors();
@@ -148,15 +142,8 @@ const LiveStatusTable = () => {
     }
   };
 
-  // Mock Manager Actions
-  const handleMockAction = (actionName) => {
-    setActionLoading(true);
-    setTimeout(() => {
-      setActionLoading(false);
-      message.success(`Đã áp dụng ${getActionLabel(actionName)} cho chỗ ${selectedSlot.slotName}. (Mô phỏng)`);
-      setDrawerVisible(false);
-      fetchSlots(); // refresh
-    }, 1000);
+  const handleUnsupportedSlotAction = (actionName) => {
+    message.warning(`Backend chưa cung cấp API cho thao tác ${getActionLabel(actionName)}.`);
   };
 
   // Real Force Release Action
@@ -431,7 +418,7 @@ const LiveStatusTable = () => {
                     <Button 
                       block 
                       loading={actionLoading}
-                      onClick={() => handleMockAction('Maintenance Lock')}
+                      onClick={() => handleUnsupportedSlotAction('Maintenance Lock')}
                       className="bg-amber-500 hover:bg-amber-600 text-white border-0 font-bold"
                     >
                       Khóa để bảo trì
@@ -449,7 +436,7 @@ const LiveStatusTable = () => {
                     <Button 
                       block 
                       loading={actionLoading}
-                      onClick={() => handleMockAction('VIP Reservation')}
+                      onClick={() => handleUnsupportedSlotAction('VIP Reservation')}
                       className="bg-purple-600 hover:bg-purple-700 text-white border-0 font-bold"
                     >
                       Giữ chỗ VIP

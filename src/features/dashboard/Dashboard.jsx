@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { parkingService } from '../../services/mockData';
 import { managerService } from '../../services/managerService';
-import ParkingLotMap from '../parking-map/ParkingLotMap';
 import LiveStatusTable from './LiveStatusTable';
 import IncidentsTable from './IncidentsTable';
 import { 
@@ -11,8 +9,6 @@ import {
   DollarSign, 
   Percent, 
   Calendar, 
-  TrendingUp, 
-  LayoutDashboard,
   Filter,
   Download,
   BarChart3,
@@ -51,13 +47,9 @@ const defaultPricingData = [
   }
 ];
 
-const Dashboard = () => {
-  const { user, role } = useAuth();
+const Dashboard = ({ section = 'overview' }) => {
+  const { role } = useAuth();
   const navigate = useNavigate();
-
-  const [slots, setSlots] = useState([]);
-  const [logs, setLogs] = useState([]);
-  const [occupancyRate, setOccupancyRate] = useState(0);
 
   const lowerRole = role?.toLowerCase();
 
@@ -144,68 +136,62 @@ const Dashboard = () => {
     }
   };
 
-  const handlePricingValueChange = (vehicleTypeId, field, value) => {
+  const getPricingRowKey = (row) => row.vehicleTypeId ?? row.pricingId ?? row.id ?? row.vehicleType ?? row.name;
+
+  const handlePricingValueChange = (rowKey, field, value) => {
     setPricingRows((prev) => prev.map((row) => (
-      row.vehicleTypeId === vehicleTypeId
+      getPricingRowKey(row) === rowKey
         ? { ...row, [field]: value }
         : row
     )));
   };
 
   const handleUpdatePricing = async (row) => {
-    setSavingPricingIds((prev) => ({ ...prev, [row.vehicleTypeId]: true }));
+    const rowKey = getPricingRowKey(row);
+    const isCarPricing = Number(row.vehicleTypeId) === 3 || String(row.vehicleType).toLowerCase() === 'car';
+    setSavingPricingIds((prev) => ({ ...prev, [rowKey]: true }));
     try {
       await managerService.updateVehiclePricing({
         vehicleTypeId: row.vehicleTypeId,
         dayRate: row.dayRate,
         nightRate: row.nightRate,
         fullDayRate: row.fullDayRate,
-        maxHoursPerTurn: Number(row.vehicleTypeId) === 3 ? row.maxHoursPerTurn : null
+        maxHoursPerTurn: isCarPricing ? row.maxHoursPerTurn : null
       });
       message.success(`Đã cập nhật cấu hình giá cho ${getVehicleTypeLabel(row.vehicleType)}.`);
     } catch (err) {
       console.error('handleUpdatePricing error:', err);
-      message.error(err.response?.data?.message || err.response?.data?.error || 'Không thể cập nhật cấu hình giá.');
+      const status = err.response?.status;
+      const backendMessage = err.response?.data?.message || err.response?.data?.error || err.response?.data;
+      if (status === 400) {
+        message.error(backendMessage || 'Giá cấu hình không hợp lệ.');
+      } else if (status === 401 || status === 403) {
+        message.error(backendMessage || 'Bạn cần đăng nhập bằng tài khoản có quyền Manager/Admin.');
+      } else if (status === 404) {
+        message.error(backendMessage || 'Không tìm thấy loại xe yêu cầu.');
+      } else if (status === 500) {
+        message.error(backendMessage || 'Lỗi máy chủ khi cập nhật bảng giá.');
+      } else {
+        message.error(backendMessage || 'Không thể cập nhật cấu hình giá.');
+      }
     } finally {
-      setSavingPricingIds((prev) => ({ ...prev, [row.vehicleTypeId]: false }));
+      setSavingPricingIds((prev) => ({ ...prev, [rowKey]: false }));
     }
   };
 
   useEffect(() => {
-    if (lowerRole === 'admin' || lowerRole === 'manager') {
+    if ((lowerRole === 'admin' || lowerRole === 'manager') && section === 'overview') {
       fetchSummary();
       const interval = setInterval(fetchSummary, 30000);
       return () => clearInterval(interval);
     }
-  }, [lowerRole]);
+  }, [lowerRole, section]);
 
   useEffect(() => {
-    if (lowerRole === 'admin' || lowerRole === 'manager') {
+    if ((lowerRole === 'admin' || lowerRole === 'manager') && section === 'analytics') {
       fetchTrafficStats();
     }
-  }, [lowerRole, startDate, endDate, groupBy, vehicleTypeId]);
-
-  // Fetch data on load and subscribe to simulated state changes
-  const fetchData = () => {
-    setSlots(parkingService.getSlots());
-    setLogs(parkingService.getLogs());
-    setOccupancyRate(parkingService.getOccupancyRate());
-  };
-
-  useEffect(() => {
-    fetchData();
-
-    // Listen to changes in simulated local database
-    const handleStateChange = () => {
-      fetchData();
-    };
-
-    window.addEventListener('parking_state_changed', handleStateChange);
-    return () => {
-      window.removeEventListener('parking_state_changed', handleStateChange);
-    };
-  }, []);
-
+  }, [lowerRole, section, startDate, endDate, groupBy, vehicleTypeId]);
 
   // Redirect driver and staff to /parking-map automatically
   useEffect(() => {
@@ -231,9 +217,7 @@ const Dashboard = () => {
   // MANAGER & ADMIN DASHBOARD
   // ----------------------------------------------------
   const renderManagerDashboard = () => {
-    const [subTab, setSubTab] = useState('Overview');
-
-    if (loadingSummary && !summary) {
+    if (section === 'overview' && loadingSummary && !summary) {
       return (
         <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium font-sans">
           <Loader2 className="h-8 w-8 text-[#2563EB] animate-spin mb-3" />
@@ -242,7 +226,7 @@ const Dashboard = () => {
       );
     }
 
-    if (errorSummary && !summary) {
+    if (section === 'overview' && errorSummary && !summary) {
       return (
         <div className="min-h-[400px] flex flex-col items-center justify-center text-rose-500 font-bold bg-white rounded-2xl border border-slate-100 p-6">
           <ShieldAlert size={36} className="mb-2 animate-bounce" />
@@ -254,20 +238,10 @@ const Dashboard = () => {
       );
     }
 
-    const getFormattedDate = () => {
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date().toLocaleDateString('vi-VN', options);
+    const sectionLabels = {
+      'slot-management': 'Quản lý chỗ đỗ',
+      'staff-logs': 'Nhật ký nhân viên'
     };
-
-    const subNavItems = [
-      { id: 'Overview', label: 'Tổng quan' },
-      { id: 'Live Status', label: 'Trạng thái trực tiếp' },
-      { id: 'Incidents', label: 'Sự cố' },
-      { id: 'Analytics', label: 'Phân tích' },
-      { id: 'Slot Management', label: 'Quản lý chỗ đỗ' },
-      { id: 'Pricing', label: 'Bảng giá' },
-      { id: 'Staff Logs', label: 'Nhật ký nhân viên' }
-    ];
 
     // Vehicles distribution calculations
     const carDetail = summary?.vehiclesInBuildingDetail?.find(v => v.vehicleTypeName.toLowerCase() === 'car') || { inBuildingCount: 0 };
@@ -462,29 +436,7 @@ const Dashboard = () => {
 
     return (
       <div className="space-y-6 select-none font-sans pb-12">
-        {/* A. Sub-Header & Sub-Navigation */}
-        <div className="space-y-4 font-sans">
-
-
-          {/* Sub-Navigation Pills */}
-          <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-100">
-            {subNavItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setSubTab(item.id)}
-                className={`px-4 py-2 font-semibold text-sm rounded-xl transition-all duration-200 ${
-                  subTab === item.id
-                    ? 'bg-[#2563EB] text-white shadow-md shadow-blue-500/10'
-                    : 'bg-white text-slate-600 border border-slate-200/80 hover:text-slate-950 hover:bg-slate-50'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {subTab === 'Overview' ? (
+        {section === 'overview' ? (
           <div className="space-y-6">
             
             {/* B. Core Metric Cards Row (4 Columns Layout) */}
@@ -695,11 +647,11 @@ const Dashboard = () => {
             </div>
 
           </div>
-        ) : subTab === 'Live Status' ? (
+        ) : section === 'live-status' ? (
           <LiveStatusTable />
-        ) : subTab === 'Incidents' ? (
+        ) : section === 'incidents' ? (
           <IncidentsTable />
-        ) : subTab === 'Analytics' ? (
+        ) : section === 'analytics' ? (
           <div className="space-y-6">
             {/* Filter Card */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
@@ -822,7 +774,7 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-        ) : subTab === 'Pricing' ? (
+        ) : section === 'pricing' ? (
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
               <DollarSign size={18} className="text-[#2563EB]" />
@@ -845,8 +797,12 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {pricingRows.map((row) => (
-                    <tr key={row.vehicleTypeId} className="hover:bg-slate-50/70 transition-colors">
+                  {pricingRows.map((row, index) => {
+                    const rowKey = getPricingRowKey(row) ?? index;
+                    const isCarPricing = Number(row.vehicleTypeId) === 3 || String(row.vehicleType).toLowerCase() === 'car';
+
+                    return (
+                    <tr key={rowKey} className="hover:bg-slate-50/70 transition-colors">
                       <td className="px-4 py-4 align-middle">
                         <div className="flex flex-col">
                           <span className="text-sm font-extrabold text-slate-800">{getVehicleTypeLabel(row.vehicleType)}</span>
@@ -859,7 +815,7 @@ const Dashboard = () => {
                           value={row.dayRate}
                           formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                           parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'dayRate', value ?? 0)}
+                          onChange={(value) => handlePricingValueChange(rowKey, 'dayRate', value ?? 0)}
                           addonAfter="VND"
                           className="w-full"
                         />
@@ -870,7 +826,7 @@ const Dashboard = () => {
                           value={row.nightRate}
                           formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                           parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'nightRate', value ?? 0)}
+                          onChange={(value) => handlePricingValueChange(rowKey, 'nightRate', value ?? 0)}
                           addonAfter="VND"
                           className="w-full"
                         />
@@ -881,18 +837,18 @@ const Dashboard = () => {
                           value={row.fullDayRate}
                           formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                           parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'fullDayRate', value ?? 0)}
+                          onChange={(value) => handlePricingValueChange(rowKey, 'fullDayRate', value ?? 0)}
                           addonAfter="VND"
                           className="w-full"
                         />
                       </td>
                       <td className="px-4 py-4 align-middle">
-                        {row.vehicleTypeId === 3 ? (
+                        {isCarPricing ? (
                           <InputNumber
                             min={1}
                             max={24}
                             value={row.maxHoursPerTurn}
-                            onChange={(value) => handlePricingValueChange(row.vehicleTypeId, 'maxHoursPerTurn', value ?? 1)}
+                            onChange={(value) => handlePricingValueChange(rowKey, 'maxHoursPerTurn', value ?? 1)}
                             addonAfter="giờ"
                             className="w-full"
                           />
@@ -903,7 +859,7 @@ const Dashboard = () => {
                       <td className="px-4 py-4 align-middle text-right">
                         <Button
                           type="primary"
-                          loading={Boolean(savingPricingIds[row.vehicleTypeId])}
+                          loading={Boolean(savingPricingIds[rowKey])}
                           onClick={() => handleUpdatePricing(row)}
                           className="h-9 rounded-xl bg-blue-600 px-5 font-bold"
                         >
@@ -911,16 +867,16 @@ const Dashboard = () => {
                         </Button>
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </table>
             </div>
           </div>
         ) : (
           <div className="bg-white border border-slate-100 rounded-2xl py-24 text-center shadow-sm">
-            <h3 className="text-slate-700 font-bold text-lg">{subNavItems.find((item) => item.id === subTab)?.label || subTab}</h3>
+            <h3 className="text-slate-700 font-bold text-lg">{sectionLabels[section] || 'Chức năng quản lý'}</h3>
             <p className="text-xs text-slate-400 mt-2 max-w-sm mx-auto">
-              Module này đang hoạt động trong giao diện quản lý. Dữ liệu cập nhật và nhật ký hiện đang được mô phỏng.
+              Chưa có dữ liệu từ backend cho chức năng này.
             </p>
           </div>
         )}
@@ -958,5 +914,12 @@ const Dashboard = () => {
       );
   }
 };
+
+export const LiveStatusPage = () => <Dashboard section="live-status" />;
+export const IncidentsPage = () => <Dashboard section="incidents" />;
+export const AnalyticsPage = () => <Dashboard section="analytics" />;
+export const SlotManagementPage = () => <Dashboard section="slot-management" />;
+export const PricingPage = () => <Dashboard section="pricing" />;
+export const StaffLogsPage = () => <Dashboard section="staff-logs" />;
 
 export default Dashboard;

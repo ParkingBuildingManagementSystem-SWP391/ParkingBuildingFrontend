@@ -71,6 +71,12 @@ const Header = () => {
     switch (location.pathname) {
       case '/parking-map': return 'Bản đồ trực tiếp';
       case '/dashboard': return 'Bảng điều khiển quản lý';
+      case '/live-status': return 'Trạng thái trực tiếp';
+      case '/incidents': return 'Sự cố';
+      case '/analytics': return 'Phân tích';
+      case '/slot-management': return 'Quản lý chỗ đỗ';
+      case '/pricing': return 'Bảng giá';
+      case '/staff-logs': return 'Nhật ký nhân viên';
       case '/accounts': return 'Quản lý người dùng';
       case '/create-account': return 'Tạo tài khoản';
       case '/my-bookings': return 'Lịch đặt chỗ của tôi';
@@ -86,6 +92,24 @@ const Header = () => {
     }
     if (location.pathname === '/parking-map') {
       return 'Bản đồ tình trạng chỗ đỗ xe theo thời gian thực';
+    }
+    if (location.pathname === '/live-status') {
+      return 'Theo dõi trạng thái chỗ đỗ theo thời gian thực';
+    }
+    if (location.pathname === '/incidents') {
+      return 'Theo dõi cảnh báo và sự cố vận hành';
+    }
+    if (location.pathname === '/analytics') {
+      return 'Phân tích lưu lượng xe và doanh thu';
+    }
+    if (location.pathname === '/slot-management') {
+      return 'Không gian quản lý trạng thái và điều phối chỗ đỗ';
+    }
+    if (location.pathname === '/pricing') {
+      return 'Cấu hình bảng giá theo loại xe';
+    }
+    if (location.pathname === '/staff-logs') {
+      return 'Theo dõi nhật ký hoạt động của nhân viên';
     }
     if (location.pathname === '/accounts') {
       return 'Quản lý tài khoản người dùng và quyền truy cập hệ thống';

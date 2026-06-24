@@ -38,7 +38,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
         </div>
         <span className="text-[10px] text-slate-500 mb-6 font-bold">B10, Ring Road 3, Cau Giay, Hanoi</span>
 
-        {/* Paper Container Mock (Light thermal paper background) */}
+        {/* Paper Container */}
         <div className="w-full bg-white border border-slate-200/80 rounded-xl p-5 space-y-4 shadow-sm">
           <div className="text-center pb-3 border-b border-dashed border-slate-200">
             <span className="text-[10.5px] text-slate-500 font-bold uppercase tracking-wider">{isTicket ? 'Check-In RFID Ticket' : 'Payment Bill Receipt'}</span>
@@ -95,7 +95,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             )}
           </div>
 
-          {/* QR / Barcode Mock (Clean white container for scanning legibility) */}
+          {/* QR / Barcode container */}
           <div className="flex flex-col items-center justify-center pt-3 border-t border-dashed border-slate-200">
             {isTicket ? (
               <div className="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">

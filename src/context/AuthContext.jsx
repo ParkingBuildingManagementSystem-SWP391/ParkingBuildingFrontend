@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { PRESET_USERS } from '../services/mockData';
 import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
@@ -159,22 +158,6 @@ export const AuthProvider = ({ children }) => {
     authService.logout();
   };
 
-  /**
-   * Giữ nguyên phục vụ mục đích demo/presentation khi mất mạng hoặc cần chuyển quyền nhanh
-   */
-  const switchRole = (newRole) => {
-    const matchedUser = PRESET_USERS[newRole];
-    if (matchedUser) {
-      setUser(matchedUser);
-      setRole(matchedUser.role);
-      localStorage.setItem('spotflow_user', JSON.stringify(matchedUser));
-      localStorage.setItem('spotflow_role', matchedUser.role);
-      window.dispatchEvent(new Event('storage'));
-      return true;
-    }
-    return false;
-  };
-
   const updateUser = (updatedFields) => {
     setUser(prev => {
       if (!prev) return null;
@@ -184,7 +167,7 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  const value = { user, role, loading, login, loginWithGoogle, loginWithUserData, logout, switchRole, updateUser };
+  const value = { user, role, loading, login, loginWithGoogle, loginWithUserData, logout, updateUser };
 
   return (
     <AuthContext.Provider value={value}>
