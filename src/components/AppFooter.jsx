@@ -7,12 +7,8 @@ const AppFooter = () => {
       <div className="max-w-[1600px] mx-auto w-full px-6 py-3 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-slate-500">
         <div className="flex items-center gap-3">
           <Logo
-            showText={false}
-            imageClassName="h-6 sm:h-7"
+            size="small"
           />
-          <span className="text-sm text-slate-800 font-bold">
-            Hệ thống quản lí bãi đỗ xe
-          </span>
         </div>
         <div className="flex flex-col sm:items-end text-center sm:text-right leading-relaxed">
           <span>© 2026 Parking Building System. All rights reserved.</span>
