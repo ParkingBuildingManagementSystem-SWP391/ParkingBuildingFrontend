@@ -16,6 +16,7 @@ import {
   UserCheck,
   Check
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Motorcycle = ({ size = 18, className = '' }) => (
   <svg 
@@ -39,6 +40,7 @@ const Motorcycle = ({ size = 18, className = '' }) => (
 );
 
 const Settings = () => {
+  const { t } = useTranslation();
   const { user, role, updateUser } = useAuth();
   const navigate = useNavigate();
 
@@ -77,7 +79,7 @@ const Settings = () => {
 
     if (!fullName.trim() || !email.trim() || !phone.trim()) {
       setAlertType('info');
-      setAlertMsg('Please fill in all profile fields.');
+      setAlertMsg(t('settings.errFillFields'));
       setTimeout(() => setAlertMsg(null), 3000);
       return;
     }
@@ -91,7 +93,7 @@ const Settings = () => {
     });
 
     setAlertType('success');
-    setAlertMsg('Account settings updated successfully!');
+    setAlertMsg(t('settings.successUpdate'));
     setTimeout(() => setAlertMsg(null), 3500);
   };
 
@@ -104,7 +106,7 @@ const Settings = () => {
       setVehicleType(user.vehicleType || 'Car');
     }
     setAlertType('info');
-    setAlertMsg('Form edits have been discarded.');
+    setAlertMsg(t('settings.infoDiscard'));
     setTimeout(() => setAlertMsg(null), 3000);
   };
 
@@ -146,8 +148,8 @@ const Settings = () => {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
             <div>
-              <h2 className="text-base font-extrabold text-slate-800 tracking-wide uppercase text-[11px]">Personal Information</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Edit your contact details and active vehicle profile</p>
+              <h2 className="text-base font-extrabold text-slate-800 tracking-wide uppercase text-[11px]">{t('settings.titlePersonalInfo')}</h2>
+              <p className="text-xs text-slate-400 mt-0.5">{t('settings.descPersonalInfo')}</p>
             </div>
             <Sparkles size={16} className="text-[#2563EB] animate-pulse" />
           </div>
@@ -157,7 +159,7 @@ const Settings = () => {
               
               {/* Username Input (Disabled based on best practices) */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Username</label>
+                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelUsername')}</label>
                 <div className="relative">
                   <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-350" />
                   <input 
@@ -167,18 +169,18 @@ const Settings = () => {
                     className="w-full h-11 pl-10 pr-4 bg-slate-100/70 border border-slate-200 text-sm rounded-xl text-slate-450 font-semibold cursor-not-allowed select-none outline-none text-slate-500"
                   />
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium block pl-1">Unique login key (cannot be modified)</span>
+                <span className="text-[10px] text-slate-400 font-medium block pl-1">{t('settings.hintUsername')}</span>
               </div>
 
               {/* Full Name Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Full Name</label>
+                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelFullName')}</label>
                 <div className="relative">
                   <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 animate-pulse" />
                   <input 
                     type="text" 
                     required
-                    placeholder="Enter your full name"
+                    placeholder={t('settings.phFullName')}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold text-slate-800"
@@ -188,13 +190,13 @@ const Settings = () => {
 
               {/* Email Address Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Email Address</label>
+                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelEmail')}</label>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
                     type="email" 
                     required
-                    placeholder="name@example.com"
+                    placeholder={t('settings.phEmail')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold text-slate-800"
@@ -204,13 +206,13 @@ const Settings = () => {
 
               {/* Phone Number Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Phone Number</label>
+                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelPhone')}</label>
                 <div className="relative">
                   <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
                     type="text" 
                     required
-                    placeholder="e.g. 0915277878"
+                    placeholder={t('settings.phPhone')}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-mono font-bold text-slate-800"
@@ -220,7 +222,7 @@ const Settings = () => {
 
               {/* Vehicle Type Dropdown */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">Vehicle Preference</label>
+                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelVehicle')}</label>
                 <div className="relative">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
                     {getVehicleIcon(vehicleType)}
@@ -230,9 +232,9 @@ const Settings = () => {
                     onChange={(e) => setVehicleType(e.target.value)}
                     className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:bg-white transition-all font-semibold text-slate-800 cursor-pointer"
                   >
-                    <option value="Car">Car</option>
-                    <option value="Motorbike">Motorbike</option>
-                    <option value="Bicycle">Bicycle</option>
+                    <option value="Car">{t('settings.optCar')}</option>
+                    <option value="Motorbike">{t('settings.optMoto')}</option>
+                    <option value="Bicycle">{t('settings.optBike')}</option>
                   </select>
                 </div>
               </div>
@@ -247,7 +249,7 @@ const Settings = () => {
                 className="flex-1 sm:flex-initial px-6 h-11 border border-slate-200 hover:bg-slate-55 hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-1 bg-white"
               >
                 <X size={15} />
-                Cancel
+                {t('settings.btnCancel')}
               </button>
               
               <button
@@ -255,7 +257,7 @@ const Settings = () => {
                 className="flex-1 sm:flex-initial px-8 h-11 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 text-sm"
               >
                 <Save size={15} />
-                Save Changes
+                {t('settings.btnSave')}
               </button>
             </div>
 
@@ -269,30 +271,30 @@ const Settings = () => {
 
           {/* Account Status / Overview Widget (Renders for everyone, providing nice context) */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-            <h3 className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Account Overview</h3>
+            <h3 className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">{t('settings.titleAccountOverview')}</h3>
             
             <div className="space-y-3 text-xs leading-normal">
               
               <div className="flex justify-between items-center py-0.5">
-                <span className="text-slate-400 font-semibold">Verification Badge</span>
+                <span className="text-slate-400 font-semibold">{t('settings.lblVerifyBadge')}</span>
                 <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
                   <Check size={14} className="bg-emerald-100 p-0.5 rounded-full" />
-                  Verified Profile
+                  {t('settings.valVerified')}
                 </span>
               </div>
 
 
               <div className="flex justify-between items-center py-0.5 border-t border-slate-50 pt-3">
-                <span className="text-slate-400 font-semibold">Account Status</span>
+                <span className="text-slate-400 font-semibold">{t('settings.lblAccountStatus')}</span>
                 <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
                   <span className="w-1.5 h-1.5 bg-[#00C853] rounded-full inline-block animate-pulse"></span>
-                  Active Session
+                  {t('settings.valActiveSession')}
                 </span>
               </div>
 
               {user && user.balance !== undefined && (
                 <div className="flex justify-between items-center py-0.5 border-t border-slate-50 pt-3">
-                  <span className="text-slate-400 font-semibold">Card Balance</span>
+                  <span className="text-slate-400 font-semibold">{t('settings.lblCardBalance')}</span>
                   <span className="font-extrabold text-[#2563EB]">
                     {user.balance.toLocaleString('vi-VN')} đ
                   </span>

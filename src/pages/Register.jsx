@@ -4,10 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { User, Lock, Mail, Phone, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { authService } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
+import { useTranslation } from 'react-i18next';
 
 const Register = () => {
   const { loginWithUserData, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Multi-step state: 1 = Register Info, 2 = OTP Verification
   const [step, setStep] = useState(1);
@@ -58,7 +60,7 @@ const Register = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!username || !email || !password) {
-      setErrorMsg('Please fill in all required fields.');
+      setErrorMsg(t('register.errorEmptyFields'));
       return;
     }
 
@@ -78,7 +80,7 @@ const Register = () => {
       setLoading(false);
     } catch (err) {
       console.error("Register err:", err);
-      setErrorMsg(err.message || 'Failed to register. Username or email may already exist.');
+      setErrorMsg(err.message || t('register.errorRegister'));
       setLoading(false);
     }
   };
@@ -87,7 +89,7 @@ const Register = () => {
     e.preventDefault();
     const otpString = otpValues.join('');
     if (otpString.length < 6) {
-      setErrorMsg('Please enter a valid 6-digit OTP.');
+      setErrorMsg(t('register.errorOtpFormat'));
       return;
     }
 
@@ -108,7 +110,7 @@ const Register = () => {
       }
     } catch (err) {
       console.error("OTP Verify err:", err);
-      setErrorMsg(err.message || 'Invalid or expired OTP code.');
+      setErrorMsg(err.message || t('register.errorOtpVerify'));
       setLoading(false);
     }
   };
@@ -131,12 +133,12 @@ const Register = () => {
         navigate('/parking-map');
       }
     } else {
-      setErrorMsg(res.message || 'Google authentication failed.');
+      setErrorMsg(res.message || t('register.errorGoogleAuth'));
     }
   };
 
   const handleGoogleError = () => {
-    setErrorMsg('Google login was unsuccessful.');
+    setErrorMsg(t('register.errorGoogleLogin'));
   };
 
   return (
@@ -152,8 +154,8 @@ const Register = () => {
         {step === 1 && (
           <>
             <div className="text-center mb-10">
-              <h1 className="text-3xl font-extrabold text-[#2A2B4E] mb-2 font-sans tracking-tight">Create Account</h1>
-              <p className="text-sm font-medium text-[#7A859E]">Sign up to get started</p>
+              <h1 className="text-3xl font-extrabold text-[#2A2B4E] mb-2 font-sans tracking-tight">{t('register.title')}</h1>
+              <p className="text-sm font-medium text-[#7A859E]">{t('register.subtitle')}</p>
             </div>
 
             {errorMsg && (
@@ -172,14 +174,14 @@ const Register = () => {
                   </div>
                   <input
                     type="text"
-                    placeholder="Username"
+                    placeholder={t('register.usernamePlaceholder')}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     disabled={loading}
                     className="w-full h-12 pl-12 pr-4 bg-[#F5F8FC] border border-transparent rounded-[1.25rem] text-sm text-[#2A2B4E] placeholder-[#9AA5BE] focus:bg-white focus:border-blue-200 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] focus:outline-none transition-all shadow-inner"
                   />
                 </div>
-                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">e.g. giang</p>
+                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">{t('register.usernameHint')}</p>
               </div>
 
               <div className="flex flex-col">
@@ -189,14 +191,14 @@ const Register = () => {
                   </div>
                   <input
                     type="email"
-                    placeholder="Email Address"
+                    placeholder={t('register.emailPlaceholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
                     className="w-full h-12 pl-12 pr-4 bg-[#F5F8FC] border border-transparent rounded-[1.25rem] text-sm text-[#2A2B4E] placeholder-[#9AA5BE] focus:bg-white focus:border-blue-200 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] focus:outline-none transition-all shadow-inner"
                   />
                 </div>
-                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">e.g. nguyengiang14012005@gmail.com</p>
+                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">{t('register.emailHint')}</p>
               </div>
 
               <div className="flex flex-col">
@@ -206,14 +208,14 @@ const Register = () => {
                   </div>
                   <input
                     type="tel"
-                    placeholder="Phone Number (Optional)"
+                    placeholder={t('register.phonePlaceholder')}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     disabled={loading}
                     className="w-full h-12 pl-12 pr-4 bg-[#F5F8FC] border border-transparent rounded-[1.25rem] text-sm text-[#2A2B4E] placeholder-[#9AA5BE] focus:bg-white focus:border-blue-200 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] focus:outline-none transition-all shadow-inner"
                   />
                 </div>
-                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">e.g. 0908231088</p>
+                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">{t('register.phoneHint')}</p>
               </div>
 
               <div className="flex flex-col">
@@ -223,7 +225,7 @@ const Register = () => {
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Password"
+                    placeholder={t('register.passwordPlaceholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
@@ -237,7 +239,7 @@ const Register = () => {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">e.g. Giang@2005</p>
+                <p className="text-[11px] text-[#7A859E] mt-1.5 ml-4 font-medium tracking-wide">{t('register.passwordHint')}</p>
               </div>
 
               <button
@@ -245,14 +247,14 @@ const Register = () => {
                 disabled={loading}
                 className="w-full h-14 mt-6 bg-gradient-to-r from-[#60A5FA] to-[#3B82F6] hover:from-[#3B82F6] hover:to-[#2563EB] text-white font-bold text-[15px] rounded-[1.25rem] shadow-[0_8px_20px_rgba(59,130,246,0.3)] hover:shadow-[0_10px_25px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Sign Up'}
+                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : t('register.signUpButton')}
               </button>
             </form>
 
             {/* Divider */}
             <div className="mt-8 mb-6 flex items-center justify-center relative">
               <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-[#E2E8F0] to-transparent"></div>
-              <span className="relative bg-white px-4 text-xs font-medium text-[#9AA5BE]">or continue with</span>
+              <span className="relative bg-white px-4 text-xs font-medium text-[#9AA5BE]">{t('register.orContinueWith')}</span>
             </div>
 
             {/* Social Buttons */}
@@ -278,9 +280,9 @@ const Register = () => {
             </div>
 
             <div className="mt-8 text-center">
-              <span className="text-[13px] text-[#7A859E] font-medium">Already have an account? </span>
+              <span className="text-[13px] text-[#7A859E] font-medium">{t('register.alreadyHaveAccount')} </span>
               <Link to="/login" className="text-[13px] font-bold text-[#4B0082] hover:text-[#3B82F6] transition-colors tracking-wide">
-                Log In
+                {t('register.logIn')}
               </Link>
             </div>
           </>
@@ -292,9 +294,9 @@ const Register = () => {
               <Mail size={32} />
             </div>
             
-            <h1 className="text-2xl font-extrabold text-[#2A2B4E] mb-2 font-sans tracking-tight">Verify Email</h1>
+            <h1 className="text-2xl font-extrabold text-[#2A2B4E] mb-2 font-sans tracking-tight">{t('register.verifyEmailTitle')}</h1>
             <p className="text-sm font-medium text-[#7A859E] text-center mb-8">
-              We've sent a 6-digit code to <br/> <span className="font-bold text-[#2A2B4E]">{email}</span>
+              {t('register.verifyEmailDesc')} <br/> <span className="font-bold text-[#2A2B4E]">{email}</span>
             </p>
 
             {errorMsg && (
@@ -327,7 +329,7 @@ const Register = () => {
                 disabled={loading || otpValues.join('').length < 6}
                 className="w-full h-14 bg-gradient-to-r from-[#60A5FA] to-[#3B82F6] hover:from-[#3B82F6] hover:to-[#2563EB] text-white font-bold text-[15px] rounded-[1.25rem] shadow-[0_8px_20px_rgba(59,130,246,0.3)] hover:shadow-[0_10px_25px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Verify & Login'}
+                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : t('register.verifyLoginButton')}
               </button>
             </form>
 
@@ -336,7 +338,7 @@ const Register = () => {
               disabled={loading}
               className="mt-6 text-sm font-bold text-[#7A859E] hover:text-[#2A2B4E] transition-colors"
             >
-              Back to Sign Up
+              {t('register.backToSignUp')}
             </button>
           </div>
         )}

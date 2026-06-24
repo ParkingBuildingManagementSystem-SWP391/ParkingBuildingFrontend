@@ -1,8 +1,10 @@
 import React from 'react';
 import { Modal, Button } from 'antd';
 import { Printer, QrCode, Barcode, CheckCircle2, Ticket } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
+  const { t } = useTranslation();
   if (!details) return null;
 
   const formatVND = (value) => {
@@ -41,7 +43,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
         {/* Paper Container */}
         <div className="w-full bg-white border border-slate-200/80 rounded-xl p-5 space-y-4 shadow-sm">
           <div className="text-center pb-3 border-b border-dashed border-slate-200">
-            <span className="text-[10.5px] text-slate-500 font-bold uppercase tracking-wider">{isTicket ? 'Check-In RFID Ticket' : 'Payment Bill Receipt'}</span>
+            <span className="text-[10.5px] text-slate-500 font-bold uppercase tracking-wider">{isTicket ? t('gate.ticket.titleCheckIn') : t('gate.ticket.titleReceipt')}</span>
             <h2 className="text-2xl font-mono font-extrabold text-slate-800 mt-1 tracking-wide">
               {details.id}
             </h2>
@@ -49,28 +51,28 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
 
           <div className="space-y-2.5 text-xs font-mono">
             <div className="flex justify-between">
-              <span className="text-slate-500">PLATE NUMBER:</span>
+              <span className="text-slate-500">{t('gate.ticket.plateNumber')}</span>
               <span className="text-slate-800 font-extrabold">{details.plate}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">VEHICLE CLASS:</span>
+              <span className="text-slate-500">{t('gate.ticket.vehicleClass')}</span>
               <span className="text-slate-800 font-bold">{details.type}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">ASSIGNED SLOT:</span>
+              <span className="text-slate-500">{t('gate.ticket.assignedSlot')}</span>
               <span className="text-indigo-600 font-extrabold">{details.slotId}</span>
             </div>
             
             <div className="h-px bg-slate-100 my-1"></div>
 
             <div className="flex justify-between">
-              <span className="text-slate-500">ENTRY DATE:</span>
+              <span className="text-slate-500">{t('gate.ticket.entryDate')}</span>
               <span className="text-slate-700 font-medium">
                 {new Date(details.checkInTime).toLocaleDateString('vi-VN')}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">ENTRY TIME:</span>
+              <span className="text-slate-500">{t('gate.ticket.entryTime')}</span>
               <span className="text-slate-700 font-medium">
                 {new Date(details.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
@@ -79,7 +81,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             {!isTicket && details.checkOutTime && (
               <>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">EXIT TIME:</span>
+                  <span className="text-slate-500">{t('gate.ticket.exitTime')}</span>
                   <span className="text-slate-700 font-medium">
                     {new Date(details.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </span>
@@ -88,7 +90,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
                 <div className="h-px bg-slate-100 my-1"></div>
                 
                 <div className="flex justify-between items-center text-sm pt-2">
-                  <span className="text-slate-500 font-extrabold">TOTAL PAID:</span>
+                  <span className="text-slate-500 font-extrabold">{t('gate.ticket.totalPaid')}</span>
                   <span className="text-emerald-600 font-extrabold text-base">{formatVND(details.fee)}</span>
                 </div>
               </>
@@ -108,7 +110,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
               </div>
             )}
             <span className="text-[10.5px] text-slate-500 text-center mt-3 leading-normal font-medium px-2">
-              {isTicket ? 'Scan at gate scanner to verify check-out.' : 'Thank you for using SpotFlow services!'}
+              {isTicket ? t('gate.ticket.scanGate') : t('gate.ticket.thankYou')}
             </span>
           </div>
         </div>
@@ -120,7 +122,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             onClick={onClose}
             className="flex-1 h-10 border-slate-300 text-slate-500 hover:text-slate-700 hover:border-slate-400 rounded-lg font-bold"
           >
-            Close Dialog
+            {t('gate.ticket.close')}
           </Button>
           <Button
             type="primary"
@@ -129,7 +131,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             className={`flex-1 h-10 border-none font-bold rounded-lg flex items-center justify-center gap-1.5 
               ${isTicket ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}
           >
-            Print Ticket
+            {t('gate.ticket.print')}
           </Button>
         </div>
       </div>

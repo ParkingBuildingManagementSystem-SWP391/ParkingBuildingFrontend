@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Table, Tag, Button, Input, Select, message, Popconfirm, Tooltip, Space } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { 
   AlertTriangle, 
   AlertCircle, 
@@ -16,6 +17,7 @@ import { managerService } from '../../services/managerService';
 const { Option } = Select;
 
 const IncidentsTable = () => {
+  const { t } = useTranslation();
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,7 +44,7 @@ const IncidentsTable = () => {
       setIncidents(data.map(normalizeIncident));
     } catch (err) {
       console.error('fetchIncidents error:', err);
-      setError('Chưa thể tải dữ liệu sự cố từ backend.');
+      setError(t('dashboard.incidents.fetchError'));
       setIncidents([]);
     } finally {
       setLoading(false);
@@ -79,10 +81,10 @@ const IncidentsTable = () => {
       setIncidents(prev => prev.map(inc => 
         inc.id === id ? { ...inc, status: 'Resolved' } : inc
       ));
-      message.success(`Sự cố ${id} đã được đánh dấu là đã xử lý.`);
+      message.success(t('dashboard.incidents.resolveSuccess', { id }));
     }).catch((err) => {
       console.error('resolveIncident error:', err);
-      message.error('Không thể cập nhật trạng thái sự cố.');
+      message.error(t('dashboard.incidents.resolveError'));
     }).finally(() => {
       setResolvingId(null);
     });
@@ -91,33 +93,33 @@ const IncidentsTable = () => {
   // Tag rendering helpers
   const getSeverityTag = (severity) => {
     switch (severity) {
-      case 'Critical': return <Tag icon={<AlertCircle size={14} className="mr-1" />} color="error" className="m-0 font-bold px-2 py-0.5 border-0">NGHIÊM TRỌNG</Tag>;
-      case 'Warning': return <Tag icon={<AlertTriangle size={14} className="mr-1" />} color="warning" className="m-0 font-bold px-2 py-0.5 border-0">CẢNH BÁO</Tag>;
-      case 'Info': return <Tag icon={<Info size={14} className="mr-1" />} color="processing" className="m-0 font-bold px-2 py-0.5 border-0">THÔNG TIN</Tag>;
+      case 'Critical': return <Tag icon={<AlertCircle size={14} className="mr-1" />} color="error" className="m-0 font-bold px-2 py-0.5 border-0">{t('dashboard.incidents.severity.critical')}</Tag>;
+      case 'Warning': return <Tag icon={<AlertTriangle size={14} className="mr-1" />} color="warning" className="m-0 font-bold px-2 py-0.5 border-0">{t('dashboard.incidents.severity.warning')}</Tag>;
+      case 'Info': return <Tag icon={<Info size={14} className="mr-1" />} color="processing" className="m-0 font-bold px-2 py-0.5 border-0">{t('dashboard.incidents.severity.info')}</Tag>;
       default: return <Tag color="default">{severity}</Tag>;
     }
   };
 
   const getStatusTag = (status) => {
-    if (status === 'Resolved') return <Tag icon={<CheckCircle2 size={14} className="mr-1" />} color="success" className="m-0 font-bold border-0">ĐÃ XỬ LÝ</Tag>;
-    return <Tag color="default" className="m-0 font-bold border border-slate-200 text-slate-500 bg-slate-50">ĐANG MỞ</Tag>;
+    if (status === 'Resolved') return <Tag icon={<CheckCircle2 size={14} className="mr-1" />} color="success" className="m-0 font-bold border-0">{t('dashboard.incidents.status.resolved')}</Tag>;
+    return <Tag color="default" className="m-0 font-bold border border-slate-200 text-slate-500 bg-slate-50">{t('dashboard.incidents.status.open')}</Tag>;
   };
 
   const columns = [
     {
-      title: 'Mã sự cố',
+      title: t('dashboard.incidents.columns.id'),
       dataIndex: 'id',
       key: 'id',
       render: (text) => <span className="font-mono font-extrabold text-rose-700">{text}</span>,
     },
     {
-      title: 'Mức độ',
+      title: t('dashboard.incidents.columns.severity'),
       dataIndex: 'severity',
       key: 'severity',
       render: (severity) => getSeverityTag(severity),
     },
     {
-      title: 'Chi tiết',
+      title: t('dashboard.incidents.columns.details'),
       key: 'details',
       render: (_, record) => (
         <div className="flex flex-col gap-1 max-w-md">
@@ -127,7 +129,7 @@ const IncidentsTable = () => {
       )
     },
     {
-      title: 'Vị trí & thời gian',
+      title: t('dashboard.incidents.columns.locationTime'),
       key: 'locationTime',
       render: (_, record) => (
         <div className="flex flex-col gap-1.5 text-xs text-slate-600">
@@ -141,30 +143,30 @@ const IncidentsTable = () => {
       )
     },
     {
-      title: 'Trạng thái',
+      title: t('dashboard.incidents.columns.status'),
       dataIndex: 'status',
       key: 'status',
       render: (status) => getStatusTag(status),
     },
     {
-      title: 'Thao tác',
+      title: t('dashboard.incidents.columns.action'),
       key: 'action',
       render: (_, record) => {
         if (record.status === 'Resolved') {
-          return <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1"><CheckCircle2 size={14} /> Đã xử lý</span>;
+          return <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1"><CheckCircle2 size={14} /> {t('dashboard.incidents.resolvedLabel')}</span>;
         }
 
         return (
           <Space>
-            <Tooltip title="Xem bằng chứng camera">
-              <Button icon={<Camera size={14} />} size="small" className="text-slate-500 border-slate-200" onClick={() => message.info("Chưa có endpoint backend cho bằng chứng camera.")} />
+            <Tooltip title={t('dashboard.incidents.cameraEvidence')}>
+              <Button icon={<Camera size={14} />} size="small" className="text-slate-500 border-slate-200" onClick={() => message.info(t('dashboard.incidents.noCameraEndpoint'))} />
             </Tooltip>
             <Popconfirm
-              title="Đánh dấu đã xử lý?"
-              description="Xác nhận sự cố này đã được xử lý."
+              title={t('dashboard.incidents.resolveConfirmTitle')}
+              description={t('dashboard.incidents.resolveConfirmDesc')}
               onConfirm={() => handleResolve(record.id)}
-              okText="Xác nhận"
-              cancelText="Hủy"
+              okText={t('dashboard.incidents.confirm')}
+              cancelText={t('dashboard.incidents.cancel')}
             >
               <Button 
                 type="primary" 
@@ -172,7 +174,7 @@ const IncidentsTable = () => {
                 loading={resolvingId === record.id}
                 className="bg-emerald-600 hover:bg-emerald-700 border-0 font-bold shadow-sm"
               >
-                Xử lý
+                {t('dashboard.incidents.resolve')}
               </Button>
             </Popconfirm>
           </Space>
@@ -193,9 +195,9 @@ const IncidentsTable = () => {
         <div>
           <h3 className="text-xl font-bold text-rose-900 flex items-center gap-2">
             <Activity className="text-rose-600" />
-            Nhật ký an ninh & cảnh báo
+            {t('dashboard.incidents.title')}
           </h3>
-          <p className="text-xs text-slate-500 mt-1">Theo dõi bất thường và cảnh báo hệ thống theo thời gian thực</p>
+          <p className="text-xs text-slate-500 mt-1">{t('dashboard.incidents.subtitle')}</p>
           {error && <p className="text-xs text-rose-500 mt-2 font-semibold">{error}</p>}
         </div>
 
@@ -206,32 +208,32 @@ const IncidentsTable = () => {
               onClick={() => setFilterSeverity('All')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${filterSeverity === 'All' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              Cảnh báo đang mở
+              {t('dashboard.incidents.filterOpen')}
             </button>
             <button 
               onClick={() => setFilterSeverity('Critical')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${filterSeverity === 'Critical' ? 'bg-rose-100 shadow-sm text-rose-800' : 'text-slate-500 hover:text-rose-600'}`}
             >
-              Nghiêm trọng
+              {t('dashboard.incidents.filterCritical')}
               {criticalCount > 0 && <span className="bg-rose-500 text-white px-1.5 rounded-full text-[10px]">{criticalCount}</span>}
             </button>
             <button 
               onClick={() => setFilterSeverity('Warning')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${filterSeverity === 'Warning' ? 'bg-amber-100 shadow-sm text-amber-800' : 'text-slate-500 hover:text-amber-600'}`}
             >
-              Cảnh báo
+              {t('dashboard.incidents.filterWarning')}
               {warningCount > 0 && <span className="bg-amber-500 text-white px-1.5 rounded-full text-[10px]">{warningCount}</span>}
             </button>
             <button 
               onClick={() => setFilterSeverity('Resolved')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${filterSeverity === 'Resolved' ? 'bg-emerald-100 shadow-sm text-emerald-800' : 'text-slate-500 hover:text-emerald-600'}`}
             >
-              Đã xử lý
+              {t('dashboard.incidents.filterResolved')}
             </button>
           </div>
 
           <Input
-            placeholder="Tìm sự cố..."
+            placeholder={t('dashboard.incidents.search')}
             prefix={<Search size={16} className="text-slate-400" />}
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
@@ -247,7 +249,7 @@ const IncidentsTable = () => {
         dataSource={filteredIncidents} 
         loading={loading}
         rowKey="id"
-        locale={{ emptyText: error ? 'Không có dữ liệu sự cố để hiển thị.' : 'Chưa có dữ liệu sự cố.' }}
+        locale={{ emptyText: error ? t('dashboard.incidents.emptyTextError') : t('dashboard.incidents.emptyText') }}
         pagination={{ pageSize: 5 }}
         rowClassName={(record) => record.status === 'Resolved' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-rose-50/30'}
         className="border border-slate-100 rounded-xl overflow-hidden shadow-sm"

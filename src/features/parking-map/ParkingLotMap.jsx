@@ -23,6 +23,8 @@ import { managerService } from '../../services/managerService';
 import api from '../../services/api';
 import carIcon from '../../assets/vehicles/car.png';
 import motorbikeIcon from '../../assets/vehicles/motorbike.png';
+import i18n from '../../i18n';
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -103,13 +105,13 @@ const getSlotVehicleAlt = (slot) => {
 const getStatusLabel = (status) => {
   switch (status) {
     case 'Available':
-      return 'Còn trống';
+      return i18n.t('parkingMap.available').replace(':', '');
     case 'Occupied':
-      return 'Đã có xe';
+      return i18n.t('parkingMap.occupied').replace(':', '');
     case 'Reserved':
-      return 'Đã đặt trước';
+      return i18n.t('parkingMap.reserved').replace(':', '');
     case 'Maintenance':
-      return 'Bảo trì';
+      return i18n.t('parkingMap.maintenance').replace(':', '');
     default:
       return status;
   }
@@ -117,24 +119,23 @@ const getStatusLabel = (status) => {
 
 const getFloorDisplayName = (floorName) => {
   if (!floorName) return '';
-  return String(floorName).replace(/^Floor\s*/i, 'Tầng ');
+  return String(floorName).replace(/^Floor\s*/i, `${i18n.t('parkingMap.floor')} `);
 };
 
 const getFloorDescriptionLabel = (description) => {
   const value = String(description || '').trim().toLowerCase();
-  if (value === 'motorbike & bicycle parking') return 'Xe máy & xe đạp';
-  if (value === 'car parking only') return 'Chỉ đỗ ô tô';
+  if (value === 'motorbike & bicycle parking') return i18n.t('parkingMap.bikes');
+  if (value === 'car parking only') return i18n.t('parkingMap.cars');
   return description;
 };
 
 const getVehicleTypeLabel = (type) => {
   switch (type) {
     case 'Bicycle':
-      return 'Xe đạp';
     case 'Motorcycle':
-      return 'Xe máy';
+      return i18n.t('parkingMap.bikes').split(' & ')[0];
     case 'Car':
-      return 'Ô tô';
+      return i18n.t('parkingMap.cars');
     default:
       return type;
   }
@@ -142,7 +143,7 @@ const getVehicleTypeLabel = (type) => {
 
 const getZoneDisplayName = (zoneName) => {
   if (!zoneName) return '';
-  return `Khu ${zoneName}`;
+  return `${i18n.t('parkingMap.zone')} ${zoneName}`;
 };
 
 const getDerivedZoneName = (slot, index) => {
@@ -181,6 +182,7 @@ const getDefaultExpectedCheckInTimeParts = () => {
 const ParkingLotMap = () => {
   const { role, user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [activeFloorId, setActiveFloorId] = useState(3); // Default to Floor G (FloorId = 3)
   const [searchQuery, setSearchQuery] = useState('');
@@ -508,8 +510,8 @@ const ParkingLotMap = () => {
   const visibleZoneEndIndex = Math.min(visibleZoneStartIndex + zonesPerPage, zoneSections.length);
   const visibleZones = zoneSections.slice(visibleZoneStartIndex, visibleZoneEndIndex);
   const showingZoneText = zoneSections.length > 0
-    ? `Đang hiển thị khu ${visibleZoneStartIndex + 1}-${visibleZoneEndIndex} / ${zoneSections.length}`
-    : 'Không có khu để hiển thị';
+    ? `${t('parkingMap.showingZone')} ${visibleZoneStartIndex + 1}-${visibleZoneEndIndex} / ${zoneSections.length}`
+    : '';
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -948,23 +950,23 @@ const ParkingLotMap = () => {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-[#00C853]"></span>
-              Còn trống: <span className="text-emerald-600 font-bold">{availableCount}</span>
+              {t('parkingMap.available')} <span className="text-emerald-600 font-bold">{availableCount}</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-[#FF1744]"></span>
-              Đã có xe: <span className="text-rose-600 font-bold">{occupiedCount}</span>
+              {t('parkingMap.occupied')} <span className="text-rose-600 font-bold">{occupiedCount}</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-[#FFC107]"></span>
-              Đã đặt trước: <span className="text-amber-500 font-bold">{reservedCount}</span>
+              {t('parkingMap.reserved')} <span className="text-amber-500 font-bold">{reservedCount}</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-sm font-semibold text-slate-600">
               <span className="w-2.5 h-2.5 rounded-sm bg-slate-500"></span>
-              Bảo trì: <span className="text-slate-600 font-bold">0</span>
+              {t('parkingMap.maintenance')} <span className="text-slate-600 font-bold">0</span>
             </div>
           </div>
           <div className="flex items-center px-4 py-1.5 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-600">
-            Tổng số chỗ: <span className="text-slate-900 font-bold ml-1">{totalCount}</span>
+            {t('parkingMap.totalSlots')} <span className="text-slate-900 font-bold ml-1">{totalCount}</span>
           </div>
         </div>
       </div>
@@ -998,13 +1000,13 @@ const ParkingLotMap = () => {
                     key={f.id}
                     onClick={() => onFloorChange(f.id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all duration-200 whitespace-nowrap ${isSelected
-                        ? 'bg-blue-50 border-blue-500 text-blue-600 font-semibold shadow-sm'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium'
+                      ? 'bg-blue-50 border-blue-500 text-blue-600 font-semibold shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium'
                       }`}
                   >
                     <span>{getFloorDisplayName(f.name)}</span>
                     <span className={`text-xs ${isSelected ? 'text-blue-400 font-medium' : 'text-slate-500'}`}>
-                      ({freeCount} còn trống)
+                      ({freeCount} {t('parkingMap.availableSuffix')})
                     </span>
                   </button>
                 );
@@ -1017,7 +1019,7 @@ const ParkingLotMap = () => {
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Tìm theo mã chỗ đỗ..."
+                  placeholder={t('parkingMap.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 text-sm rounded-full placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
@@ -1084,7 +1086,7 @@ const ParkingLotMap = () => {
                           <div className="flex items-center gap-1"><Motorcycle size={18} className="text-indigo-650" /><Bike size={18} className="text-blue-600" /></div>
                         ) : <Car size={18} className="text-blue-600" />}
                         <h3 className="font-extrabold text-slate-808 text-xs uppercase tracking-wider">
-                          Sơ đồ {getFloorDisplayName(activeFloor.name)} ({getFloorDescriptionLabel(activeFloor.desc)})
+                          {t('parkingMap.floorMap')} {getFloorDisplayName(activeFloor.name).split(' ').slice(1).join(' ')} ({getFloorDescriptionLabel(activeFloor.desc)})
                         </h3>
                       </div>
                       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-700">
@@ -1117,7 +1119,7 @@ const ParkingLotMap = () => {
                   className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all"
                 >
                   <ChevronLeft size={16} />
-                  Trước
+                  {t('parkingMap.prev')}
                 </button>
                 <span className="min-w-[160px] text-center text-xs font-extrabold text-slate-600">
                   {showingZoneText}
@@ -1127,7 +1129,7 @@ const ParkingLotMap = () => {
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-55 active:scale-95 disabled:opacity-40 transition-all"
                 >
-                  Sau
+                  {t('parkingMap.next')}
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -1135,7 +1137,7 @@ const ParkingLotMap = () => {
 
             <div className="w-full bg-[#1A62FF] text-white font-medium text-center text-xs sm:text-sm px-4 py-3 rounded-xl shadow-md flex items-center justify-center gap-2 leading-relaxed">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white animate-pulse"></span>
-              <span className="min-w-0 break-words">{availableCount} chỗ còn trống ngay lúc này — nhấn vào chỗ màu xanh để đặt chỗ</span>
+              <span className="min-w-0 break-words">{t('parkingMap.bookingInstruction', { count: availableCount })}</span>
             </div>
           </div>
 
@@ -1326,10 +1328,10 @@ const ParkingLotMap = () => {
                 <div className="flex justify-between items-center pt-2 border-t border-slate-200">
                   <span className="text-slate-400 font-semibold">Trạng thái hiện tại</span>
                   <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${selectedSlot.status === 'Available'
-                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                      : selectedSlot.status === 'Occupied'
-                        ? 'bg-rose-50 text-rose-600 border border-rose-100'
-                        : 'bg-amber-50 text-amber-600 border border-amber-100'
+                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                    : selectedSlot.status === 'Occupied'
+                      ? 'bg-rose-50 text-rose-600 border border-rose-100'
+                      : 'bg-amber-50 text-amber-600 border border-amber-100'
                     }`}>
                     {getStatusLabel(selectedSlot.status)}
                   </span>

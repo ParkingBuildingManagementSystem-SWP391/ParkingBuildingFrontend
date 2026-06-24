@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Clock, ArrowRight, CreditCard, ShieldAlert, QrCode } from 'lucide-react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Extract query parameters
   const vnpResponseCode = searchParams.get('vnp_ResponseCode');
@@ -14,7 +16,7 @@ const PaymentSuccess = () => {
 
   // Page States: 'polling' | 'success_deposit' | 'success_exit' | 'failed' | 'timeout'
   const [paymentState, setPaymentState] = useState('polling');
-  const [loadingText, setLoadingText] = useState('Đang xác nhận giao dịch từ ngân hàng...');
+  const [loadingText, setLoadingText] = useState(t('paymentSuccess.loadingText1'));
   const [sessionDetail, setSessionDetail] = useState(null);
   const [graceTime, setGraceTime] = useState(1200); // 20 minutes in seconds (1200s)
 
@@ -53,7 +55,7 @@ const PaymentSuccess = () => {
       }
 
       attempts++;
-      setLoadingText(`Đang đối khớp trạng thái hóa đơn... (Lần ${attempts}/${maxAttempts})`);
+      setLoadingText(t('paymentSuccess.loadingText2', { attempts, maxAttempts }));
       try {
         const response = await api.get(`/Payments/status/${invoiceId}`);
         const currentStatus = response.data?.status;
@@ -149,7 +151,7 @@ const PaymentSuccess = () => {
           <div className="py-12 space-y-6">
             <div className="w-16 h-16 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin mx-auto"></div>
             <div className="space-y-2">
-              <h2 className="text-xl font-bold text-slate-800">Đang kiểm tra kết quả</h2>
+              <h2 className="text-xl font-bold text-slate-800">{t('paymentSuccess.checkingResult')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">{loadingText}</p>
             </div>
           </div>
@@ -163,16 +165,16 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Đặt Cọc Giữ Chỗ Thành Công!</h2>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.depositSuccess')}</h2>
               <p className="text-sm text-slate-500 font-medium px-2">
-                Hóa đơn của bạn đã được đối soát. Vé giữ chỗ 15 phút đã được kích hoạt.
+                {t('paymentSuccess.depositDesc')}
               </p>
             </div>
 
             {/* Display check-in QR Code directly */}
             {sessionDetail ? (
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4 max-w-xs mx-auto shadow-inner">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Mã QR Check-in Vào Cổng</span>
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('paymentSuccess.qrCodeTitle')}</span>
                 <div className="bg-white p-2 rounded-xl border border-slate-200 inline-block shadow-sm">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&ecc=M&data=${sessionDetail.qrPayload}`}
@@ -185,11 +187,11 @@ const PaymentSuccess = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-left text-xs font-sans pt-2 border-t border-slate-200/80">
                   <div>
-                    <span className="text-slate-400 font-medium block">Vị trí:</span>
+                    <span className="text-slate-400 font-medium block">{t('paymentSuccess.location')}</span>
                     <span className="text-slate-800 font-bold">{sessionDetail.location}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 font-medium block">Biển số:</span>
+                    <span className="text-slate-400 font-medium block">{t('paymentSuccess.license')}</span>
                     <span className="text-slate-800 font-bold">{sessionDetail.license}</span>
                   </div>
                 </div>
@@ -197,7 +199,7 @@ const PaymentSuccess = () => {
             ) : (
               <div className="py-4 text-slate-400 text-xs flex items-center justify-center gap-1.5">
                 <QrCode size={16} />
-                Đang chuẩn bị mã QR vé của bạn...
+                {t('paymentSuccess.preparingQr')}
               </div>
             )}
 
@@ -205,7 +207,7 @@ const PaymentSuccess = () => {
               onClick={() => navigate('/dashboard')}
               className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
             >
-              Về Trang Chủ
+              {t('paymentSuccess.btnHome')}
               <ArrowRight size={16} />
             </button>
           </div>
@@ -219,20 +221,20 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Thanh Toán Phí Đỗ Xe Thành Công!</h2>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.exitSuccess')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
-                Hóa đơn đỗ xe đã được hoàn tất. Cổng barrier sẽ tự động mở khi xe của bạn di chuyển tới cổng ra.
+                {t('paymentSuccess.exitDesc')}
               </p>
             </div>
 
             {/* Countdown timer card */}
             <div className="bg-amber-50/50 border border-amber-200/70 rounded-2xl p-5 space-y-2 max-w-xs mx-auto shadow-inner">
-              <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-widest block">Thời Gian Ân Hạn Rời Bãi</span>
+              <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-widest block">{t('paymentSuccess.graceTimeTitle')}</span>
               <div className="text-4xl font-mono font-black text-amber-600 animate-pulse">
                 {formatGraceTime(graceTime)}
               </div>
               <p className="text-[10px] text-amber-800 font-medium leading-relaxed">
-                Vui lòng di chuyển xe ra khỏi bãi đỗ trước khi hết thời gian ân hạn 20 phút để tránh phát sinh thêm chi phí đỗ xe.
+                {t('paymentSuccess.graceTimeDesc')}
               </p>
             </div>
 
@@ -240,7 +242,7 @@ const PaymentSuccess = () => {
               onClick={() => navigate('/dashboard')}
               className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
             >
-              Quay Lại Trang Chủ
+              {t('paymentSuccess.btnBackHome')}
               <ArrowRight size={16} />
             </button>
           </div>
@@ -254,20 +256,20 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Thanh Toán Tại Cổng Thành Công!</h2>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.botSuccess')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
-                Giao dịch của bạn đã được ghi nhận. Cổng barrier đang mở.
+                {t('paymentSuccess.botDesc1')}
               </p>
             </div>
 
             {/* Hộp trạng thái ra cổng lập tức (Không có đếm ngược ân hạn) */}
             <div className="bg-emerald-50/50 border border-emerald-200/70 rounded-2xl p-5 space-y-2 max-w-xs mx-auto shadow-inner">
-              <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">Trạng Thái Ra Cổng</span>
+              <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">{t('paymentSuccess.gateStatusTitle')}</span>
               <div className="text-xl font-black text-emerald-600 uppercase">
-                MỜI XE RA KHỎI BÃI
+                {t('paymentSuccess.gateStatus')}
               </div>
               <p className="text-[10px] text-emerald-800 font-medium leading-relaxed">
-                Bạn đã hoàn tất thanh toán tại quầy kiểm soát (BOT). Vui lòng di chuyển xe ra ngoài ngay lập tức.
+                {t('paymentSuccess.botDesc2')}
               </p>
             </div>
 
@@ -275,7 +277,7 @@ const PaymentSuccess = () => {
               onClick={() => navigate('/dashboard')}
               className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
             >
-              Quay Lại Trang Chủ
+              {t('paymentSuccess.btnBackHome')}
               <ArrowRight size={16} />
             </button>
           </div>
@@ -289,9 +291,9 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Giao Dịch Thất Bại!</h2>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.failedTitle')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
-                Thanh toán đã bị hủy hoặc gặp lỗi trong quá trình thực hiện từ phía ngân hàng.
+                {t('paymentSuccess.failedDesc')}
               </p>
             </div>
 
@@ -300,13 +302,13 @@ const PaymentSuccess = () => {
                 onClick={() => navigate('/dashboard')}
                 className="flex-1 h-11 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer"
               >
-                Về Trang Chủ
+                {t('paymentSuccess.btnHome')}
               </button>
               <button
                 onClick={() => navigate('/my-bookings')}
                 className="flex-1 h-11 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-rose-600/10 cursor-pointer"
               >
-                Thử Thanh Toán Lại
+                {t('paymentSuccess.btnRetry')}
               </button>
             </div>
           </div>
@@ -320,9 +322,9 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Chờ Xác Thực Giao Dịch</h2>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.timeoutTitle')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
-                Hệ thống chưa nhận được phản hồi từ VNPay. Vui lòng kiểm tra lại số dư tài khoản ngân hàng hoặc lịch sử giao dịch.
+                {t('paymentSuccess.timeoutDesc')}
               </p>
             </div>
 
@@ -330,7 +332,7 @@ const PaymentSuccess = () => {
               onClick={() => navigate('/my-bookings')}
               className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
             >
-              Xem Lịch Sử Đặt Chỗ
+              {t('paymentSuccess.btnHistory')}
               <ArrowRight size={16} />
             </button>
           </div>
