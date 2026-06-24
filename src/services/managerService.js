@@ -31,6 +31,39 @@ export const managerService = {
     }
   },
 
+  getIncidents: async () => {
+    try {
+      // TODO backend: implement GET /api/Manager/incidents returning an array of incident records.
+      const response = await api.get('/Manager/incidents');
+      return response.data;
+    } catch (error) {
+      console.error('getIncidents error:', error);
+      throw error;
+    }
+  },
+
+  resolveIncident: async (incidentId) => {
+    try {
+      // TODO backend: implement PUT /api/Manager/incidents/{incidentId}/resolve.
+      const response = await api.put(`/Manager/incidents/${incidentId}/resolve`);
+      return response.data;
+    } catch (error) {
+      console.error(`resolveIncident error for incident ${incidentId}:`, error);
+      throw error;
+    }
+  },
+
+  getStaffLogs: async () => {
+    try {
+      // TODO backend: implement GET /api/Manager/staff-logs returning an array of staff activity logs.
+      const response = await api.get('/Manager/staff-logs');
+      return response.data;
+    } catch (error) {
+      console.error('getStaffLogs error:', error);
+      throw error;
+    }
+  },
+
   exportReport: async (params) => {
     try {
       const response = await api.get('/Manager/export-report', {

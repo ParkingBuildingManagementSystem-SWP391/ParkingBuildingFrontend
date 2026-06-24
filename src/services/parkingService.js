@@ -1,6 +1,17 @@
 import api from './api';
 
 export const parkingService = {
+  getFloors: async () => {
+    try {
+      // TODO backend: implement GET /api/Parking/floors returning floor metadata.
+      const response = await api.get('/Parking/floors');
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Failed to fetch parking floors.";
+      throw serverMessage;
+    }
+  },
+
   // 1. Lấy danh sách slot thực tế từ DB dựa theo Floor ID
   getSlotsByFloor: async (floorId) => {
     try {

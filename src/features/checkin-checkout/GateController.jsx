@@ -1324,7 +1324,7 @@ const GateController = () => {
           <div className="text-center py-20 text-slate-400 flex flex-col items-center">
             <CheckCircle size={44} className="text-emerald-500/20 mb-3" />
             <h3 className="text-slate-700 font-bold">Tất cả chỗ đỗ đang trống</h3>
-            <p className="text-xs text-slate-505 mt-1 max-w-xs">Hiện không có xe đang đỗ. Dùng camera mô phỏng để ghi nhận xe vào.</p>
+            <p className="text-xs text-slate-505 mt-1 max-w-xs">Hiện không có xe đang đỗ. Dùng camera để ghi nhận xe vào.</p>
           </div>
         ) : (
           <Table 

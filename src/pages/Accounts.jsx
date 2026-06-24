@@ -3,23 +3,8 @@ import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock, Unlo
 import { message, Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 
-const INITIAL_ACCOUNTS = [
-  { id: 1, name: 'Alex Johnson', email: 'admin@spotflow.com', phoneNumber: '0912345678', roleId: 1, status: 'Active', joined: '10 Jan 2025' },
-  { id: 2, name: 'Robert Vance', email: 'robert.v@spotflow.com', phoneNumber: '0923456789', roleId: 5, status: 'Active', joined: '15 Feb 2025' },
-  { id: 3, name: 'John Doe', email: 'john.doe@spotflow.com', phoneNumber: '0934567890', roleId: 5, status: 'Active', joined: '20 Mar 2025' },
-  { id: 4, name: 'Jane Smith', email: 'jane.smith@spotflow.com', phoneNumber: '0945678901', roleId: 5, status: 'Inactive', joined: '12 Apr 2025' },
-  { id: 5, name: 'Sarah Connor', email: 'sarah.c@spotflow.com', phoneNumber: '0956789012', roleId: 2, status: 'Active', joined: '20 Jan 2025' },
-  { id: 6, name: 'Michael Scott', email: 'michael.s@spotflow.com', phoneNumber: '0967890123', roleId: 2, status: 'Active', joined: '01 May 2025' },
-  { id: 7, name: 'Dwight Schrute', email: 'dwight.s@spotflow.com', phoneNumber: '0978901234', roleId: 2, status: 'Inactive', joined: '15 May 2025' },
-  { id: 8, name: 'David Miller', email: 'david.miller@gmail.com', phoneNumber: '0989012345', roleId: 4, status: 'Active', joined: '05 Jan 2026' },
-  { id: 9, name: 'Emily Watson', email: 'emily.w@gmail.com', phoneNumber: '0990123456', roleId: 4, status: 'Active', joined: '10 Feb 2026' },
-  { id: 10, name: 'Tom Hardy', email: 'tom.hardy@gmail.com', phoneNumber: '0901234567', roleId: 4, status: 'Active', joined: '15 Mar 2026' },
-  { id: 11, name: 'Natalie Portman', email: 'natalie.p@gmail.com', phoneNumber: '0912345679', roleId: 4, status: 'Inactive', joined: '20 Apr 2026' },
-  { id: 12, name: 'Chris Evans', email: 'chris.evans@gmail.com', phoneNumber: '0923456780', roleId: 4, status: 'Active', joined: '01 May 2026' }
-];
-
 const Accounts = () => {
-  const [accounts, setAccounts] = useState(INITIAL_ACCOUNTS);
+  const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorBanner, setErrorBanner] = useState('');
@@ -62,7 +47,7 @@ const Accounts = () => {
       phoneNumber: u.phoneNumber || u.PhoneNumber || '',
       roleId: roleId,
       status: u.isDeleted || u.IsDeleted ? 'Inactive' : 'Active', // Mapping to status toggle
-      joined: '05 Jun 2026' // Default join date
+      joined: u.createdAt || u.CreatedAt || u.joined || u.Joined || ''
     };
   };
 
@@ -81,20 +66,15 @@ const Accounts = () => {
         rawData = response.data;
       }
 
-      if (rawData && rawData.length > 0) {
-        const mapped = rawData
-          .map(mapUserToUI)
-          .filter(u => u.roleId !== 3); // Completely EXCLUDE RoleId = 3 (Customer)
-        setAccounts(mapped);
-      }
+      const source = Array.isArray(rawData) ? rawData : (rawData?.data || rawData?.Data || []);
+      const mapped = source
+        .map(mapUserToUI)
+        .filter(u => u.roleId !== 3); // Completely EXCLUDE RoleId = 3 (Customer)
+      setAccounts(mapped);
     } catch (err) {
       console.error(err);
-      setErrorBanner('Offline Mode: Failed to load user accounts from SQL Server.');
-      // Revert to fallback local storage if available
-      const saved = localStorage.getItem('spotflow_accounts_list');
-      if (saved) {
-        setAccounts(JSON.parse(saved).filter(u => u.roleId !== 3));
-      }
+      setErrorBanner('Không thể tải danh sách người dùng từ backend.');
+      setAccounts([]);
     } finally {
       setLoading(false);
     }
@@ -103,13 +83,6 @@ const Accounts = () => {
   useEffect(() => {
     loadUsers();
   }, []);
-
-  // Save list backup locally in offline mode
-  useEffect(() => {
-    if (accounts && accounts.length > 0) {
-      localStorage.setItem('spotflow_accounts_list', JSON.stringify(accounts));
-    }
-  }, [accounts]);
 
   // Dynamic Date subtitle
   const getFormattedDate = () => {

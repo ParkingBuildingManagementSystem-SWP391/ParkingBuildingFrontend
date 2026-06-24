@@ -178,57 +178,6 @@ const getDefaultExpectedCheckInTimeParts = () => {
   };
 };
 
-const initAuthParkingMap = () => {
-  const slots = [];
-
-  // Simulated Fallback Data (Floor G - FloorId 3)
-  for (let i = 1; i <= 60; i++) {
-    slots.push({
-      id: `G-M-${String(i).padStart(3, '0')}`,
-      dbSlotId: 154 + i,
-      slotId: 154 + i,
-      floorId: 3,
-      floor: 'Floor G',
-      zone: 'Motorcycle',
-      type: 'Motorcycle',
-      status: 'Available',
-      typeId: 2
-    });
-  }
-
-  // Simulated Fallback Data (Floor B1 - FloorId 1)
-  for (let i = 1; i <= 40; i++) {
-    slots.push({
-      id: `B1-C-${String(i).padStart(3, '0')}`,
-      dbSlotId: 4 + i,
-      slotId: 4 + i,
-      floorId: 1,
-      floor: 'Floor B1',
-      zone: 'Car',
-      type: 'Car',
-      status: 'Available',
-      typeId: 3
-    });
-  }
-
-  // Simulated Fallback Data (Floor B2 - FloorId 2)
-  for (let i = 1; i <= 20; i++) {
-    slots.push({
-      id: `B2-C-${String(i).padStart(3, '0')}`,
-      dbSlotId: 2000 + i,
-      slotId: 2000 + i,
-      floorId: 2,
-      floor: 'Floor B2',
-      zone: 'Car',
-      type: 'Car',
-      status: 'Available',
-      typeId: 3
-    });
-  }
-
-  return slots;
-};
-
 const ParkingLotMap = () => {
   const { role, user } = useAuth();
   const navigate = useNavigate();
@@ -244,7 +193,7 @@ const ParkingLotMap = () => {
   const [pendingBookingSlot, setPendingBookingSlot] = useState(null);
 
   // Stateful slots
-  const [authSlots, setAuthSlots] = useState(() => initAuthParkingMap());
+  const [authSlots, setAuthSlots] = useState([]);
 
   // Floors state initialized strictly to DB_FLOORS
   const [floors, setFloors] = useState(DB_FLOORS);
@@ -373,7 +322,7 @@ const ParkingLotMap = () => {
       }
     } catch (err) {
       console.error(err);
-      setErrorMap('Offline Mode: Displaying simulated offline layout.');
+      setErrorMap('Không thể tải dữ liệu chỗ đỗ từ backend.');
     } finally {
       setLoadingMap(false);
     }
@@ -384,21 +333,19 @@ const ParkingLotMap = () => {
     const loadInitialFloorData = async () => {
       let floorList = DB_FLOORS;
 
-      if (typeof parkingService.getFloors === 'function') {
-        try {
-          const data = await parkingService.getFloors();
-          if (data && data.length > 0) {
-            floorList = data.map(f => ({
-              id: f.floorId || f.id,
-              name: f.floorName || f.name,
-              capacity: f.capacity || 100,
-              desc: (f.floorId || f.id) === 3 ? "Motorbike & Bicycle Parking" : "Car Parking Only"
-            }));
-            setFloors(floorList);
-          }
-        } catch (e) {
-          console.warn("Failed to fetch dynamic floors, using static mapping.", e);
+      try {
+        const data = await parkingService.getFloors();
+        if (data && data.length > 0) {
+          floorList = data.map(f => ({
+            id: f.floorId || f.id,
+            name: f.floorName || f.name,
+            capacity: f.capacity || 0,
+            desc: f.description || f.Description || ''
+          }));
+          setFloors(floorList);
         }
+      } catch (e) {
+        console.warn("Failed to fetch dynamic floors.", e);
       }
 
       setLoadingMap(true);
@@ -440,7 +387,7 @@ const ParkingLotMap = () => {
         });
 
         if (successfulSummaries.length < floorList.length) {
-          setErrorMap('Offline Mode: Displaying simulated offline layout.');
+          setErrorMap('Một số tầng chưa tải được dữ liệu từ backend.');
         }
       } finally {
         setLoadingMap(false);
@@ -627,7 +574,7 @@ const ParkingLotMap = () => {
 
 
   const getEstimatedDeposit = () => {
-    // Lấy cấu hình giá từ loại xe đang chọn (ví dụ lấy từ thông tin Slot hoặc mock cấu hình)
+    // Lấy cấu hình giá từ loại xe đang chọn.
     // Giả định mức giá mặc định nếu chưa lấy được từ DB:
     const rates = {
       Car: { day: 20000, night: 30000 },

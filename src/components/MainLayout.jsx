@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import AppFooter from './AppFooter';
 
 const MainLayout = () => {
   return (
@@ -17,9 +18,14 @@ const MainLayout = () => {
         <Header />
         
         {/* Scrollable Page Content */}
-        <main className="flex-1 overflow-y-auto px-6 py-6 md:px-8 md:py-8 w-full">
-          <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
-            <Outlet />
+        <main className="flex-1 overflow-y-auto w-full">
+          <div className="min-h-full flex flex-col">
+            <div className="flex-1 px-6 py-6 md:px-8 md:py-8 w-full">
+              <div className="max-w-[1600px] mx-auto w-full animate-fade-in">
+                <Outlet />
+              </div>
+            </div>
+            <AppFooter />
           </div>
         </main>
         

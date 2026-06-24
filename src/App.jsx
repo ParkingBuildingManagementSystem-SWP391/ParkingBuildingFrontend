@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import PaymentSuccess from './pages/PaymentSuccess';
+import Home from './pages/Home';
 
 // Protected Pages (Admin & Driver Features)
 import Introduction from './pages/Introduction';
@@ -20,7 +21,14 @@ import CreateAccount from './pages/CreateAccount';
 import ParkingSessionManager from './pages/ParkingSessionManager';
 
 // Feature Components (Dashboard, Parking Map, Check-in counter)
-import Dashboard from './features/dashboard/Dashboard';
+import Dashboard, {
+  LiveStatusPage,
+  IncidentsPage,
+  AnalyticsPage,
+  SlotManagementPage,
+  PricingPage,
+  StaffLogsPage
+} from './features/dashboard/Dashboard';
 import ParkingLotMap from './features/parking-map/ParkingLotMap';
 import GateController from './features/checkin-checkout/GateController';
 
@@ -33,6 +41,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
 
         {/* MainLayout wrapping for both public and protected routes */}
         <Route element={<MainLayout />}>
@@ -57,9 +67,19 @@ function App() {
               <Route path="/create-account" element={<CreateAccount />} />
             </Route>
 
-            {/* Admin/Manager parking session management */}
-            <Route element={<RoleProtectedRoute allowedRoles={['Admin', 'Manager']} />}>
+            {/* Admin parking session management */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
               <Route path="/admin/parking-sessions" element={<ParkingSessionManager />} />
+            </Route>
+
+            {/* Manager dashboard feature pages */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Manager']} />}>
+              <Route path="/live-status" element={<LiveStatusPage />} />
+              <Route path="/incidents" element={<IncidentsPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/slot-management" element={<SlotManagementPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/staff-logs" element={<StaffLogsPage />} />
             </Route>
 
             {/* Staff/Manager operations paths */}
@@ -76,7 +96,6 @@ function App() {
         </Route>
 
         {/* Unmatched URL redirects */}
-        <Route path="/" element={<Navigate to="/parking-map" replace />} />
         <Route path="*" element={<Navigate to="/parking-map" replace />} />
       </Routes>
     </AuthProvider>

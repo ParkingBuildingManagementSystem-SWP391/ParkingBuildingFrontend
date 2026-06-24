@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Map, Calendar as CalendarIcon, LayoutDashboard,
-  UserPlus, ScanLine, Users
+  UserPlus, ScanLine, Users, Activity, AlertTriangle,
+  BarChart3, Grid3X3, DollarSign, ClipboardList
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -69,7 +70,12 @@ const Sidebar = () => {
           <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Quản lý</h4>
           <NavButton path="/dashboard" icon={LayoutDashboard} label="Bảng điều khiển" />
           <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
-          <NavButton path="/admin/parking-sessions" icon={CalendarIcon} label="Quản lý phiên đỗ" />
+          <NavButton path="/live-status" icon={Activity} label="Trạng thái trực tiếp" />
+          <NavButton path="/incidents" icon={AlertTriangle} label="Sự cố" />
+          <NavButton path="/analytics" icon={BarChart3} label="Phân tích" />
+          <NavButton path="/slot-management" icon={Grid3X3} label="Quản lý chỗ đỗ" />
+          <NavButton path="/pricing" icon={DollarSign} label="Bảng giá" />
+          <NavButton path="/staff-logs" icon={ClipboardList} label="Nhật ký nhân viên" />
         </div>
       );
     }

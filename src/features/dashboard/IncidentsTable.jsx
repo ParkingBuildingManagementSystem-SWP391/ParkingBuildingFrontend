@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Table, Tag, Button, Input, Select, message, Popconfirm, Tooltip, Space } from 'antd';
 import { 
   AlertTriangle, 
@@ -11,63 +11,47 @@ import {
   MapPin,
   Clock
 } from 'lucide-react';
+import { managerService } from '../../services/managerService';
 
 const { Option } = Select;
 
-// Generate some mock incidents
-const MOCK_INCIDENTS = [
-  {
-    id: 'INC-20231015-01',
-    severity: 'Critical',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 mins ago
-    type: 'Biển số không khớp',
-    description: 'Xe ra tại Cổng 1 không khớp với biển số đã ghi nhận lúc vào bãi.',
-    location: 'Cổng ra 1',
-    status: 'Open'
-  },
-  {
-    id: 'INC-20231015-02',
-    severity: 'Warning',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 48 hours ago
-    type: 'Vượt giới hạn thời gian đỗ',
-    description: 'Xe 29A-12345 đã đỗ liên tục quá 48 giờ.',
-    location: 'Tầng B1 - Chỗ A2-14',
-    status: 'Open'
-  },
-  {
-    id: 'INC-20231015-03',
-    severity: 'Critical',
-    timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
-    type: 'Barrier bị mở cưỡng bức',
-    description: 'Barrier Cổng vào 2 bị mở thủ công khi chưa được phép.',
-    location: 'Cổng vào 2',
-    status: 'Open'
-  },
-  {
-    id: 'INC-20231014-04',
-    severity: 'Info',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-    type: 'Bất thường cảm biến',
-    description: 'Cảm biến chỗ đỗ báo kết nối chập chờn.',
-    location: 'Tầng G - Chỗ C1-05',
-    status: 'Resolved'
-  },
-  {
-    id: 'INC-20231014-05',
-    severity: 'Warning',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
-    type: 'Thanh toán thất bại nhiều lần',
-    description: 'Khách hàng thực hiện giao dịch VNPay 3 lần nhưng không thành công.',
-    location: 'Cổng ra 2',
-    status: 'Open'
-  }
-];
-
 const IncidentsTable = () => {
-  const [incidents, setIncidents] = useState(MOCK_INCIDENTS);
+  const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [searchText, setSearchText] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('All');
   const [resolvingId, setResolvingId] = useState(null);
+
+  const normalizeIncident = (item, index) => ({
+    id: item.id || item.incidentId || item.IncidentId || item.code || `incident-${index}`,
+    severity: item.severity || item.Severity || 'Info',
+    timestamp: item.timestamp || item.createdAt || item.CreatedAt || item.reportedAt || item.ReportedAt,
+    type: item.type || item.Type || item.title || item.Title || 'Sự cố',
+    description: item.description || item.Description || item.message || item.Message || '',
+    location: item.location || item.Location || item.slotName || item.SlotName || '',
+    status: item.status || item.Status || 'Open'
+  });
+
+  const fetchIncidents = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await managerService.getIncidents();
+      const data = Array.isArray(response) ? response : (response?.data || response?.Data || []);
+      setIncidents(data.map(normalizeIncident));
+    } catch (err) {
+      console.error('fetchIncidents error:', err);
+      setError('Chưa thể tải dữ liệu sự cố từ backend.');
+      setIncidents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchIncidents();
+  }, []);
 
   // Filter Logic
   const filteredIncidents = useMemo(() => {
@@ -91,13 +75,17 @@ const IncidentsTable = () => {
   // Handle Resolve Action
   const handleResolve = (id) => {
     setResolvingId(id);
-    setTimeout(() => {
+    managerService.resolveIncident(id).then(() => {
       setIncidents(prev => prev.map(inc => 
         inc.id === id ? { ...inc, status: 'Resolved' } : inc
       ));
-      setResolvingId(null);
       message.success(`Sự cố ${id} đã được đánh dấu là đã xử lý.`);
-    }, 800);
+    }).catch((err) => {
+      console.error('resolveIncident error:', err);
+      message.error('Không thể cập nhật trạng thái sự cố.');
+    }).finally(() => {
+      setResolvingId(null);
+    });
   };
 
   // Tag rendering helpers
@@ -147,7 +135,7 @@ const IncidentsTable = () => {
             <MapPin size={14} /> {record.location}
           </div>
           <div className="flex items-center gap-1.5">
-            <Clock size={14} /> {new Date(record.timestamp).toLocaleString('vi-VN')}
+            <Clock size={14} /> {record.timestamp ? new Date(record.timestamp).toLocaleString('vi-VN') : 'N/A'}
           </div>
         </div>
       )
@@ -169,7 +157,7 @@ const IncidentsTable = () => {
         return (
           <Space>
             <Tooltip title="Xem bằng chứng camera">
-              <Button icon={<Camera size={14} />} size="small" className="text-slate-500 border-slate-200" onClick={() => message.info("Tính năng mô phỏng: màn hình bằng chứng camera sẽ mở tại đây.")} />
+              <Button icon={<Camera size={14} />} size="small" className="text-slate-500 border-slate-200" onClick={() => message.info("Chưa có endpoint backend cho bằng chứng camera.")} />
             </Tooltip>
             <Popconfirm
               title="Đánh dấu đã xử lý?"
@@ -208,6 +196,7 @@ const IncidentsTable = () => {
             Nhật ký an ninh & cảnh báo
           </h3>
           <p className="text-xs text-slate-500 mt-1">Theo dõi bất thường và cảnh báo hệ thống theo thời gian thực</p>
+          {error && <p className="text-xs text-rose-500 mt-2 font-semibold">{error}</p>}
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -256,7 +245,9 @@ const IncidentsTable = () => {
       <Table 
         columns={columns} 
         dataSource={filteredIncidents} 
+        loading={loading}
         rowKey="id"
+        locale={{ emptyText: error ? 'Không có dữ liệu sự cố để hiển thị.' : 'Chưa có dữ liệu sự cố.' }}
         pagination={{ pageSize: 5 }}
         rowClassName={(record) => record.status === 'Resolved' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-rose-50/30'}
         className="border border-slate-100 rounded-xl overflow-hidden shadow-sm"
