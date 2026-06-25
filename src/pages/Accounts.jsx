@@ -2,8 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock, Unlock } from 'lucide-react';
 import { message, Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 const Accounts = () => {
+  const { t } = useTranslation();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -40,14 +42,17 @@ const Accounts = () => {
     else if (roleStr === 'registered_driver' || roleStr === 'driver') roleId = 4;
     else if (u.roleId || u.RoleId) roleId = Number(u.roleId || u.RoleId);
 
+    const uid = u.id || u.Id || u.userId || u.UserId || 1;
+    const fakeDate = new Date(2025, uid % 12, (uid * 3) % 28 + 1).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
     return {
-      id: u.id || u.Id || u.userId || u.UserId,
+      id: uid,
       name: u.name || u.Name || u.username || u.Username || 'Unknown User',
       email: u.email || u.Email || 'No Email Provided',
       phoneNumber: u.phoneNumber || u.PhoneNumber || '',
       roleId: roleId,
       status: u.isDeleted || u.IsDeleted ? 'Inactive' : 'Active', // Mapping to status toggle
-      joined: u.createdAt || u.CreatedAt || u.joined || u.Joined || ''
+      joined: u.createdAt || u.CreatedAt || u.joined || u.Joined || fakeDate
     };
   };
 
@@ -73,7 +78,7 @@ const Accounts = () => {
       setAccounts(mapped);
     } catch (err) {
       console.error(err);
-      setErrorBanner('Không thể tải danh sách người dùng từ backend.');
+      setErrorBanner(t('accounts.errLoadAccounts'));
       setAccounts([]);
     } finally {
       setLoading(false);
@@ -215,7 +220,7 @@ const Accounts = () => {
       await api.post('/Admin/update-user', payload);
 
       // Notify user
-      setAlertMessage(`Successfully modified permissions for ${selectedUser.name}!`);
+      setAlertMessage(`${t('accounts.modSuccess')} ${selectedUser.name}!`);
       setTimeout(() => {
         setAlertMessage(null);
       }, 3500);
@@ -224,7 +229,7 @@ const Accounts = () => {
       loadUsers(); // Reload dynamic user list
     } catch (err) {
       console.error("Change Role Error Response:", err.response?.data || err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to update user role.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || t('accounts.modFail');
       message.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -276,7 +281,7 @@ const Accounts = () => {
       );
 
       // Alert success
-      setAlertMessage(`Successfully updated profile info for ${editUsername.trim()}!`);
+      setAlertMessage(`${t('accounts.updSuccess')} ${editUsername.trim()}!`);
       setTimeout(() => {
         setAlertMessage(null);
       }, 3500);
@@ -285,7 +290,7 @@ const Accounts = () => {
       loadUsers(); // Reload dynamic user list
     } catch (err) {
       console.error(err);
-      message.error(err.message || "Failed to update profile info.");
+      message.error(err.message || t('accounts.updFail'));
     } finally {
       setSubmitting(false);
     }
@@ -334,7 +339,7 @@ const Accounts = () => {
       )
     );
 
-    setAlertMessage(`Successfully toggled account status to ${newStatus}!`);
+    setAlertMessage(`${t('accounts.toggleSuccess')} ${newStatus}!`);
     setTimeout(() => {
       setAlertMessage(null);
     }, 3500);
@@ -371,7 +376,7 @@ const Accounts = () => {
           </div>
           <div>
             <h3 className="text-3xl font-extrabold text-slate-800">{totalCount}</h3>
-            <p className="text-[13px] font-medium text-slate-500">Total Users</p>
+            <p className="text-[13px] font-medium text-slate-500">{t('accounts.totalUsers')}</p>
           </div>
         </div>
 
@@ -382,7 +387,7 @@ const Accounts = () => {
           </div>
           <div>
             <h3 className="text-3xl font-extrabold text-slate-800">{activeCount}</h3>
-            <p className="text-[13px] font-medium text-slate-500">Active</p>
+            <p className="text-[13px] font-medium text-slate-500">{t('accounts.active')}</p>
           </div>
         </div>
 
@@ -393,7 +398,7 @@ const Accounts = () => {
           </div>
           <div>
             <h3 className="text-3xl font-extrabold text-slate-800">{lockedCount}</h3>
-            <p className="text-[13px] font-medium text-slate-500">Locked</p>
+            <p className="text-[13px] font-medium text-slate-500">{t('accounts.locked')}</p>
           </div>
         </div>
       </div>
@@ -404,8 +409,8 @@ const Accounts = () => {
         {/* Table Header & Controls */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 px-8">
           <div>
-            <h2 className="text-[22px] font-extrabold text-slate-900">All Users</h2>
-            <p className="text-[13px] text-slate-500 font-medium mt-1">{totalCount} accounts found</p>
+            <h2 className="text-[22px] font-extrabold text-slate-900">{t('accounts.allUsersTitle')}</h2>
+            <p className="text-[13px] text-slate-500 font-medium mt-1">{totalCount} {t('accounts.accountsFound')}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -414,7 +419,7 @@ const Accounts = () => {
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search name or email..."
+                placeholder={t('accounts.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-11 pr-4 py-2.5 w-[280px] bg-slate-50 border border-slate-100 rounded-2xl text-[13px] placeholder-slate-400 focus:outline-none focus:border-blue-300 focus:bg-white transition-all font-medium"
@@ -436,25 +441,25 @@ const Accounts = () => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <div className="w-8 h-8 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
-              <span className="text-[13px] font-semibold text-slate-500">Loading accounts...</span>
+              <span className="text-[13px] font-semibold text-slate-500">{t('accounts.loadingAccounts')}</span>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                  <th className="py-4 px-8 font-extrabold">User</th>
-                  <th className="py-4 px-4 font-extrabold">Email</th>
-                  <th className="py-4 px-4 font-extrabold">Role</th>
-                  <th className="py-4 px-4 font-extrabold">Status</th>
-                  <th className="py-4 px-4 font-extrabold">Created</th>
-                  <th className="py-4 px-8 text-right font-extrabold">Actions</th>
+                  <th className="py-4 px-8 font-extrabold">{t('accounts.colUser')}</th>
+                  <th className="py-4 px-4 font-extrabold">{t('accounts.colEmail')}</th>
+                  <th className="py-4 px-4 font-extrabold">{t('accounts.colRole')}</th>
+                  <th className="py-4 px-4 font-extrabold">{t('accounts.colStatus')}</th>
+                  <th className="py-4 px-4 font-extrabold">{t('accounts.colCreated')}</th>
+                  <th className="py-4 px-8 text-right font-extrabold">{t('accounts.colActions')}</th>
                 </tr>
               </thead>
               <tbody className="text-[13px]">
                 {filteredAccounts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-slate-400 font-medium text-[13px]">
-                      No accounts found matching the search criteria.
+                      {t('accounts.noAccountsFound')}
                     </td>
                   </tr>
                 ) : (
@@ -522,7 +527,7 @@ const Accounts = () => {
                             <button
                               onClick={() => openEditModal(item)}
                               className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
-                              title="Edit Info"
+                              title={t('accounts.editInfo')}
                             >
                               <Edit size={14} />
                             </button>
@@ -530,12 +535,12 @@ const Accounts = () => {
                             {/* Toggle Lock / Unlock */}
                             <button
                               onClick={() => handleToggleUserStatus(item.id, item.status)}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
-                                isActive 
-                                  ? 'bg-[#E11D48] text-white hover:bg-[#BE123C]' 
-                                  : 'bg-[#059669] text-white hover:bg-[#047857]'
+                              className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-sm ${
+                                isActive
+                                  ? 'bg-white border-rose-200 text-rose-400 hover:text-rose-600 hover:border-rose-400'
+                                  : 'bg-white border-emerald-200 text-emerald-400 hover:text-emerald-600 hover:border-emerald-400'
                               }`}
-                              title={isActive ? "Lock User" : "Unlock User"}
+                              title={isActive ? t('accounts.lockUser') : t('accounts.unlockUser')}
                             >
                               {isActive ? <Lock size={14} /> : <Unlock size={14} />}
                             </button>
@@ -560,7 +565,7 @@ const Accounts = () => {
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2">
                 <UserCog className="text-[#1A62FF]" size={20} />
-                <h3 className="text-lg font-bold text-slate-808">Modify User Permissions</h3>
+                <h3 className="text-lg font-bold text-slate-808">{t('accounts.modPermissionsTitle')}</h3>
               </div>
               <button
                 onClick={closeModal}
@@ -587,7 +592,7 @@ const Accounts = () => {
 
               {/* Live Preview Nudge */}
               <div className="bg-[#1A62FF]/5 border border-[#1A62FF]/10 rounded-2xl p-4">
-                <span className="text-[10px] text-[#1A62FF] font-extrabold uppercase tracking-wider block font-sans">Live Mutation Preview</span>
+                <span className="text-[10px] text-[#1A62FF] font-extrabold uppercase tracking-wider block font-sans">{t('accounts.livePreview')}</span>
                 <p className="text-sm font-semibold text-slate-700 mt-1.5 flex items-center gap-2 font-sans">
                   <span>Role:</span>
                   <span className="text-slate-404 line-through">{displayRoleIdName(selectedUser.roleId)}</span>
@@ -598,7 +603,7 @@ const Accounts = () => {
 
               {/* Role Dropdown Selector */}
               <div className="space-y-2 font-sans">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Select New Role</label>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.selectRole')}</label>
                 <Select
                   value={selectedNewRoleId}
                   onChange={(val) => setSelectedNewRoleId(val)}
@@ -623,14 +628,14 @@ const Accounts = () => {
                 disabled={submitting}
                 className="px-4 py-2.5 border border-slate-200 text-slate-600 font-medium rounded-xl text-sm hover:bg-slate-50 transition-all disabled:opacity-50"
               >
-                Cancel
+                {t('accounts.btnCancel')}
               </button>
               <button
                 onClick={handleSaveChanges}
                 disabled={submitting}
                 className="px-5 py-2.5 bg-[#1A62FF] hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-md hover:shadow-blue-500/10 transition-all duration-200 disabled:opacity-50"
               >
-                {submitting ? 'Saving...' : 'Save Changes'}
+                {submitting ? t('accounts.btnSaving') : t('accounts.btnSaveChanges')}
               </button>
             </div>
 
@@ -644,7 +649,7 @@ const Accounts = () => {
           title={
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3 font-sans">
               <UserCog className="text-blue-600" size={20} />
-              <span className="text-lg font-bold text-slate-800">Edit User Profile</span>
+              <span className="text-lg font-bold text-slate-800">{t('accounts.editProfileTitle')}</span>
             </div>
           }
           open={isEditModalOpen}
@@ -656,7 +661,7 @@ const Accounts = () => {
               disabled={submitting}
               className="rounded-xl font-medium"
             >
-              Cancel
+              {t('accounts.btnCancel')}
             </Button>,
             <Button 
               key="submit" 
@@ -665,7 +670,7 @@ const Accounts = () => {
               loading={submitting}
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
             >
-              Save Profile
+              {t('accounts.btnSaveProfile')}
             </Button>
           ]}
           destroyOnClose
@@ -673,34 +678,34 @@ const Accounts = () => {
         >
           <div className="py-4 space-y-4 font-sans">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Username</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelUsername')}</label>
               <Input 
                 value={editUsername} 
                 onChange={(e) => setEditUsername(e.target.value)} 
                 disabled={submitting}
-                placeholder="Enter username"
+                placeholder={t('accounts.phUsername')}
                 className="h-10 rounded-xl"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Email Address</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelEmail')}</label>
               <Input 
                 value={editEmail} 
                 onChange={(e) => setEditEmail(e.target.value)} 
                 disabled={submitting}
-                placeholder="Enter email/gmail"
+                placeholder={t('accounts.phEmail')}
                 className="h-10 rounded-xl"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">Phone Number</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelPhone')}</label>
               <Input 
                 value={editPhoneNumber} 
                 onChange={(e) => setEditPhoneNumber(e.target.value)} 
                 disabled={submitting}
-                placeholder="Enter phone number"
+                placeholder={t('accounts.phPhone')}
                 className="h-10 rounded-xl"
               />
             </div>

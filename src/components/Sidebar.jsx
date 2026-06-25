@@ -7,11 +7,13 @@ import {
   UserPlus, ScanLine, Users, Activity, AlertTriangle,
   BarChart3, Grid3X3, DollarSign, ClipboardList
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Sidebar = () => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const currentPath = location.pathname;
   const lowerRole = role?.toLowerCase();
@@ -39,8 +41,8 @@ const Sidebar = () => {
     if (!user) {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Công khai</h4>
-          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">{t('sidebar.public')}</h4>
+          <NavButton path="/parking-map" icon={Map} label={t('sidebar.parkingMap')} />
         </div>
       );
     }
@@ -48,9 +50,9 @@ const Sidebar = () => {
     if (['driver', 'member', 'registered_driver', 'customer'].includes(lowerRole)) {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Dịch vụ</h4>
-          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
-          <NavButton path="/my-bookings" icon={CalendarIcon} label="Lịch đặt chỗ của tôi" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">{t('sidebar.services')}</h4>
+          <NavButton path="/parking-map" icon={Map} label={t('sidebar.parkingMap')} />
+          <NavButton path="/my-bookings" icon={CalendarIcon} label={t('sidebar.myBookings')} />
         </div>
       );
     }
@@ -58,9 +60,9 @@ const Sidebar = () => {
     if (lowerRole === 'staff') {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Vận hành</h4>
-          <NavButton path="/checkin-checkout" icon={ScanLine} label="Điều khiển cổng" />
-          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">{t('sidebar.operations')}</h4>
+          <NavButton path="/checkin-checkout" icon={ScanLine} label={t('sidebar.gateControl')} />
+          <NavButton path="/parking-map" icon={Map} label={t('sidebar.parkingMap')} />
         </div>
       );
     }
@@ -68,15 +70,15 @@ const Sidebar = () => {
     if (lowerRole === 'manager') {
       return (
         <div className="mb-6">
-          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Quản lý</h4>
-          <NavButton path="/dashboard" icon={LayoutDashboard} label="Bảng điều khiển" />
-          <NavButton path="/parking-map" icon={Map} label="Sơ đồ bãi xe" />
-          <NavButton path="/live-status" icon={Activity} label="Trạng thái trực tiếp" />
-          <NavButton path="/incidents" icon={AlertTriangle} label="Sự cố" />
-          <NavButton path="/analytics" icon={BarChart3} label="Phân tích" />
-          <NavButton path="/slot-management" icon={Grid3X3} label="Quản lý chỗ đỗ" />
-          <NavButton path="/pricing" icon={DollarSign} label="Bảng giá" />
-          <NavButton path="/staff-logs" icon={ClipboardList} label="Nhật ký nhân viên" />
+          <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">{t('sidebar.management')}</h4>
+          <NavButton path="/dashboard" icon={LayoutDashboard} label={t('sidebar.dashboard')} />
+          <NavButton path="/parking-map" icon={Map} label={t('sidebar.parkingMap')} />
+          <NavButton path="/live-status" icon={Activity} label={t('sidebar.liveStatus')} />
+          <NavButton path="/incidents" icon={AlertTriangle} label={t('sidebar.incidents')} />
+          <NavButton path="/analytics" icon={BarChart3} label={t('sidebar.analytics')} />
+          <NavButton path="/slot-management" icon={Grid3X3} label={t('sidebar.slotManagement')} />
+          <NavButton path="/pricing" icon={DollarSign} label={t('sidebar.pricing')} />
+          <NavButton path="/staff-logs" icon={ClipboardList} label={t('sidebar.staffLogs')} />
         </div>
       );
     }
@@ -85,10 +87,10 @@ const Sidebar = () => {
       return (
         <>
           <div className="mb-6">
-            <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">Quản trị</h4>
-            <NavButton path="/accounts" icon={Users} label="Quản lý người dùng" />
-            <NavButton path="/create-account" icon={UserPlus} label="Tạo tài khoản" />
-            <NavButton path="/admin/parking-sessions" icon={CalendarIcon} label="Quản lý phiên đỗ" />
+            <h4 className="px-4 text-[10px] font-extrabold text-slate-400 tracking-wider uppercase mb-2">{t('sidebar.administration')}</h4>
+            <NavButton path="/accounts" icon={Users} label={t('sidebar.userAccounts')} />
+            <NavButton path="/create-account" icon={UserPlus} label={t('sidebar.createAccount')} />
+            <NavButton path="/admin/parking-sessions" icon={CalendarIcon} label={t('sidebar.parkingSessions')} />
           </div>
 
         </>

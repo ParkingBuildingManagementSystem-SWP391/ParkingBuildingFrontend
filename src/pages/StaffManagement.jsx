@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Card, Table, Avatar, Tag, Button } from 'antd';
 import { Users, UserPlus, Shield, UserCheck } from 'lucide-react';
 import { adminService } from '../services/adminService';
+import { useTranslation } from 'react-i18next';
 
 const StaffManagement = () => {
+  const { t } = useTranslation();
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,7 +33,7 @@ const StaffManagement = () => {
         setStaffMembers(staff);
       } catch (err) {
         console.error('loadStaff error:', err);
-        setError('Chưa thể tải danh sách nhân viên từ backend.');
+        setError(t('staff.errLoadList'));
         setStaffMembers([]);
       } finally {
         setLoading(false);
@@ -43,7 +45,7 @@ const StaffManagement = () => {
 
   const columns = [
     {
-      title: 'Attendant Info',
+      title: t('staff.colInfo'),
       dataIndex: 'name',
       key: 'name',
       render: (_, record) => (
@@ -57,7 +59,7 @@ const StaffManagement = () => {
       )
     },
     {
-      title: 'Security Scope',
+      title: t('staff.colScope'),
       dataIndex: 'role',
       key: 'role',
       render: (text) => (
@@ -68,13 +70,13 @@ const StaffManagement = () => {
       )
     },
     {
-      title: 'Assigned Patrol Zone',
+      title: t('staff.colZone'),
       dataIndex: 'zone',
       key: 'zone',
       render: (text) => <Tag color="blue">{text}</Tag>
     },
     {
-      title: 'Availability',
+      title: t('staff.colAvailability'),
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
@@ -87,8 +89,8 @@ const StaffManagement = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Staff Management Directory</h1>
-          <p className="text-slate-400 text-sm mt-1">Review parking attendants, schedules, and active zones</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">{t('staff.pageTitle')}</h1>
+          <p className="text-slate-400 text-sm mt-1">{t('staff.pageDesc')}</p>
           {error && <p className="text-rose-400 text-sm mt-2 font-semibold">{error}</p>}
         </div>
         <Button
@@ -96,17 +98,17 @@ const StaffManagement = () => {
           icon={<UserPlus size={16} />}
           className="bg-indigo-600 hover:bg-indigo-500 border-none font-semibold rounded-lg flex items-center justify-center gap-1.5 h-10"
         >
-          Add New Attendant
+          {t('staff.btnAdd')}
         </Button>
       </div>
 
-      <Card title={<span className="text-base font-bold text-white flex items-center gap-2"><Users size={18}/> Active Attendant Directory</span>} className="shadow-lg border border-slate-800">
+      <Card title={<span className="text-base font-bold text-white flex items-center gap-2"><Users size={18}/> {t('staff.tableTitle')}</span>} className="shadow-lg border border-slate-800">
         <Table
           columns={columns}
           dataSource={staffMembers}
           loading={loading}
           pagination={false}
-          locale={{ emptyText: error ? 'Không có dữ liệu nhân viên để hiển thị.' : 'Chưa có dữ liệu nhân viên.' }}
+          locale={{ emptyText: error ? t('staff.emptyError') : t('staff.emptyNormal') }}
           className="custom-antd-table"
         />
       </Card>

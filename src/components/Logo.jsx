@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const sizeClasses = {
   small: {
@@ -16,6 +17,7 @@ const sizeClasses = {
 };
 
 const Logo = ({ className = '', size = 'default', showText = true }) => {
+  const { t } = useTranslation();
   const classes = sizeClasses[size] || sizeClasses.default;
 
   return (
@@ -26,10 +28,10 @@ const Logo = ({ className = '', size = 'default', showText = true }) => {
       {showText && (
         <div className="text-left leading-tight">
           <p className={`font-black uppercase text-slate-950 ${classes.title}`}>
-            HỆ THỐNG
+            {t('sidebar.systemName')}
           </p>
           <p className={`font-extrabold uppercase tracking-tight text-slate-500 ${classes.subtitle}`}>
-            QUẢN LÍ BÃI ĐỖ XE
+            {t('sidebar.systemDesc')}
           </p>
         </div>
       )}

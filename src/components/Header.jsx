@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
-  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn
+  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages
 } from 'lucide-react';
 
 const Header = () => {
@@ -11,6 +12,12 @@ const Header = () => {
   const location = useLocation();
   const userMenuRef = useRef(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'vi' ? 'en' : 'vi';
+    i18n.changeLanguage(newLang);
+  };
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -93,65 +100,18 @@ const Header = () => {
   };
 
   const getPageTitle = () => {
-    switch (location.pathname) {
-      case '/parking-map': return 'Bản đồ trực tiếp';
-      case '/dashboard': return 'Bảng điều khiển quản lý';
-      case '/live-status': return 'Trạng thái trực tiếp';
-      case '/incidents': return 'Sự cố';
-      case '/analytics': return 'Phân tích';
-      case '/slot-management': return 'Quản lý chỗ đỗ';
-      case '/pricing': return 'Bảng giá';
-      case '/staff-logs': return 'Nhật ký nhân viên';
-      case '/accounts': return 'Quản lý người dùng';
-      case '/create-account': return 'Tạo tài khoản';
-      case '/my-bookings': return 'Lịch đặt chỗ của tôi';
-      case '/checkin-checkout': return 'Điều khiển cổng';
-      case '/settings': return 'Cài đặt tài khoản';
-      default: return 'Quản lý người dùng'; // Defaulting to the mockup title
-    }
+    const path = location.pathname.substring(1);
+    if (!path) return t('header.title.default');
+    return t(`header.title.${path}`, { defaultValue: t('header.title.default') });
   };
 
   const getPageSubtitle = () => {
     if (location.pathname === '/dashboard') {
       return getFormattedDate();
     }
-    if (location.pathname === '/parking-map') {
-      return 'Bản đồ tình trạng chỗ đỗ xe theo thời gian thực';
-    }
-    if (location.pathname === '/live-status') {
-      return 'Theo dõi trạng thái chỗ đỗ theo thời gian thực';
-    }
-    if (location.pathname === '/incidents') {
-      return 'Theo dõi cảnh báo và sự cố vận hành';
-    }
-    if (location.pathname === '/analytics') {
-      return 'Phân tích lưu lượng xe và doanh thu';
-    }
-    if (location.pathname === '/slot-management') {
-      return 'Không gian quản lý trạng thái và điều phối chỗ đỗ';
-    }
-    if (location.pathname === '/pricing') {
-      return 'Cấu hình bảng giá theo loại xe';
-    }
-    if (location.pathname === '/staff-logs') {
-      return 'Theo dõi nhật ký hoạt động của nhân viên';
-    }
-    if (location.pathname === '/accounts') {
-      return 'Quản lý tài khoản người dùng và quyền truy cập hệ thống';
-    }
-    if (location.pathname === '/settings') {
-      return 'Cấu hình hồ sơ cá nhân, tùy chọn hệ thống và công cụ quản trị';
-    }
-    if (location.pathname === '/checkin-checkout') {
-      return 'Trung tâm điều phối làn vào và làn ra';
-    }
-    if (location.pathname === '/create-account') {
-      return 'Tạo người dùng mới và cấp quyền truy cập hệ thống';
-    }
-    if (location.pathname === '/my-bookings') {
-      return 'Quản lý lịch đặt chỗ và lịch sử gửi xe của bạn';
-    }
-    return 'Quản lý tài khoản người dùng và quyền truy cập hệ thống';
+    const path = location.pathname.substring(1);
+    if (!path) return t('header.subtitle.default');
+    return t(`header.subtitle.${path}`, { defaultValue: t('header.subtitle.default') });
   };
 
   return (
@@ -166,13 +126,7 @@ const Header = () => {
       {/* Right: Actions & Indicators */}
       <div className="flex items-center gap-6">
 
-        {/* Active Indicator */}
-        <div className="hidden sm:flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#34C759]"></div>
-          <span className="text-[13px] font-bold text-slate-800">3 <span className="font-medium text-slate-500">đang hoạt động</span></span>
-        </div>
 
-        <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
         {/* Notifications */}
         <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative">
@@ -190,6 +144,18 @@ const Header = () => {
           {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
+        {/* Language Switcher Toggle */}
+        <button
+          onClick={toggleLanguage}
+          className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative"
+          title={i18n.language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+        >
+          <Languages size={18} />
+          <span className="absolute -bottom-1 -right-1 bg-indigo-100 text-indigo-700 text-[9px] font-bold px-1 rounded-sm border border-white">
+            {i18n.language.toUpperCase()}
+          </span>
+        </button>
+
         {user ? (
           <div className="relative" ref={userMenuRef}>
             <button
@@ -204,7 +170,7 @@ const Header = () => {
                   {getDisplayName()}
                 </span>
                 <span className="max-w-[120px] truncate text-[11px] font-medium text-slate-500">
-                  {getDisplayRole()}
+                  {getDisplayRole() || t('header.userRole')}
                 </span>
               </div>
               <ChevronDown size={15} className={`text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
@@ -224,14 +190,14 @@ const Header = () => {
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
                 >
                   <Settings size={15} className="text-slate-400" />
-                  Tài khoản của tôi
+                  {t('header.profile')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-50"
                 >
                   <LogOut size={15} />
-                  Đăng xuất
+                  {t('header.logout')}
                 </button>
               </div>
             )}

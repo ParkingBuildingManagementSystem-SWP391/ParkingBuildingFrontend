@@ -2,9 +2,11 @@ import React from 'react';
 import { Result, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Unauthorized = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center bg-transparent">
@@ -18,10 +20,10 @@ const Unauthorized = () => {
               </div>
             </div>
           }
-          title={<span className="text-white text-2xl font-bold">Access Restrained</span>}
+          title={<span className="text-white text-2xl font-bold">{t('unauthorized.title')}</span>}
           subTitle={
             <p className="text-slate-400 mt-2 max-w-sm mx-auto">
-              Your account does not possess the permissions necessary to enter this section. Please switch your role context to inspect this page.
+              {t('unauthorized.subTitle')}
             </p>
           }
           extra={
@@ -30,7 +32,7 @@ const Unauthorized = () => {
               onClick={() => navigate('/dashboard')}
               className="bg-indigo-600 hover:bg-indigo-500 border-none px-6 h-10 font-medium rounded-lg"
             >
-              Back to Dashboard
+              {t('unauthorized.btnBack')}
             </Button>
           }
         />

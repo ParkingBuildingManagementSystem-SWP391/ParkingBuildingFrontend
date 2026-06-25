@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Button, Alert, Select, message } from 'antd';
 import { Camera, RefreshCw } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
+import { useTranslation } from 'react-i18next';
 
 const scanKeyframes = `
 @keyframes qrLaserScan {
@@ -14,7 +15,8 @@ const scanKeyframes = `
 }
 `;
 
-const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR bằng Camera" }) => {
+const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
+  const { t } = useTranslation();
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -33,12 +35,12 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
           const backCamera = cameras.find(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('environment'));
           setSelectedDevice(backCamera ? backCamera.id : cameras[0].id);
         } else {
-          message.error("Không tìm thấy camera nào trên thiết bị!");
+          message.error(t('gate.qrScanner.noCamera'));
         }
       })
       .catch((err) => {
         console.error("Error getting cameras", err);
-        message.error("Không thể truy cập camera. Vui lòng cấp quyền truy cập!");
+        message.error(t('gate.qrScanner.noPermission'));
       });
   }, [isOpen]);
 
@@ -77,7 +79,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
             }
           },
           (decodedText) => {
-            message.success("Quét mã QR thành công!");
+            message.success(t('gate.qrScanner.scanSuccess'));
             // Dừng camera trước rồi mới đóng modal và gọi callback
             stopScanner(false).then(() => {
               onScanSuccess(decodedText);
@@ -134,7 +136,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
         onCancel={onClose}
         footer={[
           <Button key="close" type="dashed" onClick={onClose} className="font-bold h-10 px-5 rounded-lg">
-            Đóng
+            {t('gate.qrScanner.close')}
           </Button>
         ]}
         width={450}
@@ -144,7 +146,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
         <div className="space-y-4 pt-2">
           {devices.length > 1 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Chọn Camera:</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('gate.qrScanner.selectCamera')}</span>
               <Select
                 value={selectedDevice}
                 onChange={handleDeviceChange}
@@ -177,14 +179,14 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title = "Quét mã QR 
             {!isScanning && (
               <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center text-slate-400 gap-2">
                 <RefreshCw className="animate-spin text-indigo-400" size={28} />
-                <span className="text-xs font-bold uppercase tracking-wider">Đang khởi tạo camera...</span>
+                <span className="text-xs font-bold uppercase tracking-wider">{t('gate.qrScanner.initializing')}</span>
               </div>
             )}
           </div>
 
           <Alert
-            message="Hướng dẫn quét"
-            description="Hãy đưa mã QR hiển thị trên điện thoại hoặc vé in của khách hàng vào tâm khung hình để hệ thống tự động nhận dạng."
+            message={t('gate.qrScanner.instructionTitle')}
+            description={t('gate.qrScanner.instructionDesc')}
             type="info"
             showIcon
             className="rounded-xl text-xs"

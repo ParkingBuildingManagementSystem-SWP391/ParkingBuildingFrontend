@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Form, Input, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { parkingService } from '../../services/parkingService';
 import Webcam from 'react-webcam';
 import { 
@@ -47,8 +48,9 @@ const scanKeyframes = `
 `;
 
 const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, ocrResult, onTurnOn, isWebcamOn, onUpload, onRetry }) => {
+  const { t } = useTranslation();
   const webcamRef = React.useRef(null);
-  const cameraLabel = type === 'Entry' ? 'Cổng vào' : type === 'Exit' ? 'Cổng ra' : type;
+  const cameraLabel = type === 'Entry' ? t('gate.camera.entry') : type === 'Exit' ? t('gate.camera.exit') : type;
   
   const theme = {
     emerald: {
@@ -121,18 +123,18 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
               </div>
             )}
 
-            <div className={`absolute bottom-1.5 left-1.5 right-1.5 ${ocrResult === 'Cần kiểm tra' ? 'bg-orange-500/90 text-white' : 'bg-slate-900/90'} px-2 py-1 rounded flex items-center justify-between text-[10px] font-mono shadow-md`}>
+            <div className={`absolute bottom-1.5 left-1.5 right-1.5 ${ocrResult === t('gate.camera.needCheck') ? 'bg-orange-500/90 text-white' : 'bg-slate-900/90'} px-2 py-1 rounded flex items-center justify-between text-[10px] font-mono shadow-md`}>
               <span className="text-white/80 font-bold uppercase text-[8px]">{cameraLabel}</span>
-              <span className={`font-semibold truncate max-w-[180px] ${ocrResult === 'Cần kiểm tra' ? 'text-white' : (ocrResult && !isScanning ? 'text-yellow-400' : 'text-slate-500')}`}>
-                {isScanning ? 'AI ĐANG QUÉT...' : (ocrResult || 'ẢNH CỤC BỘ')}
+              <span className={`font-semibold truncate max-w-[180px] ${ocrResult === t('gate.camera.needCheck') ? 'text-white' : (ocrResult && !isScanning ? 'text-yellow-400' : 'text-slate-500')}`}>
+                {isScanning ? t('gate.camera.aiScanning') : (ocrResult || t('gate.camera.localImage'))}
               </span>
             </div>
           </>
         ) : (
           <>
             <MonitorPlay size={22} className={`text-slate-700 group-hover:${theme.text} transition-colors`} />
-            <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase text-center">Xem trước ảnh {cameraLabel}</span>
-            <span className="text-[8px] text-slate-600 font-bold tracking-widest uppercase">Bật camera hoặc tải ảnh lên</span>
+            <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase text-center">{t('gate.camera.preview')} {cameraLabel}</span>
+            <span className="text-[8px] text-slate-600 font-bold tracking-widest uppercase">{t('gate.camera.turnOnOrUpload')}</span>
           </>
         )}
       </div>
@@ -144,14 +146,14 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
               onClick={onTurnOn}
               className={`flex-1 h-10 border-slate-200 ${theme.borderHover} rounded-lg flex items-center justify-center gap-1.5 font-bold shadow-sm`}
             >
-              Bật camera
+              {t('gate.camera.turnOn')}
             </Button>
             <Upload
               accept="image/*"
               beforeUpload={(file) => {
                 const isImage = file.type.startsWith('image/');
-                if (!isImage) { message.error('Chỉ có thể tải lên file hình ảnh!'); return Upload.LIST_IGNORE; }
-                if (file.size / 1024 / 1024 >= 5) { message.error('Ảnh phải nhỏ hơn 5MB!'); return Upload.LIST_IGNORE; }
+                if (!isImage) { message.error(t('gate.camera.uploadOnlyImage')); return Upload.LIST_IGNORE; }
+                if (file.size / 1024 / 1024 >= 5) { message.error(t('gate.camera.imageSizeLimit')); return Upload.LIST_IGNORE; }
                 onUpload(file);
                 return false;
               }}
@@ -159,7 +161,7 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
               className="flex-1 flex"
             >
               <Button className="w-full h-10 border-slate-200 hover:border-blue-500 hover:text-blue-600 rounded-lg flex items-center justify-center gap-1.5 font-bold shadow-sm">
-                Tải ảnh lên
+                {t('gate.camera.upload')}
               </Button>
             </Upload>
           </>
@@ -172,14 +174,14 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
                 onClick={onRetry}
                 className="flex-1 h-10 text-blue-500 border-slate-200 hover:text-blue-600 hover:border-blue-500 rounded-lg font-bold"
               >
-                Chụp lại
+                {t('gate.camera.retake')}
               </Button>
             )}
             <Button
               onClick={onClear}
               className="flex-1 h-10 text-slate-500 border-slate-200 hover:text-rose-500 hover:border-rose-500 rounded-lg font-bold"
             >
-              {isWebcamOn ? 'Tắt camera' : 'Xóa dữ liệu'}
+              {isWebcamOn ? t('gate.camera.turnOff') : t('gate.camera.clearData')}
             </Button>
           </div>
         )}
@@ -190,11 +192,12 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
 
 
 const BookingCheckInModal = ({ isOpen, onClose, data }) => {
+  const { t } = useTranslation();
   if (!data) return null;
 
   return (
     <Modal
-      title={<span className="font-extrabold text-slate-800 text-base uppercase tracking-wider">Xác Nhận Đặt Chỗ Cổng Vào</span>}
+      title={<span className="font-extrabold text-slate-800 text-base uppercase tracking-wider">{t('gate.bookingCheckIn.title')}</span>}
       open={isOpen}
       onCancel={onClose}
       footer={[
@@ -204,7 +207,7 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
           onClick={onClose}
           className="h-10 bg-emerald-600 hover:bg-emerald-500 border-none font-bold rounded-lg px-6 shadow-md"
         >
-          Xác Nhận & Mở Barrier
+          {t('gate.bookingCheckIn.confirmBtn')}
         </Button>
       ]}
       centered
@@ -214,26 +217,26 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
       <div className="space-y-4 py-3">
         {/* Vị trí ô đỗ được làm nổi bật */}
         <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-center shadow-inner">
-          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">Vị Trí Ô Đỗ Được Gán</span>
+          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">{t('gate.bookingCheckIn.assignedSlot')}</span>
           <span className="text-4xl font-black text-emerald-700 tracking-wide">{data.slotName || data.SlotName || "N/A"}</span>
         </div>
 
         {/* Bảng chi tiết thông tin */}
         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
           <div className="flex justify-between border-b border-slate-200/50 pb-2 text-xs">
-            <span className="text-slate-400 font-bold uppercase tracking-wider">Tên Tài Xế</span>
+            <span className="text-slate-400 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.driverName')}</span>
             <span className="text-slate-800 font-black">{data.driverName || data.DriverName || data.fullName || data.FullName || "N/A"}</span>
           </div>
           <div className="flex justify-between border-b border-slate-200/50 pb-2 text-xs">
-            <span className="text-slate-400 font-bold uppercase tracking-wider">Số Điện Thoại</span>
+            <span className="text-slate-400 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.phone')}</span>
             <span className="text-slate-800 font-bold font-mono">{data.driverPhone || data.DriverPhone || data.phoneNumber || data.PhoneNumber || "N/A"}</span>
           </div>
           <div className="flex justify-between border-b border-slate-200/50 pb-2 text-xs">
-            <span className="text-slate-400 font-bold uppercase tracking-wider">Biển Số Xe</span>
+            <span className="text-slate-400 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.plate')}</span>
             <span className="text-slate-800 font-black font-mono">{data.licenseVehicle || data.LicenseVehicle || "N/A"}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-slate-400 font-bold uppercase tracking-wider">Loại Phương Tiện</span>
+            <span className="text-slate-400 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.vehicleType')}</span>
             <span className="text-slate-800 font-bold">{data.vehicleTypeName || data.VehicleTypeName || data.vehicleType || "Car"}</span>
           </div>
         </div>
@@ -244,7 +247,7 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
 
 
 const GateController = () => {
-
+  const { t } = useTranslation();
   const [slots, setSlots] = useState([]);
   const [checkInForm] = Form.useForm();
   const [checkOutForm] = Form.useForm();
@@ -260,10 +263,10 @@ const GateController = () => {
   const handleLocalQrScanSuccess = (decodedText) => {
     if (qrScannerTarget === 'entry') {
       checkInForm.setFieldsValue({ ticketCode: decodedText });
-      message.success(`Đã nhận diện mã đặt chỗ: ${decodedText}`);
+      message.success(t('gate.messages.scanBookingSuccess', { code: decodedText }));
     } else {
       checkOutForm.setFieldsValue({ ticketCode: decodedText });
-      message.success(`Đã nhận diện mã vé: ${decodedText}`);
+      message.success(t('gate.messages.scanTicketSuccess', { code: decodedText }));
       // Auto submit check-out
       setTimeout(() => {
         checkOutForm.submit();
@@ -300,7 +303,7 @@ const GateController = () => {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [changeDue, setChangeDue] = useState(null);
 
-  const fetchActiveParkedVehicles = async () => {
+  const fetchActiveParkedVehicles = useCallback(async () => {
     try {
       const [floorG, floorB1, floorB2] = await Promise.all([
         parkingService.getSlotsByFloor(3),
@@ -340,7 +343,7 @@ const GateController = () => {
     } catch (err) {
       console.error("Failed to load active parked slots from backend:", err);
     }
-  };
+  }, []);
 
   const loadData = () => {
     fetchActiveParkedVehicles();
@@ -356,7 +359,7 @@ const GateController = () => {
     return () => {
       window.removeEventListener('parking_state_changed', handleStateChange);
     };
-  }, []);
+  }, [fetchActiveParkedVehicles]);
 
   // Cleanup object URLs on unmount or before creating new ones
   useEffect(() => {
@@ -413,7 +416,7 @@ const GateController = () => {
           
           setTicketDetails(ticket);
           setIsTicketOpen(true);
-          message.success(response.message || "Check-in vãng lai thành công!");
+          message.success(response.message || t('gate.messages.walkinSuccess'));
           
           checkInForm.resetFields();
           if (entryImagePreviewUrl) {
@@ -423,7 +426,7 @@ const GateController = () => {
           setEntryOcrResult(null);
           fetchActiveParkedVehicles();
         } else {
-          message.error(response?.message || "Check-in thất bại.");
+          message.error(response?.message || t('gate.messages.checkinFailed'));
         }
       } else {
         // Reservation mode
@@ -438,7 +441,7 @@ const GateController = () => {
           setBookingCheckInData(response.data || response);
           setIsCheckInConfirmOpen(true);
           
-          message.success(response.message || "Check-in bằng QR đặt chỗ thành công! Barrier đã mở.");
+          message.success(response.message || t('gate.messages.bookingSuccess'));
           checkInForm.resetFields();
           if (entryImagePreviewUrl) {
             URL.revokeObjectURL(entryImagePreviewUrl);
@@ -447,7 +450,7 @@ const GateController = () => {
           setEntryOcrResult(null);
           fetchActiveParkedVehicles();
         } else {
-          message.error(response?.message || "Check-in thất bại. Vui lòng kiểm tra mã QR/mã vé.");
+          message.error(response?.message || t('gate.messages.bookingFailed'));
         }
       }
     } catch (err) {
@@ -462,7 +465,7 @@ const GateController = () => {
     const ticketCode = checkOutForm.getFieldValue('ticketCode');
     const tempImageUrl = checkOutForm.getFieldValue('tempImageUrl') || null;
     if (!plate) {
-      message.error("Vui lòng nhập biển số xe!");
+      message.error(t('gate.messages.plateRequired'));
       return;
     }
     
@@ -488,18 +491,18 @@ const GateController = () => {
       const messageText = result.message || result.Message;
       
       if (isSuccess === false) {
-        message.warning(messageText || "Biển số không khớp!");
+        message.warning(messageText || t('gate.messages.plateMismatch'));
       } else {
         const totalAmt = result.totalAmount || result.TotalAmount || 0;
         setCashReceived(totalAmt.toString());
         if (isPaid) {
-          message.success(messageText || "Khách hàng đã thanh toán trước qua App di động. Mời xe ra!");
+          message.success(messageText || t('gate.messages.prePaidCheckout'));
           fetchActiveParkedVehicles();
           setTimeout(() => {
             handleCloseCheckoutResultModal();
           }, 3000);
         } else {
-          message.success("Đã xử lý check-out. Bảng xác minh đã được mở.");
+          message.success(t('gate.messages.checkoutOpened'));
           fetchActiveParkedVehicles();
         }
       }
@@ -538,10 +541,10 @@ const GateController = () => {
         setCashReceived(totalAmt.toString());
       }
       
-      message.success(`Đã chuyển sang thanh toán bằng ${newMethod === 'VNPAY' ? 'VNPay' : 'Tiền mặt'}`);
+      message.success(t('gate.messages.switchPayment', { method: newMethod === 'VNPAY' ? t('gate.messages.vnpay') : t('gate.messages.cash') }));
     } catch (err) {
       console.error("Switch payment method error:", err);
-      message.error("Lỗi khi chuyển phương thức thanh toán: " + String(err));
+      message.error(String(err));
     } finally {
       setIsSwitchingPayment(false);
     }
@@ -558,33 +561,33 @@ const GateController = () => {
     const totalAmount = checkoutResult?.totalAmount || checkoutResult?.TotalAmount || 0;
     
     if (!ticketCode) {
-      message.error("Mã vé không hợp lệ!");
+      message.error(t('gate.messages.invalidTicket'));
       return;
     }
     
     const amount = parseFloat(cashReceived);
     if (isNaN(amount) || amount < totalAmount) {
-      message.error(`Số tiền nhận phải tối thiểu ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount)}!`);
+      message.error(t('gate.messages.minAmount', { amount: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount) }));
       return;
     }
     
     try {
       const res = await parkingService.processCashPayment(ticketCode, amount);
       if (res && res.success) {
-        message.success(res.message || "Đã ghi nhận thanh toán tiền mặt!");
+        message.success(res.message || t('gate.messages.cashSuccess'));
         setChangeDue(res.changeDue);
         setCheckoutResult(prev => ({
           ...prev,
           isPaid: true,
           IsPaid: true,
-          message: "Thanh toán tiền mặt thành công. Mở cổng cho xe ra."
+          message: t('gate.messages.cashComplete')
         }));
         fetchActiveParkedVehicles();
         setTimeout(() => {
           handleCloseCheckoutResultModal();
         }, 3000);
       } else {
-        message.error(res?.message || "Không thể xử lý thanh toán tiền mặt.");
+        message.error(res?.message || t('gate.messages.cashFailed'));
       }
     } catch (err) {
       console.error("Confirm cash payment error:", err);
@@ -596,7 +599,7 @@ const GateController = () => {
   const handleRefreshPaymentStatus = async () => {
     const invoiceId = checkoutResult?.invoiceId || checkoutResult?.InvoiceId;
     if (!invoiceId) {
-      message.error("Mã hóa đơn không hợp lệ!");
+      message.error(t('gate.messages.invalidTicket'));
       return;
     }
     
@@ -604,19 +607,19 @@ const GateController = () => {
     try {
       const res = await parkingService.getPaymentStatus(invoiceId);
       if (res && (res.status === 'SUCCESS' || res.status === 'SUCCESS'.toLowerCase() || res.status === 'SUCCESS'.toUpperCase())) {
-        message.success("Xác nhận thanh toán thành công! Barrier đã mở.");
+        message.success(t('gate.messages.vnpaySuccess'));
         setCheckoutResult(prev => ({
           ...prev,
           isPaid: true,
           IsPaid: true,
-          message: "Thanh toán VNPay thành công. Mở cổng cho xe ra."
+          message: t('gate.messages.vnpayComplete')
         }));
         fetchActiveParkedVehicles();
         setTimeout(() => {
           handleCloseCheckoutResultModal();
         }, 2000);
       } else {
-        message.info("Thanh toán vẫn đang chờ. Vui lòng đợi tài xế quét và hoàn tất thanh toán.");
+        message.info(t('gate.messages.vnpayPending'));
       }
     } catch (err) {
       console.error("Refresh payment status error:", err);
@@ -637,12 +640,12 @@ const GateController = () => {
         try {
           const res = await parkingService.getPaymentStatus(invoiceId);
           if (res && (res.status === 'SUCCESS' || res.status === 'SUCCESS'.toLowerCase() || res.status === 'SUCCESS'.toUpperCase())) {
-            message.success("Đã xác nhận thanh toán VNPay! Cổng ra đang mở.");
+            message.success(t('gate.messages.vnpayConfirmed'));
             setCheckoutResult(prev => ({
               ...prev,
               isPaid: true,
               IsPaid: true,
-              message: "Thanh toán VNPay thành công. Mở cổng cho xe ra."
+              message: t('gate.messages.vnpayComplete')
             }));
             fetchActiveParkedVehicles();
             clearInterval(intervalId);
@@ -659,12 +662,12 @@ const GateController = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isCheckoutResultModalOpen, selectedPaymentMethod, checkoutResult]);
+  }, [isCheckoutResultModalOpen, selectedPaymentMethod, checkoutResult, fetchActiveParkedVehicles]);
 
   // Immediate check-out shortcut from table list
   const handleDirectCheckOut = (plate) => {
     if (!plate) {
-      message.info('Dòng này chỉ có dữ liệu chỗ đỗ. Vui lòng nhập biển số thủ công ở form Cổng ra.');
+      message.info(t('gate.messages.directCheckoutInfo'));
       const exitCard = document.getElementById('exit-gate-card');
       if (exitCard) {
         exitCard.scrollIntoView({ behavior: 'smooth' });
@@ -672,7 +675,7 @@ const GateController = () => {
       return;
     }
     checkOutForm.setFieldsValue({ plate });
-    message.info(`Đã chọn biển số ${plate} để xe ra. Vui lòng tải ảnh check-out và xác nhận.`);
+    message.info(t('gate.messages.directCheckoutSelected', { plate }));
     const exitCard = document.getElementById('exit-gate-card');
     if (exitCard) {
       exitCard.scrollIntoView({ behavior: 'smooth' });
@@ -696,7 +699,7 @@ const GateController = () => {
   // Columns for active parked list
   const parkedColumns = [
     {
-      title: 'Mã chỗ',
+      title: t('gate.activeTable.slot'),
       dataIndex: 'id',
       key: 'id',
       render: (text) => (
@@ -706,7 +709,7 @@ const GateController = () => {
       )
     },
     {
-      title: 'Biển số',
+      title: t('gate.activeTable.plate'),
       dataIndex: ['occupiedBy', 'plate'],
       key: 'plate',
       render: (text) => (
@@ -716,7 +719,7 @@ const GateController = () => {
       )
     },
     {
-      title: 'Phân loại',
+      title: t('gate.activeTable.type'),
       dataIndex: ['occupiedBy', 'type'],
       key: 'type',
       render: (type, record) => (
@@ -724,13 +727,13 @@ const GateController = () => {
       )
     },
     {
-      title: 'Giờ vào',
+      title: t('gate.activeTable.time'),
       dataIndex: ['occupiedBy', 'checkInTime'],
       key: 'checkInTime',
       render: (text) => text ? new Date(text).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'
     },
     {
-      title: 'Thao tác',
+      title: t('gate.activeTable.action'),
       key: 'actions',
       render: (_, record) => {
         const plate = record.occupiedBy?.plate;
@@ -740,11 +743,11 @@ const GateController = () => {
             danger
             size="small"
             disabled={!plate}
-            title={!plate ? 'API chỗ đỗ chưa có dữ liệu biển số/phiên. Vui lòng dùng form Cổng ra thủ công.' : undefined}
+            title={!plate ? t('gate.activeTable.noDataTitle') : undefined}
             onClick={() => handleDirectCheckOut(plate)}
             className="flex items-center gap-1 h-7 rounded text-[11px] font-bold"
           >
-            Check-out
+            {t('gate.activeTable.checkoutBtn')}
           </Button>
         );
       }
@@ -765,7 +768,7 @@ const GateController = () => {
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
-                  <span className="text-sm font-bold text-slate-800">Cổng vào - Check-in xe</span>
+                  <span className="text-sm font-bold text-slate-800">{t('gate.entryTitle')}</span>
                 </div>
               </div>
             }
@@ -804,15 +807,15 @@ const GateController = () => {
                     const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
                     
                     if (confidence < 0.85) {
-                      setEntryOcrResult('Cần kiểm tra');
-                      message.warning("ALPR: Độ tin cậy thấp. Vui lòng kiểm tra biển số thủ công.");
+                      setEntryOcrResult(t('gate.camera.needCheck'));
+                      message.warning(t('gate.messages.alprLowConfidence'));
                     } else {
                       setEntryOcrResult(predictedPlate);
                       checkInForm.setFieldsValue({
                         plate: predictedPlate,
                         tempImageUrl: rawImageUrl
                       });
-                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                      message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
 
                       // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
                       try {
@@ -823,7 +826,7 @@ const GateController = () => {
                           checkInForm.setFieldsValue({
                             ticketCode: checkRes.ticketCode || checkRes.TicketCode
                           });
-                          message.success(`Phát hiện đặt chỗ của tài xế: ${checkRes.driverName || "N/A"}`);
+                          message.success(t('gate.messages.bookingFound', { driver: checkRes.driverName || "N/A" }));
                         }
                       } catch (err) {
                         // Không có lịch đặt trước -> Giữ nguyên chế độ Walk-in
@@ -832,13 +835,13 @@ const GateController = () => {
                       // ----------------------------------------------------
                     }
                   } else {
-                    setEntryOcrResult('Cần kiểm tra');
-                    message.warning(msg || "ALPR: Không thể đọc rõ biển số. Vui lòng nhập thủ công.");
+                    setEntryOcrResult(t('gate.camera.needCheck'));
+                    message.warning(msg || t('gate.activeTable.alprUnclear'));
                   }
                 } catch (err) {
                   console.error("Entry recognition error:", err);
-                  setEntryOcrResult('Cần kiểm tra');
-                  message.warning(`${err?.message || String(err)} Vui lòng nhập biển số thủ công.`);
+                  setEntryOcrResult(t('gate.camera.needCheck'));
+                  message.warning(t('gate.activeTable.alprError', { err: err?.message || String(err) }));
                 } finally {
                   setEntryScanning(false);
                 }
@@ -867,15 +870,15 @@ const GateController = () => {
                     const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
                     
                     if (confidence < 0.85) {
-                      setEntryOcrResult('Cần kiểm tra');
-                      message.warning("ALPR: Độ tin cậy thấp. Vui lòng kiểm tra biển số thủ công.");
+                      setEntryOcrResult(t('gate.camera.needCheck'));
+                      message.warning(t('gate.messages.alprLowConfidence'));
                     } else {
                       setEntryOcrResult(predictedPlate);
                       checkInForm.setFieldsValue({
                         plate: predictedPlate,
                         tempImageUrl: rawImageUrl
                       });
-                      message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                      message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
 
                       // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
                       try {
@@ -893,13 +896,13 @@ const GateController = () => {
                       // ----------------------------------------------------
                     }
                   } else {
-                    setEntryOcrResult('Cần kiểm tra');
-                    message.warning(msg || "ALPR: Không thể đọc rõ biển số. Vui lòng nhập thủ công.");
+                    setEntryOcrResult(t('gate.camera.needCheck'));
+                    message.warning(msg || t('gate.activeTable.alprUnclear'));
                   }
                 } catch (err) {
                   console.error("Entry recognition error:", err);
-                  setEntryOcrResult('Cần kiểm tra');
-                  message.warning(`${err?.message || String(err)} Vui lòng nhập biển số thủ công.`);
+                  setEntryOcrResult(t('gate.camera.needCheck'));
+                  message.warning(t('gate.activeTable.alprError', { err: err?.message || String(err) }));
                 } finally {
                   setEntryScanning(false);
                 }
@@ -935,10 +938,10 @@ const GateController = () => {
                 className={`flex items-center justify-center py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                   checkInMode === 'walkin'
                     ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-white'
                 }`}
               >
-                Check-in
+                {t('gate.form.checkInMode')}
               </button>
               <button
                 type="button"
@@ -949,10 +952,10 @@ const GateController = () => {
                 className={`flex items-center justify-center py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                   checkInMode === 'reservation'
                     ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-white'
                 }`}
               >
-                QR đặt chỗ
+                {t('gate.form.qrMode')}
               </button>
             </div>
 
@@ -971,8 +974,8 @@ const GateController = () => {
               {checkInMode === 'reservation' && (
                 <Form.Item
                   name="ticketCode"
-                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Mã vé / mã QR</span>}
-                  rules={[{ required: true, message: 'Vui lòng nhập hoặc quét mã QR/mã vé!' }]}
+                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.qrTicketCode')}</span>}
+                  rules={[{ required: true, message: t('gate.form.requireQr') }]}
                   className="mb-3"
                 >
                   <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500" />
@@ -986,13 +989,13 @@ const GateController = () => {
                   return (
                     <Form.Item
                       name="plate"
-                      label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Biển số xe</span>}
-                      rules={[{ required: isRequired, message: 'Vui lòng nhập biển số xe!' }]}
+                      label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.plate')}</span>}
+                      rules={[{ required: isRequired, message: t('gate.form.requirePlate') }]}
                       className="mb-3"
                     >
                       <Input
                         onChange={handlePlateChange}
-                        placeholder={type === 'Bicycle' ? 'Không bắt buộc — Tự động tạo cho xe đạp' : 'e.g. 30A-123.45'}
+                        placeholder={type === 'Bicycle' ? t('gate.form.optionalBicycle') : 'e.g. 30A-123.45'}
                         className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500"
                       />
                     </Form.Item>
@@ -1004,15 +1007,15 @@ const GateController = () => {
                 <div className="grid grid-cols-1 gap-4 mb-3">
                   <Form.Item
                     name="type"
-                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Phân loại</span>}
-                    rules={[{ required: true, message: 'Vui lòng chọn loại xe!' }]}
+                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.type')}</span>}
+                    rules={[{ required: true, message: t('gate.form.requireType') }]}
                     initialValue="Car"
                     className="mb-0"
                   >
                     <Radio.Group className="flex w-full" buttonStyle="solid">
-                      <Radio.Button value="Car" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">Ô tô</Radio.Button>
-                      <Radio.Button value="Motorbike" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">Xe máy</Radio.Button>
-                      <Radio.Button value="Bicycle" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">Xe đạp</Radio.Button>
+                      <Radio.Button value="Car" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">{t('gate.form.car')}</Radio.Button>
+                      <Radio.Button value="Motorbike" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">{t('gate.form.motorbike')}</Radio.Button>
+                      <Radio.Button value="Bicycle" className="flex-1 text-center h-10 leading-[38px] font-semibold text-sm">{t('gate.form.bicycle')}</Radio.Button>
                     </Radio.Group>
                   </Form.Item>
                 </div>
@@ -1024,7 +1027,7 @@ const GateController = () => {
                   htmlType="submit" 
                   className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 border-none font-bold rounded-lg transition-all shadow-md shadow-emerald-600/10 flex items-center justify-center gap-1.5"
                 >
-                  <Sparkles size={15}/> {checkInMode === 'reservation' ? 'Xác minh QR & mở cổng' : 'In vé & mở cổng'}
+                  <Sparkles size={15}/> {checkInMode === 'reservation' ? t('gate.form.verifyQrOpen') : t('gate.form.printTicketOpen')}
                 </Button>
               </div>
             </Form>
@@ -1039,7 +1042,7 @@ const GateController = () => {
                   }}
                   className="w-full h-10 border-indigo-300 text-indigo-600 font-bold"
                 >
-                  Quét mã QR bằng Camera
+                  {t('gate.form.scanQrCamera')}
                 </Button>
               </div>
             )}
@@ -1054,7 +1057,7 @@ const GateController = () => {
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
-                  <span className="text-sm font-bold text-slate-800">Cổng ra - Check-out xe</span>
+                  <span className="text-sm font-bold text-slate-800">{t('gate.exitTitle')}</span>
                 </div>
               </div>
             }
@@ -1095,14 +1098,14 @@ const GateController = () => {
                     const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
                     
                     if (confidence < 0.85) {
-                      setExitOcrResult('Cần kiểm tra');
-                      message.warning("ALPR: Độ tin cậy thấp. Vui lòng kiểm tra biển số thủ công.");
+                      setExitOcrResult(t('gate.camera.needCheck'));
+                      message.warning(t('gate.messages.alprLowConfidence'));
                     } else {
                       if (isBike) {
                         // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
                         setExitOcrResult(currentPlate);
                         checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
-                        message.success("Đã chụp ảnh xe đạp ra bãi.");
+                        message.success(t('gate.messages.bicycleExitImage'));
                       } else {
                         // XE CƠ GIỚI: Đọc biển số và tự động đối soát
                         setExitOcrResult(predictedPlate);
@@ -1110,7 +1113,7 @@ const GateController = () => {
                           plate: predictedPlate,
                           tempImageUrl: rawImageUrl
                         });
-                        message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                        message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
 
                         // Mở khóa ô nhập QR và tự động Focus chuột để nhân viên quét QR vé
                         setTimeout(() => {
@@ -1119,13 +1122,13 @@ const GateController = () => {
                       }
                     }
                   } else {
-                    setExitOcrResult('Cần kiểm tra');
-                    message.warning(msg || "ALPR: Không thể đọc rõ biển số. Vui lòng nhập thủ công.");
+                    setExitOcrResult(t('gate.camera.needCheck'));
+                    message.warning(msg || t('gate.activeTable.alprUnclear'));
                   }
                 } catch (err) {
                   console.error("Exit recognition error:", err);
-                  setExitOcrResult('Cần kiểm tra');
-                  message.warning(`${err?.message || String(err)} Vui lòng nhập biển số thủ công.`);
+                  setExitOcrResult(t('gate.camera.needCheck'));
+                  message.warning(t('gate.activeTable.alprError', { err: err?.message || String(err) }));
                 } finally {
                   setExitScanning(false);
                 }
@@ -1155,14 +1158,14 @@ const GateController = () => {
                     const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
 
                     if (confidence < 0.85) {
-                      setExitOcrResult('Cần kiểm tra');
-                      message.warning("ALPR: Độ tin cậy thấp. Vui lòng kiểm tra biển số thủ công.");
+                      setExitOcrResult(t('gate.camera.needCheck'));
+                      message.warning(t('gate.messages.alprLowConfidence'));
                     } else {
                       if (isBike) {
                         // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
                         setExitOcrResult(currentPlate);
                         checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
-                        message.success("Đã chụp ảnh xe đạp ra bãi.");
+                        message.success(t('gate.messages.bicycleExitImage'));
                       } else {
                         // XE CƠ GIỚI: Đọc biển số và tự động đối soát
                         setExitOcrResult(predictedPlate);
@@ -1170,7 +1173,7 @@ const GateController = () => {
                           plate: predictedPlate,
                           tempImageUrl: rawImageUrl
                         });
-                        message.success(`ALPR: Nhận diện biển số: ${predictedPlate}`);
+                        message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
 
                         // Mở khóa ô nhập QR và tự động Focus chuột để nhân viên quét QR vé
                         setTimeout(() => {
@@ -1179,13 +1182,13 @@ const GateController = () => {
                       }
                     }
                   } else {
-                    setExitOcrResult('Cần kiểm tra');
-                    message.warning(msg || "ALPR: Không thể đọc rõ biển số. Vui lòng nhập thủ công.");
+                    setExitOcrResult(t('gate.camera.needCheck'));
+                    message.warning(msg || t('gate.activeTable.alprUnclear'));
                   }
                 } catch (err) {
                   console.error("Exit recognition error:", err);
-                  setExitOcrResult('Cần kiểm tra');
-                  message.warning(`${err?.message || String(err)} Vui lòng nhập biển số thủ công.`);
+                  setExitOcrResult(t('gate.camera.needCheck'));
+                  message.warning(t('gate.activeTable.alprError', { err: err?.message || String(err) }));
                 } finally {
                   setExitScanning(false);
                 }
@@ -1226,8 +1229,8 @@ const GateController = () => {
                 name="ticketCode"
                 label={
                   <div className="flex justify-between items-center w-full">
-                    <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Mã vé / mã QR</span>
-                    {!exitOcrResult && <span className="text-[10px] text-amber-500 font-bold normal-case">⚠️ Quét biển số xe trước</span>}
+                    <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.qrTicketCode')}</span>
+                    {!exitOcrResult && <span className="text-[10px] text-amber-500 font-bold normal-case">{t('gate.form.scanPlateFirst')}</span>}
                   </div>
                 }
                 className="mb-2"
@@ -1236,15 +1239,15 @@ const GateController = () => {
                   ref={qrInputRef}
                   disabled={!exitOcrResult}
                   onPressEnter={() => checkOutForm.submit()}
-                  placeholder={exitOcrResult ? "Quét hoặc nhập mã vé rồi bấm Enter..." : "Chờ quét biển số xe..."}
+                  placeholder={exitOcrResult ? t('gate.form.scanOrEnter') : t('gate.form.waitScan')}
                   className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </Form.Item>
 
               <Form.Item
                 name="plate"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Biển số xe</span>}
-                rules={[{ required: true, message: 'Vui lòng nhập biển số xe!' }]}
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.plate')}</span>}
+                rules={[{ required: true, message: t('gate.form.requirePlate') }]}
                 className="mb-2"
               >
                 <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg uppercase font-bold focus:bg-white focus:border-rose-500" />
@@ -1252,7 +1255,7 @@ const GateController = () => {
 
               <Form.Item
                 name="paymentMethod"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Phương thức thanh toán</span>}
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.paymentMethod')}</span>}
                 initialValue="CASH"
                 className="mb-3"
               >
@@ -1260,12 +1263,12 @@ const GateController = () => {
                   <div className="grid grid-cols-2 gap-3 w-full">
                     <Radio.Button value="CASH" className="h-10 text-center font-bold rounded-lg border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-colors cursor-pointer">
                       <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
-                        <CreditCard size={15} className="text-rose-500" /> Tiền mặt
+                        <CreditCard size={15} className="text-rose-500" /> {t('gate.form.cash')}
                       </span>
                     </Radio.Button>
                     <Radio.Button value="VNPAY" className="h-10 text-center font-bold rounded-lg border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer">
                       <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
-                        <CreditCard size={15} className="text-emerald-500" /> VNPay (mã QR)
+                        <CreditCard size={15} className="text-emerald-500" /> {t('gate.form.vnpay')}
                       </span>
                     </Radio.Button>
                   </div>
@@ -1278,7 +1281,7 @@ const GateController = () => {
                   htmlType="submit" 
                   className="w-full h-11 font-bold bg-rose-600 hover:bg-rose-500 text-white border-none rounded-lg flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 cursor-pointer"
                 >
-                  <CreditCard size={15}/> Xử lý check-out & xác minh
+                  <CreditCard size={15}/> {t('gate.form.checkoutProcess')}
                 </Button>
               </div>
             </Form>
@@ -1293,7 +1296,7 @@ const GateController = () => {
                 }}
                 className="flex-1 h-10 border-rose-300 text-rose-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Quét QR bằng Camera
+                {t('gate.form.scanQrCamera')}
               </Button>
               <Button 
                 type="default"
@@ -1301,7 +1304,7 @@ const GateController = () => {
                 onClick={() => setIsQrPopupOpen(true)}
                 className="flex-1 h-10 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Nhập mã thủ công / máy quét ngoài
+                {t('gate.form.manualInput')}
               </Button>
             </div>
           </Card>
@@ -1314,7 +1317,7 @@ const GateController = () => {
         title={
           <div className="flex items-center justify-between w-full">
             <span className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              Xe đang đỗ — <span className="text-[#2563EB] font-extrabold">{occupiedSlots.length} xe trong bãi</span>
+              {t('gate.activeTable.parkedTitle')} — <span className="text-[#2563EB] font-extrabold">{occupiedSlots.length} {t('gate.activeTable.carsInLot')}</span>
             </span>
           </div>
         } 
@@ -1323,22 +1326,22 @@ const GateController = () => {
         {occupiedSlots.length === 0 ? (
           <div className="text-center py-20 text-slate-400 flex flex-col items-center">
             <CheckCircle size={44} className="text-emerald-500/20 mb-3" />
-            <h3 className="text-slate-700 font-bold">Tất cả chỗ đỗ đang trống</h3>
-            <p className="text-xs text-slate-505 mt-1 max-w-xs">Hiện không có xe đang đỗ. Dùng camera để ghi nhận xe vào.</p>
+            <h3 className="text-slate-700 font-bold">{t('gate.activeTable.emptyTitle')}</h3>
+            <p className="text-xs text-slate-505 mt-1 max-w-xs">{t('gate.activeTable.emptyDesc')}</p>
           </div>
         ) : (
           <Table 
             columns={parkedColumns} 
             dataSource={occupiedSlots} 
             rowKey="id" 
-            pagination={{ pageSize: 5, showTotal: (total) => `Tổng ${total} xe đang đỗ` }}
+            pagination={{ pageSize: 5, showTotal: (total) => t('gate.activeTable.totalCars', { total }) }}
             className="custom-antd-table text-slate-800"
           />
         )}
       </Card>
 
       <Modal
-        title="Quét mã QR vé - Cổng ra"
+        title={t('gate.form.scanQrExit')}
         open={isQrPopupOpen}
         onCancel={() => setIsQrPopupOpen(false)}
         footer={null}
@@ -1348,20 +1351,20 @@ const GateController = () => {
       >
         <div className="space-y-4 pt-2">
           <Alert
-            message="Nhập hoặc quét mã vé"
-            description="Sau khi camera đã nhận diện biển số, hãy quét mã QR bằng máy quét ngoài hoặc nhập mã vé rồi nhấn Enter để xử lý check-out."
+            message={t('gate.form.enterOrScan')}
+            description={t('gate.form.enterOrScanDesc')}
             type="info"
             showIcon
             className="rounded-xl"
           />
           <Input
             autoFocus
-            placeholder="Quét hoặc nhập mã vé rồi bấm Enter..."
+            placeholder={t('gate.form.scanOrEnter')}
             className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500"
             onPressEnter={(e) => {
               const ticketCode = e.target.value?.trim();
               if (!ticketCode) {
-                message.error('Vui lòng nhập mã vé / mã QR!');
+                message.error(t('gate.form.requireQr'));
                 return;
               }
               checkOutForm.setFieldsValue({ ticketCode });
@@ -1377,7 +1380,7 @@ const GateController = () => {
         isOpen={isLocalQrScannerOpen}
         onClose={() => setIsLocalQrScannerOpen(false)}
         onScanSuccess={handleLocalQrScanSuccess}
-        title={qrScannerTarget === 'entry' ? "Quét QR Đặt Chỗ - Cổng Vào" : "Quét QR Vé - Cổng Ra"}
+        title={qrScannerTarget === 'entry' ? t('gate.form.scanQrEntry') : t('gate.form.scanQrExit')}
       />
 
       {/* Booking Check-In Confirmation Modal */}
@@ -1418,14 +1421,14 @@ const GateController = () => {
         title={
           <div className="flex items-center gap-2 text-slate-800 border-b border-slate-150 pb-3 font-bold text-lg font-sans">
             <span className="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
-            Xác minh cổng ra & thanh toán
+            {t('gate.checkoutModal.title')}
           </div>
         }
         open={isCheckoutResultModalOpen}
         onCancel={handleCloseCheckoutResultModal}
         footer={[
           <Button key="close" type="dashed" onClick={handleCloseCheckoutResultModal} className="font-bold h-10 px-5 rounded-lg">
-            Đóng bảng
+            {t('gate.checkoutModal.close')}
           </Button>
         ]}
         width={920}
@@ -1469,25 +1472,25 @@ const GateController = () => {
             /extra|additional|grace|quá hạn|thu thêm|phụ thu/i.test(String(messageText || ''))
           );
           const amountDueLabel = isPaid
-            ? 'Đã thanh toán - Không cần thu thêm'
+            ? t('gate.checkoutModal.paidNoExtra')
             : hasExtraFeeSignal
-              ? 'Số tiền cần thu thêm'
-              : 'Số tiền cần thu';
+              ? t('gate.checkoutModal.extraAmountDue')
+              : t('gate.checkoutModal.amountDue');
 
           return (
             <div className="space-y-6 pt-4">
               {!isSuccess ? (
                 <Alert
-                  message="CẢNH BÁO AN NINH / CHẶN XE RA"
-                  description={messageText || "Phát hiện biển số không khớp! Cổng ra vẫn đóng."}
+                  message={t('gate.checkoutModal.securityWarning')}
+                  description={messageText || t('gate.checkoutModal.securityWarningDesc')}
                   type="error"
                   showIcon
                   className="rounded-xl font-bold"
                 />
               ) : (
                 <Alert
-                  message="Xác minh biển số thành công"
-                  description={messageText || "Biển số khớp. Kiểm tra trạng thái thanh toán để mở cổng."}
+                  message={t('gate.checkoutModal.plateMatchSuccess')}
+                  description={messageText || t('gate.checkoutModal.plateMatchSuccessDesc')}
                   type="success"
                   showIcon
                   className="rounded-xl font-bold"
@@ -1499,27 +1502,27 @@ const GateController = () => {
                 <div className="md:col-span-7 space-y-4">
                   {/* Security Verification panel */}
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
-                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Xác minh biển số & an ninh</h3>
+                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">{t('gate.checkoutModal.securityVerification')}</h3>
                     
                     <div className="space-y-2 font-mono text-xs">
                       <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                        <span className="text-slate-500 font-bold">Biển số nhập lúc ra:</span>
+                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.exitPlate')}</span>
                         <Tag color="blue" className="font-bold font-mono">{checkOutForm.getFieldValue('plate') || "N/A"}</Tag>
                       </div>
                       <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                        <span className="text-slate-500 font-bold">Biển số vào bãi (DB):</span>
+                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.entryPlateDb')}</span>
                         <Tag color="cyan" className="font-bold font-mono">{checkInLicensePlate || "N/A"}</Tag>
                       </div>
                       <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                        <span className="text-slate-500 font-bold">Biển số ra bãi (DB):</span>
+                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.exitPlateDb')}</span>
                         <Tag color="purple" className="font-bold font-mono">{checkOutLicensePlate || "N/A"}</Tag>
                       </div>
                       <div className="flex justify-between items-center bg-white p-2.5 rounded border border-slate-100 shadow-sm">
-                        <span className="text-slate-500 font-bold">Trạng thái đối chiếu:</span>
+                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.matchStatus')}</span>
                         {isLicensePlateMatched ? (
-                          <Tag color="success" className="font-bold">KHỚP</Tag>
+                          <Tag color="success" className="font-bold">{t('gate.checkoutModal.match')}</Tag>
                         ) : (
-                          <Tag color="error" className="font-bold">KHÔNG KHỚP</Tag>
+                          <Tag color="error" className="font-bold">{t('gate.checkoutModal.notMatch')}</Tag>
                         )}
                       </div>
                     </div>
@@ -1527,32 +1530,32 @@ const GateController = () => {
                     {/* Images side by side */}
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ảnh vào bãi</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('gate.checkoutModal.entryImage')}</span>
                         <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
                           {checkInImageUrl ? (
                             <Image
                               src={checkInImageUrl}
-                              alt="Ảnh vào bãi"
+                              alt={t('gate.checkoutModal.entryImage')}
                               className="w-full h-full object-cover"
                               fallback="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600"
                             />
                           ) : (
-                            <span className="text-[9px] text-slate-500 font-bold uppercase">Không có ảnh</span>
+                            <span className="text-[9px] text-slate-500 font-bold uppercase">{t('gate.checkoutModal.noImage')}</span>
                           )}
                         </div>
                       </div>
 
                       <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ảnh ra bãi</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('gate.checkoutModal.exitImage')}</span>
                         <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
                           {exitImagePreviewUrl ? (
                             <Image
                               src={exitImagePreviewUrl}
-                              alt="Ảnh ra bãi"
+                              alt={t('gate.checkoutModal.exitImage')}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-[9px] text-slate-500 font-bold uppercase">Không có ảnh</span>
+                            <span className="text-[9px] text-slate-500 font-bold uppercase">{t('gate.checkoutModal.noImage')}</span>
                           )}
                         </div>
                       </div>
@@ -1565,13 +1568,13 @@ const GateController = () => {
                           onClick={() => handleCheckOut(selectedPaymentMethod, checkInLicensePlate)} 
                           className="flex-1 h-10 font-bold rounded-lg bg-amber-600 hover:bg-amber-500 border-none flex items-center justify-center cursor-pointer text-white"
                         >
-                          Bỏ qua cảnh báo (Cho xe ra)
+                          {t('gate.checkoutModal.ignoreWarning')}
                         </Button>
                         <Button 
                           onClick={handleCloseCheckoutResultModal} 
                           className="flex-1 h-10 font-bold rounded-lg cursor-pointer"
                         >
-                          Giữ xe lại giải quyết
+                          {t('gate.checkoutModal.keepVehicle')}
                         </Button>
                       </div>
                     )}
@@ -1579,35 +1582,35 @@ const GateController = () => {
 
                   {/* Session Details */}
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-3">Chi tiết phiên đỗ</h3>
+                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-3">{t('gate.checkoutModal.sessionDetails')}</h3>
                     <Descriptions column={2} size="small" bordered className="bg-white rounded-lg overflow-hidden border border-slate-200/60 font-sans">
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Mã phiên</span>}>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.sessionId')}</span>}>
                         <span className="text-xs font-extrabold text-slate-800">{sessionId || "N/A"}</span>
                       </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Mã vé</span>}>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.ticketCode')}</span>}>
                         <span className="text-xs font-mono font-bold text-slate-800">{ticketCode || "N/A"}</span>
                       </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Tên chỗ</span>}>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.slotName')}</span>}>
                         <Tag color="geekblue" className="font-bold m-0">{slotName || "N/A"}</Tag>
                       </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Thời lượng</span>}>
-                        <span className="text-xs font-bold text-slate-800">{durationHours || 0} giờ</span>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.duration')}</span>}>
+                        <span className="text-xs font-bold text-slate-800">{durationHours || 0} {t('gate.checkoutModal.hours')}</span>
                       </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Giờ vào</span>}>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.entryTime')}</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
                           {checkInTime ? new Date(checkInTime).toLocaleString('vi-VN') : "N/A"}
                         </span>
                       </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Giờ ra</span>}>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.exitTime')}</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
                           {checkOutTime ? new Date(checkOutTime).toLocaleString('vi-VN') : "N/A"}
                         </span>
                       </Descriptions.Item>
-                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">Trạng thái thanh toán</span>}>
+                      <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.paymentStatus')}</span>}>
                         {isPaid ? (
-                          <Tag color="success" className="font-bold m-0">ĐÃ THANH TOÁN</Tag>
+                          <Tag color="success" className="font-bold m-0">{t('gate.checkoutModal.paid')}</Tag>
                         ) : (
-                          <Tag color="warning" className="font-bold m-0">ĐANG CHỜ</Tag>
+                          <Tag color="warning" className="font-bold m-0">{t('gate.checkoutModal.pending')}</Tag>
                         )}
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{amountDueLabel}</span>}>
@@ -1623,7 +1626,7 @@ const GateController = () => {
                 <div className="md:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
                   <div>
                     <div className="flex flex-col gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Khu vực xử lý thanh toán</h3>
+                      <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">{t('gate.checkoutModal.paymentGateway')}</h3>
                       <Radio.Group 
                         value={selectedPaymentMethod} 
                         onChange={(e) => handleSwitchPaymentMethodInModal(e.target.value)}
@@ -1633,10 +1636,10 @@ const GateController = () => {
                         className="w-full flex"
                       >
                         <Radio.Button value="CASH" className="flex-1 text-center font-bold">
-                          Tiền mặt
+                          {t('gate.form.cash')}
                         </Radio.Button>
                         <Radio.Button value="VNPAY" className="flex-1 text-center font-bold">
-                          VNPay QR
+                          VNPay
                         </Radio.Button>
                       </Radio.Group>
                     </div>
@@ -1647,12 +1650,12 @@ const GateController = () => {
                         <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
                           <Check size={32} className="text-emerald-600" />
                         </div>
-                        <h4 className="text-lg font-bold text-emerald-800">Thanh toán thành công</h4>
-                        <p className="text-sm text-slate-500 leading-relaxed">Cổng barrier đã mở. Mời xe ra khỏi bãi đỗ.</p>
+                        <h4 className="text-lg font-bold text-emerald-800">{t('gate.checkoutModal.paymentSuccess')}</h4>
+                        <p className="text-sm text-slate-500 leading-relaxed">{t('gate.checkoutModal.paymentSuccessDesc')}</p>
                         
                         {changeDue !== null && changeDue > 0 && (
                           <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-800 font-bold max-w-xs mx-auto mt-4">
-                            <span>Tiền thừa thối lại:</span>
+                            <span>{t('gate.checkoutModal.changeDue')}</span>
                             <span className="text-base text-amber-700">
                               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(changeDue)}
                             </span>
@@ -1678,7 +1681,7 @@ const GateController = () => {
                           
                           <img
                             src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(paymentUrl)}`}
-                            alt="Mã QR VNPay"
+                            alt={t('gate.checkoutModal.vnpayQrCode')}
                             className="w-48 h-48 object-contain transition-transform duration-300 group-hover:scale-105"
                           />
                         </div>
@@ -1691,7 +1694,7 @@ const GateController = () => {
                             onClick={handleRefreshPaymentStatus}
                             className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 border-none font-bold rounded-xl flex items-center justify-center gap-1.5 text-white cursor-pointer transition-all duration-200 transform active:scale-95 shadow-md"
                           >
-                            Kiểm tra trạng thái thanh toán (F5)
+                            {t('gate.checkoutModal.checkPaymentStatus')}
                           </Button>
                           <Button
                             type="link"
@@ -1699,11 +1702,11 @@ const GateController = () => {
                             onClick={() => window.open(paymentUrl, '_blank')}
                             className="text-xs text-blue-600 hover:text-blue-500 font-bold mt-1"
                           >
-                            Mở liên kết thanh toán ở tab mới
+                            {t('gate.checkoutModal.openPaymentLink')}
                           </Button>
                         </div>
                         <p className="text-[10px] text-slate-400 text-center font-medium leading-relaxed">
-                          Hệ thống quét trạng thái tự động mỗi 3 giây. Barrier sẽ tự động mở khi giao dịch thành công.
+                          {t('gate.checkoutModal.autoScanNote')}
                         </p>
                       </div>
                     )}
@@ -1719,10 +1722,10 @@ const GateController = () => {
                         </div>
 
                         <div className="space-y-3">
-                          <span className="text-xs font-bold text-slate-500 block">Số tiền khách đưa (VNĐ):</span>
+                          <span className="text-xs font-bold text-slate-500 block">{t('gate.checkoutModal.amountReceived')}</span>
                           <Input
                             type="number"
-                            placeholder="Nhập số tiền..."
+                            placeholder={t('gate.checkoutModal.enterAmount')}
                             value={cashReceived}
                             onChange={(e) => setCashReceived(e.target.value)}
                             onPressEnter={handleConfirmCashPayment}
@@ -1736,7 +1739,7 @@ const GateController = () => {
                               onClick={() => setCashReceived(totalAmount.toString())}
                               className="h-10 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
                             >
-                              Đủ tiền
+                              {t('gate.checkoutModal.exactAmount')}
                             </Button>
                             <Button 
                               onClick={() => {
@@ -1778,14 +1781,14 @@ const GateController = () => {
                               onClick={() => setCashReceived('')}
                               className="h-10 text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-100 shadow-sm transition-all"
                             >
-                              Xóa
+                              {t('gate.checkoutModal.clear')}
                             </Button>
                           </div>
                         </div>
 
                         {cashReceived && parseFloat(cashReceived) >= totalAmount && (
                           <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between text-xs text-emerald-800 font-bold shadow-sm">
-                            <span className="uppercase tracking-widest text-[10px]">Tiền thừa thối lại:</span>
+                            <span className="uppercase tracking-widest text-[10px]">{t('gate.checkoutModal.changeDue')}</span>
                             <span className="text-xl font-black text-emerald-600">
                               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(parseFloat(cashReceived) - totalAmount)}
                             </span>
@@ -1798,7 +1801,7 @@ const GateController = () => {
                           onClick={handleConfirmCashPayment}
                           className="w-full h-14 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 border-none font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 text-white mt-4 transition-all duration-300 transform hover:-translate-y-0.5"
                         >
-                          Xác nhận Đã Thu Tiền & Mở Cổng
+                          {t('gate.checkoutModal.confirmCashAndOpen')}
                         </Button>
                       </div>
                     )}

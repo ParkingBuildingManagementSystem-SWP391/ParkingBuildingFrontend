@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { UserPlus, Mail, Phone, Lock, Shield, CheckCircle, AlertCircle, X, User } from 'lucide-react';
 import { adminService } from '../services/adminService';
+import { useTranslation } from 'react-i18next';
 
 const CreateAccount = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -35,7 +37,7 @@ const CreateAccount = () => {
       const response = await adminService.createUser(formData);
       // Depending on API structure, 200/201 success or success property
       if (response.status === 200 || response.status === 201 || response.data?.success) {
-        setSuccess(`Account '${formData.username}' was created successfully!`);
+        setSuccess(t('createAccount.successCreated', { username: formData.username }));
         // Reset form
         setFormData({
           username: '',
@@ -47,7 +49,7 @@ const CreateAccount = () => {
       }
     } catch (err) {
       console.error('Create account error:', err);
-      let errorMsg = 'Failed to create account. Please try again.';
+      let errorMsg = t('createAccount.errCreate');
       if (err.response?.data) {
         const data = err.response.data;
         if (data.message) errorMsg = data.message;
@@ -79,7 +81,7 @@ const CreateAccount = () => {
             <div className="bg-rose-50/80 backdrop-blur-md border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-start gap-3 shadow-sm animate-fade-in">
               <AlertCircle className="shrink-0 mt-0.5" size={20} />
               <div className="flex-1">
-                <h4 className="font-bold text-sm">Action Failed</h4>
+                <h4 className="font-bold text-sm">{t('createAccount.actionFailed')}</h4>
                 <p className="text-sm text-rose-600 mt-0.5 whitespace-pre-line">{error}</p>
               </div>
               <button type="button" onClick={() => setError('')} className="p-1 hover:bg-rose-100 rounded-lg transition-colors">
@@ -92,7 +94,7 @@ const CreateAccount = () => {
             <div className="bg-emerald-50/80 backdrop-blur-md border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl flex items-start gap-3 shadow-sm animate-fade-in">
               <CheckCircle className="shrink-0 mt-0.5" size={20} />
               <div className="flex-1">
-                <h4 className="font-bold text-sm">Action Successful</h4>
+                <h4 className="font-bold text-sm">{t('createAccount.actionSuccess')}</h4>
                 <p className="text-sm text-emerald-600 mt-0.5">{success}</p>
               </div>
               <button type="button" onClick={() => setSuccess('')} className="p-1 hover:bg-emerald-100 rounded-lg transition-colors">
@@ -104,7 +106,7 @@ const CreateAccount = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Username */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Username</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">{t('createAccount.labelUsername')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <User size={18} className="text-slate-400" />
@@ -115,7 +117,7 @@ const CreateAccount = () => {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  placeholder="john_doe"
+                  placeholder={t('createAccount.phUsername')}
                   className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block pl-10 p-3 transition-all outline-none"
                 />
               </div>
@@ -123,7 +125,7 @@ const CreateAccount = () => {
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email Address</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">{t('createAccount.labelEmail')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Mail size={18} className="text-slate-400" />
@@ -134,7 +136,7 @@ const CreateAccount = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  placeholder="john@example.com"
+                  placeholder={t('createAccount.phEmail')}
                   className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block pl-10 p-3 transition-all outline-none"
                 />
               </div>
@@ -142,7 +144,7 @@ const CreateAccount = () => {
 
             {/* Phone */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Phone Number</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">{t('createAccount.labelPhone')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Phone size={18} className="text-slate-400" />
@@ -153,7 +155,7 @@ const CreateAccount = () => {
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   required
-                  placeholder="0912345678"
+                  placeholder={t('createAccount.phPhone')}
                   className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block pl-10 p-3 transition-all outline-none"
                 />
               </div>
@@ -161,7 +163,7 @@ const CreateAccount = () => {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Temporary Password</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">{t('createAccount.labelTempPwd')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Lock size={18} className="text-slate-400" />
@@ -172,7 +174,7 @@ const CreateAccount = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  placeholder="••••••••"
+                  placeholder={t('createAccount.phTempPwd')}
                   className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block pl-10 p-3 transition-all outline-none"
                 />
               </div>
@@ -181,7 +183,7 @@ const CreateAccount = () => {
 
           {/* Role Selection */}
           <div className="space-y-3 pt-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">System Role</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">{t('createAccount.labelSysRole')}</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {roles.map((role) => (
                 <button
@@ -220,7 +222,7 @@ const CreateAccount = () => {
               ) : (
                 <>
                   <UserPlus size={18} />
-                  Create User Account
+                  {t('createAccount.btnCreateAcc')}
                 </>
               )}
             </button>

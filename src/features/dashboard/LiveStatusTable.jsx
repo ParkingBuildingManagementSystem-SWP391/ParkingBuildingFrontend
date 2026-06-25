@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Table, Input, Select, Button, Tag, Drawer, Spin, message, Space, Tooltip, Popconfirm } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { 
   Search, 
   Car, 
@@ -20,28 +21,29 @@ import { useAuth } from '../../context/AuthContext';
 
 const { Option } = Select;
 
-const getVehicleTypeLabel = (type) => {
-  if (type === 'Car') return 'Ô tô';
-  if (type === 'Motorcycle' || type === 'Motorbike') return 'Xe máy';
-  if (type === 'Bicycle') return 'Xe đạp';
-  return type || 'Không xác định';
+const getVehicleTypeLabel = (type, t) => {
+  if (type === 'Car') return t('dashboard.liveStatus.car', { defaultValue: 'Ô tô' });
+  if (type === 'Motorcycle' || type === 'Motorbike') return t('dashboard.liveStatus.motorbike', { defaultValue: 'Xe máy' });
+  if (type === 'Bicycle') return t('dashboard.liveStatus.bicycle', { defaultValue: 'Xe đạp' });
+  return type || t('dashboard.liveStatus.unknown', { defaultValue: 'Không xác định' });
 };
 
-const getStatusLabel = (status) => {
-  if (status === 'Available') return 'CÒN TRỐNG';
-  if (status === 'Occupied') return 'ĐANG ĐỖ';
-  if (status === 'Reserved') return 'ĐÃ ĐẶT';
+const getStatusLabel = (status, t) => {
+  if (status === 'Available') return t('dashboard.liveStatus.available', { defaultValue: 'CÒN TRỐNG' });
+  if (status === 'Occupied') return t('dashboard.liveStatus.occupied', { defaultValue: 'ĐANG ĐỖ' });
+  if (status === 'Reserved') return t('dashboard.liveStatus.reserved', { defaultValue: 'ĐÃ ĐẶT' });
   return String(status || '').toUpperCase();
 };
 
-const getActionLabel = (actionName) => {
-  if (actionName === 'Maintenance Lock') return 'Khóa bảo trì';
-  if (actionName === 'VIP Reservation') return 'Giữ chỗ VIP';
+const getActionLabel = (actionName, t) => {
+  if (actionName === 'Maintenance Lock') return t('dashboard.liveStatus.maintenance', { defaultValue: 'Khóa bảo trì' });
+  if (actionName === 'VIP Reservation') return t('dashboard.liveStatus.vip', { defaultValue: 'Giữ chỗ VIP' });
   return actionName;
 };
 
 const LiveStatusTable = () => {
   const { role } = useAuth();
+  const { t } = useTranslation();
   const [floors, setFloors] = useState([]);
   const [selectedFloor, setSelectedFloor] = useState(3); // Default Floor G
   const [slots, setSlots] = useState([]);
@@ -98,13 +100,13 @@ const LiveStatusTable = () => {
           slotName: s.slotName,
           type: type,
           status: status,
-          floorName: floorObj ? floorObj.name : `Mã tầng: ${selectedFloor}`
+          floorName: floorObj ? floorObj.name : t('dashboard.liveStatus.floorId', { id: selectedFloor })
         };
       });
       setSlots(mapped);
     } catch (err) {
       console.error(err);
-      message.error("Không thể tải dữ liệu chỗ đỗ.");
+      message.error(t('dashboard.liveStatus.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -143,7 +145,7 @@ const LiveStatusTable = () => {
   };
 
   const handleUnsupportedSlotAction = (actionName) => {
-    message.warning(`Backend chưa cung cấp API cho thao tác ${getActionLabel(actionName)}.`);
+    message.warning(t('dashboard.liveStatus.noApi', { action: getActionLabel(actionName, t) }));
   };
 
   // Real Force Release Action
@@ -154,7 +156,7 @@ const LiveStatusTable = () => {
       const cleanPlate = plate !== 'Unknown' ? plate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null;
       
       const response = await parkingService.checkOutVehicle(null, cleanPlate, null, null);
-      message.success(response.message || `Đã buộc giải phóng chỗ ${selectedSlot.slotName}.`);
+      message.success(response.message || t('dashboard.liveStatus.releaseSuccess', { slot: selectedSlot.slotName }));
       setDrawerVisible(false);
       fetchSlots();
     } catch (err) {
@@ -166,14 +168,14 @@ const LiveStatusTable = () => {
 
   const columns = [
     {
-      title: 'Mã chỗ',
+      title: t('dashboard.liveStatus.slotCode'),
       dataIndex: 'slotName',
       key: 'slotName',
       render: (text) => <span className="font-mono font-extrabold text-blue-700">{text}</span>,
       sorter: (a, b) => a.slotName.localeCompare(b.slotName)
     },
     {
-      title: 'Loại xe',
+      title: t('dashboard.liveStatus.vehicleType'),
       dataIndex: 'type',
       key: 'type',
       render: (type) => {
@@ -184,19 +186,19 @@ const LiveStatusTable = () => {
         return (
           <div className="flex items-center gap-2">
             {icon}
-            <span className="font-medium text-slate-700">{getVehicleTypeLabel(type)}</span>
+            <span className="font-medium text-slate-700">{getVehicleTypeLabel(type, t)}</span>
           </div>
         );
       },
       filters: [
-        { text: 'Ô tô', value: 'Car' },
-        { text: 'Xe máy', value: 'Motorcycle' },
-        { text: 'Xe đạp', value: 'Bicycle' },
+        { text: t('dashboard.liveStatus.car'), value: 'Car' },
+        { text: t('dashboard.liveStatus.motorbike'), value: 'Motorcycle' },
+        { text: t('dashboard.liveStatus.bicycle'), value: 'Bicycle' },
       ],
       onFilter: (value, record) => record.type.indexOf(value) === 0,
     },
     {
-      title: 'Trạng thái hiện tại',
+      title: t('dashboard.liveStatus.currentStatus'),
       dataIndex: 'status',
       key: 'status',
       render: (status) => {
@@ -204,23 +206,23 @@ const LiveStatusTable = () => {
         if (status === 'Available') color = 'success';
         if (status === 'Occupied') color = 'error';
         if (status === 'Reserved') color = 'warning';
-        return <Tag color={color} className="font-bold border-0 shadow-sm px-2.5 py-0.5">{getStatusLabel(status)}</Tag>;
+        return <Tag color={color} className="font-bold border-0 shadow-sm px-2.5 py-0.5">{getStatusLabel(status, t)}</Tag>;
       },
       filters: [
-        { text: 'Còn trống', value: 'Available' },
-        { text: 'Đang đỗ', value: 'Occupied' },
-        { text: 'Đã đặt', value: 'Reserved' },
+        { text: t('dashboard.liveStatus.available'), value: 'Available' },
+        { text: t('dashboard.liveStatus.occupied'), value: 'Occupied' },
+        { text: t('dashboard.liveStatus.reserved'), value: 'Reserved' },
       ],
       onFilter: (value, record) => record.status === value,
     },
     {
-      title: 'Tầng',
+      title: t('dashboard.liveStatus.floor'),
       dataIndex: 'floorName',
       key: 'floorName',
       render: (text) => <span className="font-semibold text-slate-600">{text}</span>
     },
     {
-      title: 'Thao tác',
+      title: t('dashboard.liveStatus.action'),
       key: 'action',
       render: (_, record) => (
         <Button 
@@ -230,7 +232,7 @@ const LiveStatusTable = () => {
           className="bg-indigo-600 hover:bg-indigo-700 shadow-md flex items-center gap-1.5 rounded-md"
         >
           <Settings size={14} />
-          Quản lý
+          {t('dashboard.liveStatus.manage')}
         </Button>
       ),
     },
@@ -244,9 +246,9 @@ const LiveStatusTable = () => {
         <div>
           <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
             <ShieldAlert className="text-indigo-600" />
-            Lưới vận hành trực tiếp
+            {t('dashboard.liveStatus.title')}
           </h3>
-          <p className="text-xs text-slate-500 mt-1">Theo dõi trạng thái chỗ đỗ theo thời gian thực</p>
+          <p className="text-xs text-slate-500 mt-1">{t('dashboard.liveStatus.subtitle')}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -254,7 +256,7 @@ const LiveStatusTable = () => {
             value={selectedFloor}
             onChange={(val) => setSelectedFloor(val)}
             className="w-36 h-9"
-            placeholder="Chọn tầng"
+            placeholder={t('dashboard.liveStatus.selectFloor')}
           >
             {floors.map(f => (
               <Option key={f.id} value={f.id}>{f.name}</Option>
@@ -262,14 +264,14 @@ const LiveStatusTable = () => {
           </Select>
 
           <Input
-            placeholder="Tìm chỗ đỗ..."
+            placeholder={t('dashboard.liveStatus.searchSlot')}
             prefix={<Search size={16} className="text-slate-400" />}
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
             className="w-48 h-9 rounded-lg"
           />
 
-          <Tooltip title="Làm mới dữ liệu">
+          <Tooltip title={t('dashboard.liveStatus.refresh')}>
             <Button 
               icon={<RefreshCw size={16} />} 
               onClick={fetchSlots} 
@@ -300,7 +302,7 @@ const LiveStatusTable = () => {
         title={
           <div className="flex items-center gap-2 text-indigo-900">
             <Settings size={18} />
-            <span className="font-extrabold">Chỗ đỗ: {selectedSlot?.slotName}</span>
+            <span className="font-extrabold">{t('dashboard.liveStatus.slotDetail', { slot: selectedSlot?.slotName })}</span>
           </div>
         }
         placement="right"
@@ -315,17 +317,17 @@ const LiveStatusTable = () => {
             {/* General Info Card */}
             <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
               <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-2">
-                <span className="text-slate-500 font-semibold">Tầng</span>
+                <span className="text-slate-500 font-semibold">{t('dashboard.liveStatus.floor')}</span>
                 <span className="font-bold text-slate-800">{selectedSlot.floorName}</span>
               </div>
               <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-2">
-                <span className="text-slate-500 font-semibold">Loại xe</span>
-                <span className="font-bold text-slate-800">{getVehicleTypeLabel(selectedSlot.type)}</span>
+                <span className="text-slate-500 font-semibold">{t('dashboard.liveStatus.vehicleType')}</span>
+                <span className="font-bold text-slate-800">{getVehicleTypeLabel(selectedSlot.type, t)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-semibold">Trạng thái</span>
+                <span className="text-slate-500 font-semibold">{t('dashboard.liveStatus.currentStatus')}</span>
                 <Tag color={selectedSlot.status === 'Available' ? 'success' : selectedSlot.status === 'Occupied' ? 'error' : 'warning'} className="m-0 font-bold border-0">
-                  {getStatusLabel(selectedSlot.status)}
+                  {getStatusLabel(selectedSlot.status, t)}
                 </Tag>
               </div>
             </div>
@@ -333,12 +335,12 @@ const LiveStatusTable = () => {
             {/* Content based on status */}
             {(selectedSlot.status === 'Occupied' || selectedSlot.status === 'Reserved') && (
               <div className="space-y-4">
-                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider">Dữ liệu xe đang đỗ</h4>
+                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider">{t('dashboard.liveStatus.parkedData')}</h4>
                 
                 {detailLoading ? (
                   <div className="flex flex-col items-center justify-center p-6 gap-2">
                     <Spin size="default" />
-                    <span className="text-xs text-slate-500">Đang lấy dữ liệu từ hệ thống...</span>
+                    <span className="text-xs text-slate-500">{t('dashboard.liveStatus.loadingData')}</span>
                   </div>
                 ) : slotDetail?.activeSession ? (
                   <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl space-y-3">
@@ -352,7 +354,7 @@ const LiveStatusTable = () => {
                     {slotDetail.activeSession.checkInTime && (
                       <div className="flex items-center gap-2 text-sm">
                         <Clock size={14} className="text-blue-400" />
-                        <span className="text-slate-600">Vào bãi: {new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
+                        <span className="text-slate-600">{t('dashboard.liveStatus.checkInTime', { time: new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN') })}</span>
                       </div>
                     )}
 
@@ -370,19 +372,19 @@ const LiveStatusTable = () => {
                   </div>
                 ) : (
                   <div className="bg-slate-50 p-4 rounded-xl text-center text-xs font-medium text-slate-400">
-                    Không tìm thấy chi tiết phiên đang hoạt động.
+                    {t('dashboard.liveStatus.noActiveSession')}
                   </div>
                 )}
 
                 {/* Force Release Action */}
                 <div className="pt-4 border-t border-slate-200">
-                  <h4 className="text-xs font-extrabold uppercase text-rose-400 tracking-wider mb-3">Can thiệp quản trị</h4>
+                  <h4 className="text-xs font-extrabold uppercase text-rose-400 tracking-wider mb-3">{t('dashboard.liveStatus.adminIntervention')}</h4>
                   <Popconfirm
-                    title="Buộc giải phóng chỗ này?"
-                    description="Thao tác này bỏ qua thanh toán và giải phóng chỗ. Chỉ dùng khi có lỗi."
+                    title={t('dashboard.liveStatus.forceReleaseTitle')}
+                    description={t('dashboard.liveStatus.forceReleaseDesc')}
                     onConfirm={handleForceRelease}
-                    okText="Đồng ý giải phóng"
-                    cancelText="Hủy"
+                    okText={t('dashboard.liveStatus.confirmRelease')}
+                    cancelText={t('dashboard.liveStatus.cancel')}
                     okButtonProps={{ danger: true }}
                   >
                     <Button 
@@ -393,11 +395,11 @@ const LiveStatusTable = () => {
                       icon={<Unlock size={16} />}
                       className="font-bold shadow-sm"
                     >
-                      Buộc giải phóng
+                      {t('dashboard.liveStatus.forceRelease')}
                     </Button>
                   </Popconfirm>
                   <p className="text-[10px] text-slate-400 text-center mt-2">
-                    Thao tác sẽ được ghi nhận theo tài khoản quản lý của bạn.
+                    {t('dashboard.liveStatus.releaseNote')}
                   </p>
                 </div>
               </div>
@@ -405,14 +407,14 @@ const LiveStatusTable = () => {
 
             {selectedSlot.status === 'Available' && (
               <div className="pt-2">
-                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-3">Điều khiển chỗ đỗ</h4>
+                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-3">{t('dashboard.liveStatus.slotControl')}</h4>
                 <Space direction="vertical" className="w-full" size="middle">
                   <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex flex-col gap-3">
                     <div className="flex items-start gap-2">
                       <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-bold text-amber-800 text-sm">Khóa bảo trì</div>
-                        <div className="text-xs text-amber-600 mt-0.5">Ngăn xe mới vào chỗ này trong thời gian sửa chữa.</div>
+                        <div className="font-bold text-amber-800 text-sm">{t('dashboard.liveStatus.maintenance')}</div>
+                        <div className="text-xs text-amber-600 mt-0.5">{t('dashboard.liveStatus.maintenanceDesc')}</div>
                       </div>
                     </div>
                     <Button 
@@ -421,7 +423,7 @@ const LiveStatusTable = () => {
                       onClick={() => handleUnsupportedSlotAction('Maintenance Lock')}
                       className="bg-amber-500 hover:bg-amber-600 text-white border-0 font-bold"
                     >
-                      Khóa để bảo trì
+                      {t('dashboard.liveStatus.lockMaintenance')}
                     </Button>
                   </div>
 
@@ -429,8 +431,8 @@ const LiveStatusTable = () => {
                     <div className="flex items-start gap-2">
                       <Key size={16} className="text-purple-500 shrink-0 mt-0.5" />
                       <div>
-                        <div className="font-bold text-purple-800 text-sm">Giữ chỗ VIP</div>
-                        <div className="text-xs text-purple-600 mt-0.5">Giữ chỗ này cho khách ưu tiên.</div>
+                        <div className="font-bold text-purple-800 text-sm">{t('dashboard.liveStatus.vip')}</div>
+                        <div className="text-xs text-purple-600 mt-0.5">{t('dashboard.liveStatus.vipDesc')}</div>
                       </div>
                     </div>
                     <Button 
@@ -439,7 +441,7 @@ const LiveStatusTable = () => {
                       onClick={() => handleUnsupportedSlotAction('VIP Reservation')}
                       className="bg-purple-600 hover:bg-purple-700 text-white border-0 font-bold"
                     >
-                      Giữ chỗ VIP
+                      {t('dashboard.liveStatus.vip')}
                     </Button>
                   </div>
                 </Space>

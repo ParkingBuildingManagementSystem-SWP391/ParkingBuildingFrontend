@@ -17,10 +17,12 @@ import {
   Ticket,
   CreditCard
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const MyBookings = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // Active filter tab: 'All' | 'Active' | 'Expired'
   const [activeTab, setActiveTab] = useState('All');
@@ -66,11 +68,11 @@ const MyBookings = () => {
         // Redirect to VNPay payment URL
         window.location.href = response.data.paymentUrl;
       } else {
-        alert(response.data?.message || "Không thể tạo liên kết thanh toán VNPay.");
+        alert(response.data?.message || t('myBookings.errVNPayCreate'));
       }
     } catch (err) {
       console.error("VNPay payment creation error:", err);
-      let errorMsg = "Giao dịch thất bại. Vui lòng thử lại.";
+      let errorMsg = t('myBookings.errTxFailed');
       if (err.response?.data) {
         const data = err.response.data;
         if (data.message) {
@@ -82,7 +84,7 @@ const MyBookings = () => {
             .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
             .join('\n');
           if (validationErrors) {
-            errorMsg = `Lỗi hệ thống: ${validationErrors}`;
+            errorMsg = `${t('myBookings.errSys')}${validationErrors}`;
           }
         }
       }
@@ -102,7 +104,7 @@ const MyBookings = () => {
   const fetchMyBookings = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      setError("No token found. Please log in.");
+      setError(t('myBookings.errNoToken'));
       return;
     }
     
@@ -200,7 +202,7 @@ const MyBookings = () => {
       localStorage.setItem('spotflow_driver_bookings', JSON.stringify(mapped));
     } catch (err) {
       console.error("Fetch bookings error:", err.response?.data || err);
-      setError("Failed to load reservations.");
+      setError(t('myBookings.errLoadRes'));
     } finally {
       setLoading(false);
     }
@@ -253,8 +255,8 @@ const MyBookings = () => {
   );
   const getVnPayPaymentLabel = (booking) => (
     isDepositPaymentDue(booking)
-      ? 'Thanh toán tiền cọc (VNPay)'
-      : 'Thanh toán phí đỗ xe (VNPay)'
+      ? t('myBookings.payDepositVNPay')
+      : t('myBookings.payFeeVNPay')
   );
 
   // Metrics summary counts
@@ -294,7 +296,7 @@ const MyBookings = () => {
         
         // 2. Đóng Modal xác nhận hủy
         setIsCancelConfirmOpen(false);
-        setSuccessMessage(response.message || "Hủy đặt chỗ thành công.");
+        setSuccessMessage(response.message || t('myBookings.cancelSuccess'));
 
         // 3. OPTIMISTIC UI UPDATE: Cập nhật state trực tiếp để UI phản hồi ngay lập tức
         setBookings(prevBookings => prevBookings.map(booking => {
@@ -316,7 +318,7 @@ const MyBookings = () => {
         setTimeout(() => setSuccessMessage(''), 5000);
       } catch (err) {
         console.error("Cancel booking error:", err);
-        const errorMessage = typeof err === 'string' ? err : "Không thể hủy đơn đặt chỗ này. Vui lòng thử lại.";
+        const errorMessage = typeof err === 'string' ? err : t('myBookings.cancelFailed');
         setError(errorMessage);
         setIsCancelConfirmOpen(false);
         setTargetBookingId(null);
@@ -338,7 +340,7 @@ const MyBookings = () => {
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
           <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-blue-500/10 blur-2xl"></div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Total Bookings</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.totalBookings')}</span>
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-400 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
               <Ticket size={18} />
             </div>
@@ -352,14 +354,14 @@ const MyBookings = () => {
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
           <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl"></div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Active</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.active')}</span>
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
               <CheckCircle size={18} />
             </div>
           </div>
           <div className="flex items-end gap-2">
             <span className="text-4xl font-black text-slate-800 tracking-tight">{activeCount}</span>
-            <span className="text-sm text-slate-400 font-bold mb-1">sessions</span>
+            <span className="text-sm text-slate-400 font-bold mb-1">{t('myBookings.sessions')}</span>
           </div>
         </div>
 
@@ -367,7 +369,7 @@ const MyBookings = () => {
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
           <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-slate-500/10 blur-2xl"></div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Expired</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.expired')}</span>
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-slate-400 to-slate-300 text-white flex items-center justify-center shadow-lg shadow-slate-400/20">
               <XCircle size={18} />
             </div>
@@ -381,7 +383,7 @@ const MyBookings = () => {
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5">
           <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-indigo-500/10 blur-2xl"></div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Total Spent</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.totalSpent')}</span>
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <CreditCard size={18} />
             </div>
@@ -406,7 +408,7 @@ const MyBookings = () => {
               : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          All
+          {t('myBookings.all')}
         </button>
         <button
           onClick={() => setActiveTab('Active')}
@@ -416,7 +418,7 @@ const MyBookings = () => {
               : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          Active
+          {t('myBookings.active')}
         </button>
         <button
           onClick={() => setActiveTab('Expired')}
@@ -426,7 +428,7 @@ const MyBookings = () => {
               : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          Expired
+          {t('myBookings.expired')}
         </button>
       </div>
 
@@ -437,7 +439,7 @@ const MyBookings = () => {
           <div className="bg-rose-50/80 backdrop-blur-md border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
             <AlertCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
-              <h4 className="font-bold text-sm">Action Failed</h4>
+              <h4 className="font-bold text-sm">{t('myBookings.actionFailed')}</h4>
               <p className="text-sm text-rose-600 mt-0.5">{error}</p>
             </div>
             <button onClick={() => setError('')} className="p-1 hover:bg-rose-100 rounded-lg transition-colors">
@@ -451,7 +453,7 @@ const MyBookings = () => {
           <div className="bg-emerald-50/80 backdrop-blur-md border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl flex items-start gap-3 mb-4 shadow-sm animate-fade-in">
             <CheckCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
-              <h4 className="font-bold text-sm">Action Successful</h4>
+              <h4 className="font-bold text-sm">{t('myBookings.actionSuccess')}</h4>
               <p className="text-sm text-emerald-600 mt-0.5">{successMessage}</p>
             </div>
             <button onClick={() => setSuccessMessage('')} className="p-1 hover:bg-emerald-100 rounded-lg transition-colors">
@@ -464,16 +466,16 @@ const MyBookings = () => {
         {loading && bookings.length === 0 ? (
           <div className="bg-white/60 backdrop-blur-md border border-white rounded-3xl py-20 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <div className="w-10 h-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin mx-auto mb-4"></div>
-            <h3 className="text-slate-700 font-bold text-base">Loading your reservations...</h3>
+            <h3 className="text-slate-700 font-bold text-base">{t('myBookings.loadingRes')}</h3>
           </div>
         ) : filteredBookings.length === 0 ? (
           <div className="bg-white/60 backdrop-blur-md border border-white rounded-3xl py-20 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center">
             <div className="w-20 h-20 bg-slate-50 border border-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-5 shadow-inner">
               <QrCode size={40} />
             </div>
-            <h3 className="text-slate-800 font-extrabold text-lg mb-2">No bookings found</h3>
+            <h3 className="text-slate-800 font-extrabold text-lg mb-2">{t('myBookings.noBookings')}</h3>
             <p className="text-sm text-slate-500 max-w-sm">
-              You haven't made any parking reservations in this category yet.
+              {t('myBookings.noBookingsDesc')}
             </p>
           </div>
         ) : (
@@ -520,7 +522,7 @@ const MyBookings = () => {
                     {/* Time Metric */}
                     <div className="flex flex-col items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                        {booking.sessionStatus === 'Reserved' ? 'Deadline' : 'Activity'}
+                        {booking.sessionStatus === 'Reserved' ? t('myBookings.deadline') : t('myBookings.activity')}
                       </span>
                       {booking.sessionStatus === 'Reserved' ? (
                         <div className="flex flex-col items-start gap-1">
@@ -547,7 +549,7 @@ const MyBookings = () => {
 
                     {/* Financial Metric */}
                     <div className="flex flex-col items-start">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Billing</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('myBookings.billing')}</span>
                       {booking.totalAmount !== null && booking.totalAmount !== undefined ? (
                         <div>
                           <span className="text-sm font-black text-indigo-700 block">
@@ -567,13 +569,13 @@ const MyBookings = () => {
                           </span>
                         </div>
                       ) : (
-                        <span className="text-xs font-bold text-slate-400">No Invoice</span>
+                        <span className="text-xs font-bold text-slate-400">{t('myBookings.noInvoice')}</span>
                       )}
                     </div>
                     
                     {/* Plate Metric */}
                     <div className="flex flex-col items-start hidden sm:flex">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Plate</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('myBookings.plate')}</span>
                       <span className="text-sm font-bold text-slate-700 bg-slate-200/50 px-2 py-0.5 rounded-md border border-slate-200">
                         {booking.contact}
                       </span>
@@ -590,7 +592,7 @@ const MyBookings = () => {
                       }}
                       className="flex-1 lg:flex-none h-10 px-4 bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
                     >
-                      <QrCode size={14} /> View QR
+                      <QrCode size={14} /> {t('myBookings.viewQR')}
                     </button>
 
                     {booking.sessionStatus === 'Reserved' && (
@@ -598,7 +600,7 @@ const MyBookings = () => {
                          onClick={() => handleCancelClick(booking.id)}
                          className="flex-1 lg:flex-none h-10 px-4 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
                       >
-                        <X size={14} /> Cancel
+                        <X size={14} /> {t('myBookings.cancel')}
                       </button>
                     )}
 
@@ -613,7 +615,7 @@ const MyBookings = () => {
                         ) : (
                           <CreditCard size={14} />
                         )}
-                        Pay Now
+                        {t('myBookings.payNow')}
                       </button>
                     )}
                   </div>
@@ -641,9 +643,9 @@ const MyBookings = () => {
                 <AlertCircle size={28} />
               </div>
               <div className="space-y-1.5">
-                <h3 className="text-lg font-extrabold text-slate-800">Cancel Booking?</h3>
+                <h3 className="text-lg font-extrabold text-slate-800">{t('myBookings.cancelTitle')}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed px-2">
-                  Are you sure you want to cancel this reservation? Expired tickets release spots back to the building map grids immediately.
+                  {t('myBookings.cancelDesc')}
                 </p>
               </div>
 
@@ -652,13 +654,13 @@ const MyBookings = () => {
                   onClick={() => setIsCancelConfirmOpen(false)}
                   className="flex-1 h-11 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-sm transition-all"
                 >
-                  No, Keep it
+                  {t('myBookings.btnNoKeep')}
                 </button>
                 <button
                   onClick={handleConfirmCancel}
                   className="flex-1 h-11 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-rose-500/20 active:scale-[0.98]"
                 >
-                  Yes, Cancel
+                  {t('myBookings.btnYesCancel')}
                 </button>
               </div>
             </div>
@@ -682,8 +684,8 @@ const MyBookings = () => {
 
             <div className="space-y-5 pt-2">
               <div className="space-y-1.5">
-                <h3 className="text-lg font-extrabold text-slate-800">Parking Ticket</h3>
-                <p className="text-xs text-slate-500">Scan at entrance readers or camera checkpoints</p>
+                <h3 className="text-lg font-extrabold text-slate-800">{t('myBookings.ticketTitle')}</h3>
+                <p className="text-xs text-slate-500">{t('myBookings.ticketDesc')}</p>
               </div>
 
               <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl inline-block shadow-inner">
@@ -710,7 +712,7 @@ const MyBookings = () => {
                 }}
                 className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-slate-900/20 active:scale-[0.98]"
               >
-                Close Ticket
+                {t('myBookings.closeTicket')}
               </button>
             </div>
           </div>
