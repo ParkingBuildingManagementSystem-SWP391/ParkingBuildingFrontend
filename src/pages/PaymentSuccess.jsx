@@ -132,12 +132,12 @@ const PaymentSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-slate-50 flex items-center justify-center p-4 font-sans select-none relative overflow-hidden">
+    <div className="relative flex min-h-screen w-full select-none items-center justify-center overflow-hidden bg-slate-50 p-4 font-sans dark:bg-slate-950">
       {/* Decorative background blurs */}
-      <div className="absolute top-1/4 left-1/4 w-[420px] h-[420px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[420px] h-[420px] bg-emerald-400/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="pointer-events-none absolute left-1/4 top-1/4 h-[320px] w-[320px] rounded-full bg-indigo-500/5 blur-[100px] sm:h-[420px] sm:w-[420px]" />
+      <div className="pointer-events-none absolute bottom-1/4 right-1/4 h-[320px] w-[320px] rounded-full bg-emerald-400/5 blur-[100px] sm:h-[420px] sm:w-[420px]" />
 
-      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] p-8 sm:p-10 z-10 text-center space-y-7">
+      <div className="z-10 w-full max-w-md space-y-7 rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-900 sm:p-10">
 
         {/* State 1: Polling backend status */}
         {paymentState === 'polling' && (
@@ -147,8 +147,8 @@ const PaymentSuccess = () => {
               <div className="absolute inset-2 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.checkingResult')}</h2>
-              <p className="text-sm text-slate-500 font-medium px-4">{loadingText}</p>
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('paymentSuccess.checkingResult')}</h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">{loadingText}</p>
             </div>
           </div>
         )}
@@ -161,15 +161,15 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.depositSuccess')}</h2>
-              <p className="text-sm text-slate-500 font-medium px-2">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('paymentSuccess.depositSuccess')}</h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400">
                 {t('paymentSuccess.depositDesc')}
               </p>
             </div>
 
             {/* Display check-in QR Code directly */}
             {sessionDetail ? (
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 space-y-4 max-w-xs mx-auto">
+              <div className="mx-auto max-w-xs space-y-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800 sm:p-6">
                 <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('paymentSuccess.qrCodeTitle')}</span>
                 <div className="bg-white p-3 rounded-xl border border-slate-200 inline-block shadow-sm">
                   <img
@@ -178,17 +178,17 @@ const PaymentSuccess = () => {
                     className="w-40 h-40 object-contain"
                   />
                 </div>
-                <div className="text-xs font-mono font-bold text-emerald-600">
+                <div className="break-all font-mono text-xs font-bold text-emerald-600">
                   {sessionDetail.ticketId}
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-left text-xs font-sans pt-3 border-t border-slate-200/80">
+                <div className="grid grid-cols-1 gap-3 border-t border-slate-200/80 pt-3 text-left font-sans text-xs dark:border-slate-700 sm:grid-cols-2">
                   <div>
                     <span className="text-slate-400 font-medium block mb-0.5">{t('paymentSuccess.location')}</span>
-                    <span className="text-slate-900 font-bold">{sessionDetail.location}</span>
+                    <span className="break-words font-bold text-slate-900 dark:text-slate-100">{sessionDetail.location}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 font-medium block mb-0.5">{t('paymentSuccess.license')}</span>
-                    <span className="text-slate-900 font-bold">{sessionDetail.license}</span>
+                    <span className="break-all font-bold text-slate-900 dark:text-slate-100">{sessionDetail.license}</span>
                   </div>
                 </div>
               </div>
@@ -217,14 +217,14 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.exitSuccess')}</h2>
-              <p className="text-sm text-slate-500 font-medium px-4">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('paymentSuccess.exitSuccess')}</h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
                 {t('paymentSuccess.exitDesc')}
               </p>
             </div>
 
             {/* Countdown timer card */}
-            <div className="bg-amber-50 border border-amber-200/70 rounded-2xl p-6 space-y-2 max-w-xs mx-auto">
+            <div className="mx-auto max-w-xs space-y-2 rounded-2xl border border-amber-200/70 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10 sm:p-6">
               <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold text-amber-700 uppercase tracking-widest">
                 <Clock size={12} />
                 {t('paymentSuccess.graceTimeTitle')}
@@ -255,14 +255,14 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.botSuccess')}</h2>
-              <p className="text-sm text-slate-500 font-medium px-4">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('paymentSuccess.botSuccess')}</h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
                 {t('paymentSuccess.botDesc1')}
               </p>
             </div>
 
             {/* Hộp trạng thái ra cổng lập tức (Không có đếm ngược ân hạn) */}
-            <div className="bg-emerald-50 border border-emerald-200/70 rounded-2xl p-6 space-y-2 max-w-xs mx-auto">
+            <div className="mx-auto max-w-xs space-y-2 rounded-2xl border border-emerald-200/70 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10 sm:p-6">
               <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">{t('paymentSuccess.gateStatusTitle')}</span>
               <div className="text-xl font-black text-emerald-600 uppercase">
                 {t('paymentSuccess.gateStatus')}
@@ -290,16 +290,16 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.failedTitle')}</h2>
-              <p className="text-sm text-slate-500 font-medium px-4">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('paymentSuccess.failedTitle')}</h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
                 {t('paymentSuccess.failedDesc')}
               </p>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="flex-1 h-12 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-[14px] text-sm transition-all cursor-pointer"
+                className="h-12 flex-1 cursor-pointer rounded-[14px] border border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 {t('paymentSuccess.btnHome')}
               </button>
@@ -321,8 +321,8 @@ const PaymentSuccess = () => {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.timeoutTitle')}</h2>
-              <p className="text-sm text-slate-500 font-medium px-4">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('paymentSuccess.timeoutTitle')}</h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
                 {t('paymentSuccess.timeoutDesc')}
               </p>
             </div>

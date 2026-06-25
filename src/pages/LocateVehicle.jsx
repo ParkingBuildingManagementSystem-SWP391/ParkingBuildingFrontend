@@ -47,12 +47,12 @@ const LocateVehicle = () => {
   ];
 
   return (
-    <section id="locate-vehicle" className="relative overflow-hidden bg-slate-50 py-16 px-4 sm:px-6">
+    <section id="locate-vehicle" className="relative overflow-hidden bg-slate-50 px-4 py-16 sm:px-6">
       {/* Background decor */}
       <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-indigo-600/5 blur-[90px]" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-emerald-500/5 blur-[90px]" />
 
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
 
         {/* ============ Cột trái: giới thiệu + các bước ============ */}
         <div className="text-center lg:text-left">
@@ -71,11 +71,11 @@ const LocateVehicle = () => {
           {/* 3 bước */}
           <div className="mx-auto mt-8 max-w-md space-y-4 lg:mx-0">
             {steps.map((s, i) => (
-              <div key={i} className="flex items-start gap-4 text-left">
+              <div key={i} className="flex min-w-0 items-start gap-4 text-left">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
                   <s.icon className="h-5 w-5 text-indigo-600" strokeWidth={2.2} />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white">{i + 1}</span>
                     <h3 className="text-sm font-bold text-slate-900">{s.title}</h3>
@@ -94,7 +94,7 @@ const LocateVehicle = () => {
 
         {/* ============ Cột phải: thẻ tra cứu ============ */}
         <div className="relative w-full">
-          <div className="relative z-10 mx-auto w-full max-w-md rounded-[24px] border border-slate-100 bg-white p-8 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)]">
+          <div className="relative z-10 mx-auto w-full max-w-md rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] sm:p-8">
             <div className="mb-7 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-600/30">
                 <Search className="h-6 w-6 text-white" strokeWidth={2.5} />
@@ -114,7 +114,7 @@ const LocateVehicle = () => {
                   placeholder="VÍ DỤ: 30A-123.45"
                   value={licensePlate}
                   onChange={(e) => setLicensePlate(e.target.value)}
-                  className="w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-lg font-extrabold uppercase tracking-widest text-slate-900 placeholder-slate-300 transition-all duration-200 focus:border-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-600/10"
+                  className="w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 px-4 py-3.5 text-center text-base font-extrabold uppercase tracking-widest text-slate-900 placeholder-slate-300 transition-all duration-200 focus:border-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-600/10 sm:text-lg"
                 />
               </div>
               <button
@@ -149,27 +149,27 @@ const LocateVehicle = () => {
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"></span>
                     Đang Đỗ Trong Bãi
                   </span>
-                  <h3 className="flex items-center justify-center gap-2 text-2xl font-extrabold tracking-widest text-slate-900">
+                  <h3 className="flex min-w-0 items-center justify-center gap-2 break-all text-xl font-extrabold tracking-widest text-slate-900 sm:text-2xl">
                     <Car className="h-6 w-6 text-slate-400" strokeWidth={2.5} />
                     {result.licenseVehicle}
                   </h3>
                 </div>
 
                 {/* Thông tin Tầng & Ô Đỗ */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-4">
                     <span className="mb-1.5 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
                       <Building2 className="h-3 w-3" strokeWidth={2.5} />
                       TẦNG ĐỖ XE
                     </span>
-                    <span className="text-xl font-extrabold text-indigo-600">{result.floorName}</span>
+                    <span className="break-words text-xl font-extrabold text-indigo-600">{result.floorName}</span>
                   </div>
                   <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-4">
                     <span className="mb-1.5 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
                       <MapPin className="h-3 w-3" strokeWidth={2.5} />
                       VỊ TRÍ Ô ĐỖ
                     </span>
-                    <span className="text-xl font-extrabold text-emerald-600">{result.slotName}</span>
+                    <span className="break-words text-xl font-extrabold text-emerald-600">{result.slotName}</span>
                   </div>
                 </div>
 
