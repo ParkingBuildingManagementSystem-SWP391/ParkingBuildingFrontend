@@ -176,8 +176,8 @@ const Home = () => {
       {/* ══════════════════ HERO ══════════════════ */}
       <section className="relative overflow-hidden">
         {/* decorative blobs */}
-        <div className="pointer-events-none absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/15" />
-        <div className="pointer-events-none absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-indigo-400/10 blur-3xl dark:bg-violet-500/15" />
+        <div className="pointer-events-none absolute left-1/2 top-[-8rem] h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/15 sm:-left-32 sm:top-[-8rem] sm:h-[500px] sm:w-[500px] sm:translate-x-0" />
+        <div className="pointer-events-none absolute bottom-[-8rem] right-0 h-80 w-80 rounded-full bg-indigo-400/10 blur-3xl dark:bg-violet-500/15 sm:-bottom-40 sm:-right-40 sm:h-[600px] sm:w-[600px]" />
 
         <div className="relative mx-auto grid min-h-[calc(100vh-80px)] w-full max-w-7xl grid-cols-1 items-center gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-10">
           {/* ── text ── */}
@@ -214,7 +214,7 @@ const Home = () => {
           </div>
 
           {/* ── image ── */}
-          <div className="relative mx-auto w-full max-w-xl anim-fade-up delay-2 lg:max-w-none">
+          <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl anim-fade-up delay-2 lg:max-w-none">
             <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-indigo-950/15 ring-1 ring-slate-200/60 dark:ring-slate-700">
               <img
                 src={heroImage}
@@ -320,8 +320,8 @@ const Home = () => {
           style={{ background: 'radial-gradient(120% 120% at 0% 0%, #6366f1 0%, #4f46e5 45%, #3730a3 100%)' }}
         >
           {/* decorative */}
-          <div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+          <div className="pointer-events-none absolute right-0 top-[-5rem] h-52 w-52 rounded-full bg-white/10 blur-3xl sm:-right-20 sm:h-64 sm:w-64" />
+          <div className="pointer-events-none absolute bottom-[-4rem] left-0 h-48 w-48 rounded-full bg-white/10 blur-3xl sm:-left-16 sm:h-56 sm:w-56" />
 
           <div className="relative z-10 space-y-6">
             <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{t('home.ctaTitle')}</h2>
