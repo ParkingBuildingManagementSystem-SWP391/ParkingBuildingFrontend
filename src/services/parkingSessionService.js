@@ -45,6 +45,17 @@ const parkingSessionService = {
       throw handledError;
     }
   },
+
+  getSessionDetailById: async (sessionId, signal) => {
+    try {
+      const response = await api.get(`/Admin/sessions/${sessionId}`, { signal });
+      return response.data;
+    } catch (error) {
+      const handledError = unwrapError(error, 'Failed to fetch parking session detail.');
+      if (handledError === null) return null;
+      throw handledError;
+    }
+  },
 };
 
 export default parkingSessionService;

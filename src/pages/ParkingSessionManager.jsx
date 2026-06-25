@@ -133,7 +133,7 @@ const DetailRow = ({ label, children }) => (
   </div>
 );
 
-const SessionDetailModal = ({ ticketCode, open, onClose }) => {
+const SessionDetailModal = ({ sessionId, open, onClose }) => {
   const { t } = useTranslation();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -141,7 +141,7 @@ const SessionDetailModal = ({ ticketCode, open, onClose }) => {
   const abortRef = useRef(null);
 
   useEffect(() => {
-    if (!open || !ticketCode) return undefined;
+    if (!open || !sessionId) return undefined;
 
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -151,7 +151,7 @@ const SessionDetailModal = ({ ticketCode, open, onClose }) => {
     setDetail(null);
 
     parkingSessionService
-      .getSessionDetailByTicket(ticketCode, controller.signal)
+      .getSessionDetailById(sessionId, controller.signal)
       .then((data) => {
         if (data) setDetail(data?.data || data?.Data || data);
       })
@@ -163,7 +163,7 @@ const SessionDetailModal = ({ ticketCode, open, onClose }) => {
       });
 
     return () => controller.abort();
-  }, [open, ticketCode]);
+  }, [open, sessionId]);
 
   const handleClose = () => {
     abortRef.current?.abort();
@@ -172,6 +172,7 @@ const SessionDetailModal = ({ ticketCode, open, onClose }) => {
 
   const slotName = getField(detail, 'slotName', 'SlotName');
   const licenseVehicle = getField(detail, 'licenseVehicle', 'LicenseVehicle');
+  const ticketCode = getField(detail, 'ticketCode', 'TicketCode');
   const typeId = getField(detail, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId');
   const vehicleTypeName = getField(detail, 'vehicleTypeName', 'VehicleTypeName');
   const sessionStatus = getField(detail, 'sessionStatus', 'SessionStatus', 'status', 'Status');
@@ -257,7 +258,7 @@ const ParkingSessionManager = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedTicketCode, setSelectedTicketCode] = useState(null);
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
   const abortControllerRef = useRef(null);
   const debounceTimeoutRef = useRef(null);
   const pageSize = 10;
@@ -455,7 +456,7 @@ const ParkingSessionManager = () => {
           <table className="min-w-full divide-y divide-slate-100">
             <thead className="bg-slate-50">
               <tr>
-                {[t('parkingSession.colSlot'), t('parkingSession.colType'), t('parkingSession.colTicket'), t('parkingSession.colStatus'), t('parkingSession.colAction')].map((heading) => (
+                {[t('parkingSession.colSlot'), t('parkingSession.phPlate'), t('parkingSession.colType'), t('parkingSession.colTicket'), t('parkingSession.colStatus'), t('parkingSession.colAction')].map((heading) => (
                   <th key={heading} className="px-5 py-3.5 text-left text-xs font-extrabold uppercase tracking-wider text-slate-500">
                     {heading}
                   </th>
@@ -465,26 +466,29 @@ const ParkingSessionManager = () => {
             <tbody className="divide-y divide-slate-100 bg-white">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-16 text-center">
+                  <td colSpan={6} className="px-5 py-16 text-center">
                     <Spin tip={t('parkingSession.loadingList')} />
                   </td>
                 </tr>
               ) : paginatedSessions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-16 text-center text-sm font-semibold text-slate-400">
+                  <td colSpan={6} className="px-5 py-16 text-center text-sm font-semibold text-slate-400">
                     {t('parkingSession.noData')}
                   </td>
                 </tr>
               ) : (
                 paginatedSessions.map((session, index) => {
+                  const sessionId = getField(session, 'sessionId', 'SessionId');
                   const ticketCode = getField(session, 'ticketCode', 'TicketCode');
+                  const licenseVehicle = getField(session, 'licenseVehicle', 'LicenseVehicle');
                   const typeId = getField(session, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId');
                   const status = getField(session, 'sessionStatus', 'SessionStatus', 'status', 'Status');
                   const vehicleTypeName = getField(session, 'vehicleTypeName', 'VehicleTypeName');
 
                   return (
-                    <tr key={getField(session, 'sessionId', 'SessionId') || ticketCode || index} className="transition-colors hover:bg-indigo-50/40">
+                    <tr key={sessionId || ticketCode || index} className="transition-colors hover:bg-indigo-50/40">
                       <td className="px-5 py-4 text-sm font-bold text-slate-800">{getField(session, 'slotName', 'SlotName') || t('parkingSession.none')}</td>
+                      <td className="px-5 py-4 text-sm font-semibold text-slate-700">{licenseVehicle || t('parkingSession.none')}</td>
                       <td className="px-5 py-4 text-sm text-slate-600">{getVehicleTypeName(typeId, vehicleTypeName, t)}</td>
                       <td className="px-5 py-4 font-mono text-sm font-bold text-indigo-600">{ticketCode || t('parkingSession.none')}</td>
                       <td className="px-5 py-4">
@@ -494,8 +498,8 @@ const ParkingSessionManager = () => {
                         <Button
                           size="small"
                           icon={<Eye size={14} />}
-                          disabled={!ticketCode}
-                          onClick={() => setSelectedTicketCode(ticketCode)}
+                          disabled={!sessionId}
+                          onClick={() => setSelectedSessionId(sessionId)}
                           className="rounded-[10px] border-slate-200 font-bold text-slate-600 hover:!border-indigo-600 hover:!text-indigo-600"
                         >
                           {t('parkingSession.btnViewDetail')}
@@ -534,9 +538,9 @@ const ParkingSessionManager = () => {
       </div>
 
       <SessionDetailModal
-        ticketCode={selectedTicketCode}
-        open={Boolean(selectedTicketCode)}
-        onClose={() => setSelectedTicketCode(null)}
+        sessionId={selectedSessionId}
+        open={Boolean(selectedSessionId)}
+        onClose={() => setSelectedSessionId(null)}
       />
     </div>
   );
