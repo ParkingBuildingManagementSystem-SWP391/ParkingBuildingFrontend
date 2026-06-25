@@ -49,8 +49,8 @@ const LocateVehicle = () => {
   return (
     <section id="locate-vehicle" className="relative overflow-hidden bg-slate-50 px-4 py-16 sm:px-6">
       {/* Background decor */}
-      <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-indigo-600/5 blur-[90px]" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-emerald-500/5 blur-[90px]" />
+      <div className="pointer-events-none absolute left-0 top-[-6rem] h-72 w-72 rounded-full bg-indigo-600/5 blur-[90px] sm:-left-24 sm:h-96 sm:w-96" />
+      <div className="pointer-events-none absolute bottom-[-6rem] right-0 h-72 w-72 rounded-full bg-emerald-500/5 blur-[90px] sm:-right-24 sm:h-96 sm:w-96" />
 
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
 
