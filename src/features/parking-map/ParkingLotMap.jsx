@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   Bike,
@@ -184,7 +184,18 @@ const ParkingLotMap = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const [searchParams] = useSearchParams();
+  const highlightFloorId = searchParams.get('floorId');
+  const highlightSlotName = searchParams.get('slotName');
+
   const [activeFloorId, setActiveFloorId] = useState(3); // Default to Floor G (FloorId = 3)
+
+  // Auto switch floor if highlighted from LocateVehicle
+  useEffect(() => {
+    if (highlightFloorId) {
+      setActiveFloorId(parseInt(highlightFloorId, 10));
+    }
+  }, [highlightFloorId]);
   const [searchQuery, setSearchQuery] = useState('');
   const [zoomLevel, setZoomLevel] = useState(100);
   const [loadingMap, setLoadingMap] = useState(false);
@@ -817,12 +828,26 @@ const ParkingLotMap = () => {
     const slotSizeClass = isCar ? 'h-[116px] min-w-[112px]' : 'h-[88px] min-w-[82px]';
     const iconSizeClass = isCar ? 'h-14 w-16' : 'h-10 w-12';
 
+    // Highlight user's vehicle slot
+    const isUserCar = highlightSlotName && 
+      slot.id.replace(/\s/g, '').toUpperCase() === highlightSlotName.replace(/\s/g, '').toUpperCase();
+
+    const highlightClasses = isUserCar 
+      ? 'animate-pulse border-amber-400 ring-4 ring-amber-500/60 scale-105 z-20 bg-slate-900 shadow-2xl shadow-amber-500/40 text-amber-400 font-extrabold' 
+      : statusStyleMap[normalizedStatus];
+
     return (
       <div key={slot.id} className="relative group">
         <div
           onClick={() => handleSlotClick(slot)}
-          className={`${slotSizeClass} rounded-xl flex flex-col items-center justify-center gap-2 px-3 py-2 border transition-all duration-200 cursor-pointer font-bold ${statusStyleMap[normalizedStatus]}`}
+          className={`${slotSizeClass} rounded-xl flex flex-col items-center justify-center gap-2 px-3 py-2 border transition-all duration-200 cursor-pointer font-bold ${highlightClasses}`}
         >
+          {isUserCar && (
+            <span className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-black text-[9px] px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap animate-bounce border border-slate-900 tracking-wider z-30">
+              🚗 VỊ TRÍ XE CỦA BẠN
+            </span>
+          )}
+          
           <div className={`${isCar ? 'h-14' : 'h-10'} w-full flex items-center justify-center`}>
             {vehicleIcon ? (
               <img
