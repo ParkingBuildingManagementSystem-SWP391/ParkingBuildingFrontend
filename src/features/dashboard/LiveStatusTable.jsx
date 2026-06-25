@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Table, Input, Select, Button, Tag, Drawer, Spin, message, Space, Tooltip, Popconfirm } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { 
-  Search, 
-  Car, 
-  Bike, 
-  RefreshCw, 
-  AlertTriangle, 
-  ShieldAlert, 
-  Key, 
-  Settings, 
+import {
+  Search,
+  Car,
+  Bike,
+  RefreshCw,
+  AlertTriangle,
+  ShieldAlert,
+  Key,
+  Settings,
   Info,
   Clock,
   User,
@@ -39,6 +39,14 @@ const getActionLabel = (actionName, t) => {
   if (actionName === 'Maintenance Lock') return t('dashboard.liveStatus.maintenance', { defaultValue: 'Khóa bảo trì' });
   if (actionName === 'VIP Reservation') return t('dashboard.liveStatus.vip', { defaultValue: 'Giữ chỗ VIP' });
   return actionName;
+};
+
+// Presentational helper: maps a status to semantic pill classes (no logic impact)
+const getStatusPillClass = (status) => {
+  if (status === 'Available') return 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200';
+  if (status === 'Occupied') return 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200';
+  if (status === 'Reserved') return 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200';
+  return 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200';
 };
 
 const LiveStatusTable = () => {
@@ -154,7 +162,7 @@ const LiveStatusTable = () => {
     try {
       const plate = slotDetail?.activeSession?.licenseVehicle || 'Unknown';
       const cleanPlate = plate !== 'Unknown' ? plate.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null;
-      
+
       const response = await parkingService.checkOutVehicle(null, cleanPlate, null, null);
       message.success(response.message || t('dashboard.liveStatus.releaseSuccess', { slot: selectedSlot.slotName }));
       setDrawerVisible(false);
@@ -171,7 +179,7 @@ const LiveStatusTable = () => {
       title: t('dashboard.liveStatus.slotCode'),
       dataIndex: 'slotName',
       key: 'slotName',
-      render: (text) => <span className="font-mono font-extrabold text-blue-700">{text}</span>,
+      render: (text) => <span className="font-mono font-extrabold text-indigo-600">{text}</span>,
       sorter: (a, b) => a.slotName.localeCompare(b.slotName)
     },
     {
@@ -179,13 +187,15 @@ const LiveStatusTable = () => {
       dataIndex: 'type',
       key: 'type',
       render: (type) => {
-        let icon = <Car size={16} className="text-slate-600" />;
-        if (type === 'Bicycle') icon = <Bike size={16} className="text-slate-600" />;
-        if (type === 'Motorcycle') icon = <Bike size={16} className="text-slate-600" />; // using bike icon for both currently
+        let icon = <Car size={16} className="text-slate-500" />;
+        if (type === 'Bicycle') icon = <Bike size={16} className="text-slate-500" />;
+        if (type === 'Motorcycle') icon = <Bike size={16} className="text-slate-500" />; // using bike icon for both currently
 
         return (
           <div className="flex items-center gap-2">
-            {icon}
+            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-slate-100">
+              {icon}
+            </span>
             <span className="font-medium text-slate-700">{getVehicleTypeLabel(type, t)}</span>
           </div>
         );
@@ -206,7 +216,12 @@ const LiveStatusTable = () => {
         if (status === 'Available') color = 'success';
         if (status === 'Occupied') color = 'error';
         if (status === 'Reserved') color = 'warning';
-        return <Tag color={color} className="font-bold border-0 shadow-sm px-2.5 py-0.5">{getStatusLabel(status, t)}</Tag>;
+        return (
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${getStatusPillClass(status)}`}>
+            <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+            {getStatusLabel(status, t)}
+          </span>
+        );
       },
       filters: [
         { text: t('dashboard.liveStatus.available'), value: 'Available' },
@@ -225,11 +240,11 @@ const LiveStatusTable = () => {
       title: t('dashboard.liveStatus.action'),
       key: 'action',
       render: (_, record) => (
-        <Button 
-          type="primary" 
+        <Button
+          type="primary"
           size="small"
           onClick={() => handleManageSlot(record)}
-          className="bg-indigo-600 hover:bg-indigo-700 shadow-md flex items-center gap-1.5 rounded-md"
+          className="flex items-center gap-1.5 rounded-[14px] border-0 bg-gradient-to-r from-indigo-600 to-indigo-500 px-3 font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-indigo-600"
         >
           <Settings size={14} />
           {t('dashboard.liveStatus.manage')}
@@ -239,23 +254,27 @@ const LiveStatusTable = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 font-sans">
-      
+    <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
+
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-slate-100">
-        <div>
-          <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
-            <ShieldAlert className="text-indigo-600" />
-            {t('dashboard.liveStatus.title')}
-          </h3>
-          <p className="text-xs text-slate-500 mt-1">{t('dashboard.liveStatus.subtitle')}</p>
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center">
+        <div className="flex items-start gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+            <ShieldAlert size={22} />
+          </span>
+          <div>
+            <h3 className="text-xl font-extrabold text-slate-900">
+              {t('dashboard.liveStatus.title')}
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">{t('dashboard.liveStatus.subtitle')}</p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Select
             value={selectedFloor}
             onChange={(val) => setSelectedFloor(val)}
-            className="w-36 h-9"
+            className="h-10 w-36"
             placeholder={t('dashboard.liveStatus.selectFloor')}
           >
             {floors.map(f => (
@@ -268,40 +287,42 @@ const LiveStatusTable = () => {
             prefix={<Search size={16} className="text-slate-400" />}
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            className="w-48 h-9 rounded-lg"
+            className="h-10 w-48 rounded-[14px]"
           />
 
           <Tooltip title={t('dashboard.liveStatus.refresh')}>
-            <Button 
-              icon={<RefreshCw size={16} />} 
-              onClick={fetchSlots} 
+            <Button
+              icon={<RefreshCw size={16} />}
+              onClick={fetchSlots}
               loading={loading}
-              className="h-9 w-9 flex items-center justify-center rounded-lg text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+              className="flex h-10 w-10 items-center justify-center rounded-[14px] border-slate-200 bg-white text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50"
             />
           </Tooltip>
         </div>
       </div>
 
       {/* Data Table */}
-      <Table 
-        columns={columns} 
-        dataSource={filteredSlots} 
+      <Table
+        columns={columns}
+        dataSource={filteredSlots}
         loading={loading}
-        pagination={{ 
+        pagination={{
           current: currentPage,
-          pageSize: 10, 
+          pageSize: 10,
           showSizeChanger: true,
           onChange: (page) => setCurrentPage(page)
         }}
         rowClassName="hover:bg-indigo-50/50 cursor-default"
-        className="border border-slate-100 rounded-xl overflow-hidden"
+        className="overflow-hidden rounded-2xl border border-slate-100"
       />
 
       {/* Detail & Action Drawer */}
       <Drawer
         title={
-          <div className="flex items-center gap-2 text-indigo-900">
-            <Settings size={18} />
+          <div className="flex items-center gap-2 text-slate-900">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+              <Settings size={18} />
+            </span>
             <span className="font-extrabold">{t('dashboard.liveStatus.slotDetail', { slot: selectedSlot?.slotName })}</span>
           </div>
         }
@@ -313,72 +334,75 @@ const LiveStatusTable = () => {
       >
         {selectedSlot && (
           <div className="space-y-6">
-            
+
             {/* General Info Card */}
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
-              <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-2">
-                <span className="text-slate-500 font-semibold">{t('dashboard.liveStatus.floor')}</span>
-                <span className="font-bold text-slate-800">{selectedSlot.floorName}</span>
+            <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm">
+                <span className="font-semibold text-slate-500">{t('dashboard.liveStatus.floor')}</span>
+                <span className="font-bold text-slate-900">{selectedSlot.floorName}</span>
               </div>
-              <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-2">
-                <span className="text-slate-500 font-semibold">{t('dashboard.liveStatus.vehicleType')}</span>
-                <span className="font-bold text-slate-800">{getVehicleTypeLabel(selectedSlot.type, t)}</span>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm">
+                <span className="font-semibold text-slate-500">{t('dashboard.liveStatus.vehicleType')}</span>
+                <span className="font-bold text-slate-900">{getVehicleTypeLabel(selectedSlot.type, t)}</span>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-semibold">{t('dashboard.liveStatus.currentStatus')}</span>
-                <Tag color={selectedSlot.status === 'Available' ? 'success' : selectedSlot.status === 'Occupied' ? 'error' : 'warning'} className="m-0 font-bold border-0">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-semibold text-slate-500">{t('dashboard.liveStatus.currentStatus')}</span>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${getStatusPillClass(selectedSlot.status)}`}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
                   {getStatusLabel(selectedSlot.status, t)}
-                </Tag>
+                </span>
               </div>
             </div>
 
             {/* Content based on status */}
             {(selectedSlot.status === 'Occupied' || selectedSlot.status === 'Reserved') && (
               <div className="space-y-4">
-                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider">{t('dashboard.liveStatus.parkedData')}</h4>
-                
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">{t('dashboard.liveStatus.parkedData')}</h4>
+
                 {detailLoading ? (
-                  <div className="flex flex-col items-center justify-center p-6 gap-2">
+                  <div className="flex flex-col items-center justify-center gap-2 p-6">
                     <Spin size="default" />
                     <span className="text-xs text-slate-500">{t('dashboard.liveStatus.loadingData')}</span>
                   </div>
                 ) : slotDetail?.activeSession ? (
-                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl space-y-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Car size={16} className="text-blue-600" />
-                      <span className="font-mono text-lg font-black text-blue-800">
+                  <div className="space-y-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-white text-indigo-600 shadow-sm">
+                        <Car size={16} />
+                      </span>
+                      <span className="font-mono text-lg font-black text-indigo-900">
                         {slotDetail.activeSession.licenseVehicle}
                       </span>
                     </div>
 
                     {slotDetail.activeSession.checkInTime && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Clock size={14} className="text-blue-400" />
+                        <Clock size={14} className="text-indigo-400" />
                         <span className="text-slate-600">{t('dashboard.liveStatus.checkInTime', { time: new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN') })}</span>
                       </div>
                     )}
 
                     {slotDetail.activeSession.customer && (
-                      <div className="pt-3 mt-2 border-t border-blue-200/50">
+                      <div className="mt-2 border-t border-indigo-200/50 pt-3">
                         <div className="flex items-center gap-2 text-sm">
-                          <User size={14} className="text-blue-400" />
+                          <User size={14} className="text-indigo-400" />
                           <span className="font-bold text-slate-700">{slotDetail.activeSession.customer.username}</span>
                         </div>
-                        <div className="text-xs text-slate-500 pl-6 mt-1">
+                        <div className="mt-1 pl-6 text-xs text-slate-500">
                           {slotDetail.activeSession.customer.phoneNumber}
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="bg-slate-50 p-4 rounded-xl text-center text-xs font-medium text-slate-400">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-center text-xs font-medium text-slate-400">
                     {t('dashboard.liveStatus.noActiveSession')}
                   </div>
                 )}
 
                 {/* Force Release Action */}
-                <div className="pt-4 border-t border-slate-200">
-                  <h4 className="text-xs font-extrabold uppercase text-rose-400 tracking-wider mb-3">{t('dashboard.liveStatus.adminIntervention')}</h4>
+                <div className="border-t border-slate-100 pt-4">
+                  <h4 className="mb-3 text-xs font-extrabold uppercase tracking-wider text-rose-400">{t('dashboard.liveStatus.adminIntervention')}</h4>
                   <Popconfirm
                     title={t('dashboard.liveStatus.forceReleaseTitle')}
                     description={t('dashboard.liveStatus.forceReleaseDesc')}
@@ -387,18 +411,18 @@ const LiveStatusTable = () => {
                     cancelText={t('dashboard.liveStatus.cancel')}
                     okButtonProps={{ danger: true }}
                   >
-                    <Button 
-                      danger 
-                      block 
+                    <Button
+                      danger
+                      block
                       size="large"
                       loading={actionLoading}
                       icon={<Unlock size={16} />}
-                      className="font-bold shadow-sm"
+                      className="flex items-center justify-center gap-2 rounded-[14px] font-bold shadow-sm"
                     >
                       {t('dashboard.liveStatus.forceRelease')}
                     </Button>
                   </Popconfirm>
-                  <p className="text-[10px] text-slate-400 text-center mt-2">
+                  <p className="mt-2 text-center text-[10px] text-slate-400">
                     {t('dashboard.liveStatus.releaseNote')}
                   </p>
                 </div>
@@ -407,39 +431,39 @@ const LiveStatusTable = () => {
 
             {selectedSlot.status === 'Available' && (
               <div className="pt-2">
-                <h4 className="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-3">{t('dashboard.liveStatus.slotControl')}</h4>
+                <h4 className="mb-3 text-xs font-extrabold uppercase tracking-wider text-slate-400">{t('dashboard.liveStatus.slotControl')}</h4>
                 <Space direction="vertical" className="w-full" size="middle">
-                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex flex-col gap-3">
+                  <div className="flex flex-col gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
                     <div className="flex items-start gap-2">
-                      <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                      <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
                       <div>
-                        <div className="font-bold text-amber-800 text-sm">{t('dashboard.liveStatus.maintenance')}</div>
-                        <div className="text-xs text-amber-600 mt-0.5">{t('dashboard.liveStatus.maintenanceDesc')}</div>
+                        <div className="text-sm font-bold text-amber-800">{t('dashboard.liveStatus.maintenance')}</div>
+                        <div className="mt-0.5 text-xs text-amber-600">{t('dashboard.liveStatus.maintenanceDesc')}</div>
                       </div>
                     </div>
-                    <Button 
-                      block 
+                    <Button
+                      block
                       loading={actionLoading}
                       onClick={() => handleUnsupportedSlotAction('Maintenance Lock')}
-                      className="bg-amber-500 hover:bg-amber-600 text-white border-0 font-bold"
+                      className="rounded-[14px] border-0 bg-amber-500 font-bold text-white hover:bg-amber-600"
                     >
                       {t('dashboard.liveStatus.lockMaintenance')}
                     </Button>
                   </div>
 
-                  <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 flex flex-col gap-3">
+                  <div className="flex flex-col gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
                     <div className="flex items-start gap-2">
-                      <Key size={16} className="text-purple-500 shrink-0 mt-0.5" />
+                      <Key size={16} className="mt-0.5 shrink-0 text-indigo-500" />
                       <div>
-                        <div className="font-bold text-purple-800 text-sm">{t('dashboard.liveStatus.vip')}</div>
-                        <div className="text-xs text-purple-600 mt-0.5">{t('dashboard.liveStatus.vipDesc')}</div>
+                        <div className="text-sm font-bold text-indigo-800">{t('dashboard.liveStatus.vip')}</div>
+                        <div className="mt-0.5 text-xs text-indigo-600">{t('dashboard.liveStatus.vipDesc')}</div>
                       </div>
                     </div>
-                    <Button 
-                      block 
+                    <Button
+                      block
                       loading={actionLoading}
                       onClick={() => handleUnsupportedSlotAction('VIP Reservation')}
-                      className="bg-purple-600 hover:bg-purple-700 text-white border-0 font-bold"
+                      className="rounded-[14px] border-0 bg-gradient-to-r from-indigo-600 to-indigo-500 font-bold text-white hover:from-indigo-700 hover:to-indigo-600"
                     >
                       {t('dashboard.liveStatus.vip')}
                     </Button>

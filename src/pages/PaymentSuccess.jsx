@@ -132,26 +132,22 @@ const PaymentSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-sans select-none relative overflow-hidden">
-      {/* Decorative background grid and blurs */}
-      <div
-        className="absolute inset-0 opacity-[0.02] pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(#10B981 2px, transparent 2px)',
-          backgroundSize: '24px 24px'
-        }}
-      />
-      <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] bg-emerald-400/5 rounded-full blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-sky-500/5 rounded-full blur-[80px] pointer-events-none" />
+    <div className="min-h-screen w-screen bg-slate-50 flex items-center justify-center p-4 font-sans select-none relative overflow-hidden">
+      {/* Decorative background blurs */}
+      <div className="absolute top-1/4 left-1/4 w-[420px] h-[420px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[420px] h-[420px] bg-emerald-400/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 z-10 text-center space-y-6">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] p-8 sm:p-10 z-10 text-center space-y-7">
 
         {/* State 1: Polling backend status */}
         {paymentState === 'polling' && (
-          <div className="py-12 space-y-6">
-            <div className="w-16 h-16 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin mx-auto"></div>
+          <div className="py-12 space-y-7">
+            <div className="relative w-20 h-20 mx-auto">
+              <div className="absolute inset-0 rounded-full bg-indigo-50 border border-indigo-100" />
+              <div className="absolute inset-2 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+            </div>
             <div className="space-y-2">
-              <h2 className="text-xl font-bold text-slate-800">{t('paymentSuccess.checkingResult')}</h2>
+              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.checkingResult')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">{loadingText}</p>
             </div>
           </div>
@@ -159,13 +155,13 @@ const PaymentSuccess = () => {
 
         {/* State 2: Booking Deposit Success */}
         {paymentState === 'success_deposit' && (
-          <div className="space-y-6">
-            <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 size={32} className="text-emerald-500 animate-bounce" />
+          <div className="space-y-7">
+            <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 size={40} className="text-emerald-500" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.depositSuccess')}</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.depositSuccess')}</h2>
               <p className="text-sm text-slate-500 font-medium px-2">
                 {t('paymentSuccess.depositDesc')}
               </p>
@@ -173,9 +169,9 @@ const PaymentSuccess = () => {
 
             {/* Display check-in QR Code directly */}
             {sessionDetail ? (
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4 max-w-xs mx-auto shadow-inner">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 space-y-4 max-w-xs mx-auto">
                 <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">{t('paymentSuccess.qrCodeTitle')}</span>
-                <div className="bg-white p-2 rounded-xl border border-slate-200 inline-block shadow-sm">
+                <div className="bg-white p-3 rounded-xl border border-slate-200 inline-block shadow-sm">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&ecc=M&data=${sessionDetail.qrPayload}`}
                     alt="Check-in QR"
@@ -185,14 +181,14 @@ const PaymentSuccess = () => {
                 <div className="text-xs font-mono font-bold text-emerald-600">
                   {sessionDetail.ticketId}
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-left text-xs font-sans pt-2 border-t border-slate-200/80">
+                <div className="grid grid-cols-2 gap-3 text-left text-xs font-sans pt-3 border-t border-slate-200/80">
                   <div>
-                    <span className="text-slate-400 font-medium block">{t('paymentSuccess.location')}</span>
-                    <span className="text-slate-800 font-bold">{sessionDetail.location}</span>
+                    <span className="text-slate-400 font-medium block mb-0.5">{t('paymentSuccess.location')}</span>
+                    <span className="text-slate-900 font-bold">{sessionDetail.location}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 font-medium block">{t('paymentSuccess.license')}</span>
-                    <span className="text-slate-800 font-bold">{sessionDetail.license}</span>
+                    <span className="text-slate-400 font-medium block mb-0.5">{t('paymentSuccess.license')}</span>
+                    <span className="text-slate-900 font-bold">{sessionDetail.license}</span>
                   </div>
                 </div>
               </div>
@@ -205,7 +201,7 @@ const PaymentSuccess = () => {
 
             <button
               onClick={() => navigate('/dashboard')}
-              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
             >
               {t('paymentSuccess.btnHome')}
               <ArrowRight size={16} />
@@ -215,32 +211,35 @@ const PaymentSuccess = () => {
 
         {/* State 3: Pre-exit / Full Payment Success */}
         {paymentState === 'success_exit' && (
-          <div className="space-y-6">
-            <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 size={32} className="text-emerald-500 animate-bounce" />
+          <div className="space-y-7">
+            <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 size={40} className="text-emerald-500" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.exitSuccess')}</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.exitSuccess')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
                 {t('paymentSuccess.exitDesc')}
               </p>
             </div>
 
             {/* Countdown timer card */}
-            <div className="bg-amber-50/50 border border-amber-200/70 rounded-2xl p-5 space-y-2 max-w-xs mx-auto shadow-inner">
-              <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-widest block">{t('paymentSuccess.graceTimeTitle')}</span>
-              <div className="text-4xl font-mono font-black text-amber-600 animate-pulse">
+            <div className="bg-amber-50 border border-amber-200/70 rounded-2xl p-6 space-y-2 max-w-xs mx-auto">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold text-amber-700 uppercase tracking-widest">
+                <Clock size={12} />
+                {t('paymentSuccess.graceTimeTitle')}
+              </span>
+              <div className="text-4xl font-mono font-black text-amber-600 tracking-tight">
                 {formatGraceTime(graceTime)}
               </div>
-              <p className="text-[10px] text-amber-800 font-medium leading-relaxed">
+              <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
                 {t('paymentSuccess.graceTimeDesc')}
               </p>
             </div>
 
             <button
               onClick={() => navigate('/dashboard')}
-              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
             >
               {t('paymentSuccess.btnBackHome')}
               <ArrowRight size={16} />
@@ -250,32 +249,32 @@ const PaymentSuccess = () => {
 
         {/* State 3.1: Checkout at BOT Success */}
         {paymentState === 'success_exit_bot' && (
-          <div className="space-y-6">
-            <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 size={32} className="text-emerald-500 animate-bounce" />
+          <div className="space-y-7">
+            <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 size={40} className="text-emerald-500" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.botSuccess')}</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.botSuccess')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
                 {t('paymentSuccess.botDesc1')}
               </p>
             </div>
 
             {/* Hộp trạng thái ra cổng lập tức (Không có đếm ngược ân hạn) */}
-            <div className="bg-emerald-50/50 border border-emerald-200/70 rounded-2xl p-5 space-y-2 max-w-xs mx-auto shadow-inner">
+            <div className="bg-emerald-50 border border-emerald-200/70 rounded-2xl p-6 space-y-2 max-w-xs mx-auto">
               <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">{t('paymentSuccess.gateStatusTitle')}</span>
               <div className="text-xl font-black text-emerald-600 uppercase">
                 {t('paymentSuccess.gateStatus')}
               </div>
-              <p className="text-[10px] text-emerald-800 font-medium leading-relaxed">
+              <p className="text-[11px] text-emerald-800 font-medium leading-relaxed">
                 {t('paymentSuccess.botDesc2')}
               </p>
             </div>
 
             <button
               onClick={() => navigate('/dashboard')}
-              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
             >
               {t('paymentSuccess.btnBackHome')}
               <ArrowRight size={16} />
@@ -285,13 +284,13 @@ const PaymentSuccess = () => {
 
         {/* State 4: Payment Failed */}
         {paymentState === 'failed' && (
-          <div className="space-y-6 py-4">
-            <div className="w-16 h-16 bg-rose-50 border border-rose-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <XCircle size={32} className="text-rose-500" />
+          <div className="space-y-7 py-4">
+            <div className="w-20 h-20 bg-rose-50 ring-8 ring-rose-50/60 rounded-full flex items-center justify-center mx-auto">
+              <XCircle size={40} className="text-rose-500" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.failedTitle')}</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.failedTitle')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
                 {t('paymentSuccess.failedDesc')}
               </p>
@@ -300,13 +299,13 @@ const PaymentSuccess = () => {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="flex-1 h-11 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                className="flex-1 h-12 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-[14px] text-sm transition-all cursor-pointer"
               >
                 {t('paymentSuccess.btnHome')}
               </button>
               <button
                 onClick={() => navigate('/my-bookings')}
-                className="flex-1 h-11 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-rose-600/10 cursor-pointer"
+                className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] text-sm transition-all shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 {t('paymentSuccess.btnRetry')}
               </button>
@@ -316,13 +315,13 @@ const PaymentSuccess = () => {
 
         {/* State 5: Timeout */}
         {paymentState === 'timeout' && (
-          <div className="space-y-6 py-4">
-            <div className="w-16 h-16 bg-amber-50 border border-amber-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <ShieldAlert size={32} className="text-amber-500" />
+          <div className="space-y-7 py-4">
+            <div className="w-20 h-20 bg-amber-50 ring-8 ring-amber-50/60 rounded-full flex items-center justify-center mx-auto">
+              <ShieldAlert size={40} className="text-amber-500" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('paymentSuccess.timeoutTitle')}</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('paymentSuccess.timeoutTitle')}</h2>
               <p className="text-sm text-slate-500 font-medium px-4">
                 {t('paymentSuccess.timeoutDesc')}
               </p>
@@ -330,7 +329,7 @@ const PaymentSuccess = () => {
 
             <button
               onClick={() => navigate('/my-bookings')}
-              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
             >
               {t('paymentSuccess.btnHistory')}
               <ArrowRight size={16} />

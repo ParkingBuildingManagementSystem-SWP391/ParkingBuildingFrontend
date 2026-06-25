@@ -129,7 +129,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
           <Button
             type="dashed"
             onClick={onClose}
-            className="flex-1 h-10 border-slate-300 text-slate-500 hover:text-slate-700 hover:border-slate-400 rounded-lg font-bold"
+            className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white text-slate-600 hover:text-slate-800 hover:border-slate-400 rounded-[14px] font-bold"
           >
             {t('gate.ticket.close')}
           </Button>
@@ -137,8 +137,8 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             type="primary"
             onClick={handlePrint}
             icon={<Printer size={15} />}
-            className={`flex-1 h-10 border-none font-bold rounded-lg flex items-center justify-center gap-1.5 
-              ${isTicket ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}
+            className={`flex-1 h-11 border-none font-bold rounded-[14px] flex items-center justify-center gap-1.5 text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5
+              ${isTicket ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'}`}
           >
             {t('gate.ticket.print')}
           </Button>

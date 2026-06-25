@@ -105,7 +105,15 @@
     "orContinueWith": "or continue with",
     "noAccount": "Don't have an account?",
     "register": "Register",
-    "continueAsGuest": "Continue as guest to view parking map"
+    "continueAsGuest": "Continue as guest to view parking map",
+    "brandName": "Parking Building Management System",
+    "brandTagline": "Smart Parking Platform",
+    "brandTitle": "Smart parking management, right at your fingertips.",
+    "brandDesc": "Reserve slots, automate gate control with AI license-plate recognition, pay via VNPay, and monitor traffic in real time — all in one platform.",
+    "welcomeTitle": "Welcome back 👋",
+    "statVehicles": "Vehicles / day",
+    "statOccupancy": "Occupancy rate",
+    "statMonitor": "Monitoring"
   },
   "register": {
     "errorEmptyFields": "Please fill in all required fields.",
@@ -131,7 +139,14 @@
     "verifyEmailTitle": "Verify Email",
     "verifyEmailDesc": "We've sent a 6-digit code to",
     "verifyLoginButton": "Verify & Login",
-    "backToSignUp": "Back to Sign Up"
+    "backToSignUp": "Back to Sign Up",
+    "brandName": "Parking Management",
+    "heroTitle": "Create your account",
+    "heroSubtitle": "Join the smart parking management system and start managing your spaces with ease.",
+    "heroFeatureSecure": "Secure and reliable",
+    "heroFeatureSmart": "Smart parking management",
+    "brandTagline": "© 2026 Parking Management System. All rights reserved.",
+    "googleButton": "Continue with Google"
   },
   "home": {
     "system": "SYSTEM",
@@ -237,7 +252,9 @@
     "btnYesCancel": "Yes, Cancel",
     "ticketTitle": "Parking Ticket",
     "ticketDesc": "Scan at entrance readers or camera checkpoints",
-    "closeTicket": "Close Ticket"
+    "closeTicket": "Close Ticket",
+    "pageTitle": "My Bookings",
+    "pageSubtitle": "Manage and track your parking reservations"
   },
   "accounts": {
     "errLoadAccounts": "Cannot load user list from backend.",
@@ -292,7 +309,9 @@
     "labelTempPwd": "Temporary Password",
     "phTempPwd": "••••••••",
     "labelSysRole": "System Role",
-    "btnCreateAcc": "Create User Account"
+    "btnCreateAcc": "Create User Account",
+    "pageTitle": "Create New Account",
+    "pageSubtitle": "Add a new user and assign their system access role"
   },
   "parkingSession": {
     "vehBike": "Bicycle",
@@ -344,7 +363,9 @@
     "btnFirst": "First",
     "btnPrev": "Prev",
     "btnNext": "Next",
-    "btnLast": "Last"
+    "btnLast": "Last",
+    "fromDate": "From date",
+    "toDate": "To date"
   },
   "settings": {
     "errFillFields": "Please fill in all profile fields.",
