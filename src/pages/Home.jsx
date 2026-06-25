@@ -9,6 +9,7 @@ import AppFooter from '../components/AppFooter';
 import Logo from '../components/Logo';
 import heroImage from '../assets/logo/parking-hero.png';
 import { useTranslation } from 'react-i18next';
+import LocateVehicle from './LocateVehicle';
 
 /* ── tiny animated counter ── */
 const AnimatedNumber = ({ target, suffix = '' }) => {
@@ -114,9 +115,9 @@ const Home = () => {
           <nav className="hidden items-center gap-8 text-[13px] font-bold text-slate-500 md:flex">
             <Link className="text-blue-600" to="/">{t('home.navHome')}</Link>
             <Link className="transition-colors hover:text-blue-600" to="/parking-map">{t('home.navBook')}</Link>
-            <Link className="transition-colors text-amber-600 hover:text-amber-500 flex items-center gap-1" to="/locate">
+            <a className="transition-colors text-blue-600 hover:text-blue-700 flex items-center gap-1" href="/#locate-vehicle">
               <Search size={14} /> {t('home.navLocate', 'Tìm Xe')}
-            </Link>
+            </a>
             <Link className="transition-colors hover:text-blue-600" to="/pricing">{t('home.navPricing')}</Link>
             <a   className="transition-colors hover:text-blue-600" href="#contact">{t('home.navContact')}</a>
           </nav>
@@ -338,6 +339,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* ══════════════════ LOCATE VEHICLE SECTION ══════════════════ */}
+      <LocateVehicle />
 
       {/* ══════════════════ FOOTER ══════════════════ */}
       <AppFooter />
