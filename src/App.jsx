@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Home from './pages/Home';
+import LocateVehicle from './pages/LocateVehicle';
 
 // Protected Pages (Admin & Driver Features)
 import Introduction from './pages/Introduction';
@@ -43,6 +44,7 @@ function App() {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/locate" element={<LocateVehicle />} />
 
         {/* MainLayout wrapping for both public and protected routes */}
         <Route element={<MainLayout />}>

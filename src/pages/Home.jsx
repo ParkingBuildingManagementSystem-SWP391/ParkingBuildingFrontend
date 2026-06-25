@@ -114,6 +114,9 @@ const Home = () => {
           <nav className="hidden items-center gap-8 text-[13px] font-bold text-slate-500 md:flex">
             <Link className="text-blue-600" to="/">{t('home.navHome')}</Link>
             <Link className="transition-colors hover:text-blue-600" to="/parking-map">{t('home.navBook')}</Link>
+            <Link className="transition-colors text-amber-600 hover:text-amber-500 flex items-center gap-1" to="/locate">
+              <Search size={14} /> {t('home.navLocate', 'Tìm Xe')}
+            </Link>
             <Link className="transition-colors hover:text-blue-600" to="/pricing">{t('home.navPricing')}</Link>
             <a   className="transition-colors hover:text-blue-600" href="#contact">{t('home.navContact')}</a>
           </nav>
