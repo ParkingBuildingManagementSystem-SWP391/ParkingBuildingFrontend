@@ -54,6 +54,7 @@ const Dashboard = ({ section = 'overview' }) => {
   const { t } = useTranslation();
 
   const lowerRole = role?.toLowerCase();
+  const canEditPricing = ['admin', 'manager'].includes(lowerRole);
 
   // Manager Dashboard States
   const [summary, setSummary] = useState(null);
@@ -149,6 +150,8 @@ const Dashboard = ({ section = 'overview' }) => {
   };
 
   const handleUpdatePricing = async (row) => {
+    if (!canEditPricing) return;
+
     const rowKey = getPricingRowKey(row);
     const isCarPricing = Number(row.vehicleTypeId) === 3 || String(row.vehicleType).toLowerCase() === 'car';
     setSavingPricingIds((prev) => ({ ...prev, [rowKey]: true }));
@@ -197,10 +200,10 @@ const Dashboard = ({ section = 'overview' }) => {
 
   // Redirect driver and staff to /parking-map automatically
   useEffect(() => {
-    if (lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {
+    if (section !== 'pricing' && lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {
       navigate('/parking-map');
     }
-  }, [lowerRole, navigate]);
+  }, [lowerRole, navigate, section]);
 
   // Format currencies in VND
   const formatVND = (value) => {
@@ -804,40 +807,42 @@ const Dashboard = ({ section = 'overview' }) => {
             )}
           </div>
         ) : section === 'pricing' ? (
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100">
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm dark:bg-slate-900 dark:border-slate-700">
+            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-700">
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 dark:bg-indigo-500/15 dark:text-indigo-300">
                 <DollarSign size={18} />
               </div>
               <div>
-                <h3 className="text-base font-extrabold tracking-tight text-slate-900">{t('dashboard.pricingTitle')}</h3>
-                <p className="text-xs text-slate-500 mt-0.5">{t('dashboard.pricingDesc')}</p>
+                <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.pricingTitle')}</h3>
+                <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.pricingDesc')}</p>
               </div>
             </div>
 
-            <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100">
+            <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
               <table className="w-full min-w-[920px] border-collapse text-left">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">{t('dashboard.pricingTable.vehicleType')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">{t('dashboard.pricingTable.dayRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">{t('dashboard.pricingTable.nightRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">{t('dashboard.pricingTable.fullDayRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">{t('dashboard.pricingTable.maxHours')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right">{t('dashboard.pricingTable.action')}</th>
+                  <tr className="bg-slate-50 border-b border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.vehicleType')}</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.dayRate')}</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.nightRate')}</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.fullDayRate')}</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.maxHours')}</th>
+                    {canEditPricing && (
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
+                    )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
                   {pricingRows.map((row, index) => {
                     const rowKey = getPricingRowKey(row) ?? index;
                     const isCarPricing = Number(row.vehicleTypeId) === 3 || String(row.vehicleType).toLowerCase() === 'car';
 
                     return (
-                    <tr key={rowKey} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={rowKey} className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/70">
                       <td className="px-4 py-4 align-middle">
                         <div className="flex flex-col">
-                          <span className="text-sm font-extrabold text-slate-900">{getVehicleTypeLabel(row.vehicleType)}</span>
-                          <span className="text-xs font-medium text-slate-400">{row.description}</span>
+                          <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(row.vehicleType)}</span>
+                          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{row.description}</span>
                         </div>
                       </td>
                       <td className="px-4 py-4 align-middle">
@@ -846,9 +851,10 @@ const Dashboard = ({ section = 'overview' }) => {
                           value={row.dayRate}
                           formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                           parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={(value) => handlePricingValueChange(rowKey, 'dayRate', value ?? 0)}
+                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'dayRate', value ?? 0) : undefined}
+                          disabled={!canEditPricing}
                           addonAfter="VND"
-                          className="w-full"
+                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
                         />
                       </td>
                       <td className="px-4 py-4 align-middle">
@@ -857,9 +863,10 @@ const Dashboard = ({ section = 'overview' }) => {
                           value={row.nightRate}
                           formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                           parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={(value) => handlePricingValueChange(rowKey, 'nightRate', value ?? 0)}
+                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'nightRate', value ?? 0) : undefined}
+                          disabled={!canEditPricing}
                           addonAfter="VND"
-                          className="w-full"
+                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
                         />
                       </td>
                       <td className="px-4 py-4 align-middle">
@@ -868,9 +875,10 @@ const Dashboard = ({ section = 'overview' }) => {
                           value={row.fullDayRate}
                           formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                           parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={(value) => handlePricingValueChange(rowKey, 'fullDayRate', value ?? 0)}
+                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'fullDayRate', value ?? 0) : undefined}
+                          disabled={!canEditPricing}
                           addonAfter="VND"
-                          className="w-full"
+                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
                         />
                       </td>
                       <td className="px-4 py-4 align-middle">
@@ -879,24 +887,27 @@ const Dashboard = ({ section = 'overview' }) => {
                             min={1}
                             max={24}
                             value={row.maxHoursPerTurn}
-                            onChange={(value) => handlePricingValueChange(rowKey, 'maxHoursPerTurn', value ?? 1)}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'maxHoursPerTurn', value ?? 1) : undefined}
+                            disabled={!canEditPricing}
                             addonAfter="giờ"
-                            className="w-full"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
                           />
                         ) : (
-                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400">{t('dashboard.pricingTable.notApplicable')}</span>
+                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-400">{t('dashboard.pricingTable.notApplicable')}</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 align-middle text-right">
-                        <Button
-                          type="primary"
-                          loading={Boolean(savingPricingIds[rowKey])}
-                          onClick={() => handleUpdatePricing(row)}
-                          className="h-9 rounded-xl bg-indigo-600 px-5 font-bold"
-                        >
-                          {t('dashboard.pricingTable.save')}
-                        </Button>
-                      </td>
+                      {canEditPricing && (
+                        <td className="px-4 py-4 align-middle text-right">
+                          <Button
+                            type="primary"
+                            loading={Boolean(savingPricingIds[rowKey])}
+                            onClick={() => handleUpdatePricing(row)}
+                            className="h-9 rounded-xl bg-indigo-600 px-5 font-bold"
+                          >
+                            {t('dashboard.pricingTable.save')}
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   )})}
                 </tbody>
@@ -914,6 +925,10 @@ const Dashboard = ({ section = 'overview' }) => {
       </div>
     );
   };
+
+  if (section === 'pricing') {
+    return renderManagerDashboard();
+  }
 
   // Redirect and load map for drivers and staff
   if (lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {

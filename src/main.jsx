@@ -4,6 +4,7 @@ import { ConfigProvider, theme } from 'antd';
 import { BrowserRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import './index.css';
 import './i18n';
 
@@ -34,7 +35,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         }}
       >
         <BrowserRouter>
-          <App />
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
         </BrowserRouter>
       </ConfigProvider>
     </GoogleOAuthProvider>

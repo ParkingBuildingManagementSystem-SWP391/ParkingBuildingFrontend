@@ -18,7 +18,7 @@ const MainLayout = () => {
         <Header />
         
         {/* Scrollable Page Content */}
-        <main className="flex-1 overflow-y-auto w-full">
+        <main className="flex-1 overflow-y-auto w-full bg-slate-50 transition-colors duration-300 dark:bg-slate-900">
           <div className="min-h-full flex flex-col">
             <div className="flex-1 px-6 py-6 md:px-8 md:py-8 w-full">
               <div className="max-w-[1600px] mx-auto w-full animate-fade-in">

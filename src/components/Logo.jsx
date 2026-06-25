@@ -27,10 +27,10 @@ const Logo = ({ className = '', size = 'default', showText = true }) => {
       </div>
       {showText && (
         <div className="text-left leading-tight">
-          <p className={`font-black uppercase text-slate-950 ${classes.title}`}>
+          <p className={`font-black uppercase text-slate-950 dark:text-slate-100 ${classes.title}`}>
             {t('sidebar.systemName')}
           </p>
-          <p className={`font-extrabold uppercase tracking-tight text-slate-500 ${classes.subtitle}`}>
+          <p className={`font-extrabold uppercase tracking-tight text-slate-500 dark:text-slate-400 ${classes.subtitle}`}>
             {t('sidebar.systemDesc')}
           </p>
         </div>
