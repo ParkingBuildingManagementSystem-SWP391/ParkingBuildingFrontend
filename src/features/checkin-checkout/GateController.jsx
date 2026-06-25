@@ -427,86 +427,74 @@ const GateController = () => {
 
   // Perform Check-in (Supports both Walk-in and Reservation QR code)
   const handleCheckInSubmit = async (values) => {
-    const tempImageUrl = values.tempImageUrl || null;
-    const type = values.type || 'Car';
+    try {
+      const tempImageUrl = values.tempImageUrl || null;
 
-    // Hàm gọi API check-in thực tế
-    const proceedCheckIn = async (formValues) => {
-      try {
-        if (checkInMode === 'walkin') {
-          const vehicleTypeId = VEHICLE_TYPE_MAP[formValues.type] || 3;
-          let finalPlate = formValues.plate;
-          if (vehicleTypeId === 1 && !finalPlate) {
-            finalPlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-          }
-
-          const response = await parkingService.walkInCheckIn(finalPlate, vehicleTypeId, tempImageUrl);
-
-          if (response && response.isSuccess) {
-            const ticket = {
-              id: response.data?.ticketCode || response.data?.TicketCode || "N/A",
-              plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || finalPlate,
-              type: formValues.type,
-              slotId: response.data?.slotName || response.data?.SlotName || "N/A",
-              checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString(),
-              sessionId: response.data?.sessionId || response.data?.SessionId || null // Ánh xạ Session ID từ BE
-            };
-
-            setTicketDetails(ticket);
-            setIsTicketOpen(true);
-            message.success(response.message || t('gate.messages.walkinSuccess'));
-
-            checkInForm.resetFields();
-            if (entryImagePreviewUrl) {
-              URL.revokeObjectURL(entryImagePreviewUrl);
-              setEntryImagePreviewUrl(null);
-            }
-            setEntryOcrResult(null);
-            fetchActiveParkedVehicles();
-          } else {
-            message.error(response?.message || t('gate.messages.checkinFailed'));
-          }
-        } else {
-          // Reservation mode
-          const ticketCode = formValues.ticketCode;
-          const licenseVehicle = formValues.plate;
-
-          const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
-          const isSuccess = response?.isSuccess || response?.IsSuccess || response?.success || (response && !response.error);
-          
-          if (isSuccess) {
-            setBookingCheckInData(response.data || response);
-            setIsCheckInConfirmOpen(true);
-            message.success(response.message || t('gate.messages.bookingSuccess'));
-            checkInForm.resetFields();
-            if (entryImagePreviewUrl) {
-              URL.revokeObjectURL(entryImagePreviewUrl);
-              setEntryImagePreviewUrl(null);
-            }
-            setEntryOcrResult(null);
-            fetchActiveParkedVehicles();
-          } else {
-            message.error(response?.message || t('gate.messages.bookingFailed'));
-          }
-        }
-      } catch (err) {
-        console.error("Check-in Error:", err);
-        message.error(err.message || String(err));
+      // CHẶN CỨNG: Bắt buộc phải có ảnh chụp cổng vào
+      if (!tempImageUrl) {
+        message.error("Vui lòng chụp ảnh hoặc tải ảnh xe lên trước khi check-in!");
+        return;
       }
-    };
 
-    // Kiểm tra thiếu ảnh (Chỉ kiểm tra đối với xe máy và ô tô)
-    if (!tempImageUrl && !entryImagePreviewUrl && type !== 'Bicycle') {
-      Modal.confirm({
-        title: 'Cảnh báo thiếu ảnh phương tiện',
-        content: 'Hệ thống chưa ghi nhận ảnh chụp xe. Bạn có chắc chắn muốn tiếp tục check-in bằng biển số nhập tay không?',
-        okText: 'Vẫn tiếp tục',
-        cancelText: 'Hủy để chụp ảnh',
-        okButtonProps: { className: 'bg-amber-500 hover:bg-amber-600 border-none font-bold text-white' },
-        onOk: () => proceedCheckIn(values),
-      });
-    } else {
-      await proceedCheckIn(values);
+      if (checkInMode === 'walkin') {
+        const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 3;
+        let finalPlate = values.plate;
+        if (vehicleTypeId === 1 && !finalPlate) {
+          finalPlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        }
+
+        const response = await parkingService.walkInCheckIn(finalPlate, vehicleTypeId, tempImageUrl);
+
+        if (response && response.isSuccess) {
+          const ticket = {
+            id: response.data?.ticketCode || response.data?.TicketCode || "N/A",
+            plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || finalPlate,
+            type: values.type,
+            slotId: response.data?.slotName || response.data?.SlotName || "N/A",
+            checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString(),
+            sessionId: response.data?.sessionId || response.data?.SessionId || null // Ánh xạ Session ID từ BE
+          };
+
+          setTicketDetails(ticket);
+          setIsTicketOpen(true);
+          message.success(response.message || t('gate.messages.walkinSuccess'));
+
+          checkInForm.resetFields();
+          if (entryImagePreviewUrl) {
+            URL.revokeObjectURL(entryImagePreviewUrl);
+            setEntryImagePreviewUrl(null);
+          }
+          setEntryOcrResult(null);
+          fetchActiveParkedVehicles();
+        } else {
+          message.error(response?.message || t('gate.messages.checkinFailed'));
+        }
+      } else {
+        // Reservation mode
+        const ticketCode = values.ticketCode;
+        const licenseVehicle = values.plate;
+
+        const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
+        const isSuccess = response?.isSuccess || response?.IsSuccess || response?.success || (response && !response.error);
+        
+        if (isSuccess) {
+          setBookingCheckInData(response.data || response);
+          setIsCheckInConfirmOpen(true);
+          message.success(response.message || t('gate.messages.bookingSuccess'));
+          checkInForm.resetFields();
+          if (entryImagePreviewUrl) {
+            URL.revokeObjectURL(entryImagePreviewUrl);
+            setEntryImagePreviewUrl(null);
+          }
+          setEntryOcrResult(null);
+          fetchActiveParkedVehicles();
+        } else {
+          message.error(response?.message || t('gate.messages.bookingFailed'));
+        }
+      }
+    } catch (err) {
+      console.error("Check-in Error:", err);
+      message.error(err.message || String(err));
     }
   };
 
@@ -515,11 +503,20 @@ const GateController = () => {
     const plate = plateToUse || checkOutForm.getFieldValue('plate');
     const ticketCode = checkOutForm.getFieldValue('ticketCode');
     const tempImageUrl = checkOutForm.getFieldValue('tempImageUrl') || null;
-    if (!plate) {
-      message.error(t('gate.messages.plateRequired'));
+    
+    // 1. Cho phép gửi check-out nếu có biển số HOẶC mã QR vé
+    if (!plate && !ticketCode) {
+      message.error("Vui lòng nhập biển số xe hoặc quét mã QR vé!");
       return;
     }
 
+    // 2. CHẶN CỨNG: Bắt buộc phải chụp ảnh xe ở cổng ra trước khi check-out
+    if (!tempImageUrl) {
+      message.error("Vui lòng chụp ảnh hoặc tải ảnh xe ở cổng ra trước khi check-out!");
+      return;
+    }
+
+    // Tiến hành gọi API check-out của backend
     setSelectedPaymentMethod(paymentMethod);
     setCashReceived('');
     setChangeDue(null);
@@ -603,7 +600,22 @@ const GateController = () => {
 
   // Perform Check-out (form submit)
   const handleCheckOutSubmit = (values) => {
-    handleCheckOut(values.paymentMethod || 'CASH');
+    const ticketCode = values.ticketCode?.trim();
+    
+    // Định tuyến thông minh nếu quét nhầm mã đặt chỗ (booking) vào cổng ra
+    if (ticketCode && ticketCode.includes('SLOT:') && !ticketCode.includes('TICKET:WK_') && !ticketCode.startsWith('WK_')) {
+      checkOutForm.setFieldsValue({ ticketCode: '' });
+      setCheckInMode('reservation');
+      checkInForm.setFieldsValue({ ticketCode });
+      message.info(t('gate.messages.autoRouteToCheckIn'));
+      setTimeout(() => {
+        entryQrInputRef.current?.focus();
+      }, 100);
+      return;
+    }
+
+    // Mặc định gọi check-out bằng CASH để mở Modal hóa đơn
+    handleCheckOut('CASH');
   };
 
   // Cash payment confirmation handler
@@ -1159,28 +1171,29 @@ const GateController = () => {
 
                   const currentPlate = checkOutForm.getFieldValue('plate') || '';
                   const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
-                  const typeId = isBike ? 1 : 3;
+                  
+                  if (isBike) {
+                    const result = await parkingService.recognizeLicensePlate(file, 1);
+                    const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl || result?.imageUrl || result?.ImageUrl;
+                    
+                    setExitOcrResult(currentPlate);
+                    checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
+                    message.success("Đã ghi nhận ảnh chụp xe đạp cổng ra.");
+                  } else {
+                    const result = await parkingService.recognizeLicensePlate(file, 3);
+                    const isSuccess = result?.isSuccess || result?.IsSuccess;
+                    const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
+                    const imageUrl = result?.imageUrl || result?.ImageUrl;
+                    const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
+                    const msg = result?.message || result?.Message;
 
-                  const result = await parkingService.recognizeLicensePlate(file, typeId);
-                  const isSuccess = result?.isSuccess || result?.IsSuccess;
-                  const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
-                  const imageUrl = result?.imageUrl || result?.ImageUrl;
-                  const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
-                  const msg = result?.message || result?.Message;
+                    if (isSuccess && predictedPlate) {
+                      setExitImagePreviewUrl(rawImageUrl || imageUrl);
+                      const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
 
-                  if (isSuccess && predictedPlate) {
-                    setExitImagePreviewUrl(rawImageUrl || imageUrl);
-                    const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
-
-                    if (confidence < 0.85) {
-                      setExitOcrResult(t('gate.camera.needCheck'));
-                      message.warning(t('gate.messages.alprLowConfidence'));
-                    } else {
-                      if (isBike) {
-                        // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
-                        setExitOcrResult(currentPlate);
-                        checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
-                        message.success(t('gate.messages.bicycleExitImage'));
+                      if (confidence < 0.85) {
+                        setExitOcrResult(t('gate.camera.needCheck'));
+                        message.warning(t('gate.messages.alprLowConfidence'));
                       } else {
                         // XE CƠ GIỚI: Đọc biển số và tự động đối soát
                         setExitOcrResult(predictedPlate);
@@ -1195,10 +1208,10 @@ const GateController = () => {
                           qrInputRef.current?.focus();
                         }, 100);
                       }
+                    } else {
+                      setExitOcrResult(t('gate.camera.needCheck'));
+                      message.warning(msg || t('gate.activeTable.alprUnclear'));
                     }
-                  } else {
-                    setExitOcrResult(t('gate.camera.needCheck'));
-                    message.warning(msg || t('gate.activeTable.alprUnclear'));
                   }
                 } catch (err) {
                   console.error("Exit recognition error:", err);
@@ -1218,29 +1231,31 @@ const GateController = () => {
                 try {
                   const currentPlate = checkOutForm.getFieldValue('plate') || '';
                   const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
-                  const typeId = isBike ? 1 : 3;
-
-                  const result = await parkingService.recognizeLicensePlate(file, typeId);
-                  const isSuccess = result?.isSuccess || result?.IsSuccess;
-                  const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
-                  const imageUrl = result?.imageUrl || result?.ImageUrl;
-                  const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
-                  const msg = result?.message || result?.Message;
-
-                  if (isSuccess && predictedPlate) {
+                  
+                  if (isBike) {
+                    const result = await parkingService.recognizeLicensePlate(file, 1);
+                    const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl || result?.imageUrl || result?.ImageUrl;
+                    
                     URL.revokeObjectURL(url);
-                    setExitImagePreviewUrl(rawImageUrl || imageUrl);
-                    const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
+                    setExitOcrResult(currentPlate);
+                    checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
+                    message.success("Đã ghi nhận ảnh chụp xe đạp cổng ra.");
+                  } else {
+                    const result = await parkingService.recognizeLicensePlate(file, 3);
+                    const isSuccess = result?.isSuccess || result?.IsSuccess;
+                    const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
+                    const imageUrl = result?.imageUrl || result?.ImageUrl;
+                    const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
+                    const msg = result?.message || result?.Message;
 
-                    if (confidence < 0.85) {
-                      setExitOcrResult(t('gate.camera.needCheck'));
-                      message.warning(t('gate.messages.alprLowConfidence'));
-                    } else {
-                      if (isBike) {
-                        // XE ĐẠP: Giữ nguyên biển ảo hiện tại, chỉ lưu ảnh check-out
-                        setExitOcrResult(currentPlate);
-                        checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
-                        message.success(t('gate.messages.bicycleExitImage'));
+                    if (isSuccess && predictedPlate) {
+                      URL.revokeObjectURL(url);
+                      setExitImagePreviewUrl(rawImageUrl || imageUrl);
+                      const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
+
+                      if (confidence < 0.85) {
+                        setExitOcrResult(t('gate.camera.needCheck'));
+                        message.warning(t('gate.messages.alprLowConfidence'));
                       } else {
                         // XE CƠ GIỚI: Đọc biển số và tự động đối soát
                         setExitOcrResult(predictedPlate);
@@ -1255,10 +1270,10 @@ const GateController = () => {
                           qrInputRef.current?.focus();
                         }, 100);
                       }
+                    } else {
+                      setExitOcrResult(t('gate.camera.needCheck'));
+                      message.warning(msg || t('gate.activeTable.alprUnclear'));
                     }
-                  } else {
-                    setExitOcrResult(t('gate.camera.needCheck'));
-                    message.warning(msg || t('gate.activeTable.alprUnclear'));
                   }
                 } catch (err) {
                   console.error("Exit recognition error:", err);
@@ -1328,27 +1343,7 @@ const GateController = () => {
                 <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] uppercase font-bold focus:bg-white focus:border-indigo-500" />
               </Form.Item>
 
-              <Form.Item
-                name="paymentMethod"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.paymentMethod')}</span>}
-                initialValue="CASH"
-                className="mb-3"
-              >
-                <Radio.Group className="w-full" buttonStyle="solid">
-                  <div className="grid grid-cols-2 gap-3 w-full">
-                    <Radio.Button value="CASH" className="h-11 text-center font-bold rounded-[14px] border-slate-200 hover:border-amber-400 hover:text-amber-600 transition-colors cursor-pointer">
-                      <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
-                        <Banknote size={15} className="text-amber-500" /> {t('gate.form.cash')}
-                      </span>
-                    </Radio.Button>
-                    <Radio.Button value="VNPAY" className="h-11 text-center font-bold rounded-[14px] border-slate-200 hover:border-indigo-400 hover:text-indigo-600 transition-colors cursor-pointer">
-                      <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
-                        <CreditCard size={15} className="text-indigo-500" /> {t('gate.form.vnpay')}
-                      </span>
-                    </Radio.Button>
-                  </div>
-                </Radio.Group>
-              </Form.Item>
+
 
               <div className="pt-2">
                 <Button
@@ -1364,7 +1359,7 @@ const GateController = () => {
             <div className="flex gap-2 mt-3">
               <Button
                 type="dashed"
-                disabled={!exitOcrResult}
+                disabled={false}
                 onClick={() => {
                   setQrScannerTarget('exit');
                   setIsLocalQrScannerOpen(true);
@@ -1375,7 +1370,7 @@ const GateController = () => {
               </Button>
               <Button
                 type="default"
-                disabled={!exitOcrResult}
+                disabled={false}
                 onClick={() => setIsQrPopupOpen(true)}
                 className="flex-1 h-11 font-bold border-[1.5px] border-slate-200 bg-white rounded-[14px] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
