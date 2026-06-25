@@ -1,5 +1,5 @@
 import React from 'react';
-import Logo from './Logo';
+import parkingLogo from '../assets/logo/parking-building-logo.png';
 import { useTranslation } from 'react-i18next';
 
 const AppFooter = () => {
@@ -8,8 +8,10 @@ const AppFooter = () => {
     <footer className="border-t border-slate-200 bg-white select-none">
       <div className="max-w-[1600px] mx-auto w-full px-6 py-3 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-slate-500">
         <div className="flex items-center gap-3">
-          <Logo
-            size="small"
+          <img
+            src={parkingLogo}
+            alt="Parking Building Logo"
+            className="h-6 sm:h-7 w-auto object-contain shrink-0"
           />
           <span className="text-sm text-slate-800 font-bold">
             {t('footer.systemName')}
