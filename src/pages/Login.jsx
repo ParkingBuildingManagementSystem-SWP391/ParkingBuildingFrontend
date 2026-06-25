@@ -73,8 +73,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-4 sm:p-6 font-sans selection:bg-indigo-100">
-      <div className="grid w-full max-w-[1040px] grid-cols-1 overflow-hidden rounded-[28px] border border-slate-100 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] lg:grid-cols-[1.05fr_0.95fr] lg:min-h-[620px]">
+    <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 p-4 font-sans selection:bg-indigo-100 dark:bg-slate-950 sm:p-6">
+      <div className="grid w-full max-w-[1040px] grid-cols-1 overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-900 sm:rounded-[28px] lg:min-h-[620px] lg:grid-cols-[1.05fr_0.95fr]">
 
         {/* ============ Brand panel (trái) ============ */}
         <div className="relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
@@ -119,13 +119,13 @@ const Login = () => {
         </div>
 
         {/* ============ Form panel (phải) ============ */}
-        <div className="relative flex flex-col justify-center px-7 py-12 sm:px-14">
+        <div className="relative flex min-w-0 flex-col justify-center px-5 py-12 sm:px-14">
 
           {/* Chuyển ngôn ngữ */}
           <button
             type="button"
             onClick={toggleLanguage}
-            className="absolute right-6 top-6 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-100"
+            className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:right-6 sm:top-6"
             title={i18n.language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
           >
             <Languages size={14} />
@@ -133,13 +133,13 @@ const Login = () => {
           </button>
 
           <div className="mb-8">
-            <h3 className="text-[26px] font-extrabold tracking-tight text-slate-900">{t('login.welcomeTitle')}</h3>
-            <p className="mt-1.5 text-sm text-slate-500">{t('login.subtitle')}</p>
+            <h3 className="text-[24px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-[26px]">{t('login.welcomeTitle')}</h3>
+            <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">{t('login.subtitle')}</p>
           </div>
 
           {/* Thông báo lỗi */}
           {errorMsg && (
-            <div className="mb-5 flex items-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+            <div className="mb-5 flex min-w-0 items-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
               <AlertCircle size={16} className="shrink-0" />
               <span>{errorMsg}</span>
             </div>
@@ -148,7 +148,7 @@ const Login = () => {
           <form onSubmit={handleFormSubmit} className="space-y-[18px]">
             {/* Email / username */}
             <div>
-              <label className="mb-2 block text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              <label className="mb-2 block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 {t('login.emailPlaceholder')}
               </label>
               <div className="relative">
@@ -159,14 +159,14 @@ const Login = () => {
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
                   disabled={loading}
-                  className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60"
+                  className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                 />
               </div>
             </div>
 
             {/* Mật khẩu */}
             <div>
-              <label className="mb-2 block text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              <label className="mb-2 block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 {t('login.passwordPlaceholder')}
               </label>
               <div className="relative">
@@ -177,7 +177,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-11 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60"
+                  className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-11 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                 />
                 <button
                   type="button"
@@ -224,7 +224,7 @@ const Login = () => {
           <div className="relative">
             <button
               type="button"
-              className="flex h-[50px] w-full items-center justify-center gap-2.5 rounded-[14px] border-[1.5px] border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50"
+              className="flex h-[50px] w-full items-center justify-center gap-2.5 rounded-[14px] border-[1.5px] border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -245,7 +245,7 @@ const Login = () => {
           </div>
 
           {/* Footer */}
-          <div className="mt-7 text-center text-[13px] text-slate-500">
+          <div className="mt-7 text-center text-[13px] text-slate-500 dark:text-slate-400">
             {t('login.noAccount')}{' '}
             <Link to="/register" className="font-bold text-indigo-600 transition-colors hover:text-indigo-700">
               {t('login.register')}

@@ -107,7 +107,7 @@ const Home = () => {
 
       {/* ══════════════════ HEADER ══════════════════ */}
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/85">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <Logo />
           </Link>
@@ -174,12 +174,12 @@ const Home = () => {
       </header>
 
       {/* ══════════════════ HERO ══════════════════ */}
-      <section className="relative overflow-visible">
+      <section className="relative overflow-hidden">
         {/* decorative blobs */}
         <div className="pointer-events-none absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/15" />
         <div className="pointer-events-none absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-indigo-400/10 blur-3xl dark:bg-violet-500/15" />
 
-        <div className="relative mx-auto grid min-h-[calc(100vh-80px)] max-w-7xl grid-cols-1 items-center gap-8 px-5 py-6 sm:py-8 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-10">
+        <div className="relative mx-auto grid min-h-[calc(100vh-80px)] w-full max-w-7xl grid-cols-1 items-center gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-10">
           {/* ── text ── */}
           <div className="space-y-8 anim-fade-up">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-300">
@@ -187,7 +187,7 @@ const Home = () => {
               {t('home.badge')}
             </div>
 
-            <h1 className="text-[clamp(2.5rem,5vw,4.5rem)] font-extrabold leading-[1.08] tracking-tight">
+            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
               <span className="block text-slate-900 dark:text-slate-50">{t('home.hero1')}</span>
               <span className="block bg-gradient-to-r from-indigo-500 to-indigo-600 bg-clip-text text-transparent">{t('home.hero2')}</span>
             </h1>
@@ -199,14 +199,14 @@ const Home = () => {
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/parking-map"
-                className="group inline-flex items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-7 py-4 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5"
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-7 py-4 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:w-auto"
               >
                 {t('home.btnBook')}
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/parking-map"
-                className="inline-flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-7 py-4 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-7 py-4 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto"
               >
                 {t('home.btnViewMap')}
               </Link>
@@ -214,27 +214,27 @@ const Home = () => {
           </div>
 
           {/* ── image ── */}
-          <div className="relative anim-fade-up delay-2">
+          <div className="relative mx-auto w-full max-w-xl anim-fade-up delay-2 lg:max-w-none">
             <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-indigo-950/15 ring-1 ring-slate-200/60 dark:ring-slate-700">
               <img
                 src={heroImage}
                 alt={t('home.altHeroImg')}
-                className="h-[300px] w-full object-cover sm:h-[380px] lg:h-[430px]"
+                className="h-auto w-full max-w-full object-cover sm:h-[380px] lg:h-[430px]"
               />
               {/* overlay gradient */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent" />
             </div>
 
             {/* floating stat card */}
-            <div className="anim-float absolute -bottom-5 -left-4 rounded-2xl border border-slate-100 bg-white/95 px-5 py-4 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 sm:-left-8">
-              <p className="text-3xl font-extrabold text-indigo-600 leading-none">
+            <div className="anim-float absolute bottom-3 left-3 max-w-[calc(100%-24px)] rounded-2xl border border-slate-100 bg-white/95 px-4 py-3 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 sm:bottom-6 sm:left-6 sm:px-5 sm:py-4">
+              <p className="text-2xl font-extrabold text-indigo-600 leading-none sm:text-3xl">
                 <AnimatedNumber target="1500" suffix="+" />
               </p>
-              <p className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-300">{t('home.statSlotsLabel')}</p>
+              <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-300 sm:text-sm">{t('home.statSlotsLabel')}</p>
             </div>
 
             {/* floating badge top-right */}
-            <div className="anim-float absolute -top-3 -right-3 flex items-center gap-2 rounded-xl border border-slate-100 bg-white/95 px-4 py-2.5 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 sm:-right-6" style={{ animationDelay: '1s' }}>
+            <div className="anim-float absolute right-3 top-3 flex max-w-[calc(100%-24px)] items-center gap-2 rounded-xl border border-slate-100 bg-white/95 px-3 py-2 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 sm:right-6 sm:top-6 sm:px-4 sm:py-2.5" style={{ animationDelay: '1s' }}>
               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" style={{ animation: 'pulse-ring 2s infinite' }} />
               <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Online</span>
             </div>
@@ -243,7 +243,7 @@ const Home = () => {
       </section>
 
       {/* ══════════════════ STATS BAR ══════════════════ */}
-      <section className="relative mx-auto w-full max-w-7xl px-5 lg:px-8 -mt-2 mb-8">
+      <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 -mt-2 mb-8">
         <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-slate-100 dark:sm:divide-slate-700 sm:p-0">
           {stats.map((s, i) => (
             <div key={i} className="flex flex-col items-center py-5 sm:py-6">
@@ -258,7 +258,7 @@ const Home = () => {
       </section>
 
       {/* ══════════════════ FEATURES ══════════════════ */}
-      <section className="mx-auto w-full max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
+      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="text-center space-y-3 mb-14">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">{t('home.featTitle')}</h2>
           <p className="mx-auto max-w-xl text-base text-slate-500 font-medium dark:text-slate-300">{t('home.featDesc')}</p>
@@ -282,7 +282,7 @@ const Home = () => {
 
       {/* ══════════════════ HOW IT WORKS ══════════════════ */}
       <section className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
-        <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
+        <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="text-center space-y-3 mb-14">
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">{t('home.howTitle')}</h2>
             <p className="text-base text-slate-500 font-medium dark:text-slate-300">{t('home.howDesc')}</p>
@@ -314,7 +314,7 @@ const Home = () => {
       </section>
 
       {/* ══════════════════ CTA ══════════════════ */}
-      <section id="contact" className="mx-auto w-full max-w-7xl px-5 py-12 lg:px-8">
+      <section id="contact" className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div
           className="relative overflow-hidden rounded-3xl px-8 py-14 text-center shadow-2xl sm:px-14 sm:py-20"
           style={{ background: 'radial-gradient(120% 120% at 0% 0%, #6366f1 0%, #4f46e5 45%, #3730a3 100%)' }}
@@ -329,14 +329,14 @@ const Home = () => {
             <div className="flex flex-col items-center justify-center gap-4 pt-2 sm:flex-row">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 rounded-[14px] bg-white px-8 py-4 text-sm font-bold text-indigo-600 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] bg-white px-8 py-4 text-sm font-bold text-indigo-600 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
               >
                 {t('home.ctaBtn')}
                 <ArrowRight size={16} />
               </Link>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-[14px] border-[1.5px] border-white/30 px-6 py-4 text-sm font-bold text-white transition-all hover:bg-white/10"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-white/30 px-6 py-4 text-sm font-bold text-white transition-all hover:bg-white/10 sm:w-auto"
               >
                 {t('home.ctaLogin')}
               </Link>
