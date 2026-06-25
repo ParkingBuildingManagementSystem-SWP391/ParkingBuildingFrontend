@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 const initialFilters = {
   licenseVehicle: '',
   slotName: '',
-  username: '',
+  isRegistered: '', // Dùng isRegistered thay cho username
   typeId: '',
   sessionStatus: '',
   fromDate: '',
@@ -34,13 +34,17 @@ const normalizeFilters = (filters) => {
   const params = {
     licenseVehicle: filters.licenseVehicle?.trim() || undefined,
     slotName: filters.slotName?.trim() || undefined,
-    username: filters.username?.trim() || undefined,
+    // Chuyển đổi trạng thái isRegistered từ chuỗi select sang số nguyên gửi lên BE
+    isRegistered: filters.isRegistered !== '' ? parseInt(filters.isRegistered, 10) : undefined,
     typeId: filters.typeId ? parseInt(filters.typeId, 10) : undefined,
     sessionStatus: filters.sessionStatus || undefined,
   };
 
-  if (filters.fromDate) params.fromDate = new Date(filters.fromDate).toISOString();
-  if (filters.toDate) params.toDate = new Date(filters.toDate).toISOString();
+  // GIẢI PHÁP MÚI GIỜ VIỆT NAM (UTC+7): 
+  // Ghép chuỗi Local DateTime để khớp múi giờ Local trong DB (không bị lùi 7 tiếng do toISOString)
+  // và bao trọn cả ngày kết thúc (từ 00:00:00 đến 23:59:59)
+  if (filters.fromDate) params.fromDate = `${filters.fromDate}T00:00:00`;
+  if (filters.toDate) params.toDate = `${filters.toDate}T23:59:59`;
 
   return Object.fromEntries(Object.entries(params).filter(([, value]) => value !== undefined && value !== ''));
 };
@@ -278,7 +282,7 @@ const ParkingSessionManager = () => {
     const nextFilters = { ...filters, [key]: value };
     setFilters(nextFilters);
 
-    if (['licenseVehicle', 'slotName', 'username'].includes(key)) {
+    if (['licenseVehicle', 'slotName'].includes(key)) {
       if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
       debounceTimeoutRef.current = setTimeout(() => {
         fetchSessions(nextFilters);
@@ -317,7 +321,16 @@ const ParkingSessionManager = () => {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 lg:grid-cols-4">
           <Input placeholder={t('parkingSession.phPlate')} value={filters.licenseVehicle} onChange={(event) => updateFilter('licenseVehicle', event.target.value)} />
           <Input placeholder={t('parkingSession.phSlot')} value={filters.slotName} onChange={(event) => updateFilter('slotName', event.target.value)} />
-          <Input placeholder={t('parkingSession.phUsername')} value={filters.username} onChange={(event) => updateFilter('username', event.target.value)} />
+          <Select
+            placeholder="Phân loại khách"
+            allowClear
+            value={filters.isRegistered || undefined}
+            onChange={(value) => updateFilter('isRegistered', value !== undefined ? value : '')}
+            options={[
+              { value: '1', label: 'Khách hàng thành viên' },
+              { value: '0', label: 'Khách vãng lai' },
+            ]}
+          />
           <Select
             placeholder={t('parkingSession.phVehType')}
             allowClear
