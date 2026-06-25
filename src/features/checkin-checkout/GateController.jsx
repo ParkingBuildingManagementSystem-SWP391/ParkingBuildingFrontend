@@ -259,6 +259,11 @@ const GateController = () => {
   const [isCheckInConfirmOpen, setIsCheckInConfirmOpen] = useState(false);
   const [bookingCheckInData, setBookingCheckInData] = useState(null);
   const qrInputRef = React.useRef(null);
+  const entryQrInputRef = React.useRef(null); // Quản lý focus Cổng Vào
+
+  // Trạng thái modal lựa chọn thanh toán khi nhập mã thô cổng ra
+  const [isSelectPaymentModalOpen, setIsSelectPaymentModalOpen] = useState(false);
+  const [checkoutValues, setCheckoutValues] = useState(null);
 
   const handleLocalQrScanSuccess = (decodedText) => {
     if (qrScannerTarget === 'entry') {
@@ -411,7 +416,8 @@ const GateController = () => {
             plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || finalPlate,
             type: values.type,
             slotId: response.data?.slotName || response.data?.SlotName || "N/A",
-            checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString()
+            checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString(),
+            sessionId: response.data?.sessionId || response.data?.SessionId || null // Ánh xạ Session ID từ BE
           };
           
           setTicketDetails(ticket);
@@ -550,9 +556,33 @@ const GateController = () => {
     }
   };
 
+  // Khai báo hàm xác nhận thanh toán khi bấm nút chọn trong popup
+  const handleSelectPaymentConfirm = (method) => {
+    setIsSelectPaymentModalOpen(false);
+    if (checkoutValues) {
+      handleCheckOut(method);
+    }
+  };
+
   // Perform Check-out (form submit)
   const handleCheckOutSubmit = (values) => {
-    handleCheckOut(values.paymentMethod || 'CASH');
+    const ticketCode = values.ticketCode?.trim();
+    
+    // Định tuyến thông minh nếu quét nhầm mã đặt chỗ (booking) vào cổng ra
+    if (ticketCode && ticketCode.includes('SLOT:') && !ticketCode.includes('TICKET:WK_') && !ticketCode.startsWith('WK_')) {
+      checkOutForm.setFieldsValue({ ticketCode: '' });
+      setCheckInMode('reservation');
+      checkInForm.setFieldsValue({ ticketCode });
+      message.info(t('gate.messages.autoRouteToCheckIn'));
+      setTimeout(() => {
+        entryQrInputRef.current?.focus();
+      }, 100);
+      return;
+    }
+
+    // Thay vì chạy thẳng, mở modal chọn phương thức thanh toán cho nhập mã thô
+    setCheckoutValues(values);
+    setIsSelectPaymentModalOpen(true);
   };
 
   // Cash payment confirmation handler
@@ -827,9 +857,12 @@ const GateController = () => {
                             ticketCode: checkRes.ticketCode || checkRes.TicketCode
                           });
                           message.success(t('gate.messages.bookingFound', { driver: checkRes.driverName || "N/A" }));
+                          setTimeout(() => {
+                            entryQrInputRef.current?.focus();
+                          }, 100);
                         }
                       } catch (err) {
-                        // Không có lịch đặt trước -> Giữ nguyên chế độ Walk-in
+                        // Không có lịch đặt trước -> Tự động chuyển qua phần Walk-in
                         setCheckInMode('walkin');
                       }
                       // ----------------------------------------------------
@@ -889,6 +922,9 @@ const GateController = () => {
                             ticketCode: checkRes.ticketCode || checkRes.TicketCode
                           });
                           message.success(`Phát hiện đặt chỗ của tài xế: ${checkRes.driverName || "N/A"}`);
+                          setTimeout(() => {
+                            entryQrInputRef.current?.focus();
+                          }, 100);
                         }
                       } catch (err) {
                         setCheckInMode('walkin');
@@ -948,6 +984,9 @@ const GateController = () => {
                 onClick={() => {
                   setCheckInMode('reservation');
                   checkInForm.resetFields();
+                  setTimeout(() => {
+                    entryQrInputRef.current?.focus();
+                  }, 100);
                 }}
                 className={`flex items-center justify-center py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                   checkInMode === 'reservation'
@@ -978,7 +1017,11 @@ const GateController = () => {
                   rules={[{ required: true, message: t('gate.form.requireQr') }]}
                   className="mb-3"
                 >
-                  <Input placeholder="e.g. QR_B5F9A1D8" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500" />
+                  <Input 
+                    ref={entryQrInputRef}
+                    placeholder="e.g. QR_B5F9A1D8" 
+                    className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-emerald-500" 
+                  />
                 </Form.Item>
               )}
 
@@ -1237,7 +1280,7 @@ const GateController = () => {
               >
                 <Input
                   ref={qrInputRef}
-                  disabled={!exitOcrResult}
+                  disabled={!exitOcrResult || checkInMode === 'reservation'}
                   onPressEnter={() => checkOutForm.submit()}
                   placeholder={exitOcrResult ? t('gate.form.scanOrEnter') : t('gate.form.waitScan')}
                   className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg font-mono uppercase font-bold focus:bg-white focus:border-rose-500 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -1253,27 +1296,7 @@ const GateController = () => {
                 <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-10 bg-slate-50 border-slate-200 text-slate-800 rounded-lg uppercase font-bold focus:bg-white focus:border-rose-500" />
               </Form.Item>
 
-              <Form.Item
-                name="paymentMethod"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.paymentMethod')}</span>}
-                initialValue="CASH"
-                className="mb-3"
-              >
-                <Radio.Group className="w-full" buttonStyle="solid">
-                  <div className="grid grid-cols-2 gap-3 w-full">
-                    <Radio.Button value="CASH" className="h-10 text-center font-bold rounded-lg border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-colors cursor-pointer">
-                      <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
-                        <CreditCard size={15} className="text-rose-500" /> {t('gate.form.cash')}
-                      </span>
-                    </Radio.Button>
-                    <Radio.Button value="VNPAY" className="h-10 text-center font-bold rounded-lg border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-colors cursor-pointer">
-                      <span className="flex items-center justify-center h-full gap-1.5 pt-0.5">
-                        <CreditCard size={15} className="text-emerald-500" /> {t('gate.form.vnpay')}
-                      </span>
-                    </Radio.Button>
-                  </div>
-                </Radio.Group>
-              </Form.Item>
+
 
               <div className="pt-2">
                 <Button 
@@ -1811,6 +1834,35 @@ const GateController = () => {
             </div>
           );
         })()}
+      </Modal>
+
+      {/* Modal lựa chọn phương thức thanh toán cho nhập mã thô */}
+      <Modal
+        title="Chọn phương thức thanh toán cho xe ra"
+        open={isSelectPaymentModalOpen}
+        onCancel={() => setIsSelectPaymentModalOpen(false)}
+        footer={null}
+        width={400}
+        centered
+      >
+        <div className="flex flex-col gap-3 py-4">
+          <Button 
+            type="primary" 
+            size="large" 
+            onClick={() => handleSelectPaymentConfirm('CASH')}
+            className="bg-emerald-600 hover:bg-emerald-500 border-none font-bold h-12 rounded-lg"
+          >
+            Thanh toán Tiền mặt (CASH)
+          </Button>
+          <Button 
+            type="primary" 
+            size="large" 
+            onClick={() => handleSelectPaymentConfirm('VNPAY')}
+            className="bg-sky-600 hover:bg-sky-500 border-none font-bold h-12 rounded-lg"
+          >
+            Chuyển khoản VNPay (VNPAY)
+          </Button>
+        </div>
       </Modal>
     </div>
   );
