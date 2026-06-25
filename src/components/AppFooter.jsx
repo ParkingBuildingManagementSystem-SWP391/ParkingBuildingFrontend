@@ -1,23 +1,17 @@
 import React from 'react';
-import parkingLogo from '../assets/logo/parking-building-logo.png';
 import { useTranslation } from 'react-i18next';
+import Logo from './Logo';
 
 const AppFooter = () => {
   const { t } = useTranslation();
   return (
     <footer className="border-t border-slate-200 bg-white select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
-      <div className="max-w-[1600px] mx-auto w-full px-6 py-3 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-        <div className="flex items-center gap-3">
-          <img
-            src={parkingLogo}
-            alt="Parking Building Logo"
-            className="h-6 sm:h-7 w-auto object-contain shrink-0"
-          />
-          <span className="text-sm text-slate-800 font-bold dark:text-slate-100">
-            {t('footer.systemName')}
-          </span>
+      <div className="max-w-[1600px] mx-auto flex w-full flex-col items-center justify-between gap-3 px-4 py-4 text-center text-xs font-medium text-slate-500 dark:text-slate-400 sm:flex-row sm:px-6 sm:py-3 sm:text-left md:px-8">
+        <div className="min-w-0">
+          <Logo size="small" />
+          <span className="sr-only">{t('footer.systemName')}</span>
         </div>
-        <div className="flex flex-col sm:items-end text-center sm:text-right leading-relaxed">
+        <div className="flex min-w-0 flex-col leading-relaxed sm:items-end sm:text-right">
           <span>{t('footer.copyright')}</span>
           <span className="text-[10px] tracking-wider mt-0.5 text-slate-400">{t('footer.version')}</span>
         </div>

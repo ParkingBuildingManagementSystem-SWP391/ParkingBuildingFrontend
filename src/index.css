@@ -50,12 +50,27 @@
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
     @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    min-height: 100%;
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
     font-family: 'Inter', sans-serif;
+    margin: 0;
+  }
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 }
 
