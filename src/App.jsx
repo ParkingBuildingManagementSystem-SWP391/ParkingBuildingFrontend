@@ -96,7 +96,7 @@ function App() {
         </Route>
 
         {/* Unmatched URL redirects */}
-        <Route path="*" element={<Navigate to="/parking-map" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
   );
