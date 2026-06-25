@@ -274,14 +274,37 @@ const GateController = () => {
   const [bookingCheckInData, setBookingCheckInData] = useState(null);
   const qrInputRef = React.useRef(null);
 
-  const handleLocalQrScanSuccess = (decodedText) => {
+  const handleLocalQrScanSuccess = async (decodedText) => {
     if (qrScannerTarget === 'entry') {
       checkInForm.setFieldsValue({ ticketCode: decodedText });
       message.success(t('gate.messages.scanBookingSuccess', { code: decodedText }));
     } else {
       checkOutForm.setFieldsValue({ ticketCode: decodedText });
       message.success(t('gate.messages.scanTicketSuccess', { code: decodedText }));
-      // Auto submit check-out
+
+      // TỰ ĐỘNG TRA CỨU BIỂN SỐ NẾU Ô BIỂN SỐ ĐANG TRỐNG (Hỗ trợ xe đạp & lỗi camera)
+      const currentPlate = checkOutForm.getFieldValue('plate');
+      if (!currentPlate) {
+        try {
+          const res = await parkingService.scanCheckOut(decodedText);
+          const isSuccess = res?.isSuccess || res?.IsSuccess || (res && !res.error);
+          
+          if (isSuccess) {
+            const plateFromDb = res.data?.licenseVehicle || res.data?.LicenseVehicle || res.licenseVehicle;
+            if (plateFromDb) {
+              checkOutForm.setFieldsValue({ plate: plateFromDb });
+              // Nếu là xe đạp, cập nhật exitOcrResult để mở khóa các trạng thái khác
+              if (plateFromDb.toUpperCase().startsWith('BIKE_')) {
+                setExitOcrResult(plateFromDb);
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Không thể tự động truy vấn biển số từ mã QR:", err);
+        }
+      }
+
+      // Tự động submit sau khi điền đầy đủ dữ liệu
       setTimeout(() => {
         checkOutForm.submit();
       }, 500);
@@ -404,72 +427,86 @@ const GateController = () => {
 
   // Perform Check-in (Supports both Walk-in and Reservation QR code)
   const handleCheckInSubmit = async (values) => {
-    try {
-      const tempImageUrl = values.tempImageUrl || null;
+    const tempImageUrl = values.tempImageUrl || null;
+    const type = values.type || 'Car';
 
-      if (checkInMode === 'walkin') {
-        const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 3;
-
-        let finalPlate = values.plate;
-        // Xe đạp: tự sinh biển ảo nếu nhân viên để trống
-        if (vehicleTypeId === 1 && !finalPlate) {
-          finalPlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-        }
-
-        // Call walk-in check-in API
-        const response = await parkingService.walkInCheckIn(finalPlate, vehicleTypeId, tempImageUrl);
-
-        if (response && response.isSuccess) {
-          const ticket = {
-            id: response.data?.ticketCode || response.data?.TicketCode || "N/A",
-            plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || finalPlate,
-            type: values.type,
-            slotId: response.data?.slotName || response.data?.SlotName || "N/A",
-            checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString()
-          };
-
-          setTicketDetails(ticket);
-          setIsTicketOpen(true);
-          message.success(response.message || t('gate.messages.walkinSuccess'));
-
-          checkInForm.resetFields();
-          if (entryImagePreviewUrl) {
-            URL.revokeObjectURL(entryImagePreviewUrl);
-            setEntryImagePreviewUrl(null);
+    // Hàm gọi API check-in thực tế
+    const proceedCheckIn = async (formValues) => {
+      try {
+        if (checkInMode === 'walkin') {
+          const vehicleTypeId = VEHICLE_TYPE_MAP[formValues.type] || 3;
+          let finalPlate = formValues.plate;
+          if (vehicleTypeId === 1 && !finalPlate) {
+            finalPlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
           }
-          setEntryOcrResult(null);
-          fetchActiveParkedVehicles();
-        } else {
-          message.error(response?.message || t('gate.messages.checkinFailed'));
-        }
-      } else {
-        // Reservation mode
-        const ticketCode = values.ticketCode;
-        const licenseVehicle = values.plate;
 
-        const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
+          const response = await parkingService.walkInCheckIn(finalPlate, vehicleTypeId, tempImageUrl);
 
-        const isSuccess = response?.isSuccess || response?.IsSuccess || response?.success || (response && !response.error);
-        if (isSuccess) {
-          // Lưu dữ liệu trả về từ API và hiển thị Popup thông tin tài xế + vị trí đỗ
-          setBookingCheckInData(response.data || response);
-          setIsCheckInConfirmOpen(true);
+          if (response && response.isSuccess) {
+            const ticket = {
+              id: response.data?.ticketCode || response.data?.TicketCode || "N/A",
+              plate: response.data?.licenseVehicle || response.data?.LicenseVehicle || finalPlate,
+              type: formValues.type,
+              slotId: response.data?.slotName || response.data?.SlotName || "N/A",
+              checkInTime: response.data?.checkInTime || response.data?.CheckInTime || new Date().toISOString(),
+              sessionId: response.data?.sessionId || response.data?.SessionId || null // Ánh xạ Session ID từ BE
+            };
 
-          message.success(response.message || t('gate.messages.bookingSuccess'));
-          checkInForm.resetFields();
-          if (entryImagePreviewUrl) {
-            URL.revokeObjectURL(entryImagePreviewUrl);
-            setEntryImagePreviewUrl(null);
+            setTicketDetails(ticket);
+            setIsTicketOpen(true);
+            message.success(response.message || t('gate.messages.walkinSuccess'));
+
+            checkInForm.resetFields();
+            if (entryImagePreviewUrl) {
+              URL.revokeObjectURL(entryImagePreviewUrl);
+              setEntryImagePreviewUrl(null);
+            }
+            setEntryOcrResult(null);
+            fetchActiveParkedVehicles();
+          } else {
+            message.error(response?.message || t('gate.messages.checkinFailed'));
           }
-          setEntryOcrResult(null);
-          fetchActiveParkedVehicles();
         } else {
-          message.error(response?.message || t('gate.messages.bookingFailed'));
+          // Reservation mode
+          const ticketCode = formValues.ticketCode;
+          const licenseVehicle = formValues.plate;
+
+          const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
+          const isSuccess = response?.isSuccess || response?.IsSuccess || response?.success || (response && !response.error);
+          
+          if (isSuccess) {
+            setBookingCheckInData(response.data || response);
+            setIsCheckInConfirmOpen(true);
+            message.success(response.message || t('gate.messages.bookingSuccess'));
+            checkInForm.resetFields();
+            if (entryImagePreviewUrl) {
+              URL.revokeObjectURL(entryImagePreviewUrl);
+              setEntryImagePreviewUrl(null);
+            }
+            setEntryOcrResult(null);
+            fetchActiveParkedVehicles();
+          } else {
+            message.error(response?.message || t('gate.messages.bookingFailed'));
+          }
         }
+      } catch (err) {
+        console.error("Check-in Error:", err);
+        message.error(err.message || String(err));
       }
-    } catch (err) {
-      console.error("Check-in Error:", err);
-      message.error(err.message || String(err));
+    };
+
+    // Kiểm tra thiếu ảnh (Chỉ kiểm tra đối với xe máy và ô tô)
+    if (!tempImageUrl && !entryImagePreviewUrl && type !== 'Bicycle') {
+      Modal.confirm({
+        title: 'Cảnh báo thiếu ảnh phương tiện',
+        content: 'Hệ thống chưa ghi nhận ảnh chụp xe. Bạn có chắc chắn muốn tiếp tục check-in bằng biển số nhập tay không?',
+        okText: 'Vẫn tiếp tục',
+        cancelText: 'Hủy để chụp ảnh',
+        okButtonProps: { className: 'bg-amber-500 hover:bg-amber-600 border-none font-bold text-white' },
+        onOk: () => proceedCheckIn(values),
+      });
+    } else {
+      await proceedCheckIn(values);
     }
   };
 
@@ -813,49 +850,63 @@ const GateController = () => {
                   if (!file) throw new Error("Ảnh chụp không hợp lệ.");
                   const type = checkInForm.getFieldValue('type') || 'Car';
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
-                  const result = await parkingService.recognizeLicensePlate(file, typeId);
 
-                  const isSuccess = result?.isSuccess || result?.IsSuccess;
-                  const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
-                  const imageUrl = result?.imageUrl || result?.ImageUrl;
-                  const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
-                  const msg = result?.message || result?.Message;
-
-                  if (isSuccess && predictedPlate) {
-                    setEntryImagePreviewUrl(rawImageUrl || imageUrl);
-                    const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
-
-                    if (confidence < 0.85) {
-                      setEntryOcrResult(t('gate.camera.needCheck'));
-                      message.warning(t('gate.messages.alprLowConfidence'));
-                    } else {
-                      setEntryOcrResult(predictedPlate);
-                      checkInForm.setFieldsValue({
-                        plate: predictedPlate,
-                        tempImageUrl: rawImageUrl
-                      });
-                      message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
-
-                      // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
-                      try {
-                        const checkRes = await parkingService.scanCheckIn(null, predictedPlate);
-                        if (checkRes && checkRes.isSuccess) {
-                          // Tự chuyển sang chế độ Reservation và điền mã vé QR
-                          setCheckInMode('reservation');
-                          checkInForm.setFieldsValue({
-                            ticketCode: checkRes.ticketCode || checkRes.TicketCode
-                          });
-                          message.success(t('gate.messages.bookingFound', { driver: checkRes.driverName || "N/A" }));
-                        }
-                      } catch (err) {
-                        // Không có lịch đặt trước -> Giữ nguyên chế độ Walk-in
-                        setCheckInMode('walkin');
-                      }
-                      // ----------------------------------------------------
-                    }
+                  // NẾU LÀ XE ĐẠP: Bỏ qua nhận diện biển số
+                  if (type === 'Bicycle') {
+                    const result = await parkingService.recognizeLicensePlate(file, typeId);
+                    const rawImageUrl = result?.rawImageUrl || result?.ImageUrl;
+                    
+                    const randomBikePlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                    setEntryOcrResult(randomBikePlate);
+                    checkInForm.setFieldsValue({
+                      plate: randomBikePlate,
+                      tempImageUrl: rawImageUrl
+                    });
+                    message.success(t('gate.messages.bicycleExitImage') || "Đã lưu ảnh xe đạp!");
                   } else {
-                    setEntryOcrResult(t('gate.camera.needCheck'));
-                    message.warning(msg || t('gate.activeTable.alprUnclear'));
+                    // XE MÁY / Ô TÔ: Chạy nhận diện biển số bình thường
+                    const result = await parkingService.recognizeLicensePlate(file, typeId);
+                    const isSuccess = result?.isSuccess || result?.IsSuccess;
+                    const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
+                    const imageUrl = result?.imageUrl || result?.ImageUrl;
+                    const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
+                    const msg = result?.message || result?.Message;
+
+                    if (isSuccess && predictedPlate) {
+                      setEntryImagePreviewUrl(rawImageUrl || imageUrl);
+                      const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
+
+                      if (confidence < 0.85) {
+                        setEntryOcrResult(t('gate.camera.needCheck'));
+                        message.warning(t('gate.messages.alprLowConfidence'));
+                      } else {
+                        setEntryOcrResult(predictedPlate);
+                        checkInForm.setFieldsValue({
+                          plate: predictedPlate,
+                          tempImageUrl: rawImageUrl
+                        });
+                        message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
+
+                        try {
+                          const checkRes = await parkingService.scanCheckIn(null, predictedPlate);
+                          if (checkRes && checkRes.isSuccess) {
+                            setCheckInMode('reservation');
+                            checkInForm.setFieldsValue({
+                              ticketCode: checkRes.ticketCode || checkRes.TicketCode
+                            });
+                            message.success(t('gate.messages.bookingFound', { driver: checkRes.driverName || "N/A" }));
+                            setTimeout(() => {
+                              entryQrInputRef.current?.focus();
+                            }, 100);
+                          }
+                        } catch (err) {
+                          setCheckInMode('walkin');
+                        }
+                      }
+                    } else {
+                      setEntryOcrResult(t('gate.camera.needCheck'));
+                      message.warning(msg || t('gate.activeTable.alprUnclear'));
+                    }
                   }
                 } catch (err) {
                   console.error("Entry recognition error:", err);
@@ -1261,7 +1312,7 @@ const GateController = () => {
               >
                 <Input
                   ref={qrInputRef}
-                  disabled={!exitOcrResult}
+                  disabled={false}
                   onPressEnter={() => checkOutForm.submit()}
                   placeholder={exitOcrResult ? t('gate.form.scanOrEnter') : t('gate.form.waitScan')}
                   className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -1509,6 +1560,8 @@ const GateController = () => {
               ? t('gate.checkoutModal.extraAmountDue')
               : t('gate.checkoutModal.amountDue');
 
+          const isBicycle = checkInLicensePlate?.toUpperCase().startsWith('BIKE_');
+
           return (
             <div className="space-y-6 pt-4">
               {!isSuccess ? (
@@ -1517,7 +1570,7 @@ const GateController = () => {
                   description={messageText || t('gate.checkoutModal.securityWarningDesc')}
                   type="error"
                   showIcon
-                  className="rounded-2xl font-bold"
+                  className="rounded-xl font-bold"
                 />
               ) : (
                 <Alert
@@ -1525,7 +1578,18 @@ const GateController = () => {
                   description={messageText || t('gate.checkoutModal.plateMatchSuccessDesc')}
                   type="success"
                   showIcon
-                  className="rounded-2xl font-bold"
+                  className="rounded-xl font-bold"
+                />
+              )}
+
+              {/* THÊM BIỂU NGỮ CẢNH BÁO THIẾU ẢNH VÀO Ở ĐÂY */}
+              {isSuccess && !checkInImageUrl && !isBicycle && (
+                <Alert
+                  message="Cảnh báo an ninh: Phiên đỗ xe thiếu ảnh đầu vào!"
+                  description="Phương tiện này được check-in bằng cách nhập tay biển số hoặc camera bị lỗi lúc vào. Vui lòng đối chiếu thực tế kỹ lưỡng trước khi xác nhận cho xe ra!"
+                  type="warning"
+                  showIcon
+                  className="rounded-xl font-bold border-amber-300 bg-amber-50 text-amber-900"
                 />
               )}
 
@@ -1563,16 +1627,23 @@ const GateController = () => {
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       <div className="flex flex-col items-center">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('gate.checkoutModal.entryImage')}</span>
-                        <div className="w-full aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center">
+                        <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
                           {checkInImageUrl ? (
                             <Image
                               src={checkInImageUrl}
                               alt={t('gate.checkoutModal.entryImage')}
                               className="w-full h-full object-cover"
-                              fallback="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600"
                             />
+                          ) : isBicycle ? (
+                            <div className="flex flex-col items-center justify-center p-3 text-center bg-slate-100 w-full h-full">
+                              <span className="text-slate-400 font-extrabold text-[22px] mb-1">🚲</span>
+                              <span className="text-[10px] text-slate-500 font-bold uppercase">Xe đạp (Không ảnh)</span>
+                            </div>
                           ) : (
-                            <span className="text-[9px] text-slate-500 font-bold uppercase">{t('gate.checkoutModal.noImage')}</span>
+                            <div className="flex flex-col items-center justify-center p-3 text-center bg-amber-50 w-full h-full border border-dashed border-amber-300">
+                              <span className="text-amber-500 animate-pulse text-[22px] mb-1">⚠️</span>
+                              <span className="text-[10px] text-amber-700 font-extrabold uppercase">Không có ảnh vào</span>
+                            </div>
                           )}
                         </div>
                       </div>
