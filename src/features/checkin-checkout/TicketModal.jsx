@@ -17,6 +17,11 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
 
   const isTicket = type === 'ticket';
 
+  const qrPayload = details ? encodeURIComponent(
+    `SLOT:${details.slotId || 'N/A'}|PLATE:${details.plate || 'N/A'}|ID:${details.sessionId || 'N/A'}|TICKET:${details.id || 'N/A'}`
+  ) : '';
+  const qrUrl = details ? `https://api.qrserver.com/v1/create-qr-code/?size=130x130&ecc=M&data=${qrPayload}` : '';
+
   return (
     <Modal
       open={isOpen}
@@ -100,8 +105,12 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
           {/* QR / Barcode container */}
           <div className="flex flex-col items-center justify-center pt-3 border-t border-dashed border-slate-200">
             {isTicket ? (
-              <div className="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-                <QrCode size={110} className="text-slate-800" />
+              <div className="p-2 bg-white border border-slate-200 rounded-lg shadow-sm w-32 h-32 flex items-center justify-center">
+                <img 
+                  src={qrUrl}
+                  alt="Ticket QR Code" 
+                  className="w-[120px] h-[120px] object-contain"
+                />
               </div>
             ) : (
               <div className="flex flex-col items-center gap-1.5 p-2.5 bg-white rounded border border-slate-200 w-full text-center shadow-sm">
