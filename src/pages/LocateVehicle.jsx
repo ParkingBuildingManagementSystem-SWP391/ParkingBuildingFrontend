@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Search, MapPin, Car, AlertTriangle, Clock, Building2 } from 'lucide-react';
 
 const LocateVehicle = () => {
   const [licensePlate, setLicensePlate] = useState('');
@@ -23,7 +24,7 @@ const LocateVehicle = () => {
     try {
       // Gọi API Endpoint ẩn danh của Backend
       const response = await axios.get(`/api/Parking/locate?licensePlate=${formattedPlate}`);
-      
+
       if (response.data.isSuccess) {
         setResult(response.data.data);
       }
@@ -40,80 +41,99 @@ const LocateVehicle = () => {
   };
 
   return (
-    <section id="locate-vehicle" className="py-12 bg-[#f8fafc] flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <section id="locate-vehicle" className="min-h-screen py-12 bg-slate-50 flex flex-col items-center justify-center px-4 relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[60px] pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[80px] pointer-events-none"></div>
 
-      <div className="max-w-sm w-full bg-white rounded-2xl p-6 border border-slate-200 shadow-xl z-10 relative">
-        <div className="text-center mb-6">
-          <div className="mx-auto w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-3 shadow-inner">
-             <span className="text-2xl">🔍</span>
+      <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-slate-200 shadow-xl z-10 relative">
+        <div className="text-center mb-7">
+          <div className="mx-auto w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/30">
+            <Search className="w-7 h-7 text-white" strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Tìm Vị Trí Xe Đỗ</h2>
-          <p className="text-slate-500 text-xs mt-1.5 font-medium px-2">Dành cho tài xế hoặc khách vãng lai quên vị trí đỗ xe trong tòa nhà</p>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Tìm Vị Trí Xe Đỗ</h2>
+          <p className="text-slate-500 text-sm mt-2 font-medium px-2">Dành cho tài xế hoặc khách vãng lai quên vị trí đỗ xe trong tòa nhà</p>
         </div>
 
         {/* Form Tra Cứu */}
         <form onSubmit={handleSearch} className="space-y-4">
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nhập biển số xe của bạn</label>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nhập biển số xe của bạn</label>
             <input
               type="text"
               placeholder="VÍ DỤ: 30A-123.45"
               value={licensePlate}
               onChange={(e) => setLicensePlate(e.target.value)}
-              className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-lg text-center text-lg font-black tracking-widest text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 uppercase transition-all duration-200 shadow-sm"
+              className="w-full px-4 py-3.5 bg-slate-50 border-[1.5px] border-slate-200 rounded-[14px] text-center text-lg font-extrabold tracking-widest text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 uppercase transition-all duration-200"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm rounded-lg transition-all duration-300 shadow-md shadow-blue-600/20 active:scale-[0.98] disabled:opacity-50 flex justify-center items-center gap-2"
+            className="w-full py-3.5 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-bold text-sm rounded-[14px] transition-all duration-300 shadow-lg shadow-indigo-600/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0 flex justify-center items-center gap-2"
           >
-            {loading ? 'Đang kiểm tra...' : 'Tìm Vị Trí Ngay'}
+            {loading ? (
+              'Đang kiểm tra...'
+            ) : (
+              <>
+                <Search className="w-4 h-4" strokeWidth={2.5} />
+                Tìm Vị Trí Ngay
+              </>
+            )}
           </button>
         </form>
 
         {/* Khung Thông Báo Lỗi */}
         {error && (
-          <div className="mt-5 p-3 bg-red-50 border border-red-200 rounded-lg text-center text-red-600 text-xs font-semibold animate-fade-up">
-            ⚠️ {error}
+          <div className="mt-5 p-3.5 bg-red-50 border border-red-200 rounded-[14px] flex items-center justify-center gap-2 text-red-600 text-sm font-semibold animate-fade-up">
+            <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} />
+            {error}
           </div>
         )}
 
         {/* Khung Hiển Thị Kết Quả Đỗ Xe */}
         {result && (
-          <div className="mt-6 border-t border-slate-100 pt-5 space-y-4 animate-fade-up">
+          <div className="mt-6 border-t border-slate-100 pt-6 space-y-4 animate-fade-up">
             <div className="text-center">
-              <span className="inline-block px-2.5 py-1 bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-bold uppercase tracking-widest mb-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 Đang Đỗ Trong Bãi
               </span>
-              <h3 className="text-2xl font-black tracking-widest text-slate-800">{result.licenseVehicle}</h3>
+              <h3 className="text-2xl font-extrabold tracking-widest text-slate-900 flex items-center justify-center gap-2">
+                <Car className="w-6 h-6 text-slate-400" strokeWidth={2.5} />
+                {result.licenseVehicle}
+              </h3>
             </div>
 
             {/* Thông tin Tầng & Ô Đỗ */}
-            <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <div className="border-r border-slate-200 pr-2">
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-1">TẦNG ĐỖ XE</span>
-                <span className="font-black text-blue-600 text-lg">{result.floorName}</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-50 p-4 rounded-[14px] border border-slate-200">
+                <span className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">
+                  <Building2 className="w-3 h-3" strokeWidth={2.5} />
+                  TẦNG ĐỖ XE
+                </span>
+                <span className="font-extrabold text-indigo-600 text-xl">{result.floorName}</span>
               </div>
-              <div className="pl-2">
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-1">VỊ TRÍ Ô ĐỖ</span>
-                <span className="font-black text-emerald-600 text-lg">{result.slotName}</span>
+              <div className="bg-slate-50 p-4 rounded-[14px] border border-slate-200">
+                <span className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">
+                  <MapPin className="w-3 h-3" strokeWidth={2.5} />
+                  VỊ TRÍ Ô ĐỖ
+                </span>
+                <span className="font-extrabold text-emerald-600 text-xl">{result.slotName}</span>
               </div>
             </div>
 
             {/* Ảnh Cổng Vào Đối Chứng */}
             {result.checkInImageUrl && (
               <div>
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-1.5">Ảnh Cổng Check-in Đối Chứng</span>
-                <div className="relative group overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-2">Ảnh Cổng Check-in Đối Chứng</span>
+                <div className="relative group overflow-hidden rounded-[14px] border border-slate-200 shadow-sm">
                   <img
                     src={result.checkInImageUrl}
                     alt="Ảnh cổng check-in xe"
-                    className="w-full h-36 object-cover group-hover:scale-105 transition duration-500"
+                    className="w-full h-40 object-cover group-hover:scale-105 transition duration-500"
                   />
-                  <div className="absolute bottom-2 right-2 bg-slate-900/80 backdrop-blur-md text-[10px] px-2 py-1 rounded text-white font-medium shadow-sm">
+                  <div className="absolute bottom-2 right-2 bg-slate-900/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-medium shadow-sm flex items-center gap-1">
+                    <Clock className="w-3 h-3" strokeWidth={2.5} />
                     Vào bãi: {new Date(result.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </div>
                 </div>
@@ -123,9 +143,10 @@ const LocateVehicle = () => {
             {/* Nút Xem Bản Đồ Chỉ Đường */}
             <button
               onClick={() => handleViewOnMap(result.floorId, result.slotName)}
-              className="w-full py-3 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-lg transition duration-200 flex items-center justify-center gap-2 border-2 border-slate-200 shadow-sm"
+              className="w-full py-3.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-[14px] transition duration-200 flex items-center justify-center gap-2 border-[1.5px] border-slate-200 shadow-sm hover:-translate-y-0.5"
             >
-              🗺️ Chỉ đường trên Sơ đồ đỗ xe
+              <MapPin className="w-4 h-4 text-indigo-600" strokeWidth={2.5} />
+              Chỉ đường trên Sơ đồ đỗ xe
             </button>
           </div>
         )}

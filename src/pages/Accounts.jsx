@@ -20,7 +20,7 @@ const Accounts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedNewRoleId, setSelectedNewRoleId] = useState(4); // Default to Driver (4)
-  
+
   // Edit Profile Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
@@ -272,10 +272,10 @@ const Accounts = () => {
       }
 
       // Update local state immediately so table updates visually
-      setAccounts(prev => 
-        prev.map(acc => 
-          acc.id === userId 
-            ? { ...acc, name: editUsername.trim(), email: editEmail.trim(), phoneNumber: editPhoneNumber.trim() } 
+      setAccounts(prev =>
+        prev.map(acc =>
+          acc.id === userId
+            ? { ...acc, name: editUsername.trim(), email: editEmail.trim(), phoneNumber: editPhoneNumber.trim() }
             : acc
         )
       );
@@ -331,10 +331,10 @@ const Accounts = () => {
     }
 
     // Update local state immediately so table updates visually
-    setAccounts(prev => 
-      prev.map(acc => 
-        acc.id === cleanUserId 
-          ? { ...acc, status: newStatus } 
+    setAccounts(prev =>
+      prev.map(acc =>
+        acc.id === cleanUserId
+          ? { ...acc, status: newStatus }
           : acc
       )
     );
@@ -350,368 +350,383 @@ const Accounts = () => {
   const lockedCount = filteredAccounts.filter(a => a.status !== 'Active').length;
 
   return (
-    <div className="space-y-8 select-none font-sans pb-12 w-full">
-      {/* Floating Success Alert Toast */}
-      {alertMessage && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-xl z-50 flex items-center gap-2 border border-emerald-500 animate-bounce">
-          <CheckCircle size={18} />
-          <span>{alertMessage}</span>
-        </div>
-      )}
-
-      {/* Error / Offline Banner */}
-      {errorBanner && (
-        <div className="bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold p-3.5 rounded-xl flex items-center gap-2.5">
-          <AlertTriangle size={16} className="text-amber-600 shrink-0" />
-          <span>{errorBanner}</span>
-        </div>
-      )}
-
-      {/* A. Top Stats Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {/* Total Users */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-[#EEF2FF] flex items-center justify-center text-[#4B6BFB]">
-            <Users size={24} strokeWidth={2.5} />
+    <div className="min-h-full bg-slate-50 select-none font-sans pb-12 w-full">
+      <div className="space-y-8">
+        {/* Floating Success Alert Toast */}
+        {alertMessage && (
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-semibold text-sm px-6 py-3 rounded-[14px] shadow-xl z-50 flex items-center gap-2 border border-emerald-500 animate-bounce">
+            <CheckCircle size={18} />
+            <span>{alertMessage}</span>
           </div>
+        )}
+
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h3 className="text-3xl font-extrabold text-slate-800">{totalCount}</h3>
-            <p className="text-[13px] font-medium text-slate-500">{t('accounts.totalUsers')}</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-sm">
+                <Users size={20} strokeWidth={2.5} />
+              </span>
+              {t('accounts.allUsersTitle')}
+            </h1>
+            <p className="text-sm text-slate-500 font-medium mt-2">{getFormattedDate()}</p>
           </div>
         </div>
 
-        {/* Active Users */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
-            <CheckCircle size={24} strokeWidth={2.5} />
+        {/* Error / Offline Banner */}
+        {errorBanner && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm font-semibold p-3.5 rounded-[14px] flex items-center gap-2.5">
+            <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+            <span>{errorBanner}</span>
           </div>
-          <div>
-            <h3 className="text-3xl font-extrabold text-slate-800">{activeCount}</h3>
-            <p className="text-[13px] font-medium text-slate-500">{t('accounts.active')}</p>
-          </div>
-        </div>
+        )}
 
-        {/* Locked Users */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-[#FFF1F2] flex items-center justify-center text-[#F43F5E]">
-            <Lock size={24} strokeWidth={2.5} />
-          </div>
-          <div>
-            <h3 className="text-3xl font-extrabold text-slate-800">{lockedCount}</h3>
-            <p className="text-[13px] font-medium text-slate-500">{t('accounts.locked')}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* B. Table Section */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] pt-6 pb-2">
-        
-        {/* Table Header & Controls */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 px-8">
-          <div>
-            <h2 className="text-[22px] font-extrabold text-slate-900">{t('accounts.allUsersTitle')}</h2>
-            <p className="text-[13px] text-slate-500 font-medium mt-1">{totalCount} {t('accounts.accountsFound')}</p>
+        {/* A. Top Stats Cards Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* Total Users */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <Users size={24} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900">{totalCount}</h3>
+              <p className="text-[13px] font-medium text-slate-500">{t('accounts.totalUsers')}</p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Search Input */}
-            <div className="relative">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder={t('accounts.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 pr-4 py-2.5 w-[280px] bg-slate-50 border border-slate-100 rounded-2xl text-[13px] placeholder-slate-400 focus:outline-none focus:border-blue-300 focus:bg-white transition-all font-medium"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X size={14} />
-                </button>
-              )}
+          {/* Active Users */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+              <CheckCircle size={24} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900">{activeCount}</h3>
+              <p className="text-[13px] font-medium text-slate-500">{t('accounts.active')}</p>
+            </div>
+          </div>
+
+          {/* Locked Users */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500">
+              <Lock size={24} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900">{lockedCount}</h3>
+              <p className="text-[13px] font-medium text-slate-500">{t('accounts.locked')}</p>
             </div>
           </div>
         </div>
 
-        {/* Data Table */}
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <div className="w-8 h-8 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
-              <span className="text-[13px] font-semibold text-slate-500">{t('accounts.loadingAccounts')}</span>
+        {/* B. Table Section */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm pt-6 pb-2">
+
+          {/* Table Header & Controls */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 px-6 md:px-8">
+            <div>
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900">{t('accounts.allUsersTitle')}</h2>
+              <p className="text-[13px] text-slate-500 font-medium mt-1">{totalCount} {t('accounts.accountsFound')}</p>
             </div>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                  <th className="py-4 px-8 font-extrabold">{t('accounts.colUser')}</th>
-                  <th className="py-4 px-4 font-extrabold">{t('accounts.colEmail')}</th>
-                  <th className="py-4 px-4 font-extrabold">{t('accounts.colRole')}</th>
-                  <th className="py-4 px-4 font-extrabold">{t('accounts.colStatus')}</th>
-                  <th className="py-4 px-4 font-extrabold">{t('accounts.colCreated')}</th>
-                  <th className="py-4 px-8 text-right font-extrabold">{t('accounts.colActions')}</th>
-                </tr>
-              </thead>
-              <tbody className="text-[13px]">
-                {filteredAccounts.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-12 text-slate-400 font-medium text-[13px]">
-                      {t('accounts.noAccountsFound')}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredAccounts.map((item, index) => {
-                    const initials = getInitials(item.name);
-                    
-                    // Determine Role Badges
-                    let roleBadge = null;
-                    if (item.roleId === 1) {
-                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FFE4E6] text-[#E11D48]">admin</span>;
-                    } else if (item.roleId === 5) {
-                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#F3E8FF] text-[#9333EA]">manager</span>;
-                    } else if (item.roleId === 2) {
-                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#DBEAFE] text-[#2563EB]">staff</span>;
-                    } else {
-                      roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#D1FAE5] text-[#059669]">user</span>;
-                    }
 
-                    // Determine Status Badges
-                    const isActive = item.status === 'Active';
-                    const statusBadge = isActive 
-                      ? <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-[#A7F3D0] text-[#059669] bg-[#ECFDF5]">active</span>
-                      : <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-[#FECDD3] text-[#E11D48] bg-[#FFF1F2]">locked</span>;
-
-                    // Avatar Background Color (Using predefined distinct colors)
-                    const avatarColors = ['bg-[#F43F5E]', 'bg-[#8B5CF6]', 'bg-[#3B82F6]', 'bg-[#10B981]', 'bg-[#F59E0B]'];
-                    const avatarBg = avatarColors[item.id % avatarColors.length];
-
-                    return (
-                      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-0 group">
-                        
-                        {/* User Column */}
-                        <td className="py-4 px-8">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-[12px] shadow-sm ${avatarBg}`}>
-                              {initials}
-                            </div>
-                            <span className="text-slate-800 font-bold">{item.name}</span>
-                          </div>
-                        </td>
-
-                        {/* Email Column */}
-                        <td className="py-4 px-4 font-medium text-slate-500">
-                          {item.email}
-                        </td>
-
-                        {/* Role Column */}
-                        <td className="py-4 px-4">
-                          {roleBadge}
-                        </td>
-
-                        {/* Status Column */}
-                        <td className="py-4 px-4">
-                          {statusBadge}
-                        </td>
-
-                        {/* Created Column */}
-                        <td className="py-4 px-4 text-slate-500 font-medium">
-                          {item.joined}
-                        </td>
-
-                        {/* Actions Column */}
-                        <td className="py-4 px-8 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => openEditModal(item)}
-                              className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-300 flex items-center justify-center transition-all shadow-sm"
-                              title={t('accounts.editInfo')}
-                            >
-                              <Edit size={14} />
-                            </button>
-                            
-                            {/* Toggle Lock / Unlock */}
-                            <button
-                              onClick={() => handleToggleUserStatus(item.id, item.status)}
-                              className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-sm ${
-                                isActive
-                                  ? 'bg-white border-rose-200 text-rose-400 hover:text-rose-600 hover:border-rose-400'
-                                  : 'bg-white border-emerald-200 text-emerald-400 hover:text-emerald-600 hover:border-emerald-400'
-                              }`}
-                              title={isActive ? t('accounts.lockUser') : t('accounts.unlockUser')}
-                            >
-                              {isActive ? <Lock size={14} /> : <Unlock size={14} />}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Search Input */}
+              <div className="relative">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder={t('accounts.searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-11 pr-9 py-2.5 w-full sm:w-[280px] bg-slate-50 border-[1.5px] border-slate-200 rounded-[14px] text-[13px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-medium"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={14} />
+                  </button>
                 )}
-              </tbody>
-            </table>
-          )}
+              </div>
+            </div>
+          </div>
+
+          {/* Data Table */}
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <div className="w-8 h-8 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+                <span className="text-[13px] font-semibold text-slate-500">{t('accounts.loadingAccounts')}</span>
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse min-w-[760px]">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest bg-slate-50">
+                    <th className="py-4 px-6 md:px-8 font-extrabold">{t('accounts.colUser')}</th>
+                    <th className="py-4 px-4 font-extrabold">{t('accounts.colEmail')}</th>
+                    <th className="py-4 px-4 font-extrabold">{t('accounts.colRole')}</th>
+                    <th className="py-4 px-4 font-extrabold">{t('accounts.colStatus')}</th>
+                    <th className="py-4 px-4 font-extrabold">{t('accounts.colCreated')}</th>
+                    <th className="py-4 px-6 md:px-8 text-right font-extrabold">{t('accounts.colActions')}</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  {filteredAccounts.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-12 text-slate-400 font-medium text-[13px]">
+                        {t('accounts.noAccountsFound')}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredAccounts.map((item, index) => {
+                      const initials = getInitials(item.name);
+
+                      // Determine Role Badges
+                      let roleBadge = null;
+                      if (item.roleId === 1) {
+                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-600">admin</span>;
+                      } else if (item.roleId === 5) {
+                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-600">manager</span>;
+                      } else if (item.roleId === 2) {
+                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-600">staff</span>;
+                      } else {
+                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-600">user</span>;
+                      }
+
+                      // Determine Status Badges
+                      const isActive = item.status === 'Active';
+                      const statusBadge = isActive
+                        ? <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-emerald-200 text-emerald-600 bg-emerald-50">active</span>
+                        : <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-rose-200 text-rose-600 bg-rose-50">locked</span>;
+
+                      // Avatar Background Color (Using predefined distinct colors)
+                      const avatarColors = ['bg-rose-500', 'bg-violet-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500'];
+                      const avatarBg = avatarColors[item.id % avatarColors.length];
+
+                      return (
+                        <tr key={item.id} className="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 group">
+
+                          {/* User Column */}
+                          <td className="py-4 px-6 md:px-8">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-[12px] shadow-sm ${avatarBg}`}>
+                                {initials}
+                              </div>
+                              <span className="text-slate-900 font-bold">{item.name}</span>
+                            </div>
+                          </td>
+
+                          {/* Email Column */}
+                          <td className="py-4 px-4 font-medium text-slate-500">
+                            {item.email}
+                          </td>
+
+                          {/* Role Column */}
+                          <td className="py-4 px-4">
+                            {roleBadge}
+                          </td>
+
+                          {/* Status Column */}
+                          <td className="py-4 px-4">
+                            {statusBadge}
+                          </td>
+
+                          {/* Created Column */}
+                          <td className="py-4 px-4 text-slate-500 font-medium">
+                            {item.joined}
+                          </td>
+
+                          {/* Actions Column */}
+                          <td className="py-4 px-6 md:px-8 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => openEditModal(item)}
+                                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-300 flex items-center justify-center transition-all shadow-sm"
+                                title={t('accounts.editInfo')}
+                              >
+                                <Edit size={14} />
+                              </button>
+
+                              {/* Toggle Lock / Unlock */}
+                              <button
+                                onClick={() => handleToggleUserStatus(item.id, item.status)}
+                                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-sm ${
+                                  isActive
+                                    ? 'bg-white border-rose-200 text-rose-400 hover:text-rose-600 hover:border-rose-400'
+                                    : 'bg-white border-emerald-200 text-emerald-400 hover:text-emerald-600 hover:border-emerald-400'
+                                }`}
+                                title={isActive ? t('accounts.lockUser') : t('accounts.unlockUser')}
+                              >
+                                {isActive ? <Lock size={14} /> : <Unlock size={14} />}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* D. "Change Role" Interactive Modal Overlay */}
-      {isModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-            
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-2">
-                <UserCog className="text-[#1A62FF]" size={20} />
-                <h3 className="text-lg font-bold text-slate-808">{t('accounts.modPermissionsTitle')}</h3>
-              </div>
-              <button
-                onClick={closeModal}
-                disabled={submitting}
-                className="text-slate-404 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all disabled:opacity-50"
-              >
-                <X size={18} />
-              </button>
-            </div>
+        {/* D. "Change Role" Interactive Modal Overlay */}
+        {isModalOpen && selectedUser && (
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
 
-            {/* Modal Body */}
-            <div className="py-6 space-y-4">
-              
-              {/* Account Info Nudge */}
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${getAvatarBg(selectedUser.roleId)}`}>
-                  {getInitials(selectedUser.name)}
+              {/* Modal Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <UserCog className="text-indigo-600" size={20} />
+                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{t('accounts.modPermissionsTitle')}</h3>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-bold text-slate-805 text-sm">{selectedUser.name}</span>
-                  <span className="text-[11px] text-slate-400">{selectedUser.email}</span>
-                </div>
-              </div>
-
-              {/* Live Preview Nudge */}
-              <div className="bg-[#1A62FF]/5 border border-[#1A62FF]/10 rounded-2xl p-4">
-                <span className="text-[10px] text-[#1A62FF] font-extrabold uppercase tracking-wider block font-sans">{t('accounts.livePreview')}</span>
-                <p className="text-sm font-semibold text-slate-700 mt-1.5 flex items-center gap-2 font-sans">
-                  <span>Role:</span>
-                  <span className="text-slate-404 line-through">{displayRoleIdName(selectedUser.roleId)}</span>
-                  <span className="text-[#1A62FF] font-bold">&rarr;</span>
-                  <span className="text-indigo-650 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 font-bold">{displayRoleIdName(selectedNewRoleId)}</span>
-                </p>
-              </div>
-
-              {/* Role Dropdown Selector */}
-              <div className="space-y-2 font-sans">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.selectRole')}</label>
-                <Select
-                  value={selectedNewRoleId}
-                  onChange={(val) => setSelectedNewRoleId(val)}
+                <button
+                  onClick={closeModal}
                   disabled={submitting}
-                  className="w-full h-11"
-                  dropdownClassName="rounded-xl"
-                  style={{ width: '100%' }}
+                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all disabled:opacity-50"
                 >
-                  <Select.Option value={1}>Admin</Select.Option>
-                  <Select.Option value={2}>Staff</Select.Option>
-                  <Select.Option value={5}>Manager</Select.Option>
-                  <Select.Option value={4}>Driver</Select.Option>
-                </Select>
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="py-6 space-y-4">
+
+                {/* Account Info Nudge */}
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${getAvatarBg(selectedUser.roleId)}`}>
+                    {getInitials(selectedUser.name)}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-slate-900 text-sm">{selectedUser.name}</span>
+                    <span className="text-[11px] text-slate-400">{selectedUser.email}</span>
+                  </div>
+                </div>
+
+                {/* Live Preview Nudge */}
+                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                  <span className="text-[10px] text-indigo-600 font-extrabold uppercase tracking-wider block font-sans">{t('accounts.livePreview')}</span>
+                  <p className="text-sm font-semibold text-slate-700 mt-1.5 flex items-center gap-2 font-sans">
+                    <span>Role:</span>
+                    <span className="text-slate-400 line-through">{displayRoleIdName(selectedUser.roleId)}</span>
+                    <span className="text-indigo-600 font-bold">&rarr;</span>
+                    <span className="text-indigo-600 bg-white px-2 py-0.5 rounded-lg border border-indigo-100 font-bold">{displayRoleIdName(selectedNewRoleId)}</span>
+                  </p>
+                </div>
+
+                {/* Role Dropdown Selector */}
+                <div className="space-y-2 font-sans">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.selectRole')}</label>
+                  <Select
+                    value={selectedNewRoleId}
+                    onChange={(val) => setSelectedNewRoleId(val)}
+                    disabled={submitting}
+                    className="w-full h-11"
+                    dropdownClassName="rounded-xl"
+                    style={{ width: '100%' }}
+                  >
+                    <Select.Option value={1}>Admin</Select.Option>
+                    <Select.Option value={2}>Staff</Select.Option>
+                    <Select.Option value={5}>Manager</Select.Option>
+                    <Select.Option value={4}>Driver</Select.Option>
+                  </Select>
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 font-sans">
+                <button
+                  onClick={closeModal}
+                  disabled={submitting}
+                  className="px-4 py-2.5 border border-slate-200 bg-white text-slate-600 font-bold rounded-[14px] text-sm hover:bg-slate-50 transition-all disabled:opacity-50"
+                >
+                  {t('accounts.btnCancel')}
+                </button>
+                <button
+                  onClick={handleSaveChanges}
+                  disabled={submitting}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-[14px] text-sm shadow-md hover:shadow-indigo-500/20 transition-all duration-200 disabled:opacity-50"
+                >
+                  {submitting ? t('accounts.btnSaving') : t('accounts.btnSaveChanges')}
+                </button>
               </div>
 
             </div>
+          </div>
+        )}
 
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 font-sans">
-              <button
-                onClick={closeModal}
+        {/* E. "Edit Profile" Interactive Modal Overlay */}
+        {isEditModalOpen && editUser && (
+          <Modal
+            title={
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-3 font-sans">
+                <UserCog className="text-indigo-600" size={20} />
+                <span className="text-lg font-extrabold tracking-tight text-slate-900">{t('accounts.editProfileTitle')}</span>
+              </div>
+            }
+            open={isEditModalOpen}
+            onCancel={closeEditModal}
+            footer={[
+              <Button
+                key="cancel"
+                onClick={closeEditModal}
                 disabled={submitting}
-                className="px-4 py-2.5 border border-slate-200 text-slate-600 font-medium rounded-xl text-sm hover:bg-slate-50 transition-all disabled:opacity-50"
+                className="rounded-[14px] font-bold border-slate-200"
               >
                 {t('accounts.btnCancel')}
-              </button>
-              <button
-                onClick={handleSaveChanges}
-                disabled={submitting}
-                className="px-5 py-2.5 bg-[#1A62FF] hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-md hover:shadow-blue-500/10 transition-all duration-200 disabled:opacity-50"
+              </Button>,
+              <Button
+                key="submit"
+                type="primary"
+                onClick={handleSaveEditProfile}
+                loading={submitting}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-[14px] font-bold"
               >
-                {submitting ? t('accounts.btnSaving') : t('accounts.btnSaveChanges')}
-              </button>
-            </div>
+                {t('accounts.btnSaveProfile')}
+              </Button>
+            ]}
+            destroyOnClose
+            width={400}
+          >
+            <div className="py-4 space-y-4 font-sans">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelUsername')}</label>
+                <Input
+                  value={editUsername}
+                  onChange={(e) => setEditUsername(e.target.value)}
+                  disabled={submitting}
+                  placeholder={t('accounts.phUsername')}
+                  className="h-10 rounded-[14px]"
+                />
+              </div>
 
-          </div>
-        </div>
-      )}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelEmail')}</label>
+                <Input
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  disabled={submitting}
+                  placeholder={t('accounts.phEmail')}
+                  className="h-10 rounded-[14px]"
+                />
+              </div>
 
-      {/* E. "Edit Profile" Interactive Modal Overlay */}
-      {isEditModalOpen && editUser && (
-        <Modal
-          title={
-            <div className="flex items-center gap-2 border-b border-slate-100 pb-3 font-sans">
-              <UserCog className="text-blue-600" size={20} />
-              <span className="text-lg font-bold text-slate-800">{t('accounts.editProfileTitle')}</span>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelPhone')}</label>
+                <Input
+                  value={editPhoneNumber}
+                  onChange={(e) => setEditPhoneNumber(e.target.value)}
+                  disabled={submitting}
+                  placeholder={t('accounts.phPhone')}
+                  className="h-10 rounded-[14px]"
+                />
+              </div>
             </div>
-          }
-          open={isEditModalOpen}
-          onCancel={closeEditModal}
-          footer={[
-            <Button 
-              key="cancel" 
-              onClick={closeEditModal} 
-              disabled={submitting}
-              className="rounded-xl font-medium"
-            >
-              {t('accounts.btnCancel')}
-            </Button>,
-            <Button 
-              key="submit" 
-              type="primary" 
-              onClick={handleSaveEditProfile} 
-              loading={submitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
-            >
-              {t('accounts.btnSaveProfile')}
-            </Button>
-          ]}
-          destroyOnClose
-          width={400}
-        >
-          <div className="py-4 space-y-4 font-sans">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelUsername')}</label>
-              <Input 
-                value={editUsername} 
-                onChange={(e) => setEditUsername(e.target.value)} 
-                disabled={submitting}
-                placeholder={t('accounts.phUsername')}
-                className="h-10 rounded-xl"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelEmail')}</label>
-              <Input 
-                value={editEmail} 
-                onChange={(e) => setEditEmail(e.target.value)} 
-                disabled={submitting}
-                placeholder={t('accounts.phEmail')}
-                className="h-10 rounded-xl"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.labelPhone')}</label>
-              <Input 
-                value={editPhoneNumber} 
-                onChange={(e) => setEditPhoneNumber(e.target.value)} 
-                disabled={submitting}
-                placeholder={t('accounts.phPhone')}
-                className="h-10 rounded-xl"
-              />
-            </div>
-          </div>
-        </Modal>
-      )}
+          </Modal>
+        )}
+      </div>
     </div>
   );
 };

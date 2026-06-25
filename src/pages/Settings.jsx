@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  ShieldAlert, 
-  CheckCircle, 
-  Save, 
-  Car, 
+import {
+  User,
+  Mail,
+  Phone,
+  ShieldAlert,
+  CheckCircle,
+  Save,
+  Car,
   Bike,
-  Sparkles, 
+  Sparkles,
   X,
   CreditCard,
   UserCheck,
@@ -19,16 +19,16 @@ import {
 import { useTranslation } from 'react-i18next';
 
 const Motorcycle = ({ size = 18, className = '' }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     className={className}
   >
     <circle cx="5" cy="18" r="3" />
@@ -127,136 +127,149 @@ const Settings = () => {
 
   return (
     <div className="space-y-6 relative font-sans max-w-6xl mx-auto">
-      
+
       {/* Toast Notification Banner */}
       {alertMsg && (
-        <div className={`fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3.5 rounded-xl shadow-xl z-50 flex items-center gap-2 border animate-bounce text-white font-extrabold text-xs sm:text-sm ${
-          alertType === 'success' 
-            ? 'bg-emerald-600 border-emerald-500 shadow-emerald-500/10' 
-            : 'bg-blue-600 border-blue-500 shadow-blue-500/10'
+        <div className={`fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3.5 rounded-[14px] shadow-lg z-50 flex items-center gap-2.5 text-white font-bold text-xs sm:text-sm ${
+          alertType === 'success'
+            ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_12px_24px_-10px_rgba(16,185,129,0.7)]'
+            : 'bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)]'
         }`}>
           <CheckCircle size={18} className="text-white" />
           <span>{alertMsg}</span>
         </div>
       )}
 
+      {/* Page header */}
+      <div>
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('settings.titlePersonalInfo')}</h1>
+        <p className="text-sm text-slate-500 mt-1">{t('settings.descPersonalInfo')}</p>
+      </div>
 
       {/* Main Form Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
+
         {/* User Profile Form Column (Left - occupies 2/3 wide on large displays) */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-extrabold text-slate-800 tracking-wide uppercase text-[11px]">{t('settings.titlePersonalInfo')}</h2>
-              <p className="text-xs text-slate-400 mt-0.5">{t('settings.descPersonalInfo')}</p>
+          <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)]">
+                <UserCheck size={20} />
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-slate-900">{t('settings.titlePersonalInfo')}</h2>
+                <p className="text-xs text-slate-500 mt-0.5">{t('settings.descPersonalInfo')}</p>
+              </div>
             </div>
-            <Sparkles size={16} className="text-[#2563EB] animate-pulse" />
+            <Sparkles size={18} className="text-indigo-600" />
           </div>
 
           <form onSubmit={handleSaveProfile} className="p-6 sm:p-8 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              
+
               {/* Username Input (Disabled based on best practices) */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelUsername')}</label>
+                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelUsername')}</label>
                 <div className="relative">
-                  <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-350" />
-                  <input 
-                    type="text" 
+                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input
+                    type="text"
                     disabled
                     value={username}
-                    className="w-full h-11 pl-10 pr-4 bg-slate-100/70 border border-slate-200 text-sm rounded-xl text-slate-450 font-semibold cursor-not-allowed select-none outline-none text-slate-500"
+                    className="w-full h-12 pl-12 pr-4 bg-slate-100 border-[1.5px] border-slate-200 text-sm rounded-[14px] text-slate-500 font-semibold cursor-not-allowed select-none outline-none"
                   />
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium block pl-1">{t('settings.hintUsername')}</span>
+                <span className="text-[11px] text-slate-400 font-medium block pl-1">{t('settings.hintUsername')}</span>
               </div>
 
               {/* Full Name Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelFullName')}</label>
+                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelFullName')}</label>
                 <div className="relative">
-                  <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 animate-pulse" />
-                  <input 
-                    type="text" 
+                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
                     required
                     placeholder={t('settings.phFullName')}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold text-slate-800"
+                    className="w-full h-12 pl-12 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-semibold text-slate-900"
                   />
                 </div>
               </div>
 
               {/* Email Address Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelEmail')}</label>
+                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelEmail')}</label>
                 <div className="relative">
-                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type="email" 
+                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="email"
                     required
                     placeholder={t('settings.phEmail')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-semibold text-slate-800"
+                    className="w-full h-12 pl-12 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-semibold text-slate-900"
                   />
                 </div>
               </div>
 
               {/* Phone Number Input */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelPhone')}</label>
+                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelPhone')}</label>
                 <div className="relative">
-                  <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type="text" 
+                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
                     required
                     placeholder={t('settings.phPhone')}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] focus:bg-white transition-all font-mono font-bold text-slate-800"
+                    className="w-full h-12 pl-12 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-mono font-bold text-slate-900"
                   />
                 </div>
               </div>
 
               {/* Vehicle Type Dropdown */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">{t('settings.labelVehicle')}</label>
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelVehicle')}</label>
                 <div className="relative">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2">
                     {getVehicleIcon(vehicleType)}
                   </div>
                   <select
                     value={vehicleType}
                     onChange={(e) => setVehicleType(e.target.value)}
-                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 text-sm rounded-xl focus:outline-none focus:border-[#2563EB] focus:bg-white transition-all font-semibold text-slate-800 cursor-pointer"
+                    className="w-full h-12 pl-12 pr-10 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-semibold text-slate-900 cursor-pointer appearance-none"
                   >
                     <option value="Car">{t('settings.optCar')}</option>
                     <option value="Motorbike">{t('settings.optMoto')}</option>
                     <option value="Bicycle">{t('settings.optBike')}</option>
                   </select>
+                  <svg className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
                 </div>
               </div>
 
             </div>
 
             {/* Save Profile CTA buttons */}
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+            <div className="flex flex-col-reverse sm:flex-row items-center gap-3 pt-5 border-t border-slate-100">
               <button
                 type="button"
                 onClick={handleCancelChanges}
-                className="flex-1 sm:flex-initial px-6 h-11 border border-slate-200 hover:bg-slate-55 hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-1 bg-white"
+                className="w-full sm:w-auto px-6 h-12 border-[1.5px] border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-[14px] transition-all text-sm flex items-center justify-center gap-2"
               >
-                <X size={15} />
+                <X size={16} />
                 {t('settings.btnCancel')}
               </button>
-              
+
               <button
                 type="submit"
-                className="flex-1 sm:flex-initial px-8 h-11 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 text-sm"
+                className="w-full sm:w-auto px-8 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] transition-all shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm"
               >
-                <Save size={15} />
+                <Save size={16} />
                 {t('settings.btnSave')}
               </button>
             </div>
@@ -266,36 +279,36 @@ const Settings = () => {
 
         {/* Right Side Column: Stats or Admin Panel */}
         <div className="space-y-6 w-full">
-          
+
 
 
           {/* Account Status / Overview Widget (Renders for everyone, providing nice context) */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-            <h3 className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">{t('settings.titleAccountOverview')}</h3>
-            
-            <div className="space-y-3 text-xs leading-normal">
-              
-              <div className="flex justify-between items-center py-0.5">
-                <span className="text-slate-400 font-semibold">{t('settings.lblVerifyBadge')}</span>
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
+            <h3 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">{t('settings.titleAccountOverview')}</h3>
+
+            <div className="space-y-1 text-sm leading-normal">
+
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-slate-500 font-semibold">{t('settings.lblVerifyBadge')}</span>
                 <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                  <Check size={14} className="bg-emerald-100 p-0.5 rounded-full" />
+                  <Check size={16} className="bg-emerald-100 p-0.5 rounded-full" />
                   {t('settings.valVerified')}
                 </span>
               </div>
 
 
-              <div className="flex justify-between items-center py-0.5 border-t border-slate-50 pt-3">
-                <span className="text-slate-400 font-semibold">{t('settings.lblAccountStatus')}</span>
+              <div className="flex justify-between items-center py-2.5 border-t border-slate-100">
+                <span className="text-slate-500 font-semibold">{t('settings.lblAccountStatus')}</span>
                 <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                  <span className="w-1.5 h-1.5 bg-[#00C853] rounded-full inline-block animate-pulse"></span>
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
                   {t('settings.valActiveSession')}
                 </span>
               </div>
 
               {user && user.balance !== undefined && (
-                <div className="flex justify-between items-center py-0.5 border-t border-slate-50 pt-3">
-                  <span className="text-slate-400 font-semibold">{t('settings.lblCardBalance')}</span>
-                  <span className="font-extrabold text-[#2563EB]">
+                <div className="flex justify-between items-center py-2.5 border-t border-slate-100">
+                  <span className="text-slate-500 font-semibold">{t('settings.lblCardBalance')}</span>
+                  <span className="font-extrabold text-indigo-600">
                     {user.balance.toLocaleString('vi-VN')} đ
                   </span>
                 </div>

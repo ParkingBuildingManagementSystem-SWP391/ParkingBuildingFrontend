@@ -135,7 +135,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
         open={isOpen}
         onCancel={onClose}
         footer={[
-          <Button key="close" type="dashed" onClick={onClose} className="font-bold h-10 px-5 rounded-lg">
+          <Button key="close" type="dashed" onClick={onClose} className="font-bold h-10 px-5 rounded-[14px] border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-400">
             {t('gate.qrScanner.close')}
           </Button>
         ]}

@@ -105,7 +105,15 @@
     "orContinueWith": "hoặc tiếp tục với",
     "noAccount": "Chưa có tài khoản?",
     "register": "Đăng ký",
-    "continueAsGuest": "Tiếp tục với tư cách khách để xem bản đồ bãi đỗ"
+    "continueAsGuest": "Tiếp tục với tư cách khách để xem bản đồ bãi đỗ",
+    "brandName": "Parking Building Management System",
+    "brandTagline": "Nền tảng đỗ xe thông minh",
+    "brandTitle": "Quản lý bãi đỗ xe thông minh, trong tầm tay.",
+    "brandDesc": "Đặt chỗ, soát vé tự động bằng AI nhận diện biển số, thanh toán VNPay và theo dõi lưu lượng theo thời gian thực — tất cả trong một nền tảng.",
+    "welcomeTitle": "Chào mừng trở lại 👋",
+    "statVehicles": "Lượt xe / ngày",
+    "statOccupancy": "Tỉ lệ lấp đầy",
+    "statMonitor": "Giám sát"
   },
   "register": {
     "errorEmptyFields": "Vui lòng điền đầy đủ thông tin.",
@@ -131,7 +139,14 @@
     "verifyEmailTitle": "Xác thực Email",
     "verifyEmailDesc": "Chúng tôi đã gửi mã 6 chữ số đến",
     "verifyLoginButton": "Xác thực & Đăng nhập",
-    "backToSignUp": "Quay lại Đăng ký"
+    "backToSignUp": "Quay lại Đăng ký",
+    "brandName": "Quản Lý Bãi Đỗ Xe",
+    "heroTitle": "Tạo tài khoản của bạn",
+    "heroSubtitle": "Tham gia hệ thống quản lý bãi đỗ xe thông minh và bắt đầu quản lý chỗ đỗ một cách dễ dàng.",
+    "heroFeatureSecure": "Bảo mật và đáng tin cậy",
+    "heroFeatureSmart": "Quản lý bãi đỗ xe thông minh",
+    "brandTagline": "© 2026 Hệ thống Quản lý Bãi đỗ xe. Bảo lưu mọi quyền.",
+    "googleButton": "Tiếp tục với Google"
   },
   "home": {
     "system": "HỆ THỐNG",
@@ -237,7 +252,9 @@
     "btnYesCancel": "Có, Hủy",
     "ticketTitle": "Vé Đỗ Xe",
     "ticketDesc": "Quét mã tại máy đọc cổng vào hoặc điểm kiểm tra camera",
-    "closeTicket": "Đóng Vé"
+    "closeTicket": "Đóng Vé",
+    "pageTitle": "Đặt chỗ của tôi",
+    "pageSubtitle": "Quản lý và theo dõi các lượt đặt chỗ đỗ xe của bạn"
   },
   "accounts": {
     "errLoadAccounts": "Không thể tải danh sách người dùng từ hệ thống.",
@@ -292,7 +309,9 @@
     "labelTempPwd": "Mật Khẩu Tạm Thời",
     "phTempPwd": "••••••••",
     "labelSysRole": "Vai Trò Hệ Thống",
-    "btnCreateAcc": "Tạo Tài Khoản"
+    "btnCreateAcc": "Tạo Tài Khoản",
+    "pageTitle": "Tạo tài khoản mới",
+    "pageSubtitle": "Thêm người dùng mới và phân quyền truy cập hệ thống"
   },
   "parkingSession": {
     "vehBike": "Xe đạp",
@@ -344,7 +363,9 @@
     "btnFirst": "Đầu",
     "btnPrev": "Trước",
     "btnNext": "Sau",
-    "btnLast": "Cuối"
+    "btnLast": "Cuối",
+    "fromDate": "Từ ngày",
+    "toDate": "Đến ngày"
   },
   "settings": {
     "errFillFields": "Vui lòng điền đầy đủ thông tin.",

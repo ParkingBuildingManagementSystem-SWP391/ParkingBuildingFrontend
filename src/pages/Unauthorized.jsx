@@ -9,33 +9,34 @@ const Unauthorized = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center bg-transparent">
-      <div className="glass-panel max-w-lg w-full p-8 rounded-2xl border border-slate-800 text-center shadow-xl">
-        <Result
-          status="403"
-          icon={
-            <div className="flex justify-center mb-2">
-              <div className="p-4 bg-rose-500/10 rounded-full text-rose-400 border border-rose-500/20">
-                <ShieldAlert size={48} className="animate-pulse" />
-              </div>
-            </div>
-          }
-          title={<span className="text-white text-2xl font-bold">{t('unauthorized.title')}</span>}
-          subTitle={
-            <p className="text-slate-400 mt-2 max-w-sm mx-auto">
-              {t('unauthorized.subTitle')}
-            </p>
-          }
-          extra={
-            <Button 
-              type="primary" 
-              onClick={() => navigate('/dashboard')}
-              className="bg-indigo-600 hover:bg-indigo-500 border-none px-6 h-10 font-medium rounded-lg"
-            >
-              {t('unauthorized.btnBack')}
-            </Button>
-          }
-        />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] p-8 sm:p-10 text-center">
+        <div className="flex justify-center mb-6">
+          <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-indigo-50 to-rose-50 border border-indigo-100">
+            <span className="absolute inset-0 rounded-full bg-rose-500/10 animate-ping" />
+            <ShieldAlert size={44} className="relative text-rose-500" strokeWidth={2.2} />
+          </div>
+        </div>
+
+        <p className="text-sm font-bold tracking-[0.2em] text-indigo-600 uppercase mb-2">
+          403
+        </p>
+
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          {t('unauthorized.title')}
+        </h1>
+
+        <p className="mt-3 text-slate-500 max-w-sm mx-auto leading-relaxed">
+          {t('unauthorized.subTitle')}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard')}
+          className="mt-8 inline-flex items-center justify-center w-full rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-bold px-6 py-3 shadow-lg shadow-indigo-600/25 transition-transform duration-150 hover:-translate-y-0.5"
+        >
+          {t('unauthorized.btnBack')}
+        </button>
       </div>
     </div>
   );

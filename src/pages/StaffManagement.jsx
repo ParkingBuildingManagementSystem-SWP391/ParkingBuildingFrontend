@@ -50,10 +50,10 @@ const StaffManagement = () => {
       key: 'name',
       render: (_, record) => (
         <div className="flex items-center gap-3">
-          <Avatar src={record.avatar} alt={record.name} className="bg-indigo-950 border border-slate-700" />
+          <Avatar src={record.avatar} alt={record.name} className="bg-indigo-600 text-white border border-slate-200" />
           <div>
-            <div className="font-bold text-white text-sm">{record.name}</div>
-            <div className="text-xs text-slate-400">{record.email}</div>
+            <div className="font-bold text-slate-900 text-sm">{record.name}</div>
+            <div className="text-xs text-slate-500">{record.email}</div>
           </div>
         </div>
       )
@@ -63,8 +63,8 @@ const StaffManagement = () => {
       dataIndex: 'role',
       key: 'role',
       render: (text) => (
-        <span className="flex items-center gap-1 text-slate-300 text-xs">
-          {text === 'Supervisor' ? <Shield size={12} className="text-rose-400"/> : <UserCheck size={12} className="text-indigo-400"/>}
+        <span className="flex items-center gap-1.5 text-slate-700 text-xs font-medium">
+          {text === 'Supervisor' ? <Shield size={12} className="text-rose-500"/> : <UserCheck size={12} className="text-indigo-600"/>}
           {text}
         </span>
       )
@@ -86,23 +86,30 @@ const StaffManagement = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-full bg-slate-50 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">{t('staff.pageTitle')}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t('staff.pageDesc')}</p>
-          {error && <p className="text-rose-400 text-sm mt-2 font-semibold">{error}</p>}
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('staff.pageTitle')}</h1>
+          <p className="text-slate-500 text-sm mt-1">{t('staff.pageDesc')}</p>
+          {error && <p className="text-rose-500 text-sm mt-2 font-semibold">{error}</p>}
         </div>
         <Button
           type="primary"
           icon={<UserPlus size={16} />}
-          className="bg-indigo-600 hover:bg-indigo-500 border-none font-semibold rounded-lg flex items-center justify-center gap-1.5 h-10"
+          className="bg-indigo-600 hover:!bg-indigo-500 border-none font-semibold rounded-xl shadow-sm flex items-center justify-center gap-1.5 h-10"
         >
           {t('staff.btnAdd')}
         </Button>
       </div>
 
-      <Card title={<span className="text-base font-bold text-white flex items-center gap-2"><Users size={18}/> {t('staff.tableTitle')}</span>} className="shadow-lg border border-slate-800">
+      <Card
+        title={
+          <span className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Users size={18} className="text-indigo-600"/> {t('staff.tableTitle')}
+          </span>
+        }
+        className="bg-white rounded-2xl border border-slate-100 shadow-sm"
+      >
         <Table
           columns={columns}
           dataSource={staffMembers}
