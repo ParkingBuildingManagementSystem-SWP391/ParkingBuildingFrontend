@@ -5,11 +5,11 @@ import Logo from './Logo';
 import {
   Map, Calendar as CalendarIcon, LayoutDashboard,
   UserPlus, ScanLine, Users, Activity, AlertTriangle,
-  BarChart3, Grid3X3, DollarSign, ClipboardList
+  BarChart3, Grid3X3, DollarSign, ClipboardList, X
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const Sidebar = () => {
+const Sidebar = ({ isMobileOpen = false, onMobileClose }) => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,7 +22,10 @@ const Sidebar = () => {
     const isActive = currentPath === path;
     return (
       <button
-        onClick={() => navigate(path)}
+        onClick={() => {
+          navigate(path);
+          onMobileClose?.();
+        }}
         className={`w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-bold transition-all duration-200 relative ${isActive
             ? 'text-blue-600 bg-blue-50/80 rounded-r-full dark:bg-indigo-500/10 dark:text-indigo-300'
             : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-r-full dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
@@ -36,6 +39,38 @@ const Sidebar = () => {
       </button>
     );
   };
+
+  const renderSidebarContent = ({ showCloseButton = false } = {}) => (
+    <>
+      {/* Brand Logo Header */}
+      <div className="h-20 lg:h-24 flex items-center justify-between gap-3 px-5 lg:px-6 border-b border-slate-100 dark:border-slate-800">
+        <Link
+          to="/"
+          onClick={onMobileClose}
+          className="min-w-0 flex items-center gap-3 rounded-2xl transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+          aria-label="Về trang chủ"
+        >
+          <Logo />
+        </Link>
+
+        {showCloseButton && (
+          <button
+            type="button"
+            onClick={onMobileClose}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+            aria-label="Đóng menu"
+          >
+            <X size={20} />
+          </button>
+        )}
+      </div>
+
+      {/* Navigation Links */}
+      <div className="flex-1 overflow-y-auto py-5 pr-4 lg:py-6">
+        {renderTabs()}
+      </div>
+    </>
+  );
 
   const renderTabs = () => {
     if (!user) {
@@ -100,24 +135,25 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-[260px] h-screen bg-white border-r border-slate-200 sticky top-0 z-40 select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
+    <>
+      <aside className="hidden lg:flex flex-col w-[260px] h-screen bg-white border-r border-slate-200 sticky top-0 z-40 select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
+        {renderSidebarContent()}
+      </aside>
 
-      {/* Brand Logo Header */}
-      <div className="h-24 flex items-center px-6 border-b border-slate-100 dark:border-slate-800">
-        <Link
-          to="/"
-          className="flex items-center gap-3 rounded-2xl transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
-          aria-label="Về trang chủ"
-        >
-          <Logo />
-        </Link>
-      </div>
-
-      {/* Navigation Links */}
-      <div className="flex-1 py-6 pr-4 overflow-y-auto">
-        {renderTabs()}
-      </div>
-    </aside>
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="absolute inset-0 h-full w-full bg-slate-950/45"
+            onClick={onMobileClose}
+            aria-label="Đóng menu"
+          />
+          <aside className="relative flex h-screen w-[min(82vw,320px)] flex-col bg-white shadow-2xl select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
+            {renderSidebarContent({ showCloseButton: true })}
+          </aside>
+        </div>
+      )}
+    </>
   );
 };
 

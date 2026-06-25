@@ -4,10 +4,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import {
-  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages
+  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages, Menu
 } from 'lucide-react';
 
-const Header = () => {
+const Header = ({ onOpenSidebar }) => {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -99,21 +99,31 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full h-[96px] flex items-center justify-between px-8 bg-white border-b border-slate-100 select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
+    <header className="w-full min-w-0 h-[72px] md:h-[88px] lg:h-[96px] flex items-center justify-between gap-3 px-4 sm:px-6 md:px-8 bg-white border-b border-slate-100 select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
 
       {/* Left: Dynamic Page Title */}
-      <div className="flex-1 flex flex-col pt-2">
-        <h1 className="text-[22px] font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{getPageTitle()}</h1>
-        <p className="text-[13px] text-slate-500 font-medium dark:text-slate-400">{getPageSubtitle()}</p>
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <button
+          type="button"
+          onClick={onOpenSidebar}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700 lg:hidden"
+          aria-label="Mở menu"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="min-w-0 flex flex-col md:pt-2">
+          <h1 className="truncate text-[17px] sm:text-[19px] md:text-[22px] font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{getPageTitle()}</h1>
+          <p className="hidden truncate text-[12px] sm:block md:text-[13px] text-slate-500 font-medium dark:text-slate-400">{getPageSubtitle()}</p>
+        </div>
       </div>
 
       {/* Right: Actions & Indicators */}
-      <div className="flex items-center gap-6">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
 
 
 
         {/* Notifications */}
-        <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+        <button className="hidden sm:flex w-10 h-10 rounded-full items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
           <Bell size={18} strokeWidth={2} />
           <span className="absolute -top-1 -right-1 w-[18px] h-[18px] bg-[#FF3B30] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
             2
@@ -144,7 +154,7 @@ const Header = () => {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
-              className="flex items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 text-left shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700"
+              className="flex items-center gap-2 sm:gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-2 sm:pr-3 text-left shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700"
             >
               <div className="w-9 h-9 rounded-full bg-[#FF4B6E] flex items-center justify-center text-white text-[11px] font-bold shadow-sm">
                 {getInitials(getDisplayName())}
@@ -157,7 +167,7 @@ const Header = () => {
                   {getDisplayRole() || t('header.userRole')}
                 </span>
               </div>
-              <ChevronDown size={15} className={`text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={15} className={`hidden sm:block text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isUserMenuOpen && (
@@ -189,10 +199,10 @@ const Header = () => {
         ) : (
           <button
             onClick={handleLogin}
-            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-bold text-slate-700 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2.5 sm:px-4 text-[13px] font-bold text-slate-700 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
           >
             <LogIn size={16} className="text-slate-400" />
-            Đăng nhập
+            <span className="hidden sm:inline">Đăng nhập</span>
           </button>
         )}
 
