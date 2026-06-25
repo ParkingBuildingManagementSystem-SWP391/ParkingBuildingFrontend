@@ -94,7 +94,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {/* ─── inline keyframes ─── */}
       <style>{`
         @keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
@@ -106,20 +106,20 @@ const Home = () => {
       `}</style>
 
       {/* ══════════════════ HEADER ══════════════════ */}
-      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/85">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <Logo />
           </Link>
 
-          <nav className="hidden items-center gap-8 text-[13px] font-bold text-slate-500 md:flex">
+          <nav className="hidden items-center gap-8 text-[13px] font-bold text-slate-500 dark:text-slate-300 md:flex">
             <Link className="text-indigo-600" to="/">{t('home.navHome')}</Link>
-            <Link className="transition-colors hover:text-indigo-600" to="/parking-map">{t('home.navBook')}</Link>
+            <Link className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" to="/parking-map">{t('home.navBook')}</Link>
             <a className="transition-colors text-indigo-600 hover:text-indigo-700 flex items-center gap-1" href="/#locate-vehicle">
               <Search size={14} /> {t('home.navLocate', 'Tìm Xe')}
             </a>
-            <Link className="transition-colors hover:text-indigo-600" to="/pricing">{t('home.navPricing')}</Link>
-            <a   className="transition-colors hover:text-indigo-600" href="#contact">{t('home.navContact')}</a>
+            <Link className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" to="/pricing">{t('home.navPricing')}</Link>
+            <a   className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" href="#contact">{t('home.navContact')}</a>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -134,22 +134,22 @@ const Home = () => {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen((p) => !p)}
-                  className="flex items-center gap-2.5 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors hover:bg-slate-50"
+                  className="flex items-center gap-2.5 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-black text-white">
                     {getInitials(displayName)}
                   </div>
                   <div className="hidden leading-tight sm:block">
-                    <p className="text-sm font-bold text-slate-900">{displayName}</p>
-                    <p className="text-[11px] font-semibold text-slate-400">{displayRole}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{displayName}</p>
+                    <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-400">{displayRole}</p>
                   </div>
                   <ChevronDown size={14} className={`text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 shadow-xl">
+                  <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
                     <Link to="/settings" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-slate-50">
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
                       <Settings size={15} className="text-slate-400" />
                       {t('header.profile')}
                     </Link>
@@ -164,7 +164,7 @@ const Home = () => {
             ) : (
               <Link
                 to="/login"
-                className="rounded-[14px] border-[1.5px] border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50"
+                className="rounded-[14px] border-[1.5px] border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 {t('home.btnLogin')}
               </Link>
@@ -174,25 +174,25 @@ const Home = () => {
       </header>
 
       {/* ══════════════════ HERO ══════════════════ */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-visible">
         {/* decorative blobs */}
-        <div className="pointer-events-none absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-indigo-400/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-indigo-400/10 blur-3xl" />
+        <div className="pointer-events-none absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/15" />
+        <div className="pointer-events-none absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-indigo-400/10 blur-3xl dark:bg-violet-500/15" />
 
-        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-5 py-16 lg:grid-cols-2 lg:gap-20 lg:px-8 lg:py-24">
+        <div className="relative mx-auto grid min-h-[calc(100vh-80px)] max-w-7xl grid-cols-1 items-center gap-8 px-5 py-6 sm:py-8 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-10">
           {/* ── text ── */}
           <div className="space-y-8 anim-fade-up">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-600">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-300">
               <Star size={15} className="text-amber-500" />
               {t('home.badge')}
             </div>
 
             <h1 className="text-[clamp(2.5rem,5vw,4.5rem)] font-extrabold leading-[1.08] tracking-tight">
-              <span className="block text-slate-900">{t('home.hero1')}</span>
+              <span className="block text-slate-900 dark:text-slate-50">{t('home.hero1')}</span>
               <span className="block bg-gradient-to-r from-indigo-500 to-indigo-600 bg-clip-text text-transparent">{t('home.hero2')}</span>
             </h1>
 
-            <p className="max-w-lg text-base leading-8 text-slate-500 font-medium sm:text-lg">
+            <p className="max-w-lg text-base leading-8 text-slate-500 font-medium dark:text-slate-300 sm:text-lg">
               {t('home.heroDesc')}
             </p>
 
@@ -206,7 +206,7 @@ const Home = () => {
               </Link>
               <Link
                 to="/parking-map"
-                className="inline-flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-7 py-4 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50"
+                className="inline-flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-7 py-4 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 {t('home.btnViewMap')}
               </Link>
@@ -215,28 +215,28 @@ const Home = () => {
 
           {/* ── image ── */}
           <div className="relative anim-fade-up delay-2">
-            <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-indigo-950/15 ring-1 ring-slate-200/60">
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-indigo-950/15 ring-1 ring-slate-200/60 dark:ring-slate-700">
               <img
                 src={heroImage}
                 alt={t('home.altHeroImg')}
-                className="h-[340px] w-full object-cover sm:h-[420px] lg:h-[480px]"
+                className="h-[300px] w-full object-cover sm:h-[380px] lg:h-[430px]"
               />
               {/* overlay gradient */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent" />
             </div>
 
             {/* floating stat card */}
-            <div className="anim-float absolute -bottom-5 -left-4 rounded-2xl border border-slate-100 bg-white/95 px-5 py-4 shadow-xl backdrop-blur sm:-left-8">
+            <div className="anim-float absolute -bottom-5 -left-4 rounded-2xl border border-slate-100 bg-white/95 px-5 py-4 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 sm:-left-8">
               <p className="text-3xl font-extrabold text-indigo-600 leading-none">
                 <AnimatedNumber target="1500" suffix="+" />
               </p>
-              <p className="mt-1 text-sm font-bold text-slate-500">{t('home.statSlotsLabel')}</p>
+              <p className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-300">{t('home.statSlotsLabel')}</p>
             </div>
 
             {/* floating badge top-right */}
-            <div className="anim-float absolute -top-3 -right-3 flex items-center gap-2 rounded-xl border border-slate-100 bg-white/95 px-4 py-2.5 shadow-xl backdrop-blur sm:-right-6" style={{ animationDelay: '1s' }}>
+            <div className="anim-float absolute -top-3 -right-3 flex items-center gap-2 rounded-xl border border-slate-100 bg-white/95 px-4 py-2.5 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 sm:-right-6" style={{ animationDelay: '1s' }}>
               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" style={{ animation: 'pulse-ring 2s infinite' }} />
-              <span className="text-sm font-bold text-slate-700">Online</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Online</span>
             </div>
           </div>
         </div>
@@ -244,14 +244,14 @@ const Home = () => {
 
       {/* ══════════════════ STATS BAR ══════════════════ */}
       <section className="relative mx-auto w-full max-w-7xl px-5 lg:px-8 -mt-2 mb-8">
-        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-slate-100 sm:p-0">
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-slate-100 dark:sm:divide-slate-700 sm:p-0">
           {stats.map((s, i) => (
             <div key={i} className="flex flex-col items-center py-5 sm:py-6">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
                 <s.icon size={20} />
               </div>
-              <p className="text-xl font-extrabold text-slate-900 sm:text-2xl">{s.value}</p>
-              <p className="text-xs font-semibold text-slate-400 mt-0.5">{s.label}</p>
+              <p className="text-xl font-extrabold text-slate-900 dark:text-slate-100 sm:text-2xl">{s.value}</p>
+              <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
@@ -260,46 +260,46 @@ const Home = () => {
       {/* ══════════════════ FEATURES ══════════════════ */}
       <section className="mx-auto w-full max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
         <div className="text-center space-y-3 mb-14">
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{t('home.featTitle')}</h2>
-          <p className="mx-auto max-w-xl text-base text-slate-500 font-medium">{t('home.featDesc')}</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">{t('home.featTitle')}</h2>
+          <p className="mx-auto max-w-xl text-base text-slate-500 font-medium dark:text-slate-300">{t('home.featDesc')}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f, i) => (
             <div
               key={i}
-              className={`anim-fade-up delay-${i + 1} group relative rounded-2xl border border-slate-100 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-indigo-900/5 cursor-pointer`}
+              className={`anim-fade-up delay-${i + 1} group relative rounded-2xl border border-slate-100 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-indigo-900/5 cursor-pointer dark:border-slate-700 dark:bg-slate-900`}
             >
               <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white shadow-lg shadow-indigo-600/10 transition-transform group-hover:scale-110`}>
                 <f.icon size={22} />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">{f.title}</h3>
-              <p className="text-sm leading-relaxed text-slate-500 font-medium">{f.desc}</p>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">{f.title}</h3>
+              <p className="text-sm leading-relaxed text-slate-500 font-medium dark:text-slate-300">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ══════════════════ HOW IT WORKS ══════════════════ */}
-      <section className="bg-gradient-to-b from-slate-50 to-white">
+      <section className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
         <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
           <div className="text-center space-y-3 mb-14">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{t('home.howTitle')}</h2>
-            <p className="text-base text-slate-500 font-medium">{t('home.howDesc')}</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">{t('home.howTitle')}</h2>
+            <p className="text-base text-slate-500 font-medium dark:text-slate-300">{t('home.howDesc')}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {steps.map((s, i) => (
-              <div key={i} className={`anim-fade-up delay-${i + 1} relative rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-sm`}>
+              <div key={i} className={`anim-fade-up delay-${i + 1} relative rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900`}>
                 {/* step number */}
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
                   <s.icon size={26} strokeWidth={2} />
                 </div>
                 <span className="inline-block rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-black text-white mb-3">
                   {s.num}
                 </span>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">{s.title}</h3>
-                <p className="text-sm leading-relaxed text-slate-500 font-medium">{s.desc}</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">{s.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-500 font-medium dark:text-slate-300">{s.desc}</p>
 
                 {/* connector arrow (not on last) */}
                 {i < steps.length - 1 && (

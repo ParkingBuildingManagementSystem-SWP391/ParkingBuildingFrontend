@@ -5,15 +5,15 @@ import { useTranslation } from 'react-i18next';
 const AppFooter = () => {
   const { t } = useTranslation();
   return (
-    <footer className="border-t border-slate-200 bg-white select-none">
-      <div className="max-w-[1600px] mx-auto w-full px-6 py-3 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-slate-500">
+    <footer className="border-t border-slate-200 bg-white select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
+      <div className="max-w-[1600px] mx-auto w-full px-6 py-3 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-3">
           <img
             src={parkingLogo}
             alt="Parking Building Logo"
             className="h-6 sm:h-7 w-auto object-contain shrink-0"
           />
-          <span className="text-sm text-slate-800 font-bold">
+          <span className="text-sm text-slate-800 font-bold dark:text-slate-100">
             {t('footer.systemName')}
           </span>
         </div>

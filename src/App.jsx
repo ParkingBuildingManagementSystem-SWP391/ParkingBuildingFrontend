@@ -49,6 +49,7 @@ function App() {
           {/* Public parking map */}
           <Route path="/parking-map" element={<ParkingLotMap />} />
           <Route path="/about" element={<Introduction />} />
+          <Route path="/pricing" element={<PricingPage />} />
 
           {/* ĐUST SỬA: Đổi tên roles thành viết hoa chữ cái đầu cho khớp chuẩn với Database của bạn */}
           {/* Shell wrapping authenticated workspaces */}
@@ -78,7 +79,6 @@ function App() {
               <Route path="/incidents" element={<IncidentsPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/slot-management" element={<SlotManagementPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
               <Route path="/staff-logs" element={<StaffLogsPage />} />
             </Route>
 
