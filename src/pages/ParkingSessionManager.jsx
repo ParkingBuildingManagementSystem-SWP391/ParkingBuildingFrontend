@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 const initialFilters = {
   licenseVehicle: '',
   slotName: '',
-  username: '',
+  isRegistered: '',
   typeId: '',
   sessionStatus: '',
   fromDate: '',
@@ -34,7 +34,7 @@ const normalizeFilters = (filters) => {
   const params = {
     licenseVehicle: filters.licenseVehicle?.trim() || undefined,
     slotName: filters.slotName?.trim() || undefined,
-    username: filters.username?.trim() || undefined,
+    isRegistered: filters.isRegistered !== '' ? parseInt(filters.isRegistered, 10) : undefined,
     typeId: filters.typeId ? parseInt(filters.typeId, 10) : undefined,
     sessionStatus: filters.sessionStatus || undefined,
   };
@@ -133,7 +133,7 @@ const DetailRow = ({ label, children }) => (
   </div>
 );
 
-const SessionDetailModal = ({ sessionId, open, onClose }) => {
+const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
   const { t } = useTranslation();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -141,7 +141,7 @@ const SessionDetailModal = ({ sessionId, open, onClose }) => {
   const abortRef = useRef(null);
 
   useEffect(() => {
-    if (!open || !sessionId) return undefined;
+    if (!open || !selectedTicketCode) return undefined;
 
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -151,7 +151,7 @@ const SessionDetailModal = ({ sessionId, open, onClose }) => {
     setDetail(null);
 
     parkingSessionService
-      .getSessionDetailById(sessionId, controller.signal)
+      .getSessionDetailByTicket(selectedTicketCode, controller.signal)
       .then((data) => {
         if (data) setDetail(data?.data || data?.Data || data);
       })
@@ -163,7 +163,7 @@ const SessionDetailModal = ({ sessionId, open, onClose }) => {
       });
 
     return () => controller.abort();
-  }, [open, sessionId]);
+  }, [open, selectedTicketCode]);
 
   const handleClose = () => {
     abortRef.current?.abort();
@@ -258,7 +258,7 @@ const ParkingSessionManager = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedSessionId, setSelectedSessionId] = useState(null);
+  const [selectedTicketCode, setSelectedTicketCode] = useState(null);
   const abortControllerRef = useRef(null);
   const debounceTimeoutRef = useRef(null);
   const pageSize = 10;
@@ -304,11 +304,14 @@ const ParkingSessionManager = () => {
     const nextFilters = { ...filters, [key]: value };
     setFilters(nextFilters);
 
-    if (['licenseVehicle', 'slotName', 'username'].includes(key)) {
+    if (['licenseVehicle', 'slotName'].includes(key)) {
       if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
       debounceTimeoutRef.current = setTimeout(() => {
         fetchSessions(nextFilters);
       }, 500);
+    } else {
+      if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
+      fetchSessions(nextFilters);
     }
   };
 
@@ -365,13 +368,17 @@ const ParkingSessionManager = () => {
             onChange={(event) => updateFilter('slotName', event.target.value)}
             className={fieldClassName}
           />
-          <Input
+          <Select
             size="large"
+            placeholder={t('parkingSession.phCustomerType')}
             allowClear
-            placeholder={t('parkingSession.phUsername')}
-            value={filters.username}
-            onChange={(event) => updateFilter('username', event.target.value)}
-            className={fieldClassName}
+            value={filters.isRegistered || undefined}
+            onChange={(value) => updateFilter('isRegistered', value !== undefined ? value : '')}
+            className="ps-select-field w-full"
+            options={[
+              { value: '1', label: t('parkingSession.custRegistered') },
+              { value: '0', label: t('parkingSession.custWalkIn') },
+            ]}
           />
           <Select
             size="large"
@@ -478,17 +485,15 @@ const ParkingSessionManager = () => {
                 </tr>
               ) : (
                 paginatedSessions.map((session, index) => {
-                  const sessionId = getField(session, 'sessionId', 'SessionId');
                   const ticketCode = getField(session, 'ticketCode', 'TicketCode');
-                  const licenseVehicle = getField(session, 'licenseVehicle', 'LicenseVehicle');
                   const typeId = getField(session, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId');
                   const status = getField(session, 'sessionStatus', 'SessionStatus', 'status', 'Status');
                   const vehicleTypeName = getField(session, 'vehicleTypeName', 'VehicleTypeName');
 
                   return (
-                    <tr key={sessionId || ticketCode || index} className="transition-colors hover:bg-indigo-50/40">
+                    <tr key={ticketCode || index} className="transition-colors hover:bg-indigo-50/40">
                       <td className="px-5 py-4 text-sm font-bold text-slate-800">{getField(session, 'slotName', 'SlotName') || t('parkingSession.none')}</td>
-                      <td className="px-5 py-4 text-sm font-semibold text-slate-700">{licenseVehicle || t('parkingSession.none')}</td>
+                      <td className="px-5 py-4 text-sm font-semibold italic text-slate-400 dark:text-slate-500">{t('parkingSession.none')}</td>
                       <td className="px-5 py-4 text-sm text-slate-600">{getVehicleTypeName(typeId, vehicleTypeName, t)}</td>
                       <td className="px-5 py-4 font-mono text-sm font-bold text-indigo-600">{ticketCode || t('parkingSession.none')}</td>
                       <td className="px-5 py-4">
@@ -498,8 +503,8 @@ const ParkingSessionManager = () => {
                         <Button
                           size="small"
                           icon={<Eye size={14} />}
-                          disabled={!sessionId}
-                          onClick={() => setSelectedSessionId(sessionId)}
+                          disabled={!ticketCode}
+                          onClick={() => setSelectedTicketCode(ticketCode)}
                           className="rounded-[10px] border-slate-200 font-bold text-slate-600 hover:!border-indigo-600 hover:!text-indigo-600"
                         >
                           {t('parkingSession.btnViewDetail')}
@@ -538,9 +543,9 @@ const ParkingSessionManager = () => {
       </div>
 
       <SessionDetailModal
-        sessionId={selectedSessionId}
-        open={Boolean(selectedSessionId)}
-        onClose={() => setSelectedSessionId(null)}
+        selectedTicketCode={selectedTicketCode}
+        open={Boolean(selectedTicketCode)}
+        onClose={() => setSelectedTicketCode(null)}
       />
     </div>
   );
