@@ -155,12 +155,12 @@ const Register = () => {
         <div className="absolute -bottom-32 left-1/4 w-80 h-80 rounded-full bg-white/10 pointer-events-none" />
 
         {/* Brand */}
-        <div className="relative z-10 flex items-center gap-3">
+        <Link to="/" aria-label="Về trang chủ" className="relative z-10 flex items-center gap-3 rounded-xl transition-opacity hover:opacity-80">
           <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
             <Building2 size={24} className="text-white" />
           </div>
           <span className="text-xl font-extrabold tracking-tight">{t('register.brandName')}</span>
-        </div>
+        </Link>
 
         {/* Hero copy */}
         <div className="relative z-10 max-w-md">

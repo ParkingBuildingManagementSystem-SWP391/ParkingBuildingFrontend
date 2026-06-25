@@ -83,12 +83,12 @@ const Login = () => {
           <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/[0.06]" />
           <div className="pointer-events-none absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-white/[0.08]" />
 
-          <div className="relative z-10 flex items-center gap-3">
+          <Link to="/" aria-label="Về trang chủ" className="relative z-10 flex items-center gap-3 rounded-xl transition-opacity hover:opacity-80">
             <div className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-white/25 bg-white/[0.16] backdrop-blur-sm">
               <Building2 size={22} strokeWidth={2.2} />
             </div>
             <h2 className="text-[15px] font-bold leading-tight tracking-wide">{t('login.brandName')}</h2>
-          </div>
+          </Link>
 
           <div className="relative z-10">
             <span className="mb-5 inline-block rounded-full bg-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[1.5px]">
