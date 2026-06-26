@@ -52,8 +52,8 @@ const StaffManagement = () => {
         <div className="flex items-center gap-3">
           <Avatar src={record.avatar} alt={record.name} className="bg-indigo-600 text-white border border-slate-200" />
           <div>
-            <div className="font-bold text-slate-900 text-sm">{record.name}</div>
-            <div className="text-xs text-slate-500">{record.email}</div>
+            <div className="font-bold text-slate-900 text-sm dark:text-slate-100">{record.name}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">{record.email}</div>
           </div>
         </div>
       )
@@ -63,7 +63,7 @@ const StaffManagement = () => {
       dataIndex: 'role',
       key: 'role',
       render: (text) => (
-        <span className="flex items-center gap-1.5 text-slate-700 text-xs font-medium">
+        <span className="flex items-center gap-1.5 text-slate-700 text-xs font-medium dark:text-slate-300">
           {text === 'Supervisor' ? <Shield size={12} className="text-rose-500"/> : <UserCheck size={12} className="text-indigo-600"/>}
           {text}
         </span>
@@ -86,11 +86,11 @@ const StaffManagement = () => {
   ];
 
   return (
-    <div className="min-h-full bg-slate-50 space-y-6">
+    <div className="min-h-full bg-slate-50 space-y-6 dark:bg-slate-950">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('staff.pageTitle')}</h1>
-          <p className="text-slate-500 text-sm mt-1">{t('staff.pageDesc')}</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{t('staff.pageTitle')}</h1>
+          <p className="text-slate-500 text-sm mt-1 dark:text-slate-400">{t('staff.pageDesc')}</p>
           {error && <p className="text-rose-500 text-sm mt-2 font-semibold">{error}</p>}
         </div>
         <Button
@@ -104,11 +104,11 @@ const StaffManagement = () => {
 
       <Card
         title={
-          <span className="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span className="text-base font-bold text-slate-900 flex items-center gap-2 dark:text-slate-100">
             <Users size={18} className="text-indigo-600"/> {t('staff.tableTitle')}
           </span>
         }
-        className="bg-white rounded-2xl border border-slate-100 shadow-sm"
+        className="bg-white rounded-2xl border border-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-900"
       >
         <Table
           columns={columns}

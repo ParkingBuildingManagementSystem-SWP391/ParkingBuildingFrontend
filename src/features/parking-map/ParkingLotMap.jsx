@@ -884,9 +884,9 @@ const ParkingLotMap = () => {
     horizontalHeightClass = 'h-14',
   }) => (
     <div className={`pointer-events-none relative z-0 overflow-hidden ${className}`}>
-      <div className={`absolute left-1/2 top-0 bottom-0 -translate-x-1/2 ${verticalWidthClass} rounded-2xl border border-slate-200 bg-slate-100`} />
-      <div className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 ${horizontalHeightClass} rounded-2xl border border-slate-200 bg-slate-100`} />
-      <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${verticalWidthClass} ${horizontalHeightClass} bg-slate-100`} />
+      <div className={`absolute left-1/2 top-0 bottom-0 -translate-x-1/2 ${verticalWidthClass} rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800`} />
+      <div className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 ${horizontalHeightClass} rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800`} />
+      <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${verticalWidthClass} ${horizontalHeightClass} bg-slate-100 dark:bg-slate-800`} />
       <div className="absolute left-1/2 top-5 bottom-5 -translate-x-1/2 border-l-2 border-dashed border-white" />
       <div className="absolute left-7 right-7 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-white" />
     </div>
@@ -901,14 +901,14 @@ const ParkingLotMap = () => {
     const isBicycleZone = section.slots.some(s => normalizeVehicleType(s.type) === 'bicycle');
 
     return (
-      <section key={section.key} className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+      <section key={section.key} className="rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900/70">
         <div className="mb-4 flex items-center gap-2">
           {activeFloorId === 3 ? (
             isBicycleZone ? <Bike size={18} className="text-indigo-600" /> : <Motorcycle size={18} className="text-indigo-600" />
           ) : (
             <Car size={18} className="text-indigo-600" />
           )}
-          <h3 className="text-sm font-extrabold uppercase tracking-tight text-slate-900">
+          <h3 className="text-sm font-extrabold uppercase tracking-tight text-slate-900 dark:text-slate-100">
             {getZoneDisplayName(section.title)}
           </h3>
         </div>
@@ -932,10 +932,10 @@ const ParkingLotMap = () => {
     const title = bottomZone ? `${topZone.title} / ${bottomZone.title}` : topZone.title;
 
     return (
-      <section key={`${topZone.key}-${bottomZone?.key || 'single'}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+      <section key={`${topZone.key}-${bottomZone?.key || 'single'}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/70">
         <div className="mb-3 flex items-center gap-2">
           <Car size={18} className="text-indigo-600" />
-          <h3 className="text-sm font-extrabold uppercase tracking-tight text-slate-900">
+          <h3 className="text-sm font-extrabold uppercase tracking-tight text-slate-900 dark:text-slate-100">
             {getZoneDisplayName(title)}
           </h3>
         </div>
@@ -951,7 +951,7 @@ const ParkingLotMap = () => {
   };
 
   const renderCarFloorSection = () => (
-    <section className="rounded-2xl border border-slate-100 bg-white p-4">
+    <section className="rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
       <div className="space-y-4">
         {chunkSlots(visibleZones, 2).map(([topZone, bottomZone], index) => renderCarZonePair(topZone, bottomZone, index))}
       </div>
@@ -971,34 +971,34 @@ const ParkingLotMap = () => {
       {/* 1. Sub-Header Section (Legends) */}
       <div className="space-y-3">
         {/* Title has been moved to Header.jsx */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-emerald-50 border border-emerald-100 text-sm font-semibold text-slate-600">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-emerald-50 border border-emerald-100 text-sm font-semibold text-slate-600 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-slate-300">
               <span className="w-2.5 h-2.5 rounded-md bg-emerald-500"></span>
               {t('parkingMap.available')} <span className="text-emerald-600 font-extrabold">{availableCount}</span>
             </div>
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-rose-50 border border-rose-100 text-sm font-semibold text-slate-600">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-rose-50 border border-rose-100 text-sm font-semibold text-slate-600 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-slate-300">
               <span className="w-2.5 h-2.5 rounded-md bg-rose-500"></span>
               {t('parkingMap.occupied')} <span className="text-rose-600 font-extrabold">{occupiedCount}</span>
             </div>
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-amber-50 border border-amber-100 text-sm font-semibold text-slate-600">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-amber-50 border border-amber-100 text-sm font-semibold text-slate-600 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-slate-300">
               <span className="w-2.5 h-2.5 rounded-md bg-amber-500"></span>
               {t('parkingMap.reserved')} <span className="text-amber-500 font-extrabold">{reservedCount}</span>
             </div>
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-slate-100 border border-slate-200 text-sm font-semibold text-slate-600">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-[14px] bg-slate-100 border border-slate-200 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
               <span className="w-2.5 h-2.5 rounded-md bg-slate-500"></span>
               {t('parkingMap.maintenance')} <span className="text-slate-600 font-extrabold">0</span>
             </div>
           </div>
-          <div className="flex items-center px-4 py-1.5 rounded-[14px] bg-white border border-slate-200 text-sm font-semibold text-slate-600">
-            {t('parkingMap.totalSlots')} <span className="text-slate-900 font-extrabold ml-1">{totalCount}</span>
+          <div className="flex items-center px-4 py-1.5 rounded-[14px] bg-white border border-slate-200 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+            {t('parkingMap.totalSlots')} <span className="text-slate-900 font-extrabold ml-1 dark:text-slate-100">{totalCount}</span>
           </div>
         </div>
       </div>
 
       {/* Error / Offline Banner */}
       {errorMap && (
-        <div className="bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold p-3.5 rounded-[14px] flex items-center gap-2.5">
+        <div className="bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold p-3.5 rounded-[14px] flex items-center gap-2.5 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">
           <AlertTriangle size={16} className="text-amber-600 shrink-0" />
           <span>{errorMap}</span>
         </div>
@@ -1010,10 +1010,10 @@ const ParkingLotMap = () => {
 
 
         {/* Main Map Block (Full width) */}
-        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm min-h-0 w-full font-sans relative">
+        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm min-h-0 w-full font-sans relative dark:border-slate-700 dark:bg-slate-900">
 
           {/* Top Search Bar & Controls */}
-          <div className="p-4 border-b border-slate-100 bg-white flex flex-col xl:flex-row items-center justify-between gap-4 z-10 rounded-t-2xl">
+          <div className="p-4 border-b border-slate-100 bg-white flex flex-col xl:flex-row items-center justify-between gap-4 z-10 rounded-t-2xl dark:border-slate-700 dark:bg-slate-900">
 
             {/* Horizontal Floor Pills */}
             <div className="flex items-center gap-3 overflow-x-auto w-full xl:w-auto scrollbar-hide">
@@ -1025,12 +1025,12 @@ const ParkingLotMap = () => {
                     key={f.id}
                     onClick={() => onFloorChange(f.id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-[14px] border-[1.5px] text-sm transition-all duration-200 whitespace-nowrap ${isSelected
-                      ? 'bg-indigo-50 border-indigo-600 text-indigo-700 font-bold shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-slate-300 font-semibold'
+                      ? 'bg-indigo-50 border-indigo-600 text-indigo-700 font-bold shadow-sm dark:bg-indigo-500/15 dark:text-indigo-300'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-slate-300 font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                       }`}
                   >
                     <span>{getFloorDisplayName(f.name)}</span>
-                    <span className={`text-xs ${isSelected ? 'text-indigo-500 font-semibold' : 'text-slate-500'}`}>
+                    <span className={`text-xs ${isSelected ? 'text-indigo-500 font-semibold dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400'}`}>
                       ({freeCount} {t('parkingMap.availableSuffix')})
                     </span>
                   </button>
@@ -1047,12 +1047,12 @@ const ParkingLotMap = () => {
                   placeholder={t('parkingMap.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-10 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-mono"
+                  className="w-full h-10 pl-10 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   >
                     <X size={14} />
                   </button>
@@ -1062,16 +1062,16 @@ const ParkingLotMap = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleZoomOut}
-                  className="h-10 w-10 border-[1.5px] border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-[14px] text-slate-500 transition-all active:scale-95 bg-white"
+                  className="h-10 w-10 border-[1.5px] border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-[14px] text-slate-500 transition-all active:scale-95 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   <Minus size={16} />
                 </button>
-                <span className="text-xs font-mono font-bold text-slate-600 min-w-[48px] text-center bg-slate-50 border-[1.5px] border-slate-200 py-2.5 px-3 rounded-[14px]">
+                <span className="text-xs font-mono font-bold text-slate-600 min-w-[48px] text-center bg-slate-50 border-[1.5px] border-slate-200 py-2.5 px-3 rounded-[14px] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   {zoomLevel}%
                 </span>
                 <button
                   onClick={handleZoomIn}
-                  className="h-10 w-10 border-[1.5px] border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-[14px] text-slate-500 transition-all active:scale-95 bg-white"
+                  className="h-10 w-10 border-[1.5px] border-slate-200 hover:bg-slate-50 flex items-center justify-center rounded-[14px] text-slate-500 transition-all active:scale-95 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   <Plus size={16} />
                 </button>
@@ -1083,18 +1083,18 @@ const ParkingLotMap = () => {
 
 
           {/* Scrollable Maps Zone */}
-          <div className="flex-1 overflow-auto p-4 bg-slate-50 relative">
+          <div className="flex-1 overflow-auto p-4 bg-slate-50 relative dark:bg-slate-950">
             {loadingMap && (
-              <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10">
+              <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10 dark:bg-slate-950/70">
                 <div className="flex flex-col items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
-                  <span className="text-xs font-semibold text-slate-500">Đang tải chỗ đỗ từ cơ sở dữ liệu...</span>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Đang tải chỗ đỗ từ cơ sở dữ liệu...</span>
                 </div>
               </div>
             )}
 
             {filteredSlots.length === 0 ? (
-              <div className="flex flex-col items-center justify-center min-h-[260px] text-slate-400 gap-2">
+              <div className="flex flex-col items-center justify-center min-h-[260px] text-slate-400 gap-2 dark:text-slate-500">
                 <Info size={24} />
                 <span className="text-sm font-medium">Không tìm thấy chỗ đỗ trên {getFloorDisplayName(activeFloor.name)}.</span>
               </div>
@@ -1103,18 +1103,18 @@ const ParkingLotMap = () => {
                 className="transition-transform duration-200 origin-top-left"
                 style={{ transform: `scale(${zoomLevel / 100})` }}
               >
-                <div className="w-full min-w-0 overflow-x-auto rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div className="w-full min-w-0 overflow-x-auto rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                   <div className={activeFloorId === 3 ? 'min-w-[1010px]' : 'min-w-[860px]'}>
-                    <div className="mb-3 flex items-center justify-between gap-4 border-b border-slate-100 pb-3">
+                    <div className="mb-3 flex items-center justify-between gap-4 border-b border-slate-100 pb-3 dark:border-slate-700">
                       <div className="flex items-center gap-2">
                         {activeFloorId === 3 ? (
                           <div className="flex items-center gap-1"><Motorcycle size={18} className="text-indigo-600" /><Bike size={18} className="text-indigo-600" /></div>
                         ) : <Car size={18} className="text-indigo-600" />}
-                        <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight">
+                        <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight dark:text-slate-100">
                           {t('parkingMap.floorMap')} {getFloorDisplayName(activeFloor.name).split(' ').slice(1).join(' ')} ({getFloorDescriptionLabel(activeFloor.desc)})
                         </h3>
                       </div>
-                      <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-extrabold text-indigo-700">
+                      <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-extrabold text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
                         {showingZoneText}
                       </span>
                     </div>
@@ -1133,7 +1133,7 @@ const ParkingLotMap = () => {
           </div>
 
           {/* Zone Navigation */}
-          <div className="p-4 bg-white border-t border-slate-100 flex flex-col gap-3 rounded-b-2xl">
+          <div className="p-4 bg-white border-t border-slate-100 flex flex-col gap-3 rounded-b-2xl dark:border-slate-700 dark:bg-slate-900">
 
             {/* Zone Controls */}
             {totalPages > 1 && (
@@ -1141,18 +1141,18 @@ const ParkingLotMap = () => {
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all"
+                  className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   <ChevronLeft size={16} />
                   {t('parkingMap.prev')}
                 </button>
-                <span className="min-w-[160px] text-center text-xs font-extrabold text-slate-600">
+                <span className="min-w-[160px] text-center text-xs font-extrabold text-slate-600 dark:text-slate-300">
                   {showingZoneText}
                 </span>
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all"
+                  className="h-9 px-3 flex items-center gap-1.5 justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   {t('parkingMap.next')}
                   <ChevronRight size={16} />
@@ -1173,11 +1173,11 @@ const ParkingLotMap = () => {
       {/* 3. CREATE BOOKING MODAL (Drivers Only) */}
       {isBookingModalOpen && selectedSlot && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[95vh] overflow-y-auto border border-slate-100 animate-scale-in relative font-sans">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[95vh] overflow-y-auto border border-slate-100 animate-scale-in relative font-sans dark:border-slate-700 dark:bg-slate-900">
 
             <button
               onClick={() => setIsBookingModalOpen(false)}
-              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-[14px] transition-all"
+              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-[14px] transition-all dark:hover:bg-slate-800 dark:hover:text-slate-200"
             >
               <X size={18} />
             </button>
@@ -1185,18 +1185,18 @@ const ParkingLotMap = () => {
             <div className="p-5 sm:p-6 space-y-4">
 
               <div className="space-y-1">
-                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">Đặt chỗ đỗ xe</h3>
-                <p className="text-xs text-slate-500">Cấu hình phiên đặt chỗ trong cơ sở dữ liệu thực</p>
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight dark:text-slate-100">Đặt chỗ đỗ xe</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Cấu hình phiên đặt chỗ trong cơ sở dữ liệu thực</p>
               </div>
 
-              <div className="bg-indigo-50 border border-indigo-100 rounded-[14px] p-3.5 text-slate-600 text-xs font-semibold flex items-start gap-2.5">
+              <div className="bg-indigo-50 border border-indigo-100 rounded-[14px] p-3.5 text-slate-600 text-xs font-semibold flex items-start gap-2.5 dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-slate-300">
                 <Info size={16} className="text-indigo-600 shrink-0 mt-0.5" />
                 <div>
                   <span>Bạn đang đặt chỗ: </span>
                   <span className="font-mono font-extrabold text-indigo-600">{selectedSlot.id}</span>
                   <span> tại </span>
-                  <span className="font-bold text-slate-900">{getFloorDisplayName(activeFloor.name)}</span>
-                  <span className="text-slate-500 font-medium block mt-0.5">
+                  <span className="font-bold text-slate-900 dark:text-slate-100">{getFloorDisplayName(activeFloor.name)}</span>
+                  <span className="text-slate-500 font-medium block mt-0.5 dark:text-slate-400">
                     Phân loại chỗ đã chọn: {getVehicleTypeLabel(selectedSlot.type)} (Mã chỗ DB: {selectedSlot.slotId || selectedSlot.dbSlotId})
                   </span>
                 </div>
@@ -1205,11 +1205,11 @@ const ParkingLotMap = () => {
               <form onSubmit={handleConfirmBookingSubmit} className="space-y-3">
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Loại xe</label>
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Loại xe</label>
                   <select
                     value={bookingVehicleType}
                     onChange={(e) => setBookingVehicleType(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-medium"
+                    className="w-full h-11 px-3.5 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
                   >
                     {activeFloorId === 3 ? (
                       <>
@@ -1224,7 +1224,7 @@ const ParkingLotMap = () => {
 
                 {bookingVehicleType !== 'Bicycle' && (
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Biển số xe</label>
+                    <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Biển số xe</label>
                     <div className="relative">
                       <Car size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
@@ -1233,15 +1233,15 @@ const ParkingLotMap = () => {
                         placeholder="e.g., 29A-12345"
                         value={bookingPlate}
                         onChange={(e) => setBookingPlate(e.target.value)}
-                        className="w-full h-11 pl-10 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all uppercase font-mono font-bold"
+                        className="w-full h-11 pl-10 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all uppercase font-mono font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                       />
                     </div>
                   </div>
                 )}
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Thời gian dự kiến vào bãi</label>
-                  <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-3">
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Thời gian dự kiến vào bãi</label>
+                  <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-3 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                     <div className="flex flex-col items-center gap-1.5">
                       <input
                         type="number"
@@ -1250,9 +1250,9 @@ const ParkingLotMap = () => {
                         value={String(expectedHour).padStart(2, '0')}
                         onChange={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
                         onBlur={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
-                        className="h-12 w-16 rounded-[14px] border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10"
+                        className="h-12 w-16 rounded-[14px] border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 dark:border-indigo-500/50 dark:bg-slate-800 dark:text-indigo-300"
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Giờ</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Giờ</span>
                     </div>
 
                     <span className="pt-2 text-2xl font-extrabold text-indigo-500">:</span>
@@ -1265,18 +1265,18 @@ const ParkingLotMap = () => {
                         value={String(expectedMinute).padStart(2, '0')}
                         onChange={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
                         onBlur={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
-                        className="h-12 w-16 rounded-[14px] border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10"
+                        className="h-12 w-16 rounded-[14px] border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 dark:border-indigo-500/50 dark:bg-slate-800 dark:text-indigo-300"
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Phút</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Phút</span>
                     </div>
                   </div>
 
                   {/* Preview Tiền cọc động */}
                   {bookingVehicleType !== 'Bicycle' && (
-                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-100 rounded-[14px] flex items-center justify-between text-xs text-amber-800">
+                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-100 rounded-[14px] flex items-center justify-between text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">
                       <div>
                         <span className="font-semibold block">Tiền cọc giữ chỗ ước tính:</span>
-                        <span className="text-[10px] text-amber-600 font-medium">({getEstimatedDeposit().shiftText})</span>
+                        <span className="text-[10px] text-amber-600 font-medium dark:text-amber-300">({getEstimatedDeposit().shiftText})</span>
                       </div>
                       <span className="text-sm font-extrabold text-amber-700">
                         {getEstimatedDeposit().estimatedAmount.toLocaleString('vi-VN')} VND
@@ -1284,7 +1284,7 @@ const ParkingLotMap = () => {
                     </div>
                   )}
 
-                  <p className="rounded-[14px] border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700">
+                  <p className="rounded-[14px] border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700 dark:border-orange-500/40 dark:bg-orange-500/15 dark:text-orange-300">
                     ⚠️ Lưu ý: Lịch đặt chỗ sẽ tự động bị hủy nếu bạn không check-in tại cổng trong vòng 15 phút sau thời gian dự kiến.
                   </p>
                 </div>
@@ -1293,7 +1293,7 @@ const ParkingLotMap = () => {
                   <button
                     type="button"
                     onClick={() => setIsBookingModalOpen(false)}
-                    className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-bold rounded-[14px] transition-all text-sm"
+                    className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-bold rounded-[14px] transition-all text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                   >
                     Hủy
                   </button>
@@ -1318,11 +1318,11 @@ const ParkingLotMap = () => {
       {/* 4. SPACE OPERATIONAL DETAILS MODAL (Staff, Managers, Admins) */}
       {isDetailsModalOpen && selectedSlot && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans dark:border-slate-700 dark:bg-slate-900">
 
             <button
               onClick={() => setIsDetailsModalOpen(false)}
-              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-[14px] transition-all"
+              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-50 flex items-center justify-center rounded-[14px] transition-all dark:hover:bg-slate-800 dark:hover:text-slate-200"
             >
               <X size={18} />
             </button>
@@ -1330,28 +1330,28 @@ const ParkingLotMap = () => {
             <div className="p-6 sm:p-8 space-y-6">
 
               <div className="space-y-1">
-                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2 dark:text-slate-100">
                   {selectedSlot.type === 'Bicycle' && <Bike className="text-indigo-600" size={20} />}
                   {selectedSlot.type === 'Motorcycle' && <Motorcycle className="text-indigo-600" size={20} />}
                   {selectedSlot.type === 'Car' && <Car className="text-indigo-600" size={20} />}
                   <span>Điều khiển chỗ: {selectedSlot.id}</span>
                 </h3>
-                <p className="text-xs text-slate-500">Bảng điều khiển vận hành cho nhân viên quản lý</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Bảng điều khiển vận hành cho nhân viên quản lý</p>
               </div>
 
               {/* General Metadata Panel */}
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-2 text-xs">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-2 text-xs dark:border-slate-700 dark:bg-slate-800/70">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-semibold">Tầng</span>
-                  <span className="font-extrabold text-slate-900">{getFloorDisplayName(selectedSlot.floor)}</span>
+                  <span className="text-slate-500 font-semibold dark:text-slate-400">Tầng</span>
+                  <span className="font-extrabold text-slate-900 dark:text-slate-100">{getFloorDisplayName(selectedSlot.floor)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-semibold">Phân loại</span>
-                  <span className="font-extrabold text-slate-900 capitalize">Chỗ {getVehicleTypeLabel(selectedSlot.type)}</span>
+                  <span className="text-slate-500 font-semibold dark:text-slate-400">Phân loại</span>
+                  <span className="font-extrabold text-slate-900 capitalize dark:text-slate-100">Chỗ {getVehicleTypeLabel(selectedSlot.type)}</span>
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                  <span className="text-slate-500 font-semibold">Trạng thái hiện tại</span>
+                <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700">
+                  <span className="text-slate-500 font-semibold dark:text-slate-400">Trạng thái hiện tại</span>
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${selectedSlot.status === 'Available'
                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                     : selectedSlot.status === 'Occupied'
@@ -1368,67 +1368,67 @@ const ParkingLotMap = () => {
               {/* STATUS: OCCUPIED / RESERVED */}
               {(selectedSlot.status === 'Occupied' || selectedSlot.status === 'Reserved') && (
                 <div className="space-y-4">
-                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
-                    <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Trạng thái sử dụng</span>
-                      <span className="font-mono text-xs text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 font-extrabold shadow-sm">{getStatusLabel(selectedSlot.status)}</span>
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3 dark:border-slate-700 dark:bg-slate-800/70">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
+                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">Trạng thái sử dụng</span>
+                      <span className="font-mono text-xs text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 font-extrabold shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">{getStatusLabel(selectedSlot.status)}</span>
                     </div>
 
                     {fetchingDetail ? (
                       <div className="flex items-center justify-center py-4 gap-2">
                         <div className="w-5 h-5 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></div>
-                        <span className="text-xs text-slate-500 font-medium">Đang tải chi tiết từ cơ sở dữ liệu...</span>
+                        <span className="text-xs text-slate-500 font-medium dark:text-slate-400">Đang tải chi tiết từ cơ sở dữ liệu...</span>
                       </div>
                     ) : slotDetail?.activeSession ? (
                       <div className="space-y-2.5 pt-1 text-xs">
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium">Biển số xe:</span>
-                          <span className="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 text-sm">{slotDetail.activeSession.licenseVehicle}</span>
+                          <span className="text-slate-500 font-medium dark:text-slate-400">Biển số xe:</span>
+                          <span className="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 text-sm dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-300">{slotDetail.activeSession.licenseVehicle}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium">Loại xe:</span>
-                          <span className="font-semibold text-slate-700 capitalize">{getVehicleTypeLabel(slotDetail.activeSession.vehicleTypeName)}</span>
+                          <span className="text-slate-500 font-medium dark:text-slate-400">Loại xe:</span>
+                          <span className="font-semibold text-slate-700 capitalize dark:text-slate-300">{getVehicleTypeLabel(slotDetail.activeSession.vehicleTypeName)}</span>
                         </div>
                         {slotDetail.activeSession.checkInTime && (
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">Thời gian vào thực tế:</span>
-                            <span className="font-semibold text-slate-700">{new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
+                            <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian vào thực tế:</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.bookingTime && (
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">Thời gian đặt trước:</span>
-                            <span className="font-semibold text-slate-700">{new Date(slotDetail.activeSession.bookingTime).toLocaleString('vi-VN')}</span>
+                            <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian đặt trước:</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(slotDetail.activeSession.bookingTime).toLocaleString('vi-VN')}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.customer && (
-                          <div className="pt-2 border-t border-dashed border-slate-200 space-y-2">
+                          <div className="pt-2 border-t border-dashed border-slate-200 space-y-2 dark:border-slate-700">
                             <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Hồ sơ khách hàng</div>
                             <div className="flex justify-between items-center">
-                              <span className="text-slate-500 font-medium">Họ tên:</span>
-                              <span className="font-bold text-slate-900">{slotDetail.activeSession.customer.username}</span>
+                              <span className="text-slate-500 font-medium dark:text-slate-400">Họ tên:</span>
+                              <span className="font-bold text-slate-900 dark:text-slate-100">{slotDetail.activeSession.customer.username}</span>
                             </div>
                             {slotDetail.activeSession.customer.email && (
                               <div className="flex justify-between items-center">
-                                <span className="text-slate-500 font-medium">Email:</span>
-                                <span className="font-semibold text-slate-700">{slotDetail.activeSession.customer.email}</span>
+                                <span className="text-slate-500 font-medium dark:text-slate-400">Email:</span>
+                                <span className="font-semibold text-slate-700 dark:text-slate-300">{slotDetail.activeSession.customer.email}</span>
                               </div>
                             )}
                             {slotDetail.activeSession.customer.phoneNumber && (
                               <div className="flex justify-between items-center">
-                                <span className="text-slate-500 font-medium">Số điện thoại:</span>
-                                <span className="font-mono font-bold text-slate-700">{slotDetail.activeSession.customer.phoneNumber}</span>
+                                <span className="text-slate-500 font-medium dark:text-slate-400">Số điện thoại:</span>
+                                <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{slotDetail.activeSession.customer.phoneNumber}</span>
                               </div>
                             )}
                             <div className="flex justify-between items-center">
-                              <span className="text-slate-500 font-medium">Hạng thành viên:</span>
-                              <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">{slotDetail.activeSession.customer.customerType || "Registered Driver"}</span>
+                              <span className="text-slate-500 font-medium dark:text-slate-400">Hạng thành viên:</span>
+                              <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">{slotDetail.activeSession.customer.customerType || "Registered Driver"}</span>
                             </div>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="text-center text-slate-400 py-3 text-xs font-medium">
+                      <div className="text-center text-slate-400 py-3 text-xs font-medium dark:text-slate-500">
                         Chưa lấy được thông tin người sử dụng chỗ.
                       </div>
                     )}
@@ -1453,7 +1453,7 @@ const ParkingLotMap = () => {
                 <div className="space-y-4">
                   <form onSubmit={handleAdminReserveSubmit} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">
+                      <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">
                         {selectedSlot.type === 'Bicycle'
                           ? 'Biển số xe đạp (Không bắt buộc)'
                           : 'Nhập biển số xe vãng lai'}
@@ -1466,7 +1466,7 @@ const ParkingLotMap = () => {
                           : 'e.g. 29A-888.88'}
                         value={adminPlate}
                         onChange={(e) => setAdminPlate(e.target.value)}
-                        className="w-full h-11 px-3.5 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all uppercase font-mono font-bold"
+                        className="w-full h-11 px-3.5 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all uppercase font-mono font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                       />
                     </div>
 

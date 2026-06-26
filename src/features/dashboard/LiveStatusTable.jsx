@@ -254,19 +254,19 @@ const LiveStatusTable = () => {
   ];
 
   return (
-    <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm">
+    <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 font-sans shadow-sm dark:border-slate-700 dark:bg-slate-900">
 
       {/* Header & Controls */}
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center dark:border-slate-700">
         <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
             <ShieldAlert size={22} />
           </span>
           <div>
-            <h3 className="text-xl font-extrabold text-slate-900">
+            <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
               {t('dashboard.liveStatus.title')}
             </h3>
-            <p className="mt-1 text-xs text-slate-500">{t('dashboard.liveStatus.subtitle')}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('dashboard.liveStatus.subtitle')}</p>
           </div>
         </div>
 
@@ -295,7 +295,7 @@ const LiveStatusTable = () => {
               icon={<RefreshCw size={16} />}
               onClick={fetchSlots}
               loading={loading}
-              className="flex h-10 w-10 items-center justify-center rounded-[14px] border-slate-200 bg-white text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50"
+              className="flex h-10 w-10 items-center justify-center rounded-[14px] border-slate-200 bg-white text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-800 dark:text-indigo-300 dark:hover:bg-indigo-500/15"
             />
           </Tooltip>
         </div>
@@ -313,14 +313,14 @@ const LiveStatusTable = () => {
           onChange: (page) => setCurrentPage(page)
         }}
         rowClassName="hover:bg-indigo-50/50 cursor-default"
-        className="overflow-hidden rounded-2xl border border-slate-100"
+        className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-700"
       />
 
       {/* Detail & Action Drawer */}
       <Drawer
         title={
-          <div className="flex items-center gap-2 text-slate-900">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
               <Settings size={18} />
             </span>
             <span className="font-extrabold">{t('dashboard.liveStatus.slotDetail', { slot: selectedSlot?.slotName })}</span>
@@ -336,17 +336,17 @@ const LiveStatusTable = () => {
           <div className="space-y-6">
 
             {/* General Info Card */}
-            <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm">
-                <span className="font-semibold text-slate-500">{t('dashboard.liveStatus.floor')}</span>
-                <span className="font-bold text-slate-900">{selectedSlot.floorName}</span>
+            <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm dark:border-slate-700">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">{t('dashboard.liveStatus.floor')}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100">{selectedSlot.floorName}</span>
               </div>
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm">
-                <span className="font-semibold text-slate-500">{t('dashboard.liveStatus.vehicleType')}</span>
-                <span className="font-bold text-slate-900">{getVehicleTypeLabel(selectedSlot.type, t)}</span>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm dark:border-slate-700">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">{t('dashboard.liveStatus.vehicleType')}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(selectedSlot.type, t)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold text-slate-500">{t('dashboard.liveStatus.currentStatus')}</span>
+                <span className="font-semibold text-slate-500 dark:text-slate-400">{t('dashboard.liveStatus.currentStatus')}</span>
                 <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${getStatusPillClass(selectedSlot.status)}`}>
                   <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
                   {getStatusLabel(selectedSlot.status, t)}
@@ -362,15 +362,15 @@ const LiveStatusTable = () => {
                 {detailLoading ? (
                   <div className="flex flex-col items-center justify-center gap-2 p-6">
                     <Spin size="default" />
-                    <span className="text-xs text-slate-500">{t('dashboard.liveStatus.loadingData')}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{t('dashboard.liveStatus.loadingData')}</span>
                   </div>
                 ) : slotDetail?.activeSession ? (
-                  <div className="space-y-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4">
+                  <div className="space-y-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                     <div className="mb-2 flex items-center gap-2">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-white text-indigo-600 shadow-sm">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300">
                         <Car size={16} />
                       </span>
-                      <span className="font-mono text-lg font-black text-indigo-900">
+                      <span className="font-mono text-lg font-black text-indigo-900 dark:text-indigo-200">
                         {slotDetail.activeSession.licenseVehicle}
                       </span>
                     </div>
@@ -378,30 +378,30 @@ const LiveStatusTable = () => {
                     {slotDetail.activeSession.checkInTime && (
                       <div className="flex items-center gap-2 text-sm">
                         <Clock size={14} className="text-indigo-400" />
-                        <span className="text-slate-600">{t('dashboard.liveStatus.checkInTime', { time: new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN') })}</span>
+                        <span className="text-slate-600 dark:text-slate-300">{t('dashboard.liveStatus.checkInTime', { time: new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN') })}</span>
                       </div>
                     )}
 
                     {slotDetail.activeSession.customer && (
-                      <div className="mt-2 border-t border-indigo-200/50 pt-3">
+                      <div className="mt-2 border-t border-indigo-200/50 pt-3 dark:border-indigo-500/30">
                         <div className="flex items-center gap-2 text-sm">
                           <User size={14} className="text-indigo-400" />
-                          <span className="font-bold text-slate-700">{slotDetail.activeSession.customer.username}</span>
+                          <span className="font-bold text-slate-700 dark:text-slate-200">{slotDetail.activeSession.customer.username}</span>
                         </div>
-                        <div className="mt-1 pl-6 text-xs text-slate-500">
+                        <div className="mt-1 pl-6 text-xs text-slate-500 dark:text-slate-400">
                           {slotDetail.activeSession.customer.phoneNumber}
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-center text-xs font-medium text-slate-400">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-center text-xs font-medium text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
                     {t('dashboard.liveStatus.noActiveSession')}
                   </div>
                 )}
 
                 {/* Force Release Action */}
-                <div className="border-t border-slate-100 pt-4">
+                <div className="border-t border-slate-100 pt-4 dark:border-slate-700">
                   <h4 className="mb-3 text-xs font-extrabold uppercase tracking-wider text-rose-400">{t('dashboard.liveStatus.adminIntervention')}</h4>
                   <Popconfirm
                     title={t('dashboard.liveStatus.forceReleaseTitle')}

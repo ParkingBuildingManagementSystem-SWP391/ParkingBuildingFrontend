@@ -211,7 +211,7 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
 
   return (
     <Modal
-      title={<span className="font-extrabold text-slate-900 text-base uppercase tracking-tight flex items-center gap-2"><CheckCircle size={18} className="text-emerald-500" />{t('gate.bookingCheckIn.title')}</span>}
+      title={<span className="font-extrabold text-slate-900 text-base uppercase tracking-tight flex items-center gap-2 dark:text-slate-100"><CheckCircle size={18} className="text-emerald-500" />{t('gate.bookingCheckIn.title')}</span>}
       open={isOpen}
       onCancel={onClose}
       footer={[
@@ -230,28 +230,28 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
     >
       <div className="space-y-4 py-3">
         {/* Vị trí ô đỗ được làm nổi bật */}
-        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border border-emerald-100 rounded-2xl p-5 text-center shadow-sm">
-          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">{t('gate.bookingCheckIn.assignedSlot')}</span>
-          <span className="text-4xl font-black text-emerald-700 tracking-wide">{data.slotName || data.SlotName || "N/A"}</span>
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border border-emerald-100 rounded-2xl p-5 text-center shadow-sm dark:border-emerald-500/40 dark:from-emerald-500/15 dark:to-emerald-500/5">
+          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1 dark:text-emerald-300">{t('gate.bookingCheckIn.assignedSlot')}</span>
+          <span className="text-4xl font-black text-emerald-700 tracking-wide dark:text-emerald-300">{data.slotName || data.SlotName || "N/A"}</span>
         </div>
 
         {/* Bảng chi tiết thông tin */}
-        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
-          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.driverName')}</span>
-            <span className="text-slate-900 font-black">{data.driverName || data.DriverName || data.fullName || data.FullName || "N/A"}</span>
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3 dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs dark:border-slate-700">
+            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.driverName')}</span>
+            <span className="text-slate-900 font-black dark:text-slate-100">{data.driverName || data.DriverName || data.fullName || data.FullName || "N/A"}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.phone')}</span>
-            <span className="text-slate-900 font-bold font-mono">{data.driverPhone || data.DriverPhone || data.phoneNumber || data.PhoneNumber || "N/A"}</span>
+          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs dark:border-slate-700">
+            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.phone')}</span>
+            <span className="text-slate-900 font-bold font-mono dark:text-slate-100">{data.driverPhone || data.DriverPhone || data.phoneNumber || data.PhoneNumber || "N/A"}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.plate')}</span>
-            <span className="text-slate-900 font-black font-mono">{data.licenseVehicle || data.LicenseVehicle || "N/A"}</span>
+          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs dark:border-slate-700">
+            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.plate')}</span>
+            <span className="text-slate-900 font-black font-mono dark:text-slate-100">{data.licenseVehicle || data.LicenseVehicle || "N/A"}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.vehicleType')}</span>
-            <span className="text-slate-900 font-bold">{data.vehicleTypeName || data.VehicleTypeName || data.vehicleType || "Car"}</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.vehicleType')}</span>
+            <span className="text-slate-900 font-bold dark:text-slate-100">{data.vehicleTypeName || data.VehicleTypeName || data.vehicleType || "Car"}</span>
           </div>
         </div>
       </div>
@@ -818,7 +818,7 @@ const GateController = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-12 font-sans select-none bg-slate-50">
+    <div className="space-y-6 pb-12 font-sans select-none bg-slate-50 dark:bg-slate-950">
 
 
       {/* TOP ROW - TWO COLUMN GRID */}
@@ -830,17 +830,17 @@ const GateController = () => {
             title={
               <div className="flex items-center justify-between w-full py-1">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center dark:border-emerald-500/40 dark:bg-emerald-500/15">
                     <LogIn size={18} className="text-emerald-600" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight">{t('gate.entryTitle')}</span>
+                    <span className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight dark:text-slate-100">{t('gate.entryTitle')}</span>
                   </div>
                   <span className="ml-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
                 </div>
               </div>
             }
-            className="rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
+            className="rounded-2xl border border-slate-100 shadow-sm overflow-hidden dark:border-slate-700 dark:bg-slate-900"
             bodyStyle={{ padding: '20px' }}
           >
             <SmartCamera
@@ -1010,7 +1010,7 @@ const GateController = () => {
             />
 
             {/* Check-In Mode Toggle */}
-            <div className="p-1 bg-slate-100 border border-slate-200/80 rounded-2xl grid grid-cols-2 gap-1 mb-4 shadow-inner">
+            <div className="p-1 bg-slate-100 border border-slate-200/80 rounded-2xl grid grid-cols-2 gap-1 mb-4 shadow-inner dark:border-slate-700 dark:bg-slate-800">
               <button
                 type="button"
                 onClick={() => {
@@ -1020,7 +1020,7 @@ const GateController = () => {
                 className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                   checkInMode === 'walkin'
                     ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm shadow-indigo-600/30'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-white'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-white dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100'
                 }`}
               >
                 {t('gate.form.checkInMode')}
@@ -1034,7 +1034,7 @@ const GateController = () => {
                 className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                   checkInMode === 'reservation'
                     ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm shadow-indigo-600/30'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-white'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-white dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100'
                 }`}
               >
                 {t('gate.form.qrMode')}
@@ -1056,11 +1056,11 @@ const GateController = () => {
               {checkInMode === 'reservation' && (
                 <Form.Item
                   name="ticketCode"
-                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.qrTicketCode')}</span>}
+                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.qrTicketCode')}</span>}
                   rules={[{ required: true, message: t('gate.form.requireQr') }]}
                   className="mb-3"
                 >
-                  <Input placeholder="e.g. QR_B5F9A1D8" className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500" />
+                  <Input placeholder="e.g. QR_B5F9A1D8" className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" />
                 </Form.Item>
               )}
 
@@ -1071,14 +1071,14 @@ const GateController = () => {
                   return (
                     <Form.Item
                       name="plate"
-                      label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.plate')}</span>}
+                      label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.plate')}</span>}
                       rules={[{ required: isRequired, message: t('gate.form.requirePlate') }]}
                       className="mb-3"
                     >
                       <Input
                         onChange={handlePlateChange}
                         placeholder={type === 'Bicycle' ? t('gate.form.optionalBicycle') : 'e.g. 30A-123.45'}
-                        className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500"
+                        className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                       />
                     </Form.Item>
                   );
@@ -1089,7 +1089,7 @@ const GateController = () => {
                 <div className="grid grid-cols-1 gap-4 mb-3">
                   <Form.Item
                     name="type"
-                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.type')}</span>}
+                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.type')}</span>}
                     rules={[{ required: true, message: t('gate.form.requireType') }]}
                     initialValue="Car"
                     className="mb-0"
@@ -1138,17 +1138,17 @@ const GateController = () => {
             title={
               <div className="flex items-center justify-between w-full py-1">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center dark:border-indigo-500/40 dark:bg-indigo-500/15">
                     <LogOut size={18} className="text-indigo-600" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight">{t('gate.exitTitle')}</span>
+                    <span className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight dark:text-slate-100">{t('gate.exitTitle')}</span>
                   </div>
                   <span className="ml-1 w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse"></span>
                 </div>
               </div>
             }
-            className="rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
+            className="rounded-2xl border border-slate-100 shadow-sm overflow-hidden dark:border-slate-700 dark:bg-slate-900"
             bodyStyle={{ padding: '20px' }}
           >
             <SmartCamera
@@ -1330,7 +1330,7 @@ const GateController = () => {
                   disabled={false}
                   onPressEnter={() => checkOutForm.submit()}
                   placeholder={exitOcrResult ? t('gate.form.scanOrEnter') : t('gate.form.waitScan')}
-                  className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                 />
               </Form.Item>
 
@@ -1340,7 +1340,7 @@ const GateController = () => {
                 rules={[{ required: true, message: t('gate.form.requirePlate') }]}
                 className="mb-2"
               >
-                <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] uppercase font-bold focus:bg-white focus:border-indigo-500" />
+                <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] uppercase font-bold focus:bg-white focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" />
               </Form.Item>
 
 
@@ -1372,7 +1372,7 @@ const GateController = () => {
                 type="default"
                 disabled={false}
                 onClick={() => setIsQrPopupOpen(true)}
-                className="flex-1 h-11 font-bold border-[1.5px] border-slate-200 bg-white rounded-[14px] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 h-11 font-bold border-[1.5px] border-slate-200 bg-white rounded-[14px] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
               >
                 <Keyboard size={15} /> {t('gate.form.manualInput')}
               </Button>
@@ -1386,24 +1386,24 @@ const GateController = () => {
       <Card
         title={
           <div className="flex items-center justify-between w-full py-1">
-            <span className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+            <span className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5 dark:text-slate-100">
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center dark:border-indigo-500/40 dark:bg-indigo-500/15">
                 <ListChecks size={18} className="text-indigo-600" />
               </div>
               {t('gate.activeTable.parkedTitle')}
-              <span className="ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 font-extrabold text-xs">{occupiedSlots.length} {t('gate.activeTable.carsInLot')}</span>
+              <span className="ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 font-extrabold text-xs dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-300">{occupiedSlots.length} {t('gate.activeTable.carsInLot')}</span>
             </span>
           </div>
         }
-        className="rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
+        className="rounded-2xl border border-slate-100 shadow-sm overflow-hidden dark:border-slate-700 dark:bg-slate-900"
       >
         {occupiedSlots.length === 0 ? (
-          <div className="text-center py-20 text-slate-400 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-3">
+          <div className="text-center py-20 text-slate-400 flex flex-col items-center dark:text-slate-500">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-3 dark:border-emerald-500/40 dark:bg-emerald-500/15">
               <CheckCircle size={32} className="text-emerald-400" />
             </div>
-            <h3 className="text-slate-900 font-extrabold tracking-tight">{t('gate.activeTable.emptyTitle')}</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-xs">{t('gate.activeTable.emptyDesc')}</p>
+            <h3 className="text-slate-900 font-extrabold tracking-tight dark:text-slate-100">{t('gate.activeTable.emptyTitle')}</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-xs dark:text-slate-400">{t('gate.activeTable.emptyDesc')}</p>
           </div>
         ) : (
           <Table
@@ -1417,7 +1417,7 @@ const GateController = () => {
       </Card>
 
       <Modal
-        title={<span className="font-extrabold text-slate-900 tracking-tight flex items-center gap-2"><QrCode size={18} className="text-indigo-500" />{t('gate.form.scanQrExit')}</span>}
+        title={<span className="font-extrabold text-slate-900 tracking-tight flex items-center gap-2 dark:text-slate-100"><QrCode size={18} className="text-indigo-500" />{t('gate.form.scanQrExit')}</span>}
         open={isQrPopupOpen}
         onCancel={() => setIsQrPopupOpen(false)}
         footer={null}
@@ -1436,7 +1436,7 @@ const GateController = () => {
           <Input
             autoFocus
             placeholder={t('gate.form.scanOrEnter')}
-            className="h-12 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-indigo-500"
+            className="h-12 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
             onPressEnter={(e) => {
               const ticketCode = e.target.value?.trim();
               if (!ticketCode) {
@@ -1495,8 +1495,8 @@ const GateController = () => {
       {/* Checkout Verification & Payment Modal */}
       <Modal
         title={
-          <div className="flex items-center gap-2.5 text-slate-900 border-b border-slate-100 pb-3 font-extrabold text-lg font-sans tracking-tight">
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+          <div className="flex items-center gap-2.5 text-slate-900 border-b border-slate-100 pb-3 font-extrabold text-lg font-sans tracking-tight dark:border-slate-700 dark:text-slate-100">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center dark:border-indigo-500/40 dark:bg-indigo-500/15">
               <ShieldCheck size={18} className="text-indigo-600" />
             </div>
             {t('gate.checkoutModal.title')}
@@ -1592,24 +1592,24 @@ const GateController = () => {
                 {/* Left Column: License Plates, Images & Session Details (col-span-7) */}
                 <div className="md:col-span-7 space-y-4">
                   {/* Security Verification panel */}
-                  <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><ShieldCheck size={14} className="text-indigo-500" />{t('gate.checkoutModal.securityVerification')}</h3>
+                  <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-4 dark:border-slate-700 dark:bg-slate-900">
+                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 dark:text-slate-400"><ShieldCheck size={14} className="text-indigo-500" />{t('gate.checkoutModal.securityVerification')}</h3>
 
                     <div className="space-y-2 font-mono text-xs">
-                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.exitPlate')}</span>
+                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                        <span className="text-slate-500 font-bold dark:text-slate-400">{t('gate.checkoutModal.exitPlate')}</span>
                         <Tag color="blue" className="font-bold font-mono rounded-lg">{checkOutForm.getFieldValue('plate') || "N/A"}</Tag>
                       </div>
-                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.entryPlateDb')}</span>
+                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                        <span className="text-slate-500 font-bold dark:text-slate-400">{t('gate.checkoutModal.entryPlateDb')}</span>
                         <Tag color="cyan" className="font-bold font-mono rounded-lg">{checkInLicensePlate || "N/A"}</Tag>
                       </div>
-                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.exitPlateDb')}</span>
+                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                        <span className="text-slate-500 font-bold dark:text-slate-400">{t('gate.checkoutModal.exitPlateDb')}</span>
                         <Tag color="purple" className="font-bold font-mono rounded-lg">{checkOutLicensePlate || "N/A"}</Tag>
                       </div>
-                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <span className="text-slate-500 font-bold">{t('gate.checkoutModal.matchStatus')}</span>
+                      <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                        <span className="text-slate-500 font-bold dark:text-slate-400">{t('gate.checkoutModal.matchStatus')}</span>
                         {isLicensePlateMatched ? (
                           <Tag color="success" className="font-bold rounded-lg">{t('gate.checkoutModal.match')}</Tag>
                         ) : (
@@ -1621,8 +1621,8 @@ const GateController = () => {
                     {/* Images side by side */}
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('gate.checkoutModal.entryImage')}</span>
-                        <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 dark:text-slate-500">{t('gate.checkoutModal.entryImage')}</span>
+                        <div className="w-full aspect-[4/3] bg-slate-900 rounded overflow-hidden border border-slate-200 flex items-center justify-center dark:border-slate-700">
                           {checkInImageUrl ? (
                             <Image
                               src={checkInImageUrl}
@@ -1644,8 +1644,8 @@ const GateController = () => {
                       </div>
 
                       <div className="flex flex-col items-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('gate.checkoutModal.exitImage')}</span>
-                        <div className="w-full aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 dark:text-slate-500">{t('gate.checkoutModal.exitImage')}</span>
+                        <div className="w-full aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center dark:border-slate-700">
                           {exitImagePreviewUrl ? (
                             <Image
                               src={exitImagePreviewUrl}
@@ -1679,9 +1679,9 @@ const GateController = () => {
                   </div>
 
                   {/* Session Details */}
-                  <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-3">{t('gate.checkoutModal.sessionDetails')}</h3>
-                    <Descriptions column={2} size="small" bordered className="bg-white rounded-xl overflow-hidden border border-slate-200/60 font-sans">
+                  <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                    <h3 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-3 dark:text-slate-400">{t('gate.checkoutModal.sessionDetails')}</h3>
+                    <Descriptions column={2} size="small" bordered className="bg-white rounded-xl overflow-hidden border border-slate-200/60 font-sans dark:border-slate-700 dark:bg-slate-900">
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.sessionId')}</span>}>
                         <span className="text-xs font-extrabold text-slate-800">{sessionId || "N/A"}</span>
                       </Descriptions.Item>
@@ -1721,10 +1721,10 @@ const GateController = () => {
                 </div>
 
                 {/* Right Column: Checkout & Payment Center (col-span-5) */}
-                <div className="md:col-span-5 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between space-y-4">
+                <div className="md:col-span-5 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between space-y-4 dark:border-slate-700 dark:bg-slate-900">
                   <div>
-                    <div className="flex flex-col gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-tight flex items-center gap-1.5"><Wallet size={16} className="text-indigo-500" />{t('gate.checkoutModal.paymentGateway')}</h3>
+                    <div className="flex flex-col gap-2 border-b border-slate-100 pb-3 mb-4 dark:border-slate-700">
+                      <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-tight flex items-center gap-1.5 dark:text-slate-100"><Wallet size={16} className="text-indigo-500" />{t('gate.checkoutModal.paymentGateway')}</h3>
                       <Radio.Group
                         value={selectedPaymentMethod}
                         onChange={(e) => handleSwitchPaymentMethodInModal(e.target.value)}
@@ -1745,11 +1745,11 @@ const GateController = () => {
                     {/* Paid Alert */}
                     {isSuccess && isPaid && (
                       <div className="space-y-4 py-8 text-center">
-                        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
+                        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse dark:bg-emerald-500/15">
                           <Check size={32} className="text-emerald-600" />
                         </div>
-                        <h4 className="text-lg font-extrabold text-emerald-800 tracking-tight">{t('gate.checkoutModal.paymentSuccess')}</h4>
-                        <p className="text-sm text-slate-500 leading-relaxed">{t('gate.checkoutModal.paymentSuccessDesc')}</p>
+                        <h4 className="text-lg font-extrabold text-emerald-800 tracking-tight dark:text-emerald-300">{t('gate.checkoutModal.paymentSuccess')}</h4>
+                        <p className="text-sm text-slate-500 leading-relaxed dark:text-slate-400">{t('gate.checkoutModal.paymentSuccessDesc')}</p>
 
                         {changeDue !== null && changeDue > 0 && (
                           <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs text-amber-800 font-bold max-w-xs mx-auto mt-4">
@@ -1765,7 +1765,7 @@ const GateController = () => {
                     {/* Unpaid Flow: VNPAY */}
                     {isSuccess && !isPaid && selectedPaymentMethod === 'VNPAY' && paymentUrl && (
                       <div className="space-y-5">
-                        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/40 border border-indigo-100 p-4 rounded-2xl flex flex-col items-center justify-center shadow-sm relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/40 border border-indigo-100 p-4 rounded-2xl flex flex-col items-center justify-center shadow-sm relative overflow-hidden dark:border-indigo-500/40 dark:from-indigo-500/15 dark:to-indigo-500/5">
                           <span className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest mb-1">{amountDueLabel}</span>
                           <span className="text-2xl font-black text-indigo-700">
                             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
@@ -1773,7 +1773,7 @@ const GateController = () => {
                         </div>
 
                         {/* Interactive QR Code Card */}
-                        <div className="relative group flex justify-center bg-white p-4 rounded-2xl border border-slate-200 max-w-[240px] mx-auto shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                        <div className="relative group flex justify-center bg-white p-4 rounded-2xl border border-slate-200 max-w-[240px] mx-auto shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden dark:border-slate-700">
                           {/* Laser Scan line micro-animation */}
                           <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-500/80 shadow-[0_0_8px_#6366f1] animate-scan pointer-events-none"></div>
 
@@ -1803,7 +1803,7 @@ const GateController = () => {
                             <ExternalLink size={12} /> {t('gate.checkoutModal.openPaymentLink')}
                           </Button>
                         </div>
-                        <p className="text-[10px] text-slate-400 text-center font-medium leading-relaxed">
+                        <p className="text-[10px] text-slate-400 text-center font-medium leading-relaxed dark:text-slate-500">
                           {t('gate.checkoutModal.autoScanNote')}
                         </p>
                       </div>
@@ -1812,7 +1812,7 @@ const GateController = () => {
                     {/* Unpaid Flow: CASH */}
                     {isSuccess && !isPaid && selectedPaymentMethod === 'CASH' && (
                       <div className="space-y-4">
-                        <div className="bg-gradient-to-br from-amber-50 to-amber-100/40 border border-amber-200 rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm">
+                        <div className="bg-gradient-to-br from-amber-50 to-amber-100/40 border border-amber-200 rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm dark:border-amber-500/40 dark:from-amber-500/15 dark:to-amber-500/5">
                           <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">{amountDueLabel}</span>
                           <span className="text-2xl font-black text-amber-700">
                             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
@@ -1820,14 +1820,14 @@ const GateController = () => {
                         </div>
 
                         <div className="space-y-3">
-                          <span className="text-xs font-bold text-slate-500 block">{t('gate.checkoutModal.amountReceived')}</span>
+                          <span className="text-xs font-bold text-slate-500 block dark:text-slate-400">{t('gate.checkoutModal.amountReceived')}</span>
                           <Input
                             type="number"
                             placeholder={t('gate.checkoutModal.enterAmount')}
                             value={cashReceived}
                             onChange={(e) => setCashReceived(e.target.value)}
                             onPressEnter={handleConfirmCashPayment}
-                            className="h-14 bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-mono font-bold text-2xl px-5 transition-all focus:bg-white focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 hover:border-slate-300 shadow-sm"
+                            className="h-14 bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-mono font-bold text-2xl px-5 transition-all focus:bg-white focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 hover:border-slate-300 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
                             suffix={<span className="font-extrabold text-slate-400 text-sm">VNĐ</span>}
                           />
 
@@ -1835,7 +1835,7 @@ const GateController = () => {
                           <div className="grid grid-cols-3 gap-2.5 pt-2">
                             <Button
                               onClick={() => setCashReceived(totalAmount.toString())}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
+                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                             >
                               {t('gate.checkoutModal.exactAmount')}
                             </Button>
@@ -1844,7 +1844,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 50000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
+                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                             >
                               +50K
                             </Button>
@@ -1853,7 +1853,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 100000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
+                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                             >
                               +100K
                             </Button>
@@ -1862,7 +1862,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 200000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
+                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                             >
                               +200K
                             </Button>
@@ -1871,7 +1871,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 500000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all"
+                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                             >
                               +500K
                             </Button>

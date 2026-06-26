@@ -33,52 +33,52 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
       className="receipt-modal"
       bodyStyle={{ padding: 0 }}
     >
-      <div className="flex flex-col items-center justify-center p-5 bg-slate-50 text-slate-800 rounded-xl relative overflow-hidden select-none">
+      <div className="flex flex-col items-center justify-center p-5 bg-slate-50 text-slate-800 rounded-xl relative overflow-hidden select-none dark:bg-slate-900 dark:text-slate-200">
         
         {/* Glow ambient background border top */}
         <div className={`absolute top-0 w-full h-1 bg-gradient-to-r ${isTicket ? 'from-indigo-500 to-sky-400' : 'from-emerald-500 to-teal-400'}`}></div>
         
         {/* Top Header */}
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-extrabold uppercase tracking-wider mb-2 mt-2">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-extrabold uppercase tracking-wider mb-2 mt-2 dark:text-slate-400">
           {isTicket ? <Ticket size={14} className="text-indigo-600"/> : <CheckCircle2 size={14} className="text-emerald-600"/>}
           <span>SpotFlow Parking Counter</span>
         </div>
-        <span className="text-[10px] text-slate-500 mb-6 font-bold">B10, Ring Road 3, Cau Giay, Hanoi</span>
+        <span className="text-[10px] text-slate-500 mb-6 font-bold dark:text-slate-400">B10, Ring Road 3, Cau Giay, Hanoi</span>
 
         {/* Paper Container */}
-        <div className="w-full bg-white border border-slate-200/80 rounded-xl p-5 space-y-4 shadow-sm">
-          <div className="text-center pb-3 border-b border-dashed border-slate-200">
-            <span className="text-[10.5px] text-slate-500 font-bold uppercase tracking-wider">{isTicket ? t('gate.ticket.titleCheckIn') : t('gate.ticket.titleReceipt')}</span>
-            <h2 className="text-2xl font-mono font-extrabold text-slate-800 mt-1 tracking-wide">
+        <div className="w-full bg-white border border-slate-200/80 rounded-xl p-5 space-y-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="text-center pb-3 border-b border-dashed border-slate-200 dark:border-slate-700">
+            <span className="text-[10.5px] text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{isTicket ? t('gate.ticket.titleCheckIn') : t('gate.ticket.titleReceipt')}</span>
+            <h2 className="text-2xl font-mono font-extrabold text-slate-800 mt-1 tracking-wide dark:text-slate-100">
               {details.id}
             </h2>
           </div>
 
           <div className="space-y-2.5 text-xs font-mono">
             <div className="flex justify-between">
-              <span className="text-slate-500">{t('gate.ticket.plateNumber')}</span>
-              <span className="text-slate-800 font-extrabold">{details.plate}</span>
+              <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.plateNumber')}</span>
+              <span className="text-slate-800 font-extrabold dark:text-slate-100">{details.plate}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">{t('gate.ticket.vehicleClass')}</span>
-              <span className="text-slate-800 font-bold">{details.type}</span>
+              <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.vehicleClass')}</span>
+              <span className="text-slate-800 font-bold dark:text-slate-100">{details.type}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">{t('gate.ticket.assignedSlot')}</span>
               <span className="text-indigo-600 font-extrabold">{details.slotId}</span>
             </div>
             
-            <div className="h-px bg-slate-100 my-1"></div>
+            <div className="h-px bg-slate-100 my-1 dark:bg-slate-700"></div>
 
             <div className="flex justify-between">
-              <span className="text-slate-500">{t('gate.ticket.entryDate')}</span>
-              <span className="text-slate-700 font-medium">
+              <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.entryDate')}</span>
+              <span className="text-slate-700 font-medium dark:text-slate-300">
                 {new Date(details.checkInTime).toLocaleDateString('vi-VN')}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">{t('gate.ticket.entryTime')}</span>
-              <span className="text-slate-700 font-medium">
+              <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.entryTime')}</span>
+              <span className="text-slate-700 font-medium dark:text-slate-300">
                 {new Date(details.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             </div>
@@ -86,16 +86,16 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             {!isTicket && details.checkOutTime && (
               <>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">{t('gate.ticket.exitTime')}</span>
-                  <span className="text-slate-700 font-medium">
+                  <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.exitTime')}</span>
+                  <span className="text-slate-700 font-medium dark:text-slate-300">
                     {new Date(details.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </span>
                 </div>
                 
-                <div className="h-px bg-slate-100 my-1"></div>
+                <div className="h-px bg-slate-100 my-1 dark:bg-slate-700"></div>
                 
                 <div className="flex justify-between items-center text-sm pt-2">
-                  <span className="text-slate-500 font-extrabold">{t('gate.ticket.totalPaid')}</span>
+                  <span className="text-slate-500 font-extrabold dark:text-slate-400">{t('gate.ticket.totalPaid')}</span>
                   <span className="text-emerald-600 font-extrabold text-base">{formatVND(details.fee)}</span>
                 </div>
               </>
@@ -103,7 +103,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
           </div>
 
           {/* QR / Barcode container */}
-          <div className="flex flex-col items-center justify-center pt-3 border-t border-dashed border-slate-200">
+          <div className="flex flex-col items-center justify-center pt-3 border-t border-dashed border-slate-200 dark:border-slate-700">
             {isTicket ? (
               <div className="p-2 bg-white border border-slate-200 rounded-lg shadow-sm w-32 h-32 flex items-center justify-center">
                 <img 
@@ -118,7 +118,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
                 <span className="text-[9px] font-mono text-slate-500 font-bold tracking-widest">{details.plate}-{details.id}</span>
               </div>
             )}
-            <span className="text-[10.5px] text-slate-500 text-center mt-3 leading-normal font-medium px-2">
+            <span className="text-[10.5px] text-slate-500 text-center mt-3 leading-normal font-medium px-2 dark:text-slate-400">
               {isTicket ? t('gate.ticket.scanGate') : t('gate.ticket.thankYou')}
             </span>
           </div>
@@ -129,7 +129,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
           <Button
             type="dashed"
             onClick={onClose}
-            className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white text-slate-600 hover:text-slate-800 hover:border-slate-400 rounded-[14px] font-bold"
+            className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white text-slate-600 hover:text-slate-800 hover:border-slate-400 rounded-[14px] font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100"
           >
             {t('gate.ticket.close')}
           </Button>

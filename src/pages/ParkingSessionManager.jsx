@@ -109,7 +109,7 @@ const LazySessionImage = ({ src, alt, emptyText }) => {
 
   if (!src || hasError) {
     return (
-      <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-semibold text-slate-400">
+      <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
         {emptyText}
       </div>
     );
@@ -121,7 +121,7 @@ const LazySessionImage = ({ src, alt, emptyText }) => {
       alt={alt}
       loading="lazy"
       onError={() => setHasError(true)}
-      className="h-56 w-full rounded-xl border border-slate-200 object-cover"
+      className="h-56 w-full rounded-xl border border-slate-200 object-cover dark:border-slate-700"
     />
   );
 };
@@ -129,7 +129,7 @@ const LazySessionImage = ({ src, alt, emptyText }) => {
 const DetailRow = ({ label, children }) => (
   <div className="flex flex-col gap-0.5">
     <span className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</span>
-    <span className="text-sm font-semibold text-slate-800">{children}</span>
+    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{children}</span>
   </div>
 );
 
@@ -186,7 +186,7 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
   return (
     <Modal
       title={
-        <span className="text-lg font-extrabold tracking-tight text-slate-900">
+        <span className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
           {t('parkingSession.detailTitle')}
         </span>
       }
@@ -202,13 +202,13 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
           <Spin tip={t('parkingSession.loadingDetail')} />
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
+        <div className="rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-rose-700 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">
           {error}
         </div>
       ) : detail ? (
         <div className="space-y-6 pt-2">
           {ticketCode ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3">
+            <div className="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 dark:border-indigo-500/40 dark:bg-indigo-500/15">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
                 <Ticket size={18} />
               </span>
@@ -216,12 +216,12 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
                 <span className="text-xs font-bold uppercase tracking-wide text-indigo-400">
                   {t('parkingSession.colTicket')}
                 </span>
-                <span className="font-mono text-sm font-extrabold text-indigo-700">{ticketCode}</span>
+                <span className="font-mono text-sm font-extrabold text-indigo-700 dark:text-indigo-200">{ticketCode}</span>
               </div>
             </div>
           ) : null}
 
-          <div className="grid grid-cols-1 gap-5 rounded-2xl border border-slate-100 bg-slate-50 p-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800 md:grid-cols-2">
             <DetailRow label={t('parkingSession.booker')}>{username || t('parkingSession.none')}</DetailRow>
             <DetailRow label={t('parkingSession.slotPos')}>{slotName || t('parkingSession.none')}</DetailRow>
             <DetailRow label={t('parkingSession.plateNum')}>{licenseVehicle || t('parkingSession.none')}</DetailRow>
@@ -230,18 +230,18 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
             <DetailRow label={t('parkingSession.checkInTime')}>{formatDateTime(checkInTime, t)}</DetailRow>
             <DetailRow label={t('parkingSession.checkOutTime')}>{formatDateTime(checkOutTime, t)}</DetailRow>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('parkingSession.statusLabel')}</span>
+              <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.statusLabel')}</span>
               <span><Tag color={getStatusColor(sessionStatus)}>{getStatusLabel(sessionStatus, t)}</Tag></span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <h4 className="mb-2 text-sm font-extrabold tracking-tight text-slate-700">{t('parkingSession.imgCheckIn')}</h4>
+              <h4 className="mb-2 text-sm font-extrabold tracking-tight text-slate-700 dark:text-slate-300">{t('parkingSession.imgCheckIn')}</h4>
               <LazySessionImage src={checkInImageUrl} alt={t('parkingSession.imgCheckIn')} emptyText={t('parkingSession.noImgIn')} />
             </div>
             <div>
-              <h4 className="mb-2 text-sm font-extrabold tracking-tight text-slate-700">{t('parkingSession.imgCheckOut')}</h4>
+              <h4 className="mb-2 text-sm font-extrabold tracking-tight text-slate-700 dark:text-slate-300">{t('parkingSession.imgCheckOut')}</h4>
               <LazySessionImage src={checkOutImageUrl} alt={t('parkingSession.imgCheckOut')} emptyText={t('parkingSession.noImgOut')} />
             </div>
           </div>
@@ -335,18 +335,18 @@ const ParkingSessionManager = () => {
 
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
-  const fieldClassName = 'rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10';
+  const fieldClassName = 'rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500';
 
   return (
-    <div className="min-h-full space-y-6 bg-slate-50">
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+    <div className="min-h-full space-y-6 bg-slate-50 dark:bg-slate-900">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="mb-5 flex items-start gap-4">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm">
             <Car size={22} />
           </span>
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">{t('parkingSession.pageTitle')}</h1>
-            <p className="text-sm font-medium text-slate-500">{t('parkingSession.pageDesc')}</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('parkingSession.pageTitle')}</h1>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('parkingSession.pageDesc')}</p>
           </div>
         </div>
 
@@ -410,7 +410,7 @@ const ParkingSessionManager = () => {
             ]}
           />
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('parkingSession.fromDate')}</span>
+            <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.fromDate')}</span>
             <Input
               size="large"
               type="date"
@@ -420,7 +420,7 @@ const ParkingSessionManager = () => {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('parkingSession.toDate')}</span>
+            <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.toDate')}</span>
             <Input
               size="large"
               type="date"
@@ -444,7 +444,7 @@ const ParkingSessionManager = () => {
               size="large"
               icon={<RotateCcw size={15} />}
               onClick={handleReset}
-              className="rounded-[14px] border-slate-200 bg-white font-bold text-slate-600"
+              className="rounded-[14px] border-slate-200 bg-white font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!border-slate-600 dark:hover:!text-slate-100"
             >
               {t('parkingSession.btnReset')}
             </Button>
@@ -452,25 +452,25 @@ const ParkingSessionManager = () => {
         </form>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         {error && (
-          <div className="m-4 rounded-xl border border-rose-100 bg-rose-50 p-3 text-sm font-semibold text-rose-700">
+          <div className="m-4 rounded-xl border border-rose-100 bg-rose-50 p-3 text-sm font-semibold text-rose-700 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">
             {error}
           </div>
         )}
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-800">
               <tr>
                 {[t('parkingSession.colSlot'), t('parkingSession.phPlate'), t('parkingSession.colType'), t('parkingSession.colTicket'), t('parkingSession.colStatus'), t('parkingSession.colAction')].map((heading) => (
-                  <th key={heading} className="px-5 py-3.5 text-left text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                  <th key={heading} className="px-5 py-3.5 text-left text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {heading}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-16 text-center">
@@ -479,7 +479,7 @@ const ParkingSessionManager = () => {
                 </tr>
               ) : paginatedSessions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-16 text-center text-sm font-semibold text-slate-400">
+                  <td colSpan={6} className="px-5 py-16 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
                     {t('parkingSession.noData')}
                   </td>
                 </tr>
@@ -491,11 +491,11 @@ const ParkingSessionManager = () => {
                   const vehicleTypeName = getField(session, 'vehicleTypeName', 'VehicleTypeName');
 
                   return (
-                    <tr key={ticketCode || index} className="transition-colors hover:bg-indigo-50/40">
-                      <td className="px-5 py-4 text-sm font-bold text-slate-800">{getField(session, 'slotName', 'SlotName') || t('parkingSession.none')}</td>
+                    <tr key={ticketCode || index} className="transition-colors hover:bg-indigo-50/40 dark:hover:bg-slate-800/70">
+                      <td className="px-5 py-4 text-sm font-bold text-slate-800 dark:text-slate-200">{getField(session, 'slotName', 'SlotName') || t('parkingSession.none')}</td>
                       <td className="px-5 py-4 text-sm font-semibold italic text-slate-400 dark:text-slate-500">{t('parkingSession.none')}</td>
-                      <td className="px-5 py-4 text-sm text-slate-600">{getVehicleTypeName(typeId, vehicleTypeName, t)}</td>
-                      <td className="px-5 py-4 font-mono text-sm font-bold text-indigo-600">{ticketCode || t('parkingSession.none')}</td>
+                      <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{getVehicleTypeName(typeId, vehicleTypeName, t)}</td>
+                      <td className="px-5 py-4 font-mono text-sm font-bold text-indigo-600 dark:text-indigo-300">{ticketCode || t('parkingSession.none')}</td>
                       <td className="px-5 py-4">
                         <Tag color={getStatusColor(status)}>{getStatusLabel(status, t)}</Tag>
                       </td>
@@ -505,7 +505,7 @@ const ParkingSessionManager = () => {
                           icon={<Eye size={14} />}
                           disabled={!ticketCode}
                           onClick={() => setSelectedTicketCode(ticketCode)}
-                          className="rounded-[10px] border-slate-200 font-bold text-slate-600 hover:!border-indigo-600 hover:!text-indigo-600"
+                          className="rounded-[10px] border-slate-200 font-bold text-slate-600 hover:!border-indigo-600 hover:!text-indigo-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!border-indigo-400 dark:hover:!text-indigo-300"
                         >
                           {t('parkingSession.btnViewDetail')}
                         </Button>
@@ -518,8 +518,8 @@ const ParkingSessionManager = () => {
           </table>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-sm font-semibold text-slate-500">
+        <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
             {t('parkingSession.totalSessions')} {sessions.length} {hasFilters(filters) ? t('parkingSession.byFilter') : ''}
           </span>
           <div className="flex flex-wrap items-center gap-2">

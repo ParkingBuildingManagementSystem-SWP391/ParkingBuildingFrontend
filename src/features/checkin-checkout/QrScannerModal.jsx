@@ -127,7 +127,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
       <style>{scanKeyframes}</style>
       <Modal
         title={
-          <div className="flex items-center gap-2 text-slate-800 font-bold text-lg font-sans">
+          <div className="flex items-center gap-2 text-slate-800 font-bold text-lg font-sans dark:text-slate-100">
             <Camera size={20} className="text-indigo-600" />
             {title}
           </div>
@@ -135,7 +135,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
         open={isOpen}
         onCancel={onClose}
         footer={[
-          <Button key="close" type="dashed" onClick={onClose} className="font-bold h-10 px-5 rounded-[14px] border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-400">
+          <Button key="close" type="dashed" onClick={onClose} className="font-bold h-10 px-5 rounded-[14px] border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100">
             {t('gate.qrScanner.close')}
           </Button>
         ]}
@@ -146,7 +146,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
         <div className="space-y-4 pt-2">
           {devices.length > 1 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('gate.qrScanner.selectCamera')}</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">{t('gate.qrScanner.selectCamera')}</span>
               <Select
                 value={selectedDevice}
                 onChange={handleDeviceChange}
@@ -156,7 +156,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
             </div>
           )}
 
-          <div className="relative aspect-square w-full max-w-[320px] mx-auto bg-black rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center">
+          <div className="relative aspect-square w-full max-w-[320px] mx-auto bg-black rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center dark:border-slate-700">
             {/* HTML5 QrCode target element */}
             <div id={scannerContainerId} className="w-full h-full object-cover"></div>
 
