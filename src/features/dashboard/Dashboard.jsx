@@ -224,7 +224,7 @@ const Dashboard = ({ section = 'overview' }) => {
   const renderManagerDashboard = () => {
     if (section === 'overview' && loadingSummary && !summary) {
       return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium">
+        <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium dark:text-slate-400">
           <Loader2 className="h-9 w-9 text-indigo-600 animate-spin mb-3" />
           <span className="font-semibold">{t('dashboard.loadingSummary')}</span>
         </div>
@@ -233,8 +233,8 @@ const Dashboard = ({ section = 'overview' }) => {
 
     if (section === 'overview' && errorSummary && !summary) {
       return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center text-rose-600 font-bold bg-white rounded-2xl border border-slate-100 shadow-sm p-8">
-          <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center mb-3">
+        <div className="min-h-[400px] flex flex-col items-center justify-center text-rose-600 font-bold bg-white rounded-2xl border border-slate-100 shadow-sm p-8 dark:border-slate-700 dark:bg-slate-900 dark:text-rose-300">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center mb-3 dark:bg-rose-500/15">
             <ShieldAlert size={28} className="text-rose-500" />
           </div>
           <span>{errorSummary}</span>
@@ -443,9 +443,9 @@ const Dashboard = ({ section = 'overview' }) => {
           </svg>
 
           {/* Legend */}
-          <div className="flex items-center justify-center gap-2 pt-3 border-t border-slate-100 text-xs font-semibold">
+          <div className="flex items-center justify-center gap-2 pt-3 border-t border-slate-100 text-xs font-semibold dark:border-slate-700">
             <span className="w-3.5 h-3.5 bg-emerald-500 rounded-md block"></span>
-            <span className="text-slate-600">{t('dashboard.revenueLabel')}</span>
+            <span className="text-slate-600 dark:text-slate-300">{t('dashboard.revenueLabel')}</span>
           </div>
         </div>
       );
@@ -460,47 +460,47 @@ const Dashboard = ({ section = 'overview' }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
               {/* Card 1: Total Vehicles Current */}
-              <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">{t('dashboard.totalVehicles')}</span>
-                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 block">{summary?.occupiedSlotsCount || 0}</span>
+                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block dark:text-slate-400">{t('dashboard.totalVehicles')}</span>
+                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 block dark:text-slate-100">{summary?.occupiedSlotsCount || 0}</span>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-sm shrink-0 dark:bg-slate-900 dark:text-indigo-300">
                   <Car size={24} />
                 </div>
               </div>
 
               {/* Card 2: Daily Revenue */}
-              <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 dark:border-emerald-500/40 dark:bg-emerald-500/15">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">{t('dashboard.todayRevenue')}</span>
+                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block dark:text-slate-400">{t('dashboard.todayRevenue')}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-extrabold tracking-tight text-slate-900">{formatVND(summary?.todayRevenue || 0)}</span>
+                    <span className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{formatVND(summary?.todayRevenue || 0)}</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-600 shadow-sm shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-600 shadow-sm shrink-0 dark:bg-slate-900 dark:text-emerald-300">
                   <DollarSign size={24} />
                 </div>
               </div>
 
               {/* Card 3: Overall Occupancy Rate */}
-              <div className="bg-violet-50 p-6 rounded-2xl border border-violet-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="bg-violet-50 p-6 rounded-2xl border border-violet-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 dark:border-violet-500/40 dark:bg-violet-500/15">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">{t('dashboard.occupancyRate')}</span>
-                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 block">{((summary?.occupancyRate) || 0).toFixed(1)}%</span>
+                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block dark:text-slate-400">{t('dashboard.occupancyRate')}</span>
+                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 block dark:text-slate-100">{((summary?.occupancyRate) || 0).toFixed(1)}%</span>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-violet-600 shadow-sm shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-violet-600 shadow-sm shrink-0 dark:bg-slate-900 dark:text-violet-300">
                   <Percent size={24} />
                 </div>
               </div>
 
               {/* Card 4: Available Slots */}
-              <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100/70 shadow-sm flex items-center justify-between min-h-[110px] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 dark:border-amber-500/40 dark:bg-amber-500/15">
                 <div className="space-y-1">
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">{t('dashboard.availableSlots')}</span>
-                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 block">{summary?.availableSlotsCount || 0}</span>
+                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block dark:text-slate-400">{t('dashboard.availableSlots')}</span>
+                  <span className="text-3xl font-extrabold tracking-tight text-slate-900 block dark:text-slate-100">{summary?.availableSlotsCount || 0}</span>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0 dark:bg-slate-900 dark:text-amber-300">
                   <Calendar size={24} />
                 </div>
               </div>
@@ -511,10 +511,10 @@ const Dashboard = ({ section = 'overview' }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
               {/* Left Column: Vehicles Distribution */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between dark:border-slate-700 dark:bg-slate-900">
                 <div>
-                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{t('dashboard.vehiclesInLot')}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{t('dashboard.vehiclesDistribution')}</p>
+                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.vehiclesInLot')}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.vehiclesDistribution')}</p>
                 </div>
 
                 <div className="flex flex-col items-center justify-center py-6">
@@ -572,47 +572,47 @@ const Dashboard = ({ section = 'overview' }) => {
 
                       {/* Center Text labels */}
                       <text x="160" y="100" textAnchor="middle" className="text-[10px] font-bold uppercase tracking-wider fill-slate-400">{t('dashboard.total')}</text>
-                      <text x="160" y="120" textAnchor="middle" className="text-lg font-extrabold fill-slate-900">{totalInBuilding}</text>
+                      <text x="160" y="120" textAnchor="middle" className="text-lg font-extrabold fill-slate-900 dark:fill-slate-100">{totalInBuilding}</text>
                     </svg>
                   ) : (
-                    <div className="text-center py-12 text-slate-400 font-semibold text-xs">
+                    <div className="text-center py-12 text-slate-400 font-semibold text-xs dark:text-slate-500">
                       {t('dashboard.noVehicles')}
                     </div>
                   )}
 
                   {/* Legend below chart */}
-                  <div className="flex items-center justify-center flex-wrap gap-4 mt-4 pt-4 border-t border-slate-100 w-full">
+                  <div className="flex items-center justify-center flex-wrap gap-4 mt-4 pt-4 border-t border-slate-100 w-full dark:border-slate-700">
                     <div className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-full bg-emerald-500 block"></span>
-                      <span className="text-xs text-slate-600 font-medium">{t('dashboard.car')}: {carDetail.inBuildingCount} ({carPercent}%)</span>
+                      <span className="text-xs text-slate-600 font-medium dark:text-slate-300">{t('dashboard.car')}: {carDetail.inBuildingCount} ({carPercent}%)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-full bg-indigo-600 block"></span>
-                      <span className="text-xs text-slate-600 font-medium">{t('dashboard.motorbike')}: {bikeDetail.inBuildingCount} ({bikePercent}%)</span>
+                      <span className="text-xs text-slate-600 font-medium dark:text-slate-300">{t('dashboard.motorbike')}: {bikeDetail.inBuildingCount} ({bikePercent}%)</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-full bg-amber-500 block"></span>
-                      <span className="text-xs text-slate-600 font-medium">{t('dashboard.bicycle')}: {bicycleDetail.inBuildingCount} ({bicyclePercent}%)</span>
+                      <span className="text-xs text-slate-600 font-medium dark:text-slate-300">{t('dashboard.bicycle')}: {bicycleDetail.inBuildingCount} ({bicyclePercent}%)</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Building Details & Current Shift */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between dark:border-slate-700 dark:bg-slate-900">
                 <div>
-                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{t('dashboard.operationSummary')}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{t('dashboard.operationDesc')}</p>
+                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.operationSummary')}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.operationDesc')}</p>
                 </div>
 
                 <div className="space-y-3 py-4">
-                  <div className="flex justify-between items-center rounded-xl bg-slate-50 px-4 py-4">
-                    <span className="text-sm text-slate-500 font-semibold">{t('dashboard.totalRevenueTitle')}</span>
-                    <span className="text-sm font-extrabold text-slate-900">{formatVND(summary?.totalRevenue || 0)}</span>
+                  <div className="flex justify-between items-center rounded-xl bg-slate-50 px-4 py-4 dark:bg-slate-800">
+                    <span className="text-sm text-slate-500 font-semibold dark:text-slate-400">{t('dashboard.totalRevenueTitle')}</span>
+                    <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{formatVND(summary?.totalRevenue || 0)}</span>
                   </div>
-                  <div className="flex justify-between items-center rounded-xl bg-slate-50 px-4 py-4">
-                    <span className="text-sm text-slate-500 font-semibold">{t('dashboard.reservedSlotsTitle')}</span>
-                    <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-extrabold text-amber-700">{summary?.reservedSlotsCount || 0}</span>
+                  <div className="flex justify-between items-center rounded-xl bg-slate-50 px-4 py-4 dark:bg-slate-800">
+                    <span className="text-sm text-slate-500 font-semibold dark:text-slate-400">{t('dashboard.reservedSlotsTitle')}</span>
+                    <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-extrabold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{summary?.reservedSlotsCount || 0}</span>
                   </div>
                 </div>
               </div>
@@ -620,16 +620,16 @@ const Dashboard = ({ section = 'overview' }) => {
             </div>
 
             {/* D. Floor Occupancy Status Table (Full Width) */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-900">
               <div>
-                <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{t('dashboard.floorOccupancy')}</h3>
-                <p className="text-xs text-slate-500 mt-0.5">{t('dashboard.floorOccupancyDesc')}</p>
+                <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.floorOccupancy')}</h3>
+                <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.floorOccupancyDesc')}</p>
               </div>
 
               <div className="overflow-x-auto mt-4">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100">
+                    <tr className="border-b border-slate-100 dark:border-slate-700">
                       <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('dashboard.table.floor')}</th>
                       <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">{t('dashboard.table.totalSlots')}</th>
                       <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">{t('dashboard.table.occupied')}</th>
@@ -637,7 +637,7 @@ const Dashboard = ({ section = 'overview' }) => {
                       <th className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('dashboard.table.rate')}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                     {summary?.floorOccupancyDetail?.map((floor, idx) => {
                       const capacity = floor.capacity || 100;
                       const occupied = floor.occupiedCount || 0;
@@ -645,21 +645,21 @@ const Dashboard = ({ section = 'overview' }) => {
                       const rate = capacity > 0 ? Math.round((occupied / capacity) * 100) : 0;
 
                       return (
-                        <tr key={floor.floorId || idx} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="py-4 px-4 text-sm font-semibold text-slate-700">{floor.floorName}</td>
-                          <td className="py-4 px-4 text-sm font-medium text-slate-600 text-center">{capacity}</td>
+                        <tr key={floor.floorId || idx} className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/70">
+                          <td className="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{floor.floorName}</td>
+                          <td className="py-4 px-4 text-sm font-medium text-slate-600 text-center dark:text-slate-300">{capacity}</td>
                           <td className="py-4 px-4 text-center">
-                            <span className="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-sm font-bold text-rose-600">{occupied}</span>
+                            <span className="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-sm font-bold text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">{occupied}</span>
                           </td>
                           <td className="py-4 px-4 text-center">
-                            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-sm font-bold text-emerald-600">{available}</span>
+                            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-sm font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">{available}</span>
                           </td>
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden max-w-[140px] md:max-w-[200px] shrink-0">
+                              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden max-w-[140px] md:max-w-[200px] shrink-0 dark:bg-slate-800">
                                 <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${rate}%` }}></div>
                               </div>
-                              <span className="text-sm font-bold text-slate-700">{rate}%</span>
+                              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{rate}%</span>
                             </div>
                           </td>
                         </tr>
@@ -678,49 +678,49 @@ const Dashboard = ({ section = 'overview' }) => {
         ) : section === 'analytics' ? (
           <div className="space-y-6">
             {/* Filter Card */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-              <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 dark:border-slate-700 dark:bg-slate-900">
+              <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 dark:bg-indigo-500/15 dark:text-indigo-300">
                   <Filter size={18} />
                 </div>
-                <h3 className="text-base font-extrabold tracking-tight text-slate-900">{t('dashboard.filterTitle')}</h3>
+                <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.filterTitle')}</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('dashboard.startDate')}</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">{t('dashboard.startDate')}</label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700"
+                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('dashboard.endDate')}</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">{t('dashboard.endDate')}</label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700"
+                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('dashboard.groupBy')}</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">{t('dashboard.groupBy')}</label>
                   <select
                     value={groupBy}
                     onChange={(e) => setGroupBy(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700"
+                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
                   >
                     <option value="DAY">{t('dashboard.byDay')}</option>
                     <option value="HOUR">{t('dashboard.byHour')}</option>
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('dashboard.vehicleType')}</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider dark:text-slate-400">{t('dashboard.vehicleType')}</label>
                   <select
                     value={vehicleTypeId}
                     onChange={(e) => setVehicleTypeId(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700"
+                    className="w-full h-11 px-3 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
                   >
                     <option value="">{t('dashboard.allVehicles')}</option>
                     <option value="3">{t('dashboard.car')}</option>
@@ -732,14 +732,14 @@ const Dashboard = ({ section = 'overview' }) => {
             </div>
 
             {/* Report Export Panel */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-              <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 dark:border-slate-700 dark:bg-slate-900">
+              <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 dark:bg-emerald-500/15 dark:text-emerald-300">
                   <Download size={18} />
                 </div>
-                <h3 className="text-base font-extrabold tracking-tight text-slate-900">{t('dashboard.exportTitle')}</h3>
+                <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.exportTitle')}</h3>
               </div>
-              <p className="text-xs text-slate-500">{t('dashboard.exportDesc')}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('dashboard.exportDesc')}</p>
               <div className="flex flex-wrap items-center gap-4 pt-1">
                 <button
                   disabled={exporting}
@@ -762,20 +762,20 @@ const Dashboard = ({ section = 'overview' }) => {
 
             {/* Charts Section */}
             {loadingStats ? (
-              <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-slate-400">
+              <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
                 <Loader2 size={32} className="animate-spin text-indigo-600 mb-2" />
                 <span className="text-xs font-semibold">{t('dashboard.loadingCharts')}</span>
               </div>
             ) : errorStats ? (
-              <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center text-rose-500 font-bold">
-                <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
+              <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center text-rose-500 font-bold dark:border-slate-700 dark:bg-slate-900 dark:text-rose-300">
+                <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-3 dark:bg-rose-500/15">
                   <ShieldAlert size={28} className="text-rose-500" />
                 </div>
                 <span>{errorStats}</span>
               </div>
             ) : trafficStats.length === 0 ? (
-              <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center text-slate-400 font-semibold">
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-3">
+              <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center text-slate-400 font-semibold dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+                <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-3 dark:bg-slate-800">
                   <BarChart3 size={28} className="text-slate-400" />
                 </div>
                 <span>{t('dashboard.noData')}</span>
@@ -783,10 +783,10 @@ const Dashboard = ({ section = 'overview' }) => {
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Traffic flow SVG chart */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between dark:border-slate-700 dark:bg-slate-900">
                   <div>
-                    <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{t('dashboard.trafficChartTitle')}</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">{t('dashboard.trafficChartDesc')}</p>
+                    <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.trafficChartTitle')}</h3>
+                    <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.trafficChartDesc')}</p>
                   </div>
                   <div className="py-6">
                     {renderTrafficChart()}
@@ -794,10 +794,10 @@ const Dashboard = ({ section = 'overview' }) => {
                 </div>
 
                 {/* Revenue SVG chart */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between dark:border-slate-700 dark:bg-slate-900">
                   <div>
-                    <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{t('dashboard.revenueChartTitle')}</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">{t('dashboard.revenueChartDesc')}</p>
+                    <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.revenueChartTitle')}</h3>
+                    <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.revenueChartDesc')}</p>
                   </div>
                   <div className="py-6">
                     {renderRevenueChart()}
@@ -915,9 +915,9 @@ const Dashboard = ({ section = 'overview' }) => {
             </div>
           </div>
         ) : (
-          <div className="bg-white border border-slate-100 rounded-2xl py-24 text-center shadow-sm">
-            <h3 className="text-slate-900 font-extrabold tracking-tight text-lg">{sectionLabels[section] || 'Chức năng quản lý'}</h3>
-            <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto">
+          <div className="bg-white border border-slate-100 rounded-2xl py-24 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <h3 className="text-slate-900 font-extrabold tracking-tight text-lg dark:text-slate-100">{sectionLabels[section] || 'Chức năng quản lý'}</h3>
+            <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto dark:text-slate-400">
               {t('dashboard.noDataSection')}
             </p>
           </div>
@@ -933,8 +933,8 @@ const Dashboard = ({ section = 'overview' }) => {
   // Redirect and load map for drivers and staff
   if (lowerRole && ['driver', 'member', 'registered_driver', 'customer', 'staff'].includes(lowerRole)) {
     return (
-      <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-400 font-medium">
-        <div className="h-9 w-9 rounded-full border-4 border-slate-200 border-t-indigo-600 animate-spin mb-3"></div>
+      <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-400 font-medium dark:text-slate-400">
+        <div className="h-9 w-9 rounded-full border-4 border-slate-200 border-t-indigo-600 animate-spin mb-3 dark:border-slate-700 dark:border-t-indigo-400"></div>
         <span className="font-semibold">{t('dashboard.loadingMap')}</span>
       </div>
     );
@@ -946,17 +946,17 @@ const Dashboard = ({ section = 'overview' }) => {
       return renderManagerDashboard();
     case 'admin':
       return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+        <div className="min-h-[400px] flex flex-col items-center justify-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-100 p-8 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 dark:bg-indigo-500/15">
             <ShieldAlert size={32} className="text-indigo-600" />
           </div>
-          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 mb-2">{t('dashboard.adminNoAccess')}</h2>
-          <p className="text-sm text-slate-500">{t('dashboard.adminNoAccessDesc')}</p>
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 mb-2 dark:text-slate-100">{t('dashboard.adminNoAccess')}</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t('dashboard.adminNoAccessDesc')}</p>
         </div>
       );
     default:
       return (
-        <div className="min-h-[400px] flex items-center justify-center text-rose-500 font-bold bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        <div className="min-h-[400px] flex items-center justify-center text-rose-500 font-bold bg-white rounded-2xl border border-slate-100 shadow-sm p-6 dark:border-slate-700 dark:bg-slate-900 dark:text-rose-300">
           <ShieldAlert size={20} className="mr-2 animate-bounce" /> Error loading dashboard: User role undefined ({role})
         </div>
       );

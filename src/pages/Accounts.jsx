@@ -350,7 +350,7 @@ const Accounts = () => {
   const lockedCount = filteredAccounts.filter(a => a.status !== 'Active').length;
 
   return (
-    <div className="min-h-full bg-slate-50 select-none font-sans pb-12 w-full">
+    <div className="min-h-full w-full select-none bg-slate-50 pb-12 font-sans dark:bg-slate-900">
       <div className="space-y-8">
         {/* Floating Success Alert Toast */}
         {alertMessage && (
@@ -363,19 +363,19 @@ const Accounts = () => {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5">
+            <h1 className="flex items-center gap-2.5 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
               <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-sm">
                 <Users size={20} strokeWidth={2.5} />
               </span>
               {t('accounts.allUsersTitle')}
             </h1>
-            <p className="text-sm text-slate-500 font-medium mt-2">{getFormattedDate()}</p>
+            <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{getFormattedDate()}</p>
           </div>
         </div>
 
         {/* Error / Offline Banner */}
         {errorBanner && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm font-semibold p-3.5 rounded-[14px] flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 rounded-[14px] border border-amber-200 bg-amber-50 p-3.5 text-sm font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">
             <AlertTriangle size={16} className="text-amber-600 shrink-0" />
             <span>{errorBanner}</span>
           </div>
@@ -384,47 +384,47 @@ const Accounts = () => {
         {/* A. Top Stats Cards Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Total Users */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
               <Users size={24} strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900">{totalCount}</h3>
-              <p className="text-[13px] font-medium text-slate-500">{t('accounts.totalUsers')}</p>
+              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{totalCount}</h3>
+              <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.totalUsers')}</p>
             </div>
           </div>
 
           {/* Active Users */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/15 dark:text-emerald-300">
               <CheckCircle size={24} strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900">{activeCount}</h3>
-              <p className="text-[13px] font-medium text-slate-500">{t('accounts.active')}</p>
+              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{activeCount}</h3>
+              <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.active')}</p>
             </div>
           </div>
 
           {/* Locked Users */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500">
+          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 dark:bg-rose-500/15 dark:text-rose-300">
               <Lock size={24} strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900">{lockedCount}</h3>
-              <p className="text-[13px] font-medium text-slate-500">{t('accounts.locked')}</p>
+              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{lockedCount}</h3>
+              <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.locked')}</p>
             </div>
           </div>
         </div>
 
         {/* B. Table Section */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm pt-6 pb-2">
+        <div className="rounded-2xl border border-slate-100 bg-white pb-2 pt-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
 
           {/* Table Header & Controls */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 px-6 md:px-8">
             <div>
-              <h2 className="text-xl font-extrabold tracking-tight text-slate-900">{t('accounts.allUsersTitle')}</h2>
-              <p className="text-[13px] text-slate-500 font-medium mt-1">{totalCount} {t('accounts.accountsFound')}</p>
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('accounts.allUsersTitle')}</h2>
+              <p className="mt-1 text-[13px] font-medium text-slate-500 dark:text-slate-400">{totalCount} {t('accounts.accountsFound')}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -436,7 +436,7 @@ const Accounts = () => {
                   placeholder={t('accounts.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 pr-9 py-2.5 w-full sm:w-[280px] bg-slate-50 border-[1.5px] border-slate-200 rounded-[14px] text-[13px] text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-medium"
+                  className="w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 py-2.5 pl-11 pr-9 text-[13px] font-medium text-slate-700 placeholder-slate-400 transition-all focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800 sm:w-[280px]"
                 />
                 {searchQuery && (
                   <button
@@ -455,12 +455,12 @@ const Accounts = () => {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
                 <div className="w-8 h-8 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
-                <span className="text-[13px] font-semibold text-slate-500">{t('accounts.loadingAccounts')}</span>
+                <span className="text-[13px] font-semibold text-slate-500 dark:text-slate-400">{t('accounts.loadingAccounts')}</span>
               </div>
             ) : (
               <table className="w-full text-left border-collapse min-w-[760px]">
                 <thead>
-                  <tr className="border-b border-slate-100 text-[11px] font-extrabold text-slate-400 uppercase tracking-widest bg-slate-50">
+                  <tr className="border-b border-slate-100 bg-slate-50 text-[11px] font-extrabold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                     <th className="py-4 px-6 md:px-8 font-extrabold">{t('accounts.colUser')}</th>
                     <th className="py-4 px-4 font-extrabold">{t('accounts.colEmail')}</th>
                     <th className="py-4 px-4 font-extrabold">{t('accounts.colRole')}</th>
@@ -472,7 +472,7 @@ const Accounts = () => {
                 <tbody className="text-[13px]">
                   {filteredAccounts.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-12 text-slate-400 font-medium text-[13px]">
+                      <td colSpan={6} className="py-12 text-center text-[13px] font-medium text-slate-400 dark:text-slate-500">
                         {t('accounts.noAccountsFound')}
                       </td>
                     </tr>
@@ -483,27 +483,27 @@ const Accounts = () => {
                       // Determine Role Badges
                       let roleBadge = null;
                       if (item.roleId === 1) {
-                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-600">admin</span>;
+                        roleBadge = <span className="rounded-full bg-rose-100 px-3 py-1 text-[11px] font-bold text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">admin</span>;
                       } else if (item.roleId === 5) {
-                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-purple-100 text-purple-600">manager</span>;
+                        roleBadge = <span className="rounded-full bg-purple-100 px-3 py-1 text-[11px] font-bold text-purple-600 dark:bg-purple-500/15 dark:text-purple-300">manager</span>;
                       } else if (item.roleId === 2) {
-                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-600">staff</span>;
+                        roleBadge = <span className="rounded-full bg-blue-100 px-3 py-1 text-[11px] font-bold text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">staff</span>;
                       } else {
-                        roleBadge = <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-600">user</span>;
+                        roleBadge = <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">user</span>;
                       }
 
                       // Determine Status Badges
                       const isActive = item.status === 'Active';
                       const statusBadge = isActive
-                        ? <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-emerald-200 text-emerald-600 bg-emerald-50">active</span>
-                        : <span className="px-3 py-1 rounded-full text-[11px] font-bold border border-rose-200 text-rose-600 bg-rose-50">locked</span>;
+                        ? <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">active</span>
+                        : <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-600 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">locked</span>;
 
                       // Avatar Background Color (Using predefined distinct colors)
                       const avatarColors = ['bg-rose-500', 'bg-violet-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500'];
                       const avatarBg = avatarColors[item.id % avatarColors.length];
 
                       return (
-                        <tr key={item.id} className="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 group">
+                        <tr key={item.id} className="border-b border-slate-50 transition-colors last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/70 group">
 
                           {/* User Column */}
                           <td className="py-4 px-6 md:px-8">
@@ -511,12 +511,12 @@ const Accounts = () => {
                               <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-[12px] shadow-sm ${avatarBg}`}>
                                 {initials}
                               </div>
-                              <span className="text-slate-900 font-bold">{item.name}</span>
+                              <span className="font-bold text-slate-900 dark:text-slate-100">{item.name}</span>
                             </div>
                           </td>
 
                           {/* Email Column */}
-                          <td className="py-4 px-4 font-medium text-slate-500">
+                          <td className="px-4 py-4 font-medium text-slate-500 dark:text-slate-400">
                             {item.email}
                           </td>
 
@@ -531,7 +531,7 @@ const Accounts = () => {
                           </td>
 
                           {/* Created Column */}
-                          <td className="py-4 px-4 text-slate-500 font-medium">
+                          <td className="px-4 py-4 font-medium text-slate-500 dark:text-slate-400">
                             {item.joined}
                           </td>
 
@@ -540,7 +540,7 @@ const Accounts = () => {
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => openEditModal(item)}
-                                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-300 flex items-center justify-center transition-all shadow-sm"
+                                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-400 dark:hover:text-indigo-300"
                                 title={t('accounts.editInfo')}
                               >
                                 <Edit size={14} />
@@ -551,8 +551,8 @@ const Accounts = () => {
                                 onClick={() => handleToggleUserStatus(item.id, item.status)}
                                 className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-sm ${
                                   isActive
-                                    ? 'bg-white border-rose-200 text-rose-400 hover:text-rose-600 hover:border-rose-400'
-                                    : 'bg-white border-emerald-200 text-emerald-400 hover:text-emerald-600 hover:border-emerald-400'
+                                    ? 'bg-white border-rose-200 text-rose-400 hover:text-rose-600 hover:border-rose-400 dark:bg-slate-800 dark:border-rose-500/40 dark:text-rose-300'
+                                    : 'bg-white border-emerald-200 text-emerald-400 hover:text-emerald-600 hover:border-emerald-400 dark:bg-slate-800 dark:border-emerald-500/40 dark:text-emerald-300'
                                 }`}
                                 title={isActive ? t('accounts.lockUser') : t('accounts.unlockUser')}
                               >
@@ -573,18 +573,18 @@ const Accounts = () => {
         {/* D. "Change Role" Interactive Modal Overlay */}
         {isModalOpen && selectedUser && (
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-full max-w-md animate-in rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl duration-200 fade-in zoom-in-95 dark:border-slate-700 dark:bg-slate-900">
 
               {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-700">
                 <div className="flex items-center gap-2">
                   <UserCog className="text-indigo-600" size={20} />
-                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{t('accounts.modPermissionsTitle')}</h3>
+                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('accounts.modPermissionsTitle')}</h3>
                 </div>
                 <button
                   onClick={closeModal}
                   disabled={submitting}
-                  className="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-slate-50 rounded-xl transition-all disabled:opacity-50"
+                  className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                 >
                   <X size={18} />
                 </button>
@@ -594,30 +594,30 @@ const Accounts = () => {
               <div className="py-6 space-y-4">
 
                 {/* Account Info Nudge */}
-                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${getAvatarBg(selectedUser.roleId)}`}>
                     {getInitials(selectedUser.name)}
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-bold text-slate-900 text-sm">{selectedUser.name}</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{selectedUser.name}</span>
                     <span className="text-[11px] text-slate-400">{selectedUser.email}</span>
                   </div>
                 </div>
 
                 {/* Live Preview Nudge */}
-                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                   <span className="text-[10px] text-indigo-600 font-extrabold uppercase tracking-wider block font-sans">{t('accounts.livePreview')}</span>
-                  <p className="text-sm font-semibold text-slate-700 mt-1.5 flex items-center gap-2 font-sans">
+                  <p className="mt-1.5 flex items-center gap-2 font-sans text-sm font-semibold text-slate-700 dark:text-slate-300">
                     <span>Role:</span>
                     <span className="text-slate-400 line-through">{displayRoleIdName(selectedUser.roleId)}</span>
                     <span className="text-indigo-600 font-bold">&rarr;</span>
-                    <span className="text-indigo-600 bg-white px-2 py-0.5 rounded-lg border border-indigo-100 font-bold">{displayRoleIdName(selectedNewRoleId)}</span>
+                    <span className="rounded-lg border border-indigo-100 bg-white px-2 py-0.5 font-bold text-indigo-600 dark:border-indigo-500/40 dark:bg-slate-800 dark:text-indigo-300">{displayRoleIdName(selectedNewRoleId)}</span>
                   </p>
                 </div>
 
                 {/* Role Dropdown Selector */}
                 <div className="space-y-2 font-sans">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block">{t('accounts.selectRole')}</label>
+                  <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('accounts.selectRole')}</label>
                   <Select
                     value={selectedNewRoleId}
                     onChange={(val) => setSelectedNewRoleId(val)}
@@ -636,11 +636,11 @@ const Accounts = () => {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 font-sans">
+              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 font-sans dark:border-slate-700">
                 <button
                   onClick={closeModal}
                   disabled={submitting}
-                  className="px-4 py-2.5 border border-slate-200 bg-white text-slate-600 font-bold rounded-[14px] text-sm hover:bg-slate-50 transition-all disabled:opacity-50"
+                  className="rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   {t('accounts.btnCancel')}
                 </button>

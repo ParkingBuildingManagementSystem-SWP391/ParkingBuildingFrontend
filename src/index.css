@@ -74,6 +74,148 @@
   }
 }
 
+@layer components {
+  .dark .ant-modal-content,
+  .dark .ant-modal-header {
+    background-color: rgb(15 23 42);
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-modal-title,
+  .dark .ant-modal-close {
+    color: rgb(241 245 249);
+  }
+
+  .dark .ant-input,
+  .dark .ant-input-affix-wrapper,
+  .dark .ant-picker,
+  .dark .ant-select-selector,
+  .dark .ant-input-number,
+  .dark .ant-input-number-group-addon {
+    background-color: rgb(30 41 59) !important;
+    border-color: rgb(51 65 85) !important;
+    color: rgb(241 245 249) !important;
+  }
+
+  .dark .ant-input::placeholder,
+  .dark .ant-input-affix-wrapper input::placeholder {
+    color: rgb(100 116 139) !important;
+  }
+
+  .dark .ant-select-selection-placeholder,
+  .dark .ant-select-arrow,
+  .dark .ant-select-clear,
+  .dark .ant-picker-suffix {
+    color: rgb(148 163 184) !important;
+  }
+
+  .dark .ant-select-selection-item,
+  .dark .ant-picker-input > input,
+  .dark .ant-input-number-input {
+    color: rgb(241 245 249) !important;
+  }
+
+  .dark .ant-select-dropdown,
+  .dark .ant-picker-dropdown .ant-picker-panel-container {
+    background-color: rgb(15 23 42);
+    border: 1px solid rgb(51 65 85);
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-select-item {
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-select-item-option-active,
+  .dark .ant-select-item-option-selected {
+    background-color: rgb(30 41 59) !important;
+    color: rgb(241 245 249) !important;
+  }
+
+  .dark .ant-btn-default {
+    background-color: rgb(30 41 59);
+    border-color: rgb(51 65 85);
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-btn-default:not(:disabled):hover {
+    background-color: rgb(51 65 85);
+    border-color: rgb(71 85 105);
+    color: rgb(255 255 255);
+  }
+
+  .dark .ant-table,
+  .dark .ant-table-container,
+  .dark .ant-table-thead > tr > th,
+  .dark .ant-table-tbody > tr > td,
+  .dark .ant-descriptions-view,
+  .dark .ant-descriptions-item-label,
+  .dark .ant-descriptions-item-content {
+    background-color: rgb(15 23 42);
+    border-color: rgb(51 65 85);
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-radio-button-wrapper {
+    background-color: rgb(30 41 59);
+    border-color: rgb(51 65 85);
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-checked):hover {
+    color: rgb(165 180 252);
+  }
+
+  .dark .ant-table-tbody > tr:hover > td {
+    background-color: rgb(30 41 59) !important;
+  }
+
+  .dark .ant-drawer-content,
+  .dark .ant-drawer-header,
+  .dark .ant-drawer-body,
+  .dark .ant-card,
+  .dark .ant-card-head,
+  .dark .ant-card-body {
+    background-color: rgb(15 23 42);
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-drawer-header,
+  .dark .ant-card-head {
+    border-color: rgb(51 65 85);
+  }
+
+  .dark .ant-drawer-title,
+  .dark .ant-drawer-close,
+  .dark .ant-popover-inner,
+  .dark .ant-popover-title {
+    color: rgb(241 245 249);
+  }
+
+  .dark .ant-popover-inner {
+    background-color: rgb(15 23 42);
+    border: 1px solid rgb(51 65 85);
+  }
+
+  .dark .ant-pagination .ant-pagination-item,
+  .dark .ant-pagination .ant-pagination-prev button,
+  .dark .ant-pagination .ant-pagination-next button {
+    background-color: rgb(30 41 59);
+    border-color: rgb(51 65 85);
+  }
+
+  .dark .ant-pagination .ant-pagination-item a,
+  .dark .ant-pagination .ant-pagination-prev button,
+  .dark .ant-pagination .ant-pagination-next button {
+    color: rgb(226 232 240);
+  }
+
+  .dark .ant-empty-description,
+  .dark .ant-spin-text {
+    color: rgb(148 163 184) !important;
+  }
+}
+
 /* Elegant custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

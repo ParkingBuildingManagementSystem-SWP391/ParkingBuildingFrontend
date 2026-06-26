@@ -334,10 +334,10 @@ const MyBookings = () => {
       {/* 1. PAGE HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
             {t('myBookings.pageTitle')}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {t('myBookings.pageSubtitle')}
           </p>
         </div>
@@ -347,50 +347,50 @@ const MyBookings = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
         {/* Total Bookings Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.totalBookings')}</span>
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('myBookings.totalBookings')}</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600 dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-300">
               <Ticket size={18} />
             </div>
           </div>
           <div className="flex items-end gap-2">
-            <span className="text-4xl font-extrabold text-slate-900 tracking-tight">{totalBookings}</span>
+            <span className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{totalBookings}</span>
           </div>
         </div>
 
         {/* Active Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.active')}</span>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('myBookings.active')}</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 text-emerald-600 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">
               <CheckCircle size={18} />
             </div>
           </div>
           <div className="flex items-end gap-2">
-            <span className="text-4xl font-extrabold text-slate-900 tracking-tight">{activeCount}</span>
+            <span className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{activeCount}</span>
             <span className="text-sm text-slate-400 font-bold mb-1">{t('myBookings.sessions')}</span>
           </div>
         </div>
 
         {/* Expired Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.expired')}</span>
-            <div className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center border border-slate-200">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('myBookings.expired')}</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
               <XCircle size={18} />
             </div>
           </div>
           <div className="flex items-end gap-2">
-            <span className="text-4xl font-extrabold text-slate-900 tracking-tight">{expiredCount}</span>
+            <span className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{expiredCount}</span>
           </div>
         </div>
 
         {/* Total Spent Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('myBookings.totalSpent')}</span>
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('myBookings.totalSpent')}</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600 dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-300">
               <CreditCard size={18} />
             </div>
           </div>
@@ -405,13 +405,13 @@ const MyBookings = () => {
       </div>
 
       {/* 3. STATUS FILTER TABS (Segmented Control Design) */}
-      <div className="inline-flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+      <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-800">
         <button
           onClick={() => setActiveTab('All')}
           className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
             activeTab === 'All'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           {t('myBookings.all')}
@@ -420,8 +420,8 @@ const MyBookings = () => {
           onClick={() => setActiveTab('Active')}
           className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
             activeTab === 'Active'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           {t('myBookings.active')}
@@ -430,8 +430,8 @@ const MyBookings = () => {
           onClick={() => setActiveTab('Expired')}
           className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
             activeTab === 'Expired'
-              ? 'bg-white text-indigo-600 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           {t('myBookings.expired')}
@@ -442,11 +442,11 @@ const MyBookings = () => {
       <div className="space-y-4">
         {/* Error Banner */}
         {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-start gap-3 mb-4 shadow-sm">
+          <div className="mb-4 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700 shadow-sm dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">
             <AlertCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
               <h4 className="font-bold text-sm">{t('myBookings.actionFailed')}</h4>
-              <p className="text-sm text-rose-600 mt-0.5">{error}</p>
+              <p className="mt-0.5 text-sm text-rose-600 dark:text-rose-300">{error}</p>
             </div>
             <button onClick={() => setError('')} className="p-1 hover:bg-rose-100 rounded-lg transition-colors">
               <X size={16} />
@@ -456,11 +456,11 @@ const MyBookings = () => {
 
         {/* Success Banner */}
         {successMessage && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl flex items-start gap-3 mb-4 shadow-sm">
+          <div className="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 shadow-sm dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">
             <CheckCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
               <h4 className="font-bold text-sm">{t('myBookings.actionSuccess')}</h4>
-              <p className="text-sm text-emerald-600 mt-0.5">{successMessage}</p>
+              <p className="mt-0.5 text-sm text-emerald-600 dark:text-emerald-300">{successMessage}</p>
             </div>
             <button onClick={() => setSuccessMessage('')} className="p-1 hover:bg-emerald-100 rounded-lg transition-colors">
               <X size={16} />
@@ -470,17 +470,17 @@ const MyBookings = () => {
 
         {/* List of Bookings */}
         {loading && bookings.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-2xl py-20 text-center shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white py-20 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="w-10 h-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin mx-auto mb-4"></div>
-            <h3 className="text-slate-700 font-bold text-base">{t('myBookings.loadingRes')}</h3>
+            <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">{t('myBookings.loadingRes')}</h3>
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-2xl py-20 text-center shadow-sm flex flex-col items-center">
-            <div className="w-20 h-20 bg-slate-50 border border-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-5">
+          <div className="flex flex-col items-center rounded-2xl border border-slate-100 bg-white py-20 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full border border-slate-100 bg-slate-50 text-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
               <QrCode size={40} />
             </div>
-            <h3 className="text-slate-900 font-extrabold text-lg mb-2 tracking-tight">{t('myBookings.noBookings')}</h3>
-            <p className="text-sm text-slate-500 max-w-sm">
+            <h3 className="mb-2 text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('myBookings.noBookings')}</h3>
+            <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
               {t('myBookings.noBookingsDesc')}
             </p>
           </div>
@@ -489,7 +489,7 @@ const MyBookings = () => {
             {filteredBookings.map((booking, index) => (
               <div
                 key={booking.id}
-                className={`bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-shadow border-l-4 ${
+                className={`rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-900 border-l-4 ${
                   isActiveSession(booking.sessionStatus)
                     ? booking.sessionStatus === 'Reserved'
                       ? 'border-l-amber-400'
@@ -501,28 +501,28 @@ const MyBookings = () => {
 
                   {/* Left: ID & Main Info */}
                   <div className="flex items-center gap-4 w-full lg:w-[320px] shrink-0">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex flex-col items-center justify-center shrink-0">
+                    <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                       <span className="text-[10px] font-bold text-indigo-400">ID</span>
                       <span className="text-sm font-extrabold text-indigo-700">{index + 1}</span>
                     </div>
 
                     <div>
                       <div className="flex items-center flex-wrap gap-2 mb-1">
-                        <span className="font-extrabold text-slate-900 text-base">{booking.location}</span>
-                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-slate-100 text-slate-600">
+                        <span className="text-base font-extrabold text-slate-900 dark:text-slate-100">{booking.location}</span>
+                        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                           {booking.vehicleType}
                         </span>
                         <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
                           isActiveSession(booking.sessionStatus)
                             ? booking.sessionStatus === 'Reserved'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-emerald-100 text-emerald-700'
-                            : 'bg-slate-100 text-slate-500'
+                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                         }`}>
                           {booking.sessionStatus || booking.status}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                      <div className="flex items-center gap-3 text-xs font-medium text-slate-500 dark:text-slate-400">
                         <span className="flex items-center gap-1"><Ticket size={12} className="text-slate-400"/> {booking.ticketId}</span>
                         <span className="w-1 h-1 rounded-full bg-slate-300 hidden sm:block"></span>
                         <span className="flex items-center gap-1"><CalendarIcon size={12} className="text-slate-400"/> {booking.bookedDate} {booking.bookedTime}</span>
@@ -531,7 +531,7 @@ const MyBookings = () => {
                   </div>
 
                   {/* Middle: Status Metrics */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1 w-full bg-slate-50 p-3 lg:p-0 rounded-xl lg:bg-transparent lg:px-8 border-x border-transparent lg:border-slate-100">
+                  <div className="grid w-full flex-1 grid-cols-2 gap-4 rounded-xl border-x border-transparent bg-slate-50 p-3 dark:bg-slate-800/70 lg:bg-transparent lg:px-8 lg:p-0 lg:border-slate-100 dark:lg:border-slate-700 sm:grid-cols-3">
 
                     {/* Time Metric */}
                     <div className="flex flex-col items-start">
@@ -540,13 +540,13 @@ const MyBookings = () => {
                       </span>
                       {booking.sessionStatus === 'Reserved' ? (
                         <div className="flex flex-col items-start gap-1">
-                          <span className="text-sm font-bold text-slate-700 block leading-none">{booking.deadlineTime}</span>
-                          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-100 text-amber-700 animate-pulse inline-block">
+                          <span className="block text-sm font-bold leading-none text-slate-700 dark:text-slate-300">{booking.deadlineTime}</span>
+                          <span className="inline-block animate-pulse rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
                             {getRemainingMinutesText(booking.rawDeadlineBaseTime)}
                           </span>
                         </div>
                       ) : (
-                        <div className="text-xs font-semibold text-slate-600 space-y-0.5">
+                        <div className="space-y-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
                           <div className="flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                             In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) : 'N/A'}
@@ -569,7 +569,7 @@ const MyBookings = () => {
                           <span className="text-sm font-extrabold text-indigo-700 block">
                             {booking.totalAmount.toLocaleString('vi-VN')} đ
                           </span>
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">
+                          <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">
                             {booking.paymentMethod || 'CASH'} - {booking.paymentStatus || 'PENDING'}
                           </span>
                         </div>
@@ -578,7 +578,7 @@ const MyBookings = () => {
                           <span className="text-sm font-extrabold text-amber-600 block">
                             {Number(booking.depositAmount).toLocaleString('vi-VN')} đ
                           </span>
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">
+                          <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">
                             DEP - {booking.paymentStatus || 'PENDING'}
                           </span>
                         </div>
@@ -590,7 +590,7 @@ const MyBookings = () => {
                     {/* Plate Metric */}
                     <div className="flex flex-col items-start hidden sm:flex">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('myBookings.plate')}</span>
-                      <span className="text-sm font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                      <span className="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                         {booking.contact}
                       </span>
                     </div>
@@ -604,7 +604,7 @@ const MyBookings = () => {
                         setTargetBooking(booking);
                         setIsQrOpen(true);
                       }}
-                      className="flex-1 lg:flex-none h-10 px-4 bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-[14px] font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                      className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-slate-200 bg-white px-4 text-xs font-bold text-slate-700 shadow-sm transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-indigo-400 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300 lg:flex-none"
                     >
                       <QrCode size={14} /> {t('myBookings.viewQR')}
                     </button>
@@ -612,7 +612,7 @@ const MyBookings = () => {
                     {booking.sessionStatus === 'Reserved' && (
                       <button
                          onClick={() => handleCancelClick(booking.id)}
-                         className="flex-1 lg:flex-none h-10 px-4 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-[14px] font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                         className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-rose-200 bg-white px-4 text-xs font-bold text-rose-600 shadow-sm transition-all hover:bg-rose-50 dark:border-rose-500/40 dark:bg-slate-800 dark:text-rose-300 dark:hover:bg-rose-500/15 lg:flex-none"
                       >
                         <X size={14} /> {t('myBookings.cancel')}
                       </button>
@@ -644,21 +644,21 @@ const MyBookings = () => {
       {/* 5. DYNAMIC CUSTOM REACTION CONFIRMATION MODAL OVERLAY */}
       {isCancelConfirmOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 border border-slate-100 relative">
+          <div className="relative w-full max-w-sm rounded-2xl border border-slate-100 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900">
             <button
               onClick={() => setIsCancelConfirmOpen(false)}
-              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center rounded-xl transition-all"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             >
               <X size={18} />
             </button>
 
             <div className="space-y-5 pt-2 text-center">
-              <div className="w-14 h-14 bg-rose-50 border border-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-rose-100 bg-rose-50 text-rose-600 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">
                 <AlertCircle size={28} />
               </div>
               <div className="space-y-1.5">
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">{t('myBookings.cancelTitle')}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed px-2">
+                <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('myBookings.cancelTitle')}</h3>
+                <p className="px-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                   {t('myBookings.cancelDesc')}
                 </p>
               </div>
@@ -666,7 +666,7 @@ const MyBookings = () => {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => setIsCancelConfirmOpen(false)}
-                  className="flex-1 h-11 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-[14px] text-sm transition-all"
+                  className="h-11 flex-1 rounded-[14px] border border-slate-200 bg-white text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 >
                   {t('myBookings.btnNoKeep')}
                 </button>
@@ -685,24 +685,24 @@ const MyBookings = () => {
       {/* 6. DYNAMIC QR DISPLAY MODAL OVERLAY */}
       {isQrOpen && targetBooking && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 border border-slate-100 relative text-center">
+          <div className="relative w-full max-w-sm rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-xl dark:border-slate-700 dark:bg-slate-900">
             <button
               onClick={() => {
                 setIsQrOpen(false);
                 setTargetBooking(null);
               }}
-              className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center rounded-xl transition-all"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             >
               <X size={18} />
             </button>
 
             <div className="space-y-5 pt-2">
               <div className="space-y-1.5">
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">{t('myBookings.ticketTitle')}</h3>
-                <p className="text-xs text-slate-500">{t('myBookings.ticketDesc')}</p>
+                <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('myBookings.ticketTitle')}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t('myBookings.ticketDesc')}</p>
               </div>
 
-              <div className="bg-slate-50 border border-slate-100 p-6 rounded-2xl inline-block">
+              <div className="inline-block rounded-2xl border border-slate-100 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800">
                 {/* Real thermal QR block */}
                 <div className="w-40 h-40 bg-white border border-slate-200 rounded-xl p-2 mx-auto flex items-center justify-center shadow-sm">
                   <img

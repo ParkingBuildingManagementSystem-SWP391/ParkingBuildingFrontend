@@ -72,25 +72,25 @@ const CreateAccount = () => {
 
         {/* PAGE HEADER */}
         <div className="space-y-1">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
             {t('createAccount.pageTitle')}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {t('createAccount.pageSubtitle')}
           </p>
         </div>
 
         {/* FORM CARD */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 dark:border-slate-700 dark:bg-slate-900">
           <form onSubmit={handleSubmit} className="space-y-6">
 
             {/* Status Messages */}
             {error && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-[14px] flex items-start gap-3">
+              <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-[14px] flex items-start gap-3 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">
                 <AlertCircle className="shrink-0 mt-0.5" size={20} />
                 <div className="flex-1">
                   <h4 className="font-bold text-sm">{t('createAccount.actionFailed')}</h4>
-                  <p className="text-sm text-rose-600 mt-0.5 whitespace-pre-line">{error}</p>
+                  <p className="text-sm text-rose-600 mt-0.5 whitespace-pre-line dark:text-rose-300">{error}</p>
                 </div>
                 <button type="button" onClick={() => setError('')} className="p-1 hover:bg-rose-100 rounded-lg transition-colors">
                   <X size={16} />
@@ -99,11 +99,11 @@ const CreateAccount = () => {
             )}
 
             {success && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-[14px] flex items-start gap-3">
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-[14px] flex items-start gap-3 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">
                 <CheckCircle className="shrink-0 mt-0.5" size={20} />
                 <div className="flex-1">
                   <h4 className="font-bold text-sm">{t('createAccount.actionSuccess')}</h4>
-                  <p className="text-sm text-emerald-600 mt-0.5">{success}</p>
+                  <p className="text-sm text-emerald-600 mt-0.5 dark:text-emerald-300">{success}</p>
                 </div>
                 <button type="button" onClick={() => setSuccess('')} className="p-1 hover:bg-emerald-100 rounded-lg transition-colors">
                   <X size={16} />
@@ -126,7 +126,7 @@ const CreateAccount = () => {
                     onChange={handleChange}
                     required
                     placeholder={t('createAccount.phUsername')}
-                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none"
+                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
               </div>
@@ -145,7 +145,7 @@ const CreateAccount = () => {
                     onChange={handleChange}
                     required
                     placeholder={t('createAccount.phEmail')}
-                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none"
+                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
               </div>
@@ -164,7 +164,7 @@ const CreateAccount = () => {
                     onChange={handleChange}
                     required
                     placeholder={t('createAccount.phPhone')}
-                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none"
+                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
               </div>
@@ -183,7 +183,7 @@ const CreateAccount = () => {
                     onChange={handleChange}
                     required
                     placeholder={t('createAccount.phTempPwd')}
-                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none"
+                    className="w-full h-[52px] bg-slate-50 border-[1.5px] border-slate-200 text-slate-800 text-sm rounded-[14px] focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 focus:bg-white block pl-11 pr-4 transition-all outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
               </div>
@@ -200,8 +200,8 @@ const CreateAccount = () => {
                     onClick={() => handleRoleChange(role)}
                     className={`relative flex flex-col items-center justify-center p-4 rounded-[14px] border-[1.5px] transition-all duration-200 ${
                       formData.roleName === role
-                        ? 'bg-indigo-50 border-indigo-600 shadow-sm z-10'
-                        : 'bg-white border-slate-200 hover:border-indigo-200 hover:bg-slate-50'
+                        ? 'bg-indigo-50 border-indigo-600 shadow-sm z-10 dark:bg-indigo-500/15'
+                        : 'bg-white border-slate-200 hover:border-indigo-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700'
                     }`}
                   >
                     {formData.roleName === role && (
@@ -210,7 +210,7 @@ const CreateAccount = () => {
                       </div>
                     )}
                     <Shield size={24} className={`mb-2 ${formData.roleName === role ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span className={`text-sm font-bold text-center ${formData.roleName === role ? 'text-indigo-900' : 'text-slate-600'}`}>
+                    <span className={`text-sm font-bold text-center ${formData.roleName === role ? 'text-indigo-900 dark:text-indigo-200' : 'text-slate-600 dark:text-slate-300'}`}>
                       {role.replace('_', ' ')}
                     </span>
                   </button>
@@ -219,7 +219,7 @@ const CreateAccount = () => {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-6 mt-6 border-t border-slate-100">
+            <div className="pt-6 mt-6 border-t border-slate-100 dark:border-slate-700">
               <button
                 type="submit"
                 disabled={loading}

@@ -109,7 +109,7 @@ const IncidentsTable = () => {
         </span>
       );
       default: return (
-        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
           {severity}
         </span>
       );
@@ -118,12 +118,12 @@ const IncidentsTable = () => {
 
   const getStatusTag = (status) => {
     if (status === 'Resolved') return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/40">
         <CheckCircle2 size={14} /> {t('dashboard.incidents.status.resolved')}
       </span>
     );
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
         <span className="h-1.5 w-1.5 rounded-full bg-rose-500" /> {t('dashboard.incidents.status.open')}
       </span>
     );
@@ -147,8 +147,8 @@ const IncidentsTable = () => {
       key: 'details',
       render: (_, record) => (
         <div className="flex flex-col gap-1 max-w-md">
-          <span className="font-bold text-slate-900 text-sm">{record.type}</span>
-          <span className="text-xs text-slate-500 leading-relaxed">{record.description}</span>
+          <span className="font-bold text-slate-900 text-sm dark:text-slate-100">{record.type}</span>
+          <span className="text-xs text-slate-500 leading-relaxed dark:text-slate-400">{record.description}</span>
         </div>
       )
     },
@@ -156,11 +156,11 @@ const IncidentsTable = () => {
       title: t('dashboard.incidents.columns.locationTime'),
       key: 'locationTime',
       render: (_, record) => (
-        <div className="flex flex-col gap-1.5 text-xs text-slate-600">
+        <div className="flex flex-col gap-1.5 text-xs text-slate-600 dark:text-slate-300">
           <div className="flex items-center gap-1.5 font-semibold text-indigo-600">
             <MapPin size={14} /> {record.location}
           </div>
-          <div className="flex items-center gap-1.5 text-slate-500">
+          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
             <Clock size={14} /> {record.timestamp ? new Date(record.timestamp).toLocaleString('vi-VN') : 'N/A'}
           </div>
         </div>
@@ -183,7 +183,7 @@ const IncidentsTable = () => {
         return (
           <Space>
             <Tooltip title={t('dashboard.incidents.cameraEvidence')}>
-              <Button icon={<Camera size={14} />} size="small" className="flex items-center justify-center rounded-[12px] border-slate-200 bg-white text-slate-500 hover:text-indigo-600 hover:border-indigo-200" onClick={() => message.info(t('dashboard.incidents.noCameraEndpoint'))} />
+              <Button icon={<Camera size={14} />} size="small" className="flex items-center justify-center rounded-[12px] border-slate-200 bg-white text-slate-500 hover:text-indigo-600 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-indigo-300" onClick={() => message.info(t('dashboard.incidents.noCameraEndpoint'))} />
             </Tooltip>
             <Popconfirm
               title={t('dashboard.incidents.resolveConfirmTitle')}
@@ -212,49 +212,49 @@ const IncidentsTable = () => {
   const warningCount = incidents.filter(i => i.severity === 'Warning' && i.status === 'Open').length;
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5 font-sans">
+    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5 font-sans dark:border-slate-700 dark:bg-slate-900">
 
       {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-100">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-100 dark:bg-rose-500/15 dark:text-rose-300 dark:ring-rose-500/40">
             <Activity size={22} />
           </div>
           <div>
-            <h3 className="text-xl font-extrabold text-slate-900">
+            <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
               {t('dashboard.incidents.title')}
             </h3>
-            <p className="text-sm text-slate-500 mt-0.5">{t('dashboard.incidents.subtitle')}</p>
+            <p className="text-sm text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.incidents.subtitle')}</p>
             {error && <p className="text-xs text-rose-500 mt-2 font-semibold">{error}</p>}
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
 
-          <div className="flex bg-slate-50 p-1 rounded-[14px] border border-slate-200">
+          <div className="flex bg-slate-50 p-1 rounded-[14px] border border-slate-200 dark:border-slate-700 dark:bg-slate-800">
             <button
               onClick={() => setFilterSeverity('All')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all ${filterSeverity === 'All' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all ${filterSeverity === 'All' ? 'bg-white shadow-sm text-slate-900 dark:bg-slate-900 dark:text-slate-100' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
             >
               {t('dashboard.incidents.filterOpen')}
             </button>
             <button
               onClick={() => setFilterSeverity('Critical')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all flex items-center gap-1.5 ${filterSeverity === 'Critical' ? 'bg-rose-100 shadow-sm text-rose-800' : 'text-slate-500 hover:text-rose-600'}`}
+              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all flex items-center gap-1.5 ${filterSeverity === 'Critical' ? 'bg-rose-100 shadow-sm text-rose-800 dark:bg-rose-500/15 dark:text-rose-300' : 'text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-300'}`}
             >
               {t('dashboard.incidents.filterCritical')}
               {criticalCount > 0 && <span className="bg-rose-500 text-white px-1.5 rounded-full text-[10px]">{criticalCount}</span>}
             </button>
             <button
               onClick={() => setFilterSeverity('Warning')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all flex items-center gap-1.5 ${filterSeverity === 'Warning' ? 'bg-amber-100 shadow-sm text-amber-800' : 'text-slate-500 hover:text-amber-600'}`}
+              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all flex items-center gap-1.5 ${filterSeverity === 'Warning' ? 'bg-amber-100 shadow-sm text-amber-800 dark:bg-amber-500/15 dark:text-amber-300' : 'text-slate-500 hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-300'}`}
             >
               {t('dashboard.incidents.filterWarning')}
               {warningCount > 0 && <span className="bg-amber-500 text-white px-1.5 rounded-full text-[10px]">{warningCount}</span>}
             </button>
             <button
               onClick={() => setFilterSeverity('Resolved')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all ${filterSeverity === 'Resolved' ? 'bg-emerald-100 shadow-sm text-emerald-800' : 'text-slate-500 hover:text-emerald-600'}`}
+              className={`px-3 py-1.5 text-xs font-bold rounded-[10px] transition-all ${filterSeverity === 'Resolved' ? 'bg-emerald-100 shadow-sm text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' : 'text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-300'}`}
             >
               {t('dashboard.incidents.filterResolved')}
             </button>
@@ -279,8 +279,8 @@ const IncidentsTable = () => {
         rowKey="id"
         locale={{ emptyText: error ? t('dashboard.incidents.emptyTextError') : t('dashboard.incidents.emptyText') }}
         pagination={{ pageSize: 5 }}
-        rowClassName={(record) => record.status === 'Resolved' ? 'bg-slate-50/50 opacity-70' : 'hover:bg-rose-50/30'}
-        className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm"
+        rowClassName={(record) => record.status === 'Resolved' ? 'bg-slate-50/50 opacity-70 dark:bg-slate-800/40' : 'hover:bg-rose-50/30 dark:hover:bg-rose-500/10'}
+        className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm dark:border-slate-700"
       />
     </div>
   );

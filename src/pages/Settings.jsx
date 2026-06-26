@@ -142,23 +142,23 @@ const Settings = () => {
 
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('settings.titlePersonalInfo')}</h1>
-        <p className="text-sm text-slate-500 mt-1">{t('settings.descPersonalInfo')}</p>
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{t('settings.titlePersonalInfo')}</h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('settings.descPersonalInfo')}</p>
       </div>
 
       {/* Main Form Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
         {/* User Profile Form Column (Left - occupies 2/3 wide on large displays) */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-700 sm:px-8">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)]">
                 <UserCheck size={20} />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-slate-900">{t('settings.titlePersonalInfo')}</h2>
-                <p className="text-xs text-slate-500 mt-0.5">{t('settings.descPersonalInfo')}</p>
+                <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">{t('settings.titlePersonalInfo')}</h2>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{t('settings.descPersonalInfo')}</p>
               </div>
             </div>
             <Sparkles size={18} className="text-indigo-600" />
@@ -169,22 +169,22 @@ const Settings = () => {
 
               {/* Username Input (Disabled based on best practices) */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelUsername')}</label>
+                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelUsername')}</label>
                 <div className="relative">
                   <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
                   <input
                     type="text"
                     disabled
                     value={username}
-                    className="w-full h-12 pl-12 pr-4 bg-slate-100 border-[1.5px] border-slate-200 text-sm rounded-[14px] text-slate-500 font-semibold cursor-not-allowed select-none outline-none"
+                    className="h-12 w-full cursor-not-allowed select-none rounded-[14px] border-[1.5px] border-slate-200 bg-slate-100 pl-12 pr-4 text-sm font-semibold text-slate-500 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
                   />
                 </div>
-                <span className="text-[11px] text-slate-400 font-medium block pl-1">{t('settings.hintUsername')}</span>
+                <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">{t('settings.hintUsername')}</span>
               </div>
 
               {/* Full Name Input */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelFullName')}</label>
+                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelFullName')}</label>
                 <div className="relative">
                   <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
@@ -193,14 +193,14 @@ const Settings = () => {
                     placeholder={t('settings.phFullName')}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-semibold text-slate-900"
+                    className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
               </div>
 
               {/* Email Address Input */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelEmail')}</label>
+                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelEmail')}</label>
                 <div className="relative">
                   <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
@@ -209,14 +209,14 @@ const Settings = () => {
                     placeholder={t('settings.phEmail')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-semibold text-slate-900"
+                    className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
               </div>
 
               {/* Phone Number Input */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelPhone')}</label>
+                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelPhone')}</label>
                 <div className="relative">
                   <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
@@ -225,14 +225,14 @@ const Settings = () => {
                     placeholder={t('settings.phPhone')}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-mono font-bold text-slate-900"
+                    className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 font-mono text-sm font-bold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
               </div>
 
               {/* Vehicle Type Dropdown */}
               <div className="space-y-1.5 md:col-span-2">
-                <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">{t('settings.labelVehicle')}</label>
+                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelVehicle')}</label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2">
                     {getVehicleIcon(vehicleType)}
@@ -240,7 +240,7 @@ const Settings = () => {
                   <select
                     value={vehicleType}
                     onChange={(e) => setVehicleType(e.target.value)}
-                    className="w-full h-12 pl-12 pr-10 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-semibold text-slate-900 cursor-pointer appearance-none"
+                    className="h-12 w-full cursor-pointer appearance-none rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-10 text-sm font-semibold text-slate-900 transition-all focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
                   >
                     <option value="Car">{t('settings.optCar')}</option>
                     <option value="Motorbike">{t('settings.optMoto')}</option>
@@ -255,11 +255,11 @@ const Settings = () => {
             </div>
 
             {/* Save Profile CTA buttons */}
-            <div className="flex flex-col-reverse sm:flex-row items-center gap-3 pt-5 border-t border-slate-100">
+            <div className="flex flex-col-reverse items-center gap-3 border-t border-slate-100 pt-5 dark:border-slate-700 sm:flex-row">
               <button
                 type="button"
                 onClick={handleCancelChanges}
-                className="w-full sm:w-auto px-6 h-12 border-[1.5px] border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-[14px] transition-all text-sm flex items-center justify-center gap-2"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-6 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:w-auto"
               >
                 <X size={16} />
                 {t('settings.btnCancel')}
@@ -283,22 +283,22 @@ const Settings = () => {
 
 
           {/* Account Status / Overview Widget (Renders for everyone, providing nice context) */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
+          <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <h3 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">{t('settings.titleAccountOverview')}</h3>
 
             <div className="space-y-1 text-sm leading-normal">
 
               <div className="flex justify-between items-center py-2.5">
-                <span className="text-slate-500 font-semibold">{t('settings.lblVerifyBadge')}</span>
+                <span className="font-semibold text-slate-500 dark:text-slate-400">{t('settings.lblVerifyBadge')}</span>
                 <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                  <Check size={16} className="bg-emerald-100 p-0.5 rounded-full" />
+                  <Check size={16} className="rounded-full bg-emerald-100 p-0.5 dark:bg-emerald-500/20" />
                   {t('settings.valVerified')}
                 </span>
               </div>
 
 
-              <div className="flex justify-between items-center py-2.5 border-t border-slate-100">
-                <span className="text-slate-500 font-semibold">{t('settings.lblAccountStatus')}</span>
+              <div className="flex items-center justify-between border-t border-slate-100 py-2.5 dark:border-slate-700">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">{t('settings.lblAccountStatus')}</span>
                 <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
                   {t('settings.valActiveSession')}
@@ -306,8 +306,8 @@ const Settings = () => {
               </div>
 
               {user && user.balance !== undefined && (
-                <div className="flex justify-between items-center py-2.5 border-t border-slate-100">
-                  <span className="text-slate-500 font-semibold">{t('settings.lblCardBalance')}</span>
+                <div className="flex items-center justify-between border-t border-slate-100 py-2.5 dark:border-slate-700">
+                  <span className="font-semibold text-slate-500 dark:text-slate-400">{t('settings.lblCardBalance')}</span>
                   <span className="font-extrabold text-indigo-600">
                     {user.balance.toLocaleString('vi-VN')} đ
                   </span>
