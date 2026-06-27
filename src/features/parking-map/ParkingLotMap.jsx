@@ -23,6 +23,7 @@ import { managerService } from '../../services/managerService';
 import api from '../../services/api';
 import carIcon from '../../assets/vehicles/car.png';
 import motorbikeIcon from '../../assets/vehicles/motorbike.png';
+import bikeIcon from '../../assets/vehicles/bike.png';
 import i18n from '../../i18n';
 import { useTranslation } from 'react-i18next';
 
@@ -59,7 +60,8 @@ const DB_FLOORS = [
 const vehicleIconMap = {
   car: carIcon,
   motorbike: motorbikeIcon,
-  bicycle: motorbikeIcon,
+  bike: bikeIcon,
+  bicycle: bikeIcon,
 };
 
 const statusStyleMap = {
@@ -77,9 +79,9 @@ const normalizeStatus = (status) => {
 
 const normalizeVehicleType = (type) => {
   const value = String(type ?? '').trim().toLowerCase();
-  if (value === 'car') return 'car';
-  if (value === 'motorbike' || value === 'motorcycle') return 'motorbike';
-  if (value === 'bicycle' || value === 'bike') return 'bicycle';
+  if (value.includes('bicycle') || value.includes('bike') || value.includes('xe đạp') || value.includes('xe dap')) return 'bike';
+  if (value.includes('motor') || value.includes('scooter') || value.includes('xe máy') || value.includes('xe may')) return 'motorbike';
+  if (value.includes('car') || value.includes('ô tô') || value.includes('oto')) return 'car';
   return value;
 };
 
@@ -92,13 +94,15 @@ const canonicalStatusLabel = {
 const getSlotVehicleIcon = (slot) => {
   const typeId = Number(slot?.typeId);
   if (typeId === 3) return carIcon;
-  if (typeId === 1 || typeId === 2) return motorbikeIcon;
+  if (typeId === 1) return bikeIcon;
+  if (typeId === 2) return motorbikeIcon;
   return vehicleIconMap[normalizeVehicleType(slot?.type)] || null;
 };
 
 const getSlotVehicleAlt = (slot) => {
   const typeId = Number(slot?.typeId);
   if (typeId === 3 || normalizeVehicleType(slot?.type) === 'car') return 'Car';
+  if (typeId === 1 || normalizeVehicleType(slot?.type) === 'bike') return 'Bike';
   return 'Motorbike';
 };
 
@@ -139,6 +143,39 @@ const getVehicleTypeLabel = (type) => {
     default:
       return type;
   }
+};
+
+const bookingVehicleOptions = [
+  { value: 'Car', typeId: 3, labelKey: 'carOpt' },
+  { value: 'Motorcycle', typeId: 2, labelKey: 'motorcycleOpt' },
+  { value: 'Bicycle', typeId: 1, labelKey: 'bicycleOpt' },
+];
+
+const getBookingVehicleValueFromSlot = (slot) => {
+  const typeId = Number(slot?.typeId);
+  if (typeId === 1) return 'Bicycle';
+  if (typeId === 2) return 'Motorcycle';
+  if (typeId === 3) return 'Car';
+
+  const normalizedType = normalizeVehicleType(slot?.type);
+  if (normalizedType === 'bike') return 'Bicycle';
+  if (normalizedType === 'motorbike') return 'Motorcycle';
+  if (normalizedType === 'car') return 'Car';
+
+  return null;
+};
+
+const getAllowedBookingVehicleTypes = (slot, floorId) => {
+  const slotVehicleType = getBookingVehicleValueFromSlot(slot);
+  if (slotVehicleType) {
+    return bookingVehicleOptions.filter((option) => option.value === slotVehicleType);
+  }
+
+  if (Number(floorId) === 3) {
+    return bookingVehicleOptions.filter((option) => ['Motorcycle', 'Bicycle'].includes(option.value));
+  }
+
+  return bookingVehicleOptions.filter((option) => option.value === 'Car');
 };
 
 const getZoneDisplayName = (zoneName) => {
@@ -256,6 +293,13 @@ const ParkingLotMap = () => {
   const activeFloor = useMemo(() => {
     return floors.find(f => f.id === activeFloorId) || floors[0];
   }, [activeFloorId, floors]);
+
+  const allowedBookingVehicleTypes = useMemo(() => (
+    getAllowedBookingVehicleTypes(selectedSlot, activeFloorId)
+  ), [selectedSlot, activeFloorId]);
+
+  const shouldShowVehicleTypeSelect = allowedBookingVehicleTypes.length > 1;
+  const fixedBookingVehicleType = allowedBookingVehicleTypes[0] || null;
 
   // Helper: map database response to UI structure
   const mapBackendSlotsToUI = (backendSlots, floorId, floorName) => {
@@ -412,17 +456,14 @@ const ParkingLotMap = () => {
 
   // Synchronize dynamic booking form selection on floor/slot updates
   useEffect(() => {
-    if (activeFloorId === 3) {
-      setBookingVehicleType('Motorcycle');
-    } else {
-      setBookingVehicleType('Car');
-    }
+    const defaultVehicleType = allowedBookingVehicleTypes[0]?.value || (activeFloorId === 3 ? 'Motorcycle' : 'Car');
+    setBookingVehicleType(defaultVehicleType);
     setBookingPlate('');
     const defaultExpectedTime = getDefaultExpectedCheckInTimeParts();
     setExpectedHour(defaultExpectedTime.hour);
     setExpectedMinute(defaultExpectedTime.minute);
     setAdminPlate('');
-  }, [activeFloorId, selectedSlot]);
+  }, [activeFloorId, selectedSlot, allowedBookingVehicleTypes]);
 
   // Automatically open booking modal if user gets authenticated and has a pending slot
   useEffect(() => {
@@ -898,7 +939,7 @@ const ParkingLotMap = () => {
     const leftBottom = section.slots.slice(10, 15);
     const rightBottom = section.slots.slice(15, 20);
 
-    const isBicycleZone = section.slots.some(s => normalizeVehicleType(s.type) === 'bicycle');
+    const isBicycleZone = section.slots.some(s => normalizeVehicleType(s.type) === 'bike');
 
     return (
       <section key={section.key} className="rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900/70">
@@ -1205,21 +1246,30 @@ const ParkingLotMap = () => {
               <form onSubmit={handleConfirmBookingSubmit} className="space-y-3">
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Loại xe</label>
-                  <select
-                    value={bookingVehicleType}
-                    onChange={(e) => setBookingVehicleType(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
-                  >
-                    {activeFloorId === 3 ? (
-                      <>
-                        <option value="Motorcycle">Xe máy</option>
-                        <option value="Bicycle">Xe đạp</option>
-                      </>
-                    ) : (
-                      <option value="Car">Ô tô</option>
-                    )}
-                  </select>
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.vehicleTypeLabel')}</label>
+                  {shouldShowVehicleTypeSelect ? (
+                    <select
+                      required
+                      value={bookingVehicleType}
+                      onChange={(e) => setBookingVehicleType(e.target.value)}
+                      className="w-full h-11 px-3.5 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
+                    >
+                      {allowedBookingVehicleTypes.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {t(`parkingMap.${option.labelKey}`)}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 px-3.5 py-3 transition-colors dark:border-slate-700 dark:bg-slate-800">
+                      <div className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                        {fixedBookingVehicleType ? t(`parkingMap.${fixedBookingVehicleType.labelKey}`) : t('parkingMap.vehicleTypeLabel')}
+                      </div>
+                      <p className="mt-1 text-[11px] font-semibold leading-relaxed text-slate-500 dark:text-slate-400">
+                        {t('parkingMap.fixedVehicleTypeNote')}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {bookingVehicleType !== 'Bicycle' && (
