@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Form, Input, Button, Alert, message, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
+import { Card, Form, Input, Button, Alert, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { parkingService } from '../../services/parkingService';
+import { toast as message } from '../../components/ToastProvider';
 import Webcam from 'react-webcam';
 import {
   CheckCircle,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table, Input, Select, Button, Tag, Drawer, Spin, message, Space, Tooltip, Popconfirm } from 'antd';
+import { Table, Input, Select, Button, Tag, Drawer, Spin, Space, Tooltip, Popconfirm } from 'antd';
+import { toast as message } from '../../components/ToastProvider';
 import { useTranslation } from 'react-i18next';
 import {
   Search,

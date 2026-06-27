@@ -68,6 +68,10 @@
     "systemName": "Parking Building",
     "systemDesc": "Management System"
   },
+  "driverFab": {
+    "myBookings": "Lịch đặt chỗ",
+    "parkingMap": "Sơ đồ bãi xe"
+  },
   "footer": {
     "systemName": "Parking Building Management System",
     "copyright": "© 2026 Hệ thống Quản lý Tòa nhà Đỗ xe. Đã đăng ký bản quyền.",
@@ -468,6 +472,9 @@
     "motorbike": "Xe máy",
     "bicycle": "Xe đạp",
     "allVehicles": "Tất cả xe",
+    "exportSuccess": "Đã xuất báo cáo thành công dưới dạng {{format}}",
+    "exportError": "Không thể xuất báo cáo.",
+    "pricingUpdateSuccess": "Đã cập nhật cấu hình giá cho {{vehicleType}}.",
     "operationSummary": "Tóm tắt vận hành bãi đỗ",
     "operationDesc": "Tổng hợp doanh thu và lưu lượng trong bãi",
     "totalRevenueTitle": "Tổng doanh thu:",

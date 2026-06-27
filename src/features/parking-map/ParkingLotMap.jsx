@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -9,7 +9,6 @@ import {
   Search,
   Plus,
   Minus,
-  CheckCircle,
   Coins,
   ShieldCheck,
   UserCheck,
@@ -17,10 +16,10 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { message } from 'antd';
 import { parkingService } from '../../services/parkingService';
 import { managerService } from '../../services/managerService';
 import api from '../../services/api';
+import { toast as message } from '../../components/ToastProvider';
 import carIcon from '../../assets/vehicles/car.png';
 import motorbikeIcon from '../../assets/vehicles/motorbike.png';
 import bikeIcon from '../../assets/vehicles/bike.png';
@@ -283,7 +282,6 @@ const ParkingLotMap = () => {
   // Form states for Manager/Admin reservation
   const [adminPlate, setAdminPlate] = useState('');
 
-  const [alertBanner, setAlertBanner] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Zone navigation for high density floors
@@ -716,20 +714,16 @@ const ParkingLotMap = () => {
       setIsBookingModalOpen(false);
       if (requiresPayment && paymentUrl) {
         const depositText = depositAmount ? ` Tiền cọc: ${Number(depositAmount).toLocaleString('vi-VN')} VND.` : '';
-        setAlertBanner((responseData.message || responseData.Message || 'Cần thanh toán tiền cọc để hoàn tất đặt chỗ.') + depositText);
+        message.success((responseData.message || responseData.Message || 'Cần thanh toán tiền cọc để hoàn tất đặt chỗ.') + depositText);
         window.location.href = paymentUrl;
       } else if (requiresPayment) {
-        setAlertBanner(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
+        message.success(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
       } else {
-        setAlertBanner(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} thành công!`);
+        message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} thành công!`);
       }
       if (paymentStatus) {
         console.info('Booking payment status:', paymentStatus);
       }
-      setTimeout(() => {
-        setAlertBanner(null);
-      }, 4000);
-
       onFloorChange(activeFloorId);
     } catch (err) {
       console.error("Booking Error Response:", err);
@@ -802,17 +796,13 @@ const ParkingLotMap = () => {
       setIsDetailsModalOpen(false);
 
       const successMsg = response?.message || `Chỗ ${selectedSlot.id} hiện đã được xe ${cleanPlate} sử dụng.`;
-      setAlertBanner(successMsg);
-
-      setTimeout(() => {
-        setAlertBanner(null);
-      }, 4000);
+      message.success(successMsg);
 
       // Load lại sơ đồ bãi xe để cập nhật màu Đỏ (Occupied)
       onFloorChange(activeFloorId);
     } catch (err) {
       console.error("Walk-in Check-in Error Response:", err.response?.data || err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error || "Check-in thất bại. Vui lòng kiểm tra lại quyền.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Check-in thất bại. Vui lòng kiỒm tra lại quyền.";
       message.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -841,10 +831,7 @@ const ParkingLotMap = () => {
         ? ` Phí đã xử lý: ${response.totalAmount.toLocaleString('vi-VN')} đ.`
         : '';
 
-      setAlertBanner((response.message || `Chỗ ${selectedSlot.id} đã được giải phóng thành công.`) + invoiceText);
-      setTimeout(() => {
-        setAlertBanner(null);
-      }, 5000);
+      message.success((response.message || `Chỗ ${selectedSlot.id} đã được giải phóng thành công.`) + invoiceText);
 
       onFloorChange(activeFloorId);
     } catch (err) {
@@ -1001,14 +988,6 @@ const ParkingLotMap = () => {
 
   return (
     <div className="space-y-6 relative select-none">
-      {/* Floating Success Alert Toast */}
-      {alertBanner && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-[14px] shadow-lg shadow-emerald-500/20 z-50 flex items-center gap-2 border border-emerald-400 animate-bounce">
-          <CheckCircle size={18} className="text-white" />
-          <span>{alertBanner}</span>
-        </div>
-      )}
-
       {/* 1. Sub-Header Section (Legends) */}
       <div className="space-y-3">
         {/* Title has been moved to Header.jsx */}

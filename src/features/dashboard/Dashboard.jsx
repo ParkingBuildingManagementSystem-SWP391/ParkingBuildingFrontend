@@ -16,7 +16,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Button, InputNumber, message } from 'antd';
+import { Button, InputNumber } from 'antd';
+import { toast as message } from '../../components/ToastProvider';
 
 const defaultPricingData = [
   {
@@ -130,10 +131,10 @@ const Dashboard = ({ section = 'overview' }) => {
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-      message.success(`Đã xuất báo cáo thành công dưới dạng ${format}`);
+      message.success(t('dashboard.exportSuccess', { format }));
     } catch (err) {
       console.error("Export error:", err);
-      message.error("Không thể xuất báo cáo.");
+      message.error(t('dashboard.exportError'));
     } finally {
       setExporting(false);
     }
@@ -163,7 +164,7 @@ const Dashboard = ({ section = 'overview' }) => {
         fullDayRate: row.fullDayRate,
         maxHoursPerTurn: isCarPricing ? row.maxHoursPerTurn : null
       });
-      message.success(`Đã cập nhật cấu hình giá cho ${getVehicleTypeLabel(row.vehicleType)}.`);
+      message.success(t('dashboard.pricingUpdateSuccess', { vehicleType: getVehicleTypeLabel(row.vehicleType) }));
     } catch (err) {
       console.error('handleUpdatePricing error:', err);
       const status = err.response?.status;

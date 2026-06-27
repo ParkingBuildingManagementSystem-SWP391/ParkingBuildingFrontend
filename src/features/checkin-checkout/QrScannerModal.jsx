@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Button, Alert, Select, message } from 'antd';
+import { Modal, Button, Alert, Select } from 'antd';
 import { Camera, RefreshCw } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useTranslation } from 'react-i18next';
+import { toast as message } from '../../components/ToastProvider';
 
 const scanKeyframes = `
 @keyframes qrLaserScan {

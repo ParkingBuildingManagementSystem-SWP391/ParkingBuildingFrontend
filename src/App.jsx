@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import MainLayout from './components/MainLayout';
+import { ToastProvider } from './components/ToastProvider';
 
 // Public Pages
 import Login from './pages/Login';
@@ -35,14 +36,15 @@ import GateController from './features/checkin-checkout/GateController';
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        {/* Public auth pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/payment-success" element={<PaymentSuccess />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
+      <ToastProvider>
+        <Routes>
+          {/* Public auth pages */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
 
         {/* MainLayout wrapping for both public and protected routes */}
         <Route element={<MainLayout />}>
@@ -96,8 +98,9 @@ function App() {
         </Route>
 
         {/* Unmatched URL redirects */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ToastProvider>
     </AuthProvider>
   );
 }

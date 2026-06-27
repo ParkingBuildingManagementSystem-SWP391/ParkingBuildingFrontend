@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock, Unlock } from 'lucide-react';
-import { message, Select, Modal, Input, Switch, Button } from 'antd';
+import { Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
+import { toast as message } from '../components/ToastProvider';
 
 const Accounts = () => {
   const { t } = useTranslation();
@@ -27,8 +28,6 @@ const Accounts = () => {
   const [editUsername, setEditUsername] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPhoneNumber, setEditPhoneNumber] = useState('');
-
-  const [alertMessage, setAlertMessage] = useState(null);
 
   // Helper: map backend user DTO to local structure
   const mapUserToUI = (u) => {
@@ -219,11 +218,7 @@ const Accounts = () => {
       // Call correct backend route using shared axios instance
       await api.post('/Admin/update-user', payload);
 
-      // Notify user
-      setAlertMessage(`${t('accounts.modSuccess')} ${selectedUser.name}!`);
-      setTimeout(() => {
-        setAlertMessage(null);
-      }, 3500);
+      message.success(`${t('accounts.modSuccess')} ${selectedUser.name}!`);
 
       closeModal();
       loadUsers(); // Reload dynamic user list
@@ -280,11 +275,7 @@ const Accounts = () => {
         )
       );
 
-      // Alert success
-      setAlertMessage(`${t('accounts.updSuccess')} ${editUsername.trim()}!`);
-      setTimeout(() => {
-        setAlertMessage(null);
-      }, 3500);
+      message.success(`${t('accounts.updSuccess')} ${editUsername.trim()}!`);
 
       closeEditModal();
       loadUsers(); // Reload dynamic user list
@@ -339,10 +330,7 @@ const Accounts = () => {
       )
     );
 
-    setAlertMessage(`${t('accounts.toggleSuccess')} ${newStatus}!`);
-    setTimeout(() => {
-      setAlertMessage(null);
-    }, 3500);
+    message.success(`${t('accounts.toggleSuccess')} ${newStatus}!`);
   };
 
   const totalCount = filteredAccounts.length;
@@ -352,14 +340,6 @@ const Accounts = () => {
   return (
     <div className="min-h-full w-full select-none bg-slate-50 pb-12 font-sans dark:bg-slate-900">
       <div className="space-y-8">
-        {/* Floating Success Alert Toast */}
-        {alertMessage && (
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-semibold text-sm px-6 py-3 rounded-[14px] shadow-xl z-50 flex items-center gap-2 border border-emerald-500 animate-bounce">
-            <CheckCircle size={18} />
-            <span>{alertMessage}</span>
-          </div>
-        )}
-
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
