@@ -89,7 +89,12 @@
     "prev": "Prev",
     "next": "Next",
     "bookingInstruction": "{{count}} slots available right now — click on a green slot to book",
-    "zone": "Zone"
+    "zone": "Zone",
+    "vehicleTypeLabel": "Vehicle Type",
+    "fixedVehicleTypeNote": "Vehicle type is fixed by the selected floor or zone",
+    "carOpt": "Car",
+    "motorcycleOpt": "Motorcycle",
+    "bicycleOpt": "Bicycle"
   },
   "login": {
     "errorEmptyFields": "Please enter your email/username and password.",
@@ -163,6 +168,10 @@
     "btnBook": "Book a Spot Now",
     "btnViewMap": "Explore Live Map",
     "btnLogin": "Sign In",
+    "toggleTheme": "Toggle light or dark mode",
+    "toggleLanguage": "Change language",
+    "defaultAccount": "Account",
+    "online": "Online",
     "altHeroImg": "Smart Parking Building System",
     "statSlots": "1,500+",
     "statSlotsLabel": "Parking Spaces",

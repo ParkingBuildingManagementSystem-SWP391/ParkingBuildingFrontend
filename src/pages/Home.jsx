@@ -2,13 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronDown, LogOut, Settings, Map, Zap, ShieldCheck, CreditCard,
-  Search, CalendarCheck, CarFront, ArrowRight, Star, Users, Clock, Activity
+  Search, CalendarCheck, CarFront, ArrowRight, Star, Users, Clock, Activity,
+  Sun, Moon, Languages
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AppFooter from '../components/AppFooter';
 import Logo from '../components/Logo';
 import heroImage from '../assets/logo/parking-hero.png';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext';
 import LocateVehicle from './LocateVehicle';
 
 /* ── tiny animated counter ── */
@@ -46,13 +48,14 @@ const AnimatedNumber = ({ target, suffix = '' }) => {
 
 const Home = () => {
   const { user, role, logout } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const userMenuRef = useRef(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const displayName = user?.fullName || user?.name || user?.username || user?.email || 'Account';
-  const displayRole = user?.role || user?.userRole || user?.roles?.[0] || role || 'User';
+  const displayName = user?.fullName || user?.name || user?.username || user?.email || t('home.defaultAccount');
+  const displayRole = user?.role || user?.userRole || user?.roles?.[0] || role || t('header.userRole');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -68,6 +71,11 @@ const Home = () => {
     const parts = name.replace(/\s+/g, ' ').trim().split(' ');
     if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     return parts[0]?.[0]?.toUpperCase() || 'U';
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'vi' ? 'en' : 'vi';
+    i18n.changeLanguage(newLang);
   };
 
   const handleLogout = () => { setIsUserMenuOpen(false); logout(); navigate('/login'); };
@@ -116,13 +124,36 @@ const Home = () => {
             <Link className="text-indigo-600" to="/">{t('home.navHome')}</Link>
             <Link className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" to="/parking-map">{t('home.navBook')}</Link>
             <a className="transition-colors text-indigo-600 hover:text-indigo-700 flex items-center gap-1" href="/#locate-vehicle">
-              <Search size={14} /> {t('home.navLocate', 'Tìm Xe')}
+              <Search size={14} /> {t('home.navLocate')}
             </a>
             <Link className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" to="/pricing">{t('home.navPricing')}</Link>
             <a   className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" href="#contact">{t('home.navContact')}</a>
           </nav>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex h-10 w-10 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-amber-500 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              aria-label={t('home.toggleTheme')}
+              title={t('home.toggleTheme')}
+            >
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="relative flex h-10 w-10 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label={t('home.toggleLanguage')}
+              title={t('home.toggleLanguage')}
+            >
+              <Languages size={18} />
+              <span className="absolute -bottom-1 -right-1 rounded-sm border border-white bg-indigo-100 px-1 text-[9px] font-bold text-indigo-700 dark:border-slate-900 dark:bg-indigo-500/20 dark:text-indigo-200">
+                {i18n.language.toUpperCase()}
+              </span>
+            </button>
+
             <Link
               to="/parking-map"
               className="hidden rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:inline-flex"
@@ -179,24 +210,24 @@ const Home = () => {
         <div className="pointer-events-none absolute left-1/2 top-[-8rem] h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/15 sm:-left-32 sm:top-[-8rem] sm:h-[500px] sm:w-[500px] sm:translate-x-0" />
         <div className="pointer-events-none absolute bottom-[-8rem] right-0 h-80 w-80 rounded-full bg-indigo-400/10 blur-3xl dark:bg-violet-500/15 sm:-bottom-40 sm:-right-40 sm:h-[600px] sm:w-[600px]" />
 
-        <div className="relative mx-auto grid min-h-[calc(100vh-80px)] w-full max-w-7xl grid-cols-1 items-center gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-10">
+        <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-2 lg:gap-14 lg:px-8 lg:py-24">
           {/* ── text ── */}
-          <div className="space-y-8 anim-fade-up">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-300">
+          <div className="max-w-2xl anim-fade-up">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-300">
               <Star size={15} className="text-amber-500" />
               {t('home.badge')}
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
-              <span className="block text-slate-900 dark:text-slate-50">{t('home.hero1')}</span>
-              <span className="block bg-gradient-to-r from-indigo-500 to-indigo-600 bg-clip-text text-transparent">{t('home.hero2')}</span>
+            <h1 className="mb-6 max-w-2xl pb-2 text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl xl:text-6xl">
+              <span className="block pb-1 text-slate-900 dark:text-slate-50">{t('home.hero1')}</span>
+              <span className="block pb-1 bg-gradient-to-r from-indigo-500 to-indigo-600 bg-clip-text text-transparent">{t('home.hero2')}</span>
             </h1>
 
-            <p className="max-w-lg text-base leading-8 text-slate-500 font-medium dark:text-slate-300 sm:text-lg">
+            <p className="max-w-xl text-base leading-relaxed text-slate-500 font-medium dark:text-slate-300 md:text-lg">
               {t('home.heroDesc')}
             </p>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/parking-map"
                 className="group inline-flex w-full items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-7 py-4 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:w-auto"
@@ -236,7 +267,7 @@ const Home = () => {
             {/* floating badge top-right */}
             <div className="anim-float absolute right-3 top-3 flex max-w-[calc(100%-24px)] items-center gap-2 rounded-xl border border-slate-100 bg-white/95 px-3 py-2 shadow-xl backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 sm:right-6 sm:top-6 sm:px-4 sm:py-2.5" style={{ animationDelay: '1s' }}>
               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" style={{ animation: 'pulse-ring 2s infinite' }} />
-              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Online</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{t('home.online')}</span>
             </div>
           </div>
         </div>

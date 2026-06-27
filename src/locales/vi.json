@@ -89,7 +89,12 @@
     "prev": "Trước",
     "next": "Sau",
     "bookingInstruction": "{{count}} chỗ còn trống ngay lúc này — nhấn vào chỗ màu xanh để đặt chỗ",
-    "zone": "Khu"
+    "zone": "Khu",
+    "vehicleTypeLabel": "Loại xe",
+    "fixedVehicleTypeNote": "Loại xe được cố định theo tầng/khu đã chọn",
+    "carOpt": "Ô tô",
+    "motorcycleOpt": "Xe máy",
+    "bicycleOpt": "Xe đạp"
   },
   "login": {
     "errorEmptyFields": "Vui lòng nhập email/tên đăng nhập và mật khẩu.",
@@ -163,6 +168,10 @@
     "btnBook": "Đặt chỗ ngay",
     "btnViewMap": "Khám phá sơ đồ",
     "btnLogin": "Đăng nhập",
+    "toggleTheme": "Đổi giao diện sáng/tối",
+    "toggleLanguage": "Đổi ngôn ngữ",
+    "defaultAccount": "Tài khoản",
+    "online": "Online",
     "altHeroImg": "Hệ thống bãi đỗ xe thông minh",
     "statSlots": "1.500+",
     "statSlotsLabel": "Chỗ đỗ xe",
