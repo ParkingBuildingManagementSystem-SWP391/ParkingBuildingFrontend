@@ -1557,6 +1557,10 @@ const GateController = () => {
               : t('gate.checkoutModal.amountDue');
 
           const isBicycle = checkInLicensePlate?.toUpperCase().startsWith('BIKE_');
+          const formatMoney = (value) => `${new Intl.NumberFormat('vi-VN').format(Number(value || 0))} đ`;
+          const receivedAmount = parseFloat(cashReceived) || 0;
+          const previewChangeDue = Math.max(0, receivedAmount - Number(totalAmount || 0));
+          const canConfirmCashPayment = receivedAmount >= Number(totalAmount || 0);
 
           return (
             <div className="space-y-6 pt-4">
@@ -1714,7 +1718,7 @@ const GateController = () => {
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{amountDueLabel}</span>}>
                         <span className="text-xs font-extrabold text-rose-600">
-                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
+                          {formatMoney(totalAmount)}
                         </span>
                       </Descriptions.Item>
                     </Descriptions>
@@ -1722,25 +1726,45 @@ const GateController = () => {
                 </div>
 
                 {/* Right Column: Checkout & Payment Center (col-span-5) */}
-                <div className="md:col-span-5 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between space-y-4 dark:border-slate-700 dark:bg-slate-900">
+                <div className="md:col-span-5">
+                  <section className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-900/70">
                   <div>
-                    <div className="flex flex-col gap-2 border-b border-slate-100 pb-3 mb-4 dark:border-slate-700">
-                      <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-tight flex items-center gap-1.5 dark:text-slate-100"><Wallet size={16} className="text-indigo-500" />{t('gate.checkoutModal.paymentGateway')}</h3>
-                      <Radio.Group
-                        value={selectedPaymentMethod}
-                        onChange={(e) => handleSwitchPaymentMethodInModal(e.target.value)}
-                        disabled={isSwitchingPayment}
-                        size="small"
-                        buttonStyle="solid"
-                        className="w-full flex"
-                      >
-                        <Radio.Button value="CASH" className="flex-1 text-center font-bold">
+                    <div className="mb-5 space-y-4 border-b border-slate-100 pb-4 dark:border-slate-700">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:ring-indigo-800/60">
+                          <Wallet size={18} />
+                        </div>
+                        <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
+                          {t('gate.checkoutModal.paymentGateway')}
+                        </h3>
+                      </div>
+
+                      <div className="grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800/70">
+                        <button
+                          type="button"
+                          disabled={isSwitchingPayment}
+                          onClick={() => handleSwitchPaymentMethodInModal('CASH')}
+                          className={`h-10 rounded-lg text-sm font-extrabold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-800 ${
+                            selectedPaymentMethod === 'CASH'
+                              ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-900/20'
+                              : 'text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                          } disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
                           {t('gate.form.cash')}
-                        </Radio.Button>
-                        <Radio.Button value="VNPAY" className="flex-1 text-center font-bold">
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isSwitchingPayment}
+                          onClick={() => handleSwitchPaymentMethodInModal('VNPAY')}
+                          className={`h-10 rounded-lg text-sm font-extrabold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-800 ${
+                            selectedPaymentMethod === 'VNPAY'
+                              ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-900/20'
+                              : 'text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                          } disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
                           VNPay
-                        </Radio.Button>
-                      </Radio.Group>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Paid Alert */}
@@ -1753,10 +1777,10 @@ const GateController = () => {
                         <p className="text-sm text-slate-500 leading-relaxed dark:text-slate-400">{t('gate.checkoutModal.paymentSuccessDesc')}</p>
 
                         {changeDue !== null && changeDue > 0 && (
-                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs text-amber-800 font-bold max-w-xs mx-auto mt-4">
+                          <div className="mx-auto mt-4 flex max-w-xs items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-950/20 dark:text-emerald-300">
                             <span>{t('gate.checkoutModal.changeDue')}</span>
-                            <span className="text-base text-amber-700">
-                              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(changeDue)}
+                            <span className="text-base text-emerald-700 dark:text-emerald-300">
+                              {formatMoney(changeDue)}
                             </span>
                           </div>
                         )}
@@ -1766,15 +1790,15 @@ const GateController = () => {
                     {/* Unpaid Flow: VNPAY */}
                     {isSuccess && !isPaid && selectedPaymentMethod === 'VNPAY' && paymentUrl && (
                       <div className="space-y-5">
-                        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/40 border border-indigo-100 p-4 rounded-2xl flex flex-col items-center justify-center shadow-sm relative overflow-hidden dark:border-indigo-500/40 dark:from-indigo-500/15 dark:to-indigo-500/5">
-                          <span className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest mb-1">{amountDueLabel}</span>
-                          <span className="text-2xl font-black text-indigo-700">
-                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center shadow-sm dark:border-amber-800/50 dark:bg-amber-950/20">
+                          <span className="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-amber-700 dark:text-amber-300">{amountDueLabel}</span>
+                          <span className="text-3xl font-black tracking-tight text-amber-800 dark:text-amber-300">
+                            {formatMoney(totalAmount)}
                           </span>
                         </div>
 
                         {/* Interactive QR Code Card */}
-                        <div className="relative group flex justify-center bg-white p-4 rounded-2xl border border-slate-200 max-w-[240px] mx-auto shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden dark:border-slate-700">
+                        <div className="relative group mx-auto flex max-w-[240px] justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-md transition-shadow duration-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800">
                           {/* Laser Scan line micro-animation */}
                           <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-500/80 shadow-[0_0_8px_#6366f1] animate-scan pointer-events-none"></div>
 
@@ -1807,36 +1831,39 @@ const GateController = () => {
                         <p className="text-[10px] text-slate-400 text-center font-medium leading-relaxed dark:text-slate-500">
                           {t('gate.checkoutModal.autoScanNote')}
                         </p>
+                        <p className="rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-2 text-center text-[11px] font-semibold leading-relaxed text-indigo-700 dark:border-indigo-800/50 dark:bg-indigo-950/20 dark:text-indigo-300">
+                          {t('gate.checkoutModal.vnpayNote')}
+                        </p>
                       </div>
                     )}
 
                     {/* Unpaid Flow: CASH */}
                     {isSuccess && !isPaid && selectedPaymentMethod === 'CASH' && (
                       <div className="space-y-4">
-                        <div className="bg-gradient-to-br from-amber-50 to-amber-100/40 border border-amber-200 rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm dark:border-amber-500/40 dark:from-amber-500/15 dark:to-amber-500/5">
-                          <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">{amountDueLabel}</span>
-                          <span className="text-2xl font-black text-amber-700">
-                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalAmount || 0)}
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-800/50 dark:bg-amber-950/20">
+                          <span className="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-amber-700 dark:text-amber-300">{amountDueLabel}</span>
+                          <span className="block text-3xl font-black tracking-tight text-amber-800 dark:text-amber-300">
+                            {formatMoney(totalAmount)}
                           </span>
                         </div>
 
-                        <div className="space-y-3">
-                          <span className="text-xs font-bold text-slate-500 block dark:text-slate-400">{t('gate.checkoutModal.amountReceived')}</span>
+                        <div className="space-y-2.5">
+                          <span className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('gate.checkoutModal.amountReceived')}</span>
                           <Input
                             type="number"
                             placeholder={t('gate.checkoutModal.enterAmount')}
                             value={cashReceived}
                             onChange={(e) => setCashReceived(e.target.value)}
                             onPressEnter={handleConfirmCashPayment}
-                            className="h-14 bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl font-mono font-bold text-2xl px-5 transition-all focus:bg-white focus:ring-4 focus:ring-amber-500/10 focus:border-amber-400 hover:border-slate-300 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
-                            suffix={<span className="font-extrabold text-slate-400 text-sm">VNĐ</span>}
+                            className="h-14 rounded-2xl border border-slate-200 bg-slate-50 px-5 font-mono text-2xl font-bold text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800/70 dark:text-white dark:focus:bg-slate-800"
+                            suffix={<span className="text-sm font-extrabold text-slate-400 dark:text-slate-500">đ</span>}
                           />
 
                           {/* Quick Denominations Grid */}
-                          <div className="grid grid-cols-3 gap-2.5 pt-2">
+                          <div className="grid grid-cols-3 gap-2 pt-1">
                             <Button
                               onClick={() => setCashReceived(totalAmount.toString())}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                              className="h-12 rounded-xl border border-indigo-200 bg-indigo-50 text-sm font-extrabold text-indigo-700 shadow-sm transition-all hover:!border-indigo-300 hover:!bg-indigo-100 focus:!ring-2 focus:!ring-indigo-300 dark:border-indigo-800/60 dark:bg-indigo-950/30 dark:text-indigo-300 dark:hover:!bg-indigo-900/40"
                             >
                               {t('gate.checkoutModal.exactAmount')}
                             </Button>
@@ -1845,7 +1872,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 50000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                              className="h-12 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition-all hover:!border-slate-300 hover:!bg-slate-50 focus:!ring-2 focus:!ring-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!bg-slate-700"
                             >
                               +50K
                             </Button>
@@ -1854,7 +1881,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 100000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                              className="h-12 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition-all hover:!border-slate-300 hover:!bg-slate-50 focus:!ring-2 focus:!ring-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!bg-slate-700"
                             >
                               +100K
                             </Button>
@@ -1863,7 +1890,7 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 200000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                              className="h-12 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition-all hover:!border-slate-300 hover:!bg-slate-50 focus:!ring-2 focus:!ring-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!bg-slate-700"
                             >
                               +200K
                             </Button>
@@ -1872,39 +1899,43 @@ const GateController = () => {
                                 const val = parseFloat(cashReceived) || 0;
                                 setCashReceived((val + 500000).toString());
                               }}
-                              className="h-11 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                              className="h-12 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 shadow-sm transition-all hover:!border-slate-300 hover:!bg-slate-50 focus:!ring-2 focus:!ring-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!bg-slate-700"
                             >
                               +500K
                             </Button>
                             <Button
                               onClick={() => setCashReceived('')}
-                              className="h-11 text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-100 shadow-sm transition-all"
+                              className="h-12 rounded-xl border border-rose-200 bg-rose-50 text-sm font-extrabold text-rose-600 shadow-sm transition-all hover:!border-rose-300 hover:!bg-rose-100 focus:!ring-2 focus:!ring-rose-200 dark:border-rose-800/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:!bg-rose-900/40"
                             >
                               {t('gate.checkoutModal.clear')}
                             </Button>
                           </div>
                         </div>
 
-                        {cashReceived && parseFloat(cashReceived) >= totalAmount && (
-                          <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between text-xs text-emerald-800 font-bold shadow-sm">
-                            <span className="uppercase tracking-widest text-[10px]">{t('gate.checkoutModal.changeDue')}</span>
-                            <span className="text-xl font-black text-emerald-600">
-                              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(parseFloat(cashReceived) - totalAmount)}
-                            </span>
-                          </div>
-                        )}
+                        <div className={`flex items-center justify-between rounded-2xl border p-4 text-xs font-bold shadow-sm transition-colors ${
+                          previewChangeDue > 0
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-950/20 dark:text-emerald-300'
+                            : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-300'
+                        }`}>
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest">{t('gate.checkoutModal.changeDue')}</span>
+                          <span className={`text-xl font-black ${previewChangeDue > 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-300'}`}>
+                            {formatMoney(previewChangeDue)}
+                          </span>
+                        </div>
 
                         <Button
                           type="primary"
                           icon={<Check size={18} />}
                           onClick={handleConfirmCashPayment}
-                          className="w-full h-14 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 border-none font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 text-white mt-4 transition-all duration-300 transform hover:-translate-y-0.5"
+                          disabled={!canConfirmCashPayment}
+                          className="mt-2 flex h-14 w-full items-center justify-center gap-2 rounded-2xl border-none bg-gradient-to-r from-emerald-500 to-teal-500 font-bold text-white shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:!from-emerald-400 hover:!to-teal-400 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                         >
                           {t('gate.checkoutModal.confirmCashAndOpen')}
                         </Button>
                       </div>
                     )}
                   </div>
+                  </section>
                 </div>
               </div>
             </div>

@@ -102,7 +102,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {/* ─── inline keyframes ─── */}
       <style>{`
         @keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
@@ -114,10 +114,10 @@ const Home = () => {
       `}</style>
 
       {/* ══════════════════ HEADER ══════════════════ */}
-      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/85">
-        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center gap-3 shrink-0">
-            <Logo />
+      <header className="sticky top-0 z-50 w-full max-w-full border-b border-slate-100 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/85">
+        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
+          <Link to="/" className="flex min-w-0 flex-1 items-center">
+            <Logo className="max-w-[210px] sm:max-w-[250px]" />
           </Link>
 
           <nav className="hidden items-center gap-8 text-[13px] font-bold text-slate-500 dark:text-slate-300 md:flex">
@@ -130,11 +130,11 @@ const Home = () => {
             <a   className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" href="#contact">{t('home.navContact')}</a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex h-10 w-10 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-amber-500 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-amber-500 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
               aria-label={t('home.toggleTheme')}
               title={t('home.toggleTheme')}
             >
@@ -144,7 +144,7 @@ const Home = () => {
             <button
               type="button"
               onClick={toggleLanguage}
-              className="relative flex h-10 w-10 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
               aria-label={t('home.toggleLanguage')}
               title={t('home.toggleLanguage')}
             >
@@ -156,7 +156,7 @@ const Home = () => {
 
             <Link
               to="/parking-map"
-              className="hidden rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:inline-flex"
+              className="hidden shrink-0 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:inline-flex"
             >
               {t('home.btnBook')}
             </Link>
@@ -165,20 +165,20 @@ const Home = () => {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen((p) => !p)}
-                  className="flex items-center gap-2.5 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+                  className="flex min-w-0 items-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-2.5 py-2 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 sm:gap-2.5 sm:px-3"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-black text-white">
                     {getInitials(displayName)}
                   </div>
                   <div className="hidden leading-tight sm:block">
-                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{displayName}</p>
-                    <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-400">{displayRole}</p>
+                    <p className="max-w-[120px] truncate text-sm font-bold text-slate-900 dark:text-slate-100">{displayName}</p>
+                    <p className="max-w-[120px] truncate text-[11px] font-semibold text-slate-400 dark:text-slate-400">{displayRole}</p>
                   </div>
                   <ChevronDown size={14} className={`text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                  <div className="absolute right-0 top-full z-50 mt-2 w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
                     <Link to="/settings" onClick={() => setIsUserMenuOpen(false)}
                       className="flex w-full items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
                       <Settings size={15} className="text-slate-400" />
@@ -195,7 +195,7 @@ const Home = () => {
             ) : (
               <Link
                 to="/login"
-                className="rounded-[14px] border-[1.5px] border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="shrink-0 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:px-4"
               >
                 {t('home.btnLogin')}
               </Link>
@@ -205,20 +205,20 @@ const Home = () => {
       </header>
 
       {/* ══════════════════ HERO ══════════════════ */}
-      <section className="relative overflow-hidden">
+      <section className="relative w-full max-w-full overflow-hidden">
         {/* decorative blobs */}
         <div className="pointer-events-none absolute left-1/2 top-[-8rem] h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/15 sm:-left-32 sm:top-[-8rem] sm:h-[500px] sm:w-[500px] sm:translate-x-0" />
-        <div className="pointer-events-none absolute bottom-[-8rem] right-0 h-80 w-80 rounded-full bg-indigo-400/10 blur-3xl dark:bg-violet-500/15 sm:-bottom-40 sm:-right-40 sm:h-[600px] sm:w-[600px]" />
+        <div className="pointer-events-none absolute bottom-[-8rem] right-[-6rem] h-80 w-80 rounded-full bg-indigo-400/10 blur-3xl dark:bg-violet-500/15 sm:-bottom-40 sm:-right-40 sm:h-[600px] sm:w-[600px]" />
 
         <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 py-16 sm:px-6 md:py-20 lg:grid-cols-2 lg:gap-14 lg:px-8 lg:py-24">
           {/* ── text ── */}
-          <div className="max-w-2xl anim-fade-up">
+          <div className="min-w-0 max-w-2xl anim-fade-up">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-300">
               <Star size={15} className="text-amber-500" />
               {t('home.badge')}
             </div>
 
-            <h1 className="mb-6 max-w-2xl pb-2 text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl xl:text-6xl">
+            <h1 className="mb-6 max-w-2xl break-words pb-2 text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl xl:text-6xl">
               <span className="block pb-1 text-slate-900 dark:text-slate-50">{t('home.hero1')}</span>
               <span className="block pb-1 bg-gradient-to-r from-indigo-500 to-indigo-600 bg-clip-text text-transparent">{t('home.hero2')}</span>
             </h1>
@@ -274,7 +274,7 @@ const Home = () => {
       </section>
 
       {/* ══════════════════ STATS BAR ══════════════════ */}
-      <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 -mt-2 mb-8">
+      <section className="relative mx-auto mb-8 mt-[-0.5rem] w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-slate-100 dark:sm:divide-slate-700 sm:p-0">
           {stats.map((s, i) => (
             <div key={i} className="flex flex-col items-center py-5 sm:py-6">
@@ -312,7 +312,7 @@ const Home = () => {
       </section>
 
       {/* ══════════════════ HOW IT WORKS ══════════════════ */}
-      <section className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      <section className="w-full max-w-full overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
         <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="text-center space-y-3 mb-14">
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">{t('home.howTitle')}</h2>
@@ -347,7 +347,7 @@ const Home = () => {
       {/* ══════════════════ CTA ══════════════════ */}
       <section id="contact" className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div
-          className="relative overflow-hidden rounded-3xl px-8 py-14 text-center shadow-2xl sm:px-14 sm:py-20"
+          className="relative max-w-full overflow-hidden rounded-3xl px-6 py-14 text-center shadow-2xl sm:px-14 sm:py-20"
           style={{ background: 'radial-gradient(120% 120% at 0% 0%, #6366f1 0%, #4f46e5 45%, #3730a3 100%)' }}
         >
           {/* decorative */}

@@ -65,15 +65,15 @@
     "userAccounts": "Quản lý người dùng",
     "createAccount": "Tạo tài khoản",
     "parkingSessions": "Quản lý phiên đỗ",
-    "systemName": "Parking Building",
-    "systemDesc": "Management System"
+    "systemName": "HỆ THỐNG QUẢN LÝ",
+    "systemDesc": "TÒA NHÀ ĐỖ XE"
   },
   "driverFab": {
     "myBookings": "Lịch đặt chỗ",
     "parkingMap": "Sơ đồ bãi xe"
   },
   "footer": {
-    "systemName": "Parking Building Management System",
+    "systemName": "HỆ THỐNG QUẢN LÝ TÒA NHÀ ĐỖ XE",
     "copyright": "© 2026 Hệ thống Quản lý Tòa nhà Đỗ xe. Đã đăng ký bản quyền.",
     "version": "Phiên bản 1.0.0 - Phát triển bởi Nhóm 5"
   },
@@ -748,6 +748,7 @@
       "checkPaymentStatus": "Kiểm tra trạng thái thanh toán (F5)",
       "openPaymentLink": "Mở liên kết thanh toán ở tab mới",
       "autoScanNote": "Hệ thống quét trạng thái tự động mỗi 3 giây. Barrier sẽ tự động mở khi giao dịch thành công.",
+      "vnpayNote": "Thanh toán qua VNPay sẽ được xử lý qua cổng thanh toán trực tuyến.",
       "amountReceived": "Số tiền đã nhận",
       "enterAmount": "Nhập số tiền...",
       "exactAmount": "Đủ",

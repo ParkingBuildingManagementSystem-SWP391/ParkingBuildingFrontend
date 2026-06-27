@@ -47,15 +47,15 @@ const LocateVehicle = () => {
   ];
 
   return (
-    <section id="locate-vehicle" className="relative overflow-hidden bg-slate-50 px-4 py-16 text-slate-950 transition-colors duration-300 dark:bg-slate-950 dark:text-white sm:px-6">
+    <section id="locate-vehicle" className="relative w-full max-w-full overflow-hidden bg-slate-50 px-4 py-16 text-slate-950 transition-colors duration-300 dark:bg-slate-950 dark:text-white sm:px-6">
       {/* Background decor */}
-      <div className="pointer-events-none absolute left-0 top-[-6rem] h-72 w-72 rounded-full bg-indigo-600/5 blur-[90px] dark:bg-indigo-500/10 sm:-left-24 sm:h-96 sm:w-96" />
-      <div className="pointer-events-none absolute bottom-[-6rem] right-0 h-72 w-72 rounded-full bg-emerald-500/5 blur-[90px] dark:bg-emerald-400/10 sm:-right-24 sm:h-96 sm:w-96" />
+      <div className="pointer-events-none absolute left-[-6rem] top-[-6rem] h-72 w-72 rounded-full bg-indigo-600/5 blur-[90px] dark:bg-indigo-500/10 sm:-left-24 sm:h-96 sm:w-96" />
+      <div className="pointer-events-none absolute bottom-[-6rem] right-[-6rem] h-72 w-72 rounded-full bg-emerald-500/5 blur-[90px] dark:bg-emerald-400/10 sm:-right-24 sm:h-96 sm:w-96" />
 
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
 
         {/* ============ Cột trái: giới thiệu + các bước ============ */}
-        <div className="text-center lg:text-left">
+        <div className="min-w-0 text-center lg:text-left">
           <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[1.5px] text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
             <Sparkles className="h-3.5 w-3.5" strokeWidth={2.5} />
             Tra cứu nhanh
@@ -93,7 +93,7 @@ const LocateVehicle = () => {
         </div>
 
         {/* ============ Cột phải: thẻ tra cứu ============ */}
-        <div className="relative w-full">
+        <div className="relative min-w-0 w-full">
           <div className="relative z-10 mx-auto w-full max-w-md rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none dark:[&_h3]:text-white dark:[&_label]:text-slate-500 dark:[&_p]:text-slate-400 sm:p-8">
             <div className="mb-7 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-600/30">
