@@ -7,7 +7,7 @@ import {
   Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages, Menu
 } from 'lucide-react';
 
-const Header = ({ onOpenSidebar }) => {
+const Header = ({ onOpenSidebar, hasSidebar = true }) => {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -103,6 +103,7 @@ const Header = ({ onOpenSidebar }) => {
 
       {/* Left: Dynamic Page Title */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
+        {hasSidebar && (
         <button
           type="button"
           onClick={onOpenSidebar}
@@ -111,6 +112,7 @@ const Header = ({ onOpenSidebar }) => {
         >
           <Menu size={20} />
         </button>
+        )}
         <div className="min-w-0 flex flex-col md:pt-2">
           <h1 className="truncate text-[17px] sm:text-[19px] md:text-[22px] font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{getPageTitle()}</h1>
           <p className="hidden truncate text-[12px] sm:block md:text-[13px] text-slate-500 font-medium dark:text-slate-400">{getPageSubtitle()}</p>

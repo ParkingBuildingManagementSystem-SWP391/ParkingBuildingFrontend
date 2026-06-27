@@ -6,7 +6,6 @@ import {
   Mail,
   Phone,
   ShieldAlert,
-  CheckCircle,
   Save,
   Car,
   Bike,
@@ -17,6 +16,7 @@ import {
   Check
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast as message } from '../components/ToastProvider';
 
 const Motorcycle = ({ size = 18, className = '' }) => (
   <svg
@@ -51,10 +51,6 @@ const Settings = () => {
   const [phone, setPhone] = useState('');
   const [vehicleType, setVehicleType] = useState('Car');
 
-  // Alert/Toast states
-  const [alertMsg, setAlertMsg] = useState(null);
-  const [alertType, setAlertType] = useState('success'); // 'success' | 'info'
-
   // Initialize fields on load or when user object changes
   useEffect(() => {
     if (user) {
@@ -78,9 +74,7 @@ const Settings = () => {
     e.preventDefault();
 
     if (!fullName.trim() || !email.trim() || !phone.trim()) {
-      setAlertType('info');
-      setAlertMsg(t('settings.errFillFields'));
-      setTimeout(() => setAlertMsg(null), 3000);
+      message.info(t('settings.errFillFields'));
       return;
     }
 
@@ -92,9 +86,7 @@ const Settings = () => {
       vehicleType: vehicleType
     });
 
-    setAlertType('success');
-    setAlertMsg(t('settings.successUpdate'));
-    setTimeout(() => setAlertMsg(null), 3500);
+    message.success(t('settings.successUpdate'));
   };
 
   // Reset form to original values
@@ -105,9 +97,7 @@ const Settings = () => {
       setPhone(user.phone || user.vehiclePlate || '0915277878');
       setVehicleType(user.vehicleType || 'Car');
     }
-    setAlertType('info');
-    setAlertMsg(t('settings.infoDiscard'));
-    setTimeout(() => setAlertMsg(null), 3000);
+    message.info(t('settings.infoDiscard'));
   };
 
 
@@ -127,18 +117,6 @@ const Settings = () => {
 
   return (
     <div className="space-y-6 relative font-sans max-w-6xl mx-auto">
-
-      {/* Toast Notification Banner */}
-      {alertMsg && (
-        <div className={`fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3.5 rounded-[14px] shadow-lg z-50 flex items-center gap-2.5 text-white font-bold text-xs sm:text-sm ${
-          alertType === 'success'
-            ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_12px_24px_-10px_rgba(16,185,129,0.7)]'
-            : 'bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)]'
-        }`}>
-          <CheckCircle size={18} className="text-white" />
-          <span>{alertMsg}</span>
-        </div>
-      )}
 
       {/* Page header */}
       <div>

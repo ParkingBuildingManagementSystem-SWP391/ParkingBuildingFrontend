@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Input, Modal, Select, Spin, Tag, message } from 'antd';
+import { Button, Input, Modal, Select, Spin, Tag } from 'antd';
 import { Car, Eye, RotateCcw, Search, Ticket } from 'lucide-react';
 import parkingSessionService from '../services/parkingSessionService';
 import { useTranslation } from 'react-i18next';
+import { toast as message } from '../components/ToastProvider';
 
 const initialFilters = {
   licenseVehicle: '',

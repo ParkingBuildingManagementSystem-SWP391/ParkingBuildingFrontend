@@ -18,6 +18,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast as message } from '../components/ToastProvider';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -30,7 +31,6 @@ const MyBookings = () => {
   // Loading and Error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
 
   // Ticking count state
   const [tick, setTick] = useState(0);
@@ -68,7 +68,7 @@ const MyBookings = () => {
         // Redirect to VNPay payment URL
         window.location.href = response.data.paymentUrl;
       } else {
-        alert(response.data?.message || t('myBookings.errVNPayCreate'));
+        message.error(response.data?.message || t('myBookings.errVNPayCreate'));
       }
     } catch (err) {
       console.error("VNPay payment creation error:", err);
@@ -88,7 +88,7 @@ const MyBookings = () => {
           }
         }
       }
-      alert(errorMsg);
+      message.error(errorMsg);
     } finally {
       setPayingSessionId(null);
     }
@@ -289,14 +289,13 @@ const MyBookings = () => {
     if (targetBookingId !== null) {
       setLoading(true);
       setError('');
-      setSuccessMessage('');
       try {
         // 1. Gọi API hủy đặt chỗ lên Backend
         const response = await parkingService.cancelBooking(targetBookingId);
 
         // 2. Đóng Modal xác nhận hủy
         setIsCancelConfirmOpen(false);
-        setSuccessMessage(response.message || t('myBookings.cancelSuccess'));
+        message.success(response.message || t('myBookings.cancelSuccess'));
 
         // 3. OPTIMISTIC UI UPDATE: Cập nhật state trực tiếp để UI phản hồi ngay lập tức
         setBookings(prevBookings => prevBookings.map(booking => {
@@ -315,11 +314,11 @@ const MyBookings = () => {
         await fetchMyBookings();
 
         // Tự động ẩn thông báo sau 5 giây
-        setTimeout(() => setSuccessMessage(''), 5000);
       } catch (err) {
         console.error("Cancel booking error:", err);
         const errorMessage = typeof err === 'string' ? err : t('myBookings.cancelFailed');
         setError(errorMessage);
+        message.error(errorMessage);
         setIsCancelConfirmOpen(false);
         setTargetBookingId(null);
       } finally {
@@ -449,20 +448,6 @@ const MyBookings = () => {
               <p className="mt-0.5 text-sm text-rose-600 dark:text-rose-300">{error}</p>
             </div>
             <button onClick={() => setError('')} className="p-1 hover:bg-rose-100 rounded-lg transition-colors">
-              <X size={16} />
-            </button>
-          </div>
-        )}
-
-        {/* Success Banner */}
-        {successMessage && (
-          <div className="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 shadow-sm dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">
-            <CheckCircle className="shrink-0 mt-0.5" size={20} />
-            <div className="flex-1">
-              <h4 className="font-bold text-sm">{t('myBookings.actionSuccess')}</h4>
-              <p className="mt-0.5 text-sm text-emerald-600 dark:text-emerald-300">{successMessage}</p>
-            </div>
-            <button onClick={() => setSuccessMessage('')} className="p-1 hover:bg-emerald-100 rounded-lg transition-colors">
               <X size={16} />
             </button>
           </div>

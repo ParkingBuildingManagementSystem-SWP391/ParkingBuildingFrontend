@@ -68,6 +68,10 @@
     "systemName": "Parking Building",
     "systemDesc": "Management System"
   },
+  "driverFab": {
+    "myBookings": "My bookings",
+    "parkingMap": "Parking map"
+  },
   "footer": {
     "systemName": "Parking Building Management System",
     "copyright": "© 2026 Parking Building Management System. All rights reserved.",
@@ -468,6 +472,9 @@
     "motorbike": "Motorbike",
     "bicycle": "Bicycle",
     "allVehicles": "All Vehicles",
+    "exportSuccess": "Report exported successfully as {{format}}",
+    "exportError": "Could not export report.",
+    "pricingUpdateSuccess": "Updated pricing configuration for {{vehicleType}}.",
     "operationSummary": "Operation Summary",
     "operationDesc": "Summary of revenue and traffic in the building",
     "totalRevenueTitle": "Total Revenue:",
