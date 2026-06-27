@@ -65,15 +65,15 @@
     "userAccounts": "User Accounts",
     "createAccount": "Create Account",
     "parkingSessions": "Parking Sessions",
-    "systemName": "Parking Building",
-    "systemDesc": "Management System"
+    "systemName": "PARKING BUILDING",
+    "systemDesc": "MANAGEMENT SYSTEM"
   },
   "driverFab": {
     "myBookings": "My bookings",
     "parkingMap": "Parking map"
   },
   "footer": {
-    "systemName": "Parking Building Management System",
+    "systemName": "PARKING BUILDING MANAGEMENT SYSTEM",
     "copyright": "© 2026 Parking Building Management System. All rights reserved.",
     "version": "Version 1.0.0 - Developed by Team 5"
   },
@@ -748,6 +748,7 @@
       "checkPaymentStatus": "Check Payment Status (F5)",
       "openPaymentLink": "Open Payment Link in New Tab",
       "autoScanNote": "System auto-scans status every 3 seconds. Barrier opens automatically upon successful transaction.",
+      "vnpayNote": "VNPay payments are processed through the online payment gateway.",
       "amountReceived": "Amount Received",
       "enterAmount": "Enter amount...",
       "exactAmount": "Exact",

@@ -99,7 +99,7 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
   };
 
   return (
-    <header className="w-full min-w-0 h-[72px] md:h-[88px] lg:h-[96px] flex items-center justify-between gap-3 px-4 sm:px-6 md:px-8 bg-white border-b border-slate-100 select-none transition-colors duration-300 dark:bg-slate-900 dark:border-slate-800">
+    <header className="flex min-h-[84px] w-full min-w-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 select-none transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 sm:px-6 md:min-h-[96px] md:px-8">
 
       {/* Left: Dynamic Page Title */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -113,9 +113,13 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
           <Menu size={20} />
         </button>
         )}
-        <div className="min-w-0 flex flex-col md:pt-2">
-          <h1 className="truncate text-[17px] sm:text-[19px] md:text-[22px] font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{getPageTitle()}</h1>
-          <p className="hidden truncate text-[12px] sm:block md:text-[13px] text-slate-500 font-medium dark:text-slate-400">{getPageSubtitle()}</p>
+        <div className="flex min-w-0 flex-col">
+          <h1 className="max-w-full break-words text-xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-2xl md:text-3xl">
+            {getPageTitle()}
+          </h1>
+          <p className="mt-1 max-w-full break-words text-sm font-normal leading-snug text-slate-500 dark:text-slate-400 md:text-base">
+            {getPageSubtitle()}
+          </p>
         </div>
       </div>
 
