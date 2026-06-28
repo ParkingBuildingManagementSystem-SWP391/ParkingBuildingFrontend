@@ -249,27 +249,22 @@ The project is configured for Vercel deployment.
 
 ## Screenshots
 
-> Add screenshots under `docs/images/` and update the paths below.
+> Screenshots are stored under `src/assets/readme_pic/`.
 
 ### Homepage
-
-![Homepage](docs/images/homepage.png)
+![Homepage](src/assets/readme_pic/homepage.png)
 
 ### Parking Map
-
-![Parking Map](docs/images/parking-map.png)
+![Parking Map](src/assets/readme_pic/parking%20map.png)
 
 ### Booking Modal
-
-![Booking Modal](docs/images/booking-modal.png)
+![Booking Modal](src/assets/readme_pic/booking%20demo.png)
 
 ### Gate Control
-
-![Gate Control](docs/images/gate-control.png)
+![Gate Control](src/assets/readme_pic/gate%20controller.png)
 
 ### Manager Analytics
-
-![Analytics](docs/images/analytics.png)
+![Manager Analytics](src/assets/readme_pic/manager%20analy.png)
 
 ## Known Notes
 
