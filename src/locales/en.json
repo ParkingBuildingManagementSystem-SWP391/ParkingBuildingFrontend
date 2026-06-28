@@ -72,6 +72,11 @@
     "myBookings": "My bookings",
     "parkingMap": "Parking map"
   },
+  "nav": {
+    "myBookings": "My bookings",
+    "parkingMap": "Parking Map",
+    "gateControl": "Gate Control"
+  },
   "footer": {
     "systemName": "PARKING BUILDING MANAGEMENT SYSTEM",
     "copyright": "© 2026 Parking Building Management System. All rights reserved.",
