@@ -61,6 +61,8 @@ export const AuthProvider = ({ children }) => {
       const rawRole = data.roleName || data.RoleName || "Registered_Driver";
       const matchedUser = {
         username: data.username || data.Username || "Google User",
+        email: data.email || data.Email || '',
+        phoneNumber: data.phoneNumber || data.PhoneNumber || '',
         role: rawRole
       };
 
@@ -101,6 +103,8 @@ export const AuthProvider = ({ children }) => {
       const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
       const matchedUser = {
         username: data.username || data.Username || (typeof usernameOrEmail === 'string' ? usernameOrEmail.split('@')[0] : "User"),
+        email: data.email || data.Email || '',
+        phoneNumber: data.phoneNumber || data.PhoneNumber || '',
         role: rawRole
       };
 
@@ -134,6 +138,8 @@ export const AuthProvider = ({ children }) => {
     const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
     const matchedUser = {
       username: data.username || data.Username || data.email?.split('@')[0] || "User",
+      email: data.email || data.Email || '',
+      phoneNumber: data.phoneNumber || data.PhoneNumber || '',
       role: rawRole
     };
 

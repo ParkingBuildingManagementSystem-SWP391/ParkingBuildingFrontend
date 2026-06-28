@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import MainLayout from './components/MainLayout';
 import { ToastProvider } from './components/ToastProvider';
@@ -20,6 +21,8 @@ import Settings from './pages/Settings';
 import Accounts from './pages/Accounts';
 import CreateAccount from './pages/CreateAccount';
 import ParkingSessionManager from './pages/ParkingSessionManager';
+import MyMonthlyCard from './pages/MyMonthlyCard';
+import MonthlyCardManager from './pages/MonthlyCardManager';
 
 // Feature Components (Dashboard, Parking Map, Check-in counter)
 import Dashboard, {
@@ -32,6 +35,17 @@ import Dashboard, {
 } from './features/dashboard/Dashboard';
 import ParkingLotMap from './features/parking-map/ParkingLotMap';
 import GateController from './features/checkin-checkout/GateController';
+
+const MonthlyCardsRoute = () => {
+  const { role } = useAuth();
+  const normalizedRole = String(role || '').toLowerCase();
+
+  if (['manager', 'admin'].includes(normalizedRole)) {
+    return <MonthlyCardManager />;
+  }
+
+  return <MyMonthlyCard />;
+};
 
 function App() {
   return (
@@ -84,6 +98,11 @@ function App() {
               <Route path="/staff-logs" element={<StaffLogsPage />} />
             </Route>
 
+            {/* Monthly card route adapts to Manager/Admin vs Registered Driver */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Manager', 'Admin', 'Registered_Driver']} />}>
+              <Route path="/dashboard/monthly-cards" element={<MonthlyCardsRoute />} />
+            </Route>
+
             {/* Staff/Manager operations paths */}
             <Route element={<RoleProtectedRoute allowedRoles={['Staff', 'Manager']} />}>
               <Route path="/checkin-checkout" element={<GateController />} />
@@ -92,6 +111,11 @@ function App() {
             {/* Driver/Customer-only paths */}
             <Route element={<RoleProtectedRoute allowedRoles={['Driver', 'Member', 'Registered_Driver', 'Customer']} />}>
               <Route path="/my-bookings" element={<MyBookings />} />
+            </Route>
+
+            {/* Registered driver monthly card */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Registered_Driver']} />}>
+              <Route path="/my-monthly-card" element={<MyMonthlyCard />} />
             </Route>
             
           </Route>

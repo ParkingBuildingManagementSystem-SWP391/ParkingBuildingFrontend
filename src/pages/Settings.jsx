@@ -1,133 +1,112 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import {
-  User,
+  AlertCircle,
+  Check,
   Mail,
   Phone,
-  ShieldAlert,
   Save,
-  Car,
-  Bike,
+  ShieldAlert,
   Sparkles,
-  X,
-  CreditCard,
+  User,
   UserCheck,
-  Check
+  X
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 
-const Motorcycle = ({ size = 18, className = '' }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="5" cy="18" r="3" />
-    <circle cx="19" cy="18" r="3" />
-    <path d="M12 18V12H17L19 9" />
-    <path d="M7.5 14H16.5" />
-    <path d="M12 12L9 6H5" />
-  </svg>
-);
+const getUserValue = (user, ...keys) => {
+  for (const key of keys) {
+    const value = user?.[key];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return '';
+};
+
+const normalizeProfile = (user) => ({
+  username: getUserValue(user, 'username', 'Username'),
+  fullName: getUserValue(user, 'fullName', 'FullName', 'name', 'Name'),
+  email: getUserValue(user, 'email', 'Email'),
+  phoneNumber: getUserValue(user, 'phoneNumber', 'PhoneNumber', 'phone', 'Phone')
+});
 
 const Settings = () => {
   const { t } = useTranslation();
-  const { user, role, updateUser } = useAuth();
-  const navigate = useNavigate();
+  const { user, role } = useAuth();
 
-  // Profile fields state
+  const initialProfile = useMemo(() => normalizeProfile(user), [user]);
   const [username, setUsername] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [vehicleType, setVehicleType] = useState('Car');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [errors, setErrors] = useState({});
 
-  // Initialize fields on load or when user object changes
   useEffect(() => {
-    if (user) {
-      let displayUsername = user.username || 'driver_account';
-      // Sanitizer: if the loaded username is simply the role identifier, output a proper unique username
-      if (displayUsername === 'driver') displayUsername = 'david_miller';
-      if (displayUsername === 'staff') displayUsername = 'sarah_connor';
-      if (displayUsername === 'admin') displayUsername = 'alex_johnson';
-      if (displayUsername === 'manager') displayUsername = 'robert_vance';
+    setUsername(initialProfile.username);
+    setFullName(initialProfile.fullName);
+    setEmail(initialProfile.email);
+    setPhoneNumber(initialProfile.phoneNumber);
+    setErrors({});
+  }, [initialProfile]);
 
-      setUsername(displayUsername);
-      setFullName(user.name || '');
-      setEmail(user.email || '');
-      setPhone(user.phone || user.vehiclePlate || '0915277878');
-      setVehicleType(user.vehicleType || 'Car');
+  const displayRoleName = (value) => {
+    const normalizedRole = String(value || '').toLowerCase();
+    if (normalizedRole === 'registered_driver' || normalizedRole === 'driver') return 'Registered Driver';
+    if (normalizedRole === 'staff') return 'Parking Staff';
+    if (normalizedRole === 'manager') return 'Parking Manager';
+    if (normalizedRole === 'admin') return 'System Admin';
+    return value || 'Không xác định';
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+    const trimmedName = fullName.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phoneNumber.trim();
+
+    if (trimmedName.length > 100) {
+      nextErrors.fullName = 'Họ tên không được vượt quá 100 ký tự.';
     }
-  }, [user, role]);
 
-  // Handle profile changes save
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      nextErrors.email = 'Email không đúng định dạng.';
+    }
 
-    if (!fullName.trim() || !email.trim() || !phone.trim()) {
-      message.info(t('settings.errFillFields'));
+    if (trimmedPhone && !/^[0-9+\-\s()]{8,20}$/.test(trimmedPhone)) {
+      nextErrors.phoneNumber = 'Số điện thoại không đúng định dạng cơ bản.';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSaveProfile = (event) => {
+    event.preventDefault();
+
+    if (!validateForm()) {
+      message.error('Vui lòng kiểm tra lại thông tin tài khoản.');
       return;
     }
 
-    // Call context updater to save session data in localStorage & state
-    updateUser({
-      name: fullName,
-      email: email,
-      phone: phone,
-      vehicleType: vehicleType
-    });
-
-    message.success(t('settings.successUpdate'));
+    message.error('Backend chưa có API cập nhật profile cho người dùng hiện tại. Không thể lưu thay đổi giả lập.');
   };
 
-  // Reset form to original values
   const handleCancelChanges = () => {
-    if (user) {
-      setFullName(user.name || '');
-      setEmail(user.email || '');
-      setPhone(user.phone || user.vehiclePlate || '0915277878');
-      setVehicleType(user.vehicleType || 'Car');
-    }
+    setFullName(initialProfile.fullName);
+    setEmail(initialProfile.email);
+    setPhoneNumber(initialProfile.phoneNumber);
+    setErrors({});
     message.info(t('settings.infoDiscard'));
   };
 
-
-  const getVehicleIcon = (type) => {
-    if (type === 'Bicycle') return <Bike size={18} className="text-blue-500" />;
-    if (type === 'Motorcycle') return <Motorcycle size={18} className="text-indigo-500" />;
-    return <Car size={18} className="text-indigo-650" />;
-  };
-
-  const displayRoleName = (r) => {
-    if (r === 'driver') return 'Driver';
-    if (r === 'staff') return 'Parking Staff';
-    if (r === 'manager') return 'Parking Manager';
-    if (r === 'admin') return 'System Admin';
-    return r;
-  };
-
   return (
-    <div className="space-y-6 relative font-sans max-w-6xl mx-auto">
-
-      {/* Page header */}
+    <div className="relative mx-auto max-w-6xl space-y-6 font-sans">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{t('settings.titlePersonalInfo')}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('settings.titlePersonalInfo')}</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('settings.descPersonalInfo')}</p>
       </div>
 
-      {/* Main Form Split Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-
-        {/* User Profile Form Column (Left - occupies 2/3 wide on large displays) */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:col-span-2">
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-700 sm:px-8">
             <div className="flex items-center gap-3">
@@ -142,10 +121,15 @@ const Settings = () => {
             <Sparkles size={18} className="text-indigo-600" />
           </div>
 
-          <form onSubmit={handleSaveProfile} className="p-6 sm:p-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <form onSubmit={handleSaveProfile} className="space-y-6 p-6 sm:p-8">
+            {!user && (
+              <div className="flex items-start gap-3 rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700">
+                <ShieldAlert size={18} className="mt-0.5 shrink-0" />
+                <span>Không tải được thông tin tài khoản. Vui lòng đăng nhập lại.</span>
+              </div>
+            )}
 
-              {/* Username Input (Disabled based on best practices) */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelUsername')}</label>
                 <div className="relative">
@@ -154,85 +138,65 @@ const Settings = () => {
                     type="text"
                     disabled
                     value={username}
+                    placeholder="Không tải được username"
                     className="h-12 w-full cursor-not-allowed select-none rounded-[14px] border-[1.5px] border-slate-200 bg-slate-100 pl-12 pr-4 text-sm font-semibold text-slate-500 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
                   />
                 </div>
                 <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">{t('settings.hintUsername')}</span>
               </div>
 
-              {/* Full Name Input */}
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelFullName')}</label>
                 <div className="relative">
                   <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    required
+                    maxLength={100}
                     placeholder={t('settings.phFullName')}
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(event) => setFullName(event.target.value)}
                     className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
+                {errors.fullName && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.fullName}</p>}
               </div>
 
-              {/* Email Address Input */}
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelEmail')}</label>
                 <div className="relative">
                   <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="email"
-                    required
                     placeholder={t('settings.phEmail')}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(event) => setEmail(event.target.value)}
                     className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
+                {errors.email && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.email}</p>}
               </div>
 
-              {/* Phone Number Input */}
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelPhone')}</label>
                 <div className="relative">
                   <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    required
                     placeholder={t('settings.phPhone')}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    value={phoneNumber}
+                    onChange={(event) => setPhoneNumber(event.target.value)}
                     className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 font-mono text-sm font-bold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                   />
                 </div>
+                {errors.phoneNumber && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.phoneNumber}</p>}
               </div>
-
-              {/* Vehicle Type Dropdown */}
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelVehicle')}</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                    {getVehicleIcon(vehicleType)}
-                  </div>
-                  <select
-                    value={vehicleType}
-                    onChange={(e) => setVehicleType(e.target.value)}
-                    className="h-12 w-full cursor-pointer appearance-none rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-10 text-sm font-semibold text-slate-900 transition-all focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
-                  >
-                    <option value="Car">{t('settings.optCar')}</option>
-                    <option value="Motorbike">{t('settings.optMoto')}</option>
-                    <option value="Bicycle">{t('settings.optBike')}</option>
-                  </select>
-                  <svg className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </div>
-              </div>
-
             </div>
 
-            {/* Save Profile CTA buttons */}
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+              <AlertCircle size={18} className="mt-0.5 shrink-0" />
+              <span>Frontend chưa tìm thấy API cập nhật profile cá nhân cho Driver. Các thay đổi sẽ không được lưu cho đến khi backend cung cấp endpoint dùng token hiện tại.</span>
+            </div>
+
             <div className="flex flex-col-reverse items-center gap-3 border-t border-slate-100 pt-5 dark:border-slate-700 sm:flex-row">
               <button
                 type="button"
@@ -245,42 +209,36 @@ const Settings = () => {
 
               <button
                 type="submit"
-                className="w-full sm:w-auto px-8 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] transition-all shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-8 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:w-auto"
               >
                 <Save size={16} />
                 {t('settings.btnSave')}
               </button>
             </div>
-
           </form>
         </div>
 
-        {/* Right Side Column: Stats or Admin Panel */}
-        <div className="space-y-6 w-full">
-
-
-
-          {/* Account Status / Overview Widget (Renders for everyone, providing nice context) */}
+        <div className="w-full space-y-6">
           <div className="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <h3 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">{t('settings.titleAccountOverview')}</h3>
 
             <div className="space-y-1 text-sm leading-normal">
+              <div className="flex items-center justify-between py-2.5">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">Vai trò</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{displayRoleName(role || user?.role)}</span>
+              </div>
 
-              <div className="flex justify-between items-center py-2.5">
+              <div className="flex items-center justify-between border-t border-slate-100 py-2.5 dark:border-slate-700">
                 <span className="font-semibold text-slate-500 dark:text-slate-400">{t('settings.lblVerifyBadge')}</span>
-                <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                  <Check size={16} className="rounded-full bg-emerald-100 p-0.5 dark:bg-emerald-500/20" />
-                  {t('settings.valVerified')}
+                <span className="flex items-center gap-1.5 font-bold text-slate-500">
+                  <Check size={16} className="rounded-full bg-slate-100 p-0.5 dark:bg-slate-800" />
+                  Chưa có dữ liệu API
                 </span>
               </div>
 
-
               <div className="flex items-center justify-between border-t border-slate-100 py-2.5 dark:border-slate-700">
                 <span className="font-semibold text-slate-500 dark:text-slate-400">{t('settings.lblAccountStatus')}</span>
-                <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
-                  {t('settings.valActiveSession')}
-                </span>
+                <span className="font-bold text-slate-500">Chưa có dữ liệu API</span>
               </div>
 
               {user && user.balance !== undefined && (
@@ -291,14 +249,10 @@ const Settings = () => {
                   </span>
                 </div>
               )}
-
             </div>
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 };

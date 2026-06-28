@@ -84,6 +84,7 @@ export const managerService = {
         dayRate: Number(data.dayRate),
         nightRate: Number(data.nightRate),
         fullDayRate: Number(data.fullDayRate),
+        monthlyPrice: Number(data.monthlyPrice),
         maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
           ? Number(data.maxHoursPerTurn)
           : null
@@ -91,6 +92,26 @@ export const managerService = {
       return response.data;
     } catch (error) {
       console.error('updateVehiclePricing error:', error);
+      throw error;
+    }
+  },
+
+  getMonthlyCards: async () => {
+    try {
+      const response = await api.get('/Manager/monthly-cards');
+      return response.data;
+    } catch (error) {
+      console.error('getMonthlyCards error:', error);
+      throw error;
+    }
+  },
+
+  cancelMonthlyCard: async (monthlyCardId) => {
+    try {
+      const response = await api.put(`/Manager/monthly-card/${monthlyCardId}/cancel`);
+      return response.data;
+    } catch (error) {
+      console.error(`cancelMonthlyCard error for card ${monthlyCardId}:`, error);
       throw error;
     }
   }
