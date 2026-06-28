@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
-import { CalendarCheck, Map } from 'lucide-react';
+import { CalendarCheck, Map, ScanLine } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import AppFooter from './AppFooter';
+
+const RoleFloatingActionButton = ({ icon: Icon, label, onClick }) => (
+  <div className="fixed bottom-5 right-5 z-40 sm:bottom-8 sm:right-8">
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-extrabold text-white shadow-xl shadow-indigo-900/25 transition-all hover:scale-[1.02] hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-800 sm:px-5"
+    >
+      <Icon className="h-5 w-5" strokeWidth={2.4} />
+      <span>{label}</span>
+    </button>
+  </div>
+);
 
 const MainLayout = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -17,13 +31,30 @@ const MainLayout = () => {
   const normalizedRole = String(role || user?.role || '').toLowerCase();
   const isGuestLayout = !user || ['guest', 'public'].includes(normalizedRole);
   const isDriverLayout = ['driver', 'registered_driver', 'member', 'customer'].includes(normalizedRole);
-  const showSidebar = ['admin', 'manager', 'staff'].includes(normalizedRole);
+  const isStaffLayout = normalizedRole === 'staff';
+  const showSidebar = ['admin', 'manager'].includes(normalizedRole);
   const isFullWidthLayout = isGuestLayout || isDriverLayout || !showSidebar;
-  const showDriverFab = isDriverLayout && ['/parking-map', '/my-bookings'].includes(location.pathname);
+  const isParkingMapPage = location.pathname === '/parking-map';
   const isBookingsPage = location.pathname === '/my-bookings';
-  const fabTarget = isBookingsPage ? '/parking-map' : '/my-bookings';
-  const FabIcon = isBookingsPage ? Map : CalendarCheck;
-  const fabLabel = isBookingsPage ? t('driverFab.parkingMap') : t('driverFab.myBookings');
+  const isGateControlPage = location.pathname === '/checkin-checkout';
+
+  const driverFabConfig = isDriverLayout && (isParkingMapPage || isBookingsPage)
+    ? {
+      target: isBookingsPage ? '/parking-map' : '/my-bookings',
+      icon: isBookingsPage ? Map : CalendarCheck,
+      label: isBookingsPage ? t('nav.parkingMap') : t('nav.myBookings')
+    }
+    : null;
+
+  const staffFabConfig = isStaffLayout && (isParkingMapPage || isGateControlPage)
+    ? {
+      target: isGateControlPage ? '/parking-map' : '/checkin-checkout',
+      icon: isGateControlPage ? Map : ScanLine,
+      label: isGateControlPage ? t('nav.parkingMap') : t('nav.gateControl')
+    }
+    : null;
+
+  const fabConfig = driverFabConfig || staffFabConfig;
 
   return (
     <div className="flex min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500">
@@ -57,15 +88,12 @@ const MainLayout = () => {
           </div>
         </main>
 
-        {showDriverFab && (
-          <button
-            type="button"
-            onClick={() => navigate(fabTarget)}
-            className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-extrabold text-white shadow-xl shadow-indigo-900/20 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-800 sm:bottom-6 sm:right-6 sm:px-5"
-          >
-            <FabIcon size={18} />
-            <span>{fabLabel}</span>
-          </button>
+        {fabConfig && (
+          <RoleFloatingActionButton
+            icon={fabConfig.icon}
+            label={fabConfig.label}
+            onClick={() => navigate(fabConfig.target)}
+          />
         )}
         
       </div>

@@ -72,6 +72,11 @@
     "myBookings": "Lịch đặt chỗ",
     "parkingMap": "Sơ đồ bãi xe"
   },
+  "nav": {
+    "myBookings": "Lịch đặt chỗ",
+    "parkingMap": "Sơ đồ bãi xe",
+    "gateControl": "Điều khiển cổng"
+  },
   "footer": {
     "systemName": "HỆ THỐNG QUẢN LÝ TÒA NHÀ ĐỖ XE",
     "copyright": "© 2026 Hệ thống Quản lý Tòa nhà Đỗ xe. Đã đăng ký bản quyền.",
