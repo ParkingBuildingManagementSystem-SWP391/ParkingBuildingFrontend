@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Card, Empty, Form, Input, Select, Spin, Tag, message } from 'antd';
-import { CalendarDays, CreditCard, MapPin, ShieldCheck } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Card, Form, Input, Select, Spin, Tag, message } from 'antd';
+import { CalendarDays, CreditCard, ShieldCheck } from 'lucide-react';
 import api from '../services/api';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
@@ -10,6 +10,20 @@ const getValue = (source, ...keys) => {
     if (source?.[key] !== undefined && source?.[key] !== null) return source[key];
   }
   return undefined;
+};
+
+const getPaymentUrl = (payload) => {
+  const data = unwrapData(payload);
+  const candidates = [payload, payload?.data, data, data?.data];
+  const keys = ['paymentUrl', 'paymentURL', 'PaymentUrl', 'PaymentURL', 'vnpayUrl', 'vnPayUrl', 'VnpayUrl', 'VnPayUrl', 'url', 'Url'];
+
+  for (const source of candidates) {
+    for (const key of keys) {
+      if (source?.[key]) return source[key];
+    }
+  }
+
+  return '';
 };
 
 const formatDateTime = (value) => {
@@ -42,19 +56,21 @@ const MyMonthlyCard = () => {
   const [form] = Form.useForm();
   const [cardInfo, setCardInfo] = useState(null);
   const [loadingCard, setLoadingCard] = useState(true);
-  const [slots, setSlots] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const selectedTypeId = Form.useWatch('vehicleTypeId', form);
 
   const fetchCardInfo = useCallback(async () => {
     setLoadingCard(true);
     try {
-      const response = await api.get('/Driver/monthly-card');
-      setCardInfo(unwrapData(response.data));
+      const response = await api.get('/MonthlyCard/my-card');
+      const data = unwrapData(response.data);
+      setCardInfo(data?.card ?? data);
     } catch (error) {
       if (error.response?.status !== 404) {
-        message.error(error.response?.data?.message || 'Không thể tải thông tin vé tháng.');
+        const status = error.response?.status;
+        const fallback = status === 403
+          ? 'Bạn không có quyền xem thông tin vé tháng.'
+          : 'Không thể tải thông tin vé tháng.';
+        message.error(error.response?.data?.message || error.response?.data?.error || fallback);
       }
       setCardInfo(null);
     } finally {
@@ -62,61 +78,31 @@ const MyMonthlyCard = () => {
     }
   }, []);
 
-  const fetchAvailableSlots = useCallback(async (typeId) => {
-    if (!typeId) {
-      setSlots([]);
-      return;
-    }
-
-    setLoadingSlots(true);
-    try {
-      const response = await api.get('/Parking/slots', {
-        params: { typeId, status: 'Available' }
-      });
-      const data = unwrapData(response.data);
-      setSlots(Array.isArray(data) ? data : []);
-    } catch (error) {
-      setSlots([]);
-      message.error(error.response?.data?.message || 'Không thể tải danh sách chỗ trống.');
-    } finally {
-      setLoadingSlots(false);
-    }
-  }, []);
-
   useEffect(() => {
     fetchCardInfo();
   }, [fetchCardInfo]);
 
-  useEffect(() => {
-    fetchAvailableSlots(selectedTypeId);
-    form.setFieldsValue({ slotId: undefined });
-  }, [fetchAvailableSlots, form, selectedTypeId]);
-
-  const slotOptions = useMemo(() => slots.map((slot) => ({
-    value: getValue(slot, 'slotId', 'id', 'parkingSlotId'),
-    label: getValue(slot, 'slotName', 'name', 'unitName', 'code') || `Slot #${getValue(slot, 'slotId', 'id')}`
-  })).filter((slot) => slot.value !== undefined), [slots]);
-
   const handleRegister = async (values) => {
     setSubmitting(true);
     try {
-      const response = await api.post('/Driver/monthly-card/register', {
-        vehicleTypeId: Number(values.vehicleTypeId),
-        typeId: Number(values.vehicleTypeId),
+      const response = await api.post('/MonthlyCard/register', {
+        tariffId: Number(values.vehicleTypeId),
         licenseVehicle: values.licenseVehicle.trim().toUpperCase(),
-        slotId: Number(values.slotId),
-        durationInMonths: Number(values.durationInMonths),
+        durationMonths: Number(values.durationInMonths),
         paymentMethod: 'VNPAY'
       });
-      const paymentUrl = response.data?.data?.paymentUrl || response.data?.paymentUrl;
+      const paymentUrl = getPaymentUrl(response.data);
       if (paymentUrl) {
         window.location.href = paymentUrl;
         return;
       }
-      message.success(response.data?.message || 'Đăng ký vé tháng thành công.');
-      fetchCardInfo();
+      message.error(response.data?.message || 'Không nhận được URL thanh toán VNPay từ hệ thống.');
     } catch (error) {
-      message.error(error.response?.data?.message || error.response?.data?.error || 'Không thể tạo đăng ký vé tháng.');
+      const status = error.response?.status;
+      const fallback = status === 403
+        ? 'Bạn không có quyền đăng ký vé tháng.'
+        : 'Không thể tạo đăng ký vé tháng.';
+      message.error(error.response?.data?.message || error.response?.data?.error || fallback);
     } finally {
       setSubmitting(false);
     }
@@ -131,12 +117,46 @@ const MyMonthlyCard = () => {
   }
 
   if (cardInfo) {
-    const licenseVehicle = getValue(cardInfo, 'licenseVehicle', 'LicenseVehicle');
+    const licenseVehicle = getValue(cardInfo, 'licenseVehicle', 'LicenseVehicle', 'plateNumber', 'PlateNumber');
+    const vehicleTypeName = getValue(cardInfo, 'vehicleTypeName', 'VehicleTypeName', 'typeName', 'TypeName');
     const slotName = getValue(cardInfo, 'slotName', 'SlotName', 'unitName');
-    const startTime = getValue(cardInfo, 'startTime', 'StartTime');
-    const endTime = getValue(cardInfo, 'endTime', 'EndTime');
-    const tariffId = getValue(cardInfo, 'tariffId', 'TariffId');
+    const startTime = getValue(cardInfo, 'startDate', 'StartDate', 'startTime', 'StartTime');
+    const endTime = getValue(cardInfo, 'endDate', 'EndDate', 'endTime', 'EndTime');
+    const tariffId = getValue(cardInfo, 'tariffId', 'TariffId', 'packageName', 'PackageName');
+    const price = getValue(cardInfo, 'price', 'Price', 'amount', 'Amount', 'amountToPay', 'AmountToPay');
     const status = getValue(cardInfo, 'status', 'Status') || 'Active';
+    const detailCards = [
+      vehicleTypeName && {
+        icon: <ShieldCheck className="mb-3 text-cyan-200" size={22} />,
+        label: 'Loại xe',
+        value: vehicleTypeName
+      },
+      slotName && {
+        icon: <ShieldCheck className="mb-3 text-cyan-200" size={22} />,
+        label: 'Vị trí',
+        value: slotName
+      },
+      {
+        icon: <CalendarDays className="mb-3 text-emerald-200" size={22} />,
+        label: 'Ngày bắt đầu',
+        value: formatDateTime(startTime)
+      },
+      {
+        icon: <CalendarDays className="mb-3 text-amber-200" size={22} />,
+        label: 'Ngày hết hạn',
+        value: formatDateTime(endTime)
+      },
+      tariffId && {
+        icon: <CreditCard className="mb-3 text-pink-200" size={22} />,
+        label: 'Gói vé',
+        value: tariffId
+      },
+      price !== undefined && {
+        icon: <CreditCard className="mb-3 text-pink-200" size={22} />,
+        label: 'Chi phí',
+        value: `${Number(price).toLocaleString('vi-VN')} VND`
+      }
+    ].filter(Boolean);
 
     return (
       <div className="mx-auto max-w-5xl px-4 py-8">
@@ -148,34 +168,21 @@ const MyMonthlyCard = () => {
                 Monthly Parking Pass
               </div>
               <h1 className="mt-5 text-4xl font-black tracking-tight">{licenseVehicle || 'Biển số chưa cập nhật'}</h1>
-              <p className="mt-2 text-sm font-medium text-indigo-100">Thẻ giữ chỗ cố định cho khách hàng đăng ký vé tháng</p>
+              <p className="mt-2 text-sm font-medium text-indigo-100">Thẻ vé tháng cho khách hàng thanh toán theo chu kỳ</p>
             </div>
             <Tag color={status === 'Active' ? 'green' : 'default'} className="m-0 w-fit rounded-full px-4 py-1 text-sm font-bold">
               {status}
             </Tag>
           </div>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-              <MapPin className="mb-3 text-cyan-200" size={22} />
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-200">Vị trí cố định</p>
-              <p className="mt-1 text-lg font-extrabold">{slotName || 'Chưa cập nhật'}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-              <CalendarDays className="mb-3 text-emerald-200" size={22} />
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-200">Ngày bắt đầu</p>
-              <p className="mt-1 text-sm font-bold">{formatDateTime(startTime)}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-              <CalendarDays className="mb-3 text-amber-200" size={22} />
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-200">Ngày hết hạn</p>
-              <p className="mt-1 text-sm font-bold">{formatDateTime(endTime)}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-              <CreditCard className="mb-3 text-pink-200" size={22} />
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-200">Mã biểu phí</p>
-              <p className="mt-1 text-lg font-extrabold">{tariffId || 'N/A'}</p>
-            </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {detailCards.map((item) => (
+              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                {item.icon}
+                <p className="text-xs font-bold uppercase tracking-wider text-indigo-200">{item.label}</p>
+                <p className="mt-1 text-sm font-bold">{item.value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -187,7 +194,7 @@ const MyMonthlyCard = () => {
       <Card className="rounded-2xl border-slate-100 shadow-sm">
         <div className="mb-6">
           <h1 className="text-2xl font-black tracking-tight text-slate-900">Đăng ký vé tháng</h1>
-          <p className="mt-1 text-sm text-slate-500">Chọn loại xe, biển số và vị trí còn trống để tạo yêu cầu thanh toán VNPay.</p>
+          <p className="mt-1 text-sm text-slate-500">Chọn loại xe, nhập biển số và thời hạn để tạo yêu cầu thanh toán VNPay.</p>
         </div>
 
         <Form
@@ -211,23 +218,6 @@ const MyMonthlyCard = () => {
             rules={[{ required: true, message: 'Vui lòng nhập biển số xe.' }]}
           >
             <Input placeholder="Ví dụ: 51A12345" size="large" onChange={(event) => form.setFieldsValue({ licenseVehicle: event.target.value.toUpperCase() })} />
-          </Form.Item>
-
-          <Form.Item
-            name="slotId"
-            label="Chỗ đỗ còn trống"
-            rules={[{ required: true, message: 'Vui lòng chọn chỗ đỗ.' }]}
-          >
-            <Select
-              placeholder="Chọn chỗ đỗ"
-              loading={loadingSlots}
-              notFoundContent={selectedTypeId ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có chỗ trống" /> : 'Chọn loại xe trước'}
-              options={slotOptions}
-              size="large"
-              showSearch
-              optionFilterProp="label"
-              disabled={!selectedTypeId}
-            />
           </Form.Item>
 
           <Form.Item
