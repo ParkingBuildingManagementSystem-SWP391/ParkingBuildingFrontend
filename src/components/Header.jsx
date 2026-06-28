@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import {
-  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages, Menu
+  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages, Menu, CreditCard
 } from 'lucide-react';
 
 const Header = ({ onOpenSidebar, hasSidebar = true }) => {
@@ -15,6 +15,8 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const { isDarkMode, toggleTheme } = useTheme();
+  const normalizedRole = String(role || user?.role || '').toLowerCase();
+  const canAccessMonthlyCard = ['registered_driver', 'driver', 'manager', 'admin'].includes(normalizedRole);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'vi' ? 'en' : 'vi';
@@ -71,6 +73,11 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
   const handleGoToProfile = () => {
     setIsUserMenuOpen(false);
     navigate('/settings');
+  };
+
+  const handleGoToMonthlyCards = () => {
+    setIsUserMenuOpen(false);
+    navigate('/dashboard/monthly-cards');
   };
 
   const handleLogout = () => {
@@ -192,6 +199,15 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
                   <Settings size={15} className="text-slate-400" />
                   {t('header.profile')}
                 </button>
+                {canAccessMonthlyCard && (
+                  <button
+                    onClick={handleGoToMonthlyCards}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                  >
+                    <CreditCard size={15} className="text-slate-400" />
+                    Vé tháng
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-50"

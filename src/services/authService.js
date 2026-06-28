@@ -38,6 +38,7 @@ export const authService = {
         token: data.token || data.Token,
         username: data.username || data.Username,
         email: data.email || data.Email,
+        phoneNumber: data.phoneNumber || data.PhoneNumber,
         roleName: data.roleName || data.RoleName
       };
     } catch (error) {
@@ -80,6 +81,7 @@ export const authService = {
         token: data.token || data.Token,
         username: data.username || data.Username,
         email: data.email || data.Email,
+        phoneNumber: data.phoneNumber || data.PhoneNumber,
         roleName: data.roleName || data.RoleName
       };
     } catch (error) {
@@ -107,6 +109,7 @@ export const authService = {
         token: data.token || data.Token,
         username: data.username || data.Username,
         email: data.email || data.Email,
+        phoneNumber: data.phoneNumber || data.PhoneNumber,
         roleName: data.roleName || data.RoleName
       };
     } catch (error) {
