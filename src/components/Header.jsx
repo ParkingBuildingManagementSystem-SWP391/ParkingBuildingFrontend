@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import { formatLongDateVN } from '../utils/dateTime';
 import {
   Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages, Menu, CreditCard
 } from 'lucide-react';
@@ -24,8 +25,7 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
   };
 
   const getFormattedDate = () => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date().toLocaleDateString('vi-VN', options);
+    return formatLongDateVN();
   };
 
   useEffect(() => {

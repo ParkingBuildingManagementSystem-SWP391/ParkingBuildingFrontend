@@ -16,38 +16,40 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
     if (isOpen) {
       form.setFieldsValue({
         issueType: form.getFieldValue('issueType') || 'Lost Ticket',
-        sessionId: activeSessionId || undefined
+        sessionId: activeSessionId || undefined,
       });
     }
   }, [activeSessionId, form, isOpen]);
 
-  // Danh sách các loại sự cố phổ biến
   const issueTypes = [
     { value: 'Lost Ticket', label: 'Mất thẻ giữ xe' },
     { value: 'Vehicle Damage', label: 'Xe bị va chạm / Hư hỏng' },
     { value: 'Equipment Malfunction', label: 'Lỗi thiết bị (Barrier/Camera/Hệ thống)' },
     { value: 'Staff Complaint', label: 'Khiếu nại nhân viên' },
-    { value: 'Other', label: 'Khác' }
+    { value: 'Other', label: 'Khác' },
   ];
 
-  // Hàm upload ảnh lên Cloudinary
   const uploadImageToCloud = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'parking_incidents'); // preset cấu hình trên Cloudinary
-    
-    // Nếu chưa có Cloudinary, tạm thời trả về URL giả lập hoặc log lỗi
-    try {
-      const res = await fetch('https://api.cloudinary.com/v1_1/ddr2erkma/image/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      return data.secure_url || '';
-    } catch (err) {
-      console.warn("Cloudinary upload failed, using local/fake URL", err);
-      return URL.createObjectURL(file); // fallback tạm thời
+    formData.append('upload_preset', 'parking_incidents');
+
+    const cloudName = 'ddr2erkma';
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error('Không thể tải ảnh lên máy chủ Cloudinary');
     }
+
+    const data = await res.json();
+    if (!data.secure_url) {
+      throw new Error('Cloudinary không trả về URL ảnh hợp lệ');
+    }
+
+    return data.secure_url;
   };
 
   const handleSubmit = async (values) => {
@@ -66,15 +68,15 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
         sessionId: sessionId ? parseInt(sessionId, 10) : null,
         issueType: values.issueType,
         description: values.description,
-        imageProofUrl
+        imageProofUrl,
       };
 
       await incidentReportService.createIncident(payload);
       message.success('Báo cáo sự cố đã được gửi đi thành công.');
-      onSuccess(); // Reload danh sách hoặc cập nhật UI cha
+      onSuccess?.();
       form.resetFields();
       setFileList([]);
-      onClose();   // Đóng modal
+      onClose();
     } catch (err) {
       message.error(err.message || 'Gửi báo cáo thất bại.');
     } finally {
@@ -87,7 +89,7 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
 
   return (
     <Modal
-      title="Báo Cáo Sự Cố Mới"
+      title="Báo cáo sự cố mới"
       open={isOpen}
       onCancel={onClose}
       footer={null}
@@ -99,7 +101,7 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
         onFinish={handleSubmit}
         initialValues={{
           issueType: 'Lost Ticket',
-          sessionId: activeSessionId
+          sessionId: activeSessionId,
         }}
       >
         <Form.Item
@@ -108,8 +110,8 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
           rules={[{ required: true, message: 'Vui lòng chọn loại sự cố!' }]}
         >
           <Select>
-            {issueTypes.map(t => (
-              <Option key={t.value} value={t.value}>{t.label}</Option>
+            {issueTypes.map((type) => (
+              <Option key={type.value} value={type.value}>{type.label}</Option>
             ))}
           </Select>
         </Form.Item>
@@ -118,9 +120,9 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
           name="sessionId"
           label="Mã lượt đỗ liên quan (Session ID):"
         >
-          <Input 
+          <Input
             disabled={!!activeSessionId}
-            placeholder="Có thể bỏ trống nếu là sự cố chung..." 
+            placeholder="Có thể bỏ trống nếu là sự cố chung..."
           />
         </Form.Item>
 
@@ -132,9 +134,7 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
           <TextArea rows={4} placeholder="Nhập thông tin chi tiết sự cố..." />
         </Form.Item>
 
-        <Form.Item
-          label="Ảnh chụp bằng chứng (nếu có):"
-        >
+        <Form.Item label="Ảnh chụp bằng chứng (nếu có):">
           <Upload
             beforeUpload={() => false}
             listType="picture"
@@ -149,7 +149,7 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
           <Button onClick={onClose} disabled={submitting}>Hủy</Button>
           <Button type="primary" htmlType="submit" loading={submitting || uploading} danger>
-            Gửi Báo Cáo
+            Gửi báo cáo
           </Button>
         </div>
       </Form>

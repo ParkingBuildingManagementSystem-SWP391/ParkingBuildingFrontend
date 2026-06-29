@@ -4,6 +4,7 @@ import { Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
+import { formatDateVN, formatLongDateVN } from '../utils/dateTime';
 
 const Accounts = () => {
   const { t } = useTranslation();
@@ -42,7 +43,8 @@ const Accounts = () => {
     else if (u.roleId || u.RoleId) roleId = Number(u.roleId || u.RoleId);
 
     const uid = u.id || u.Id || u.userId || u.UserId || 1;
-    const fakeDate = new Date(2025, uid % 12, (uid * 3) % 28 + 1).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const fakeDate = formatDateVN(new Date(2025, uid % 12, (uid * 3) % 28 + 1));
+    const joinedDate = u.createdAt || u.CreatedAt || u.joined || u.Joined;
 
     return {
       id: uid,
@@ -51,7 +53,7 @@ const Accounts = () => {
       phoneNumber: u.phoneNumber || u.PhoneNumber || '',
       roleId: roleId,
       status: u.isDeleted || u.IsDeleted ? 'Inactive' : 'Active', // Mapping to status toggle
-      joined: u.createdAt || u.CreatedAt || u.joined || u.Joined || fakeDate
+      joined: formatDateVN(joinedDate, joinedDate || fakeDate)
     };
   };
 
@@ -90,8 +92,7 @@ const Accounts = () => {
 
   // Dynamic Date subtitle
   const getFormattedDate = () => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date().toLocaleDateString('en-US', options);
+    return formatLongDateVN();
   };
 
   // Helper mapping role tags for readable view

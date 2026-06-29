@@ -25,6 +25,7 @@ import motorbikeIcon from '../../assets/vehicles/motorbike.png';
 import bikeIcon from '../../assets/vehicles/bike.png';
 import i18n from '../../i18n';
 import { useTranslation } from 'react-i18next';
+import { createVietnamWallTimeIso, formatDateTimeVN, getVietnamDateParts } from '../../utils/dateTime';
 
 
 
@@ -207,11 +208,11 @@ const chunkSlots = (slots, size) => {
 };
 
 const getDefaultExpectedCheckInTimeParts = () => {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() + 30); // Default to 30 mins in the future, not realtime
+  const d = new Date(Date.now() + 30 * 60 * 1000); // Default to 30 mins in the future, not realtime
+  const parts = getVietnamDateParts(d);
   return {
-    hour: d.getHours(),
-    minute: d.getMinutes(),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
   };
 };
 
@@ -638,11 +639,14 @@ const ParkingLotMap = () => {
   };
 
   const buildExpectedCheckInIso = () => {
-    const expectedDate = new Date();
-    expectedDate.setHours(expectedHour, expectedMinute, 0, 0);
+    let expectedDate = new Date(createVietnamWallTimeIso({ hour: expectedHour, minute: expectedMinute }));
 
     if (expectedDate <= new Date()) {
-      expectedDate.setDate(expectedDate.getDate() + 1);
+      expectedDate = new Date(createVietnamWallTimeIso({
+        hour: expectedHour,
+        minute: expectedMinute,
+        baseDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      }));
     }
 
     // Send the standard UTC ISO string. The backend treats it as UTC and computes the time diff correctly.
@@ -1447,13 +1451,13 @@ const ParkingLotMap = () => {
                         {slotDetail.activeSession.checkInTime && (
                           <div className="flex justify-between items-center">
                             <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian vào thực tế:</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatDateTimeVN(slotDetail.activeSession.checkInTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.bookingTime && (
                           <div className="flex justify-between items-center">
                             <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian đặt trước:</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(slotDetail.activeSession.bookingTime).toLocaleString('vi-VN')}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatDateTimeVN(slotDetail.activeSession.bookingTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.customer && (

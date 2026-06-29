@@ -18,6 +18,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Button, InputNumber } from 'antd';
 import { toast as message } from '../../components/ToastProvider';
+import { addDaysToDateInput, getVietnamDateInputValue } from '../../utils/dateTime';
 
 const defaultPricingData = [
   {
@@ -67,11 +68,9 @@ const Dashboard = ({ section = 'overview' }) => {
 
   // Manager Analytics States
   const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 7);
-    return d.toISOString().split('T')[0];
+    return addDaysToDateInput(getVietnamDateInputValue(), -7);
   });
-  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => getVietnamDateInputValue());
   const [groupBy, setGroupBy] = useState('DAY');
   const [vehicleTypeId, setVehicleTypeId] = useState('');
   const [trafficStats, setTrafficStats] = useState([]);
