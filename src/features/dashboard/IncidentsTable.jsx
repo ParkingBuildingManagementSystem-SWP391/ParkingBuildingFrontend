@@ -14,6 +14,7 @@ import {
   Clock
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
+import ResolveIncidentModal from './ResolveIncidentModal';
 
 const IncidentsTable = () => {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ const IncidentsTable = () => {
   const [filterSeverity, setFilterSeverity] = useState('All');
   const [resolvingId, setResolvingId] = useState(null);
   const [evidenceIncident, setEvidenceIncident] = useState(null);
+  const [activeResolveIncident, setActiveResolveIncident] = useState(null);
 
   const normalizeIncident = (item, index) => ({
     id: item.id || item.incidentId || item.IncidentId || item.code || `incident-${index}`,
@@ -43,7 +45,20 @@ const IncidentsTable = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await managerService.getIncidents();
+      const params = {};
+      
+      if (filterSeverity === 'Resolved') {
+        params.status = 'Resolved';
+      } else if (filterSeverity !== 'All') {
+        params.severity = filterSeverity;
+        params.status = 'Open';
+      }
+      
+      if (searchText.trim() !== '') {
+        params.licenseVehicle = searchText.trim();
+      }
+
+      const response = await managerService.getIncidents(params);
       const data = Array.isArray(response) ? response : (response?.data || response?.Data || []);
       setIncidents(data.map((item, index) => {
         const normalized = normalizeIncident(item, index);
@@ -69,8 +84,12 @@ const IncidentsTable = () => {
   };
 
   useEffect(() => {
-    fetchIncidents();
-  }, []);
+    const delayDebounceFn = setTimeout(() => {
+      fetchIncidents();
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [filterSeverity, searchText]);
 
   // Filter Logic
   const filteredIncidents = useMemo(() => {
@@ -91,29 +110,14 @@ const IncidentsTable = () => {
   }, [incidents, searchText, filterSeverity]);
 
   // Handle Resolve Action
-  const handleResolve = (id) => {
-    const resolutionNotes = window.prompt(t('dashboard.incidents.promptNotes', "Nhập ghi chú xử lý (VD: Đã tìm thấy chìa khóa/ Khách đồng ý nộp phạt 50k/...)"), "Đã xử lý nộp phạt mất thẻ xe");
-    if (resolutionNotes === null) return;
-    
-    const fineAmountStr = window.prompt(t('dashboard.incidents.promptFine', "Số tiền phạt / Thu thêm (nếu có - VNĐ):"), "50000");
-    if (fineAmountStr === null) return;
-    const fineAmount = parseFloat(fineAmountStr);
-    if (Number.isNaN(fineAmount) || fineAmount < 0) {
-      message.error(t('dashboard.incidents.invalidFine', 'Số tiền phạt không hợp lệ.'));
-      return;
-    }
-    
-    const payload = {
-      resolutionNotes,
-      fineAmount
-    };
-
+  const handleResolve = (id, payload) => {
     setResolvingId(id);
     managerService.resolveIncident(id, payload).then(() => {
       setIncidents(prev => prev.map(inc =>
         inc.id === id ? { ...inc, status: 'Resolved', ...payload } : inc
       ));
       message.success(t('dashboard.incidents.resolveSuccess', { id }));
+      setActiveResolveIncident(null);
     }).catch((err) => {
       console.error('resolveIncident error:', err);
       message.error(t('dashboard.incidents.resolveError'));
@@ -222,22 +226,14 @@ const IncidentsTable = () => {
                 onClick={() => record.imageProofUrl ? setEvidenceIncident(record) : message.info(t('dashboard.incidents.noCameraEndpoint'))}
               />
             </Tooltip>
-            <Popconfirm
-              title={t('dashboard.incidents.resolveConfirmTitle')}
-              description={t('dashboard.incidents.resolveConfirmDesc')}
-              onConfirm={() => handleResolve(record.id)}
-              okText={t('dashboard.incidents.confirm')}
-              cancelText={t('dashboard.incidents.cancel')}
+            <Button
+              type="primary"
+              size="small"
+              className="rounded-[12px] border-0 bg-emerald-600 font-bold shadow-sm hover:bg-emerald-700"
+              onClick={() => setActiveResolveIncident(record)}
             >
-              <Button
-                type="primary"
-                size="small"
-                loading={resolvingId === record.id}
-                className="rounded-[12px] border-0 bg-emerald-600 font-bold shadow-sm hover:bg-emerald-700"
-              >
-                {t('dashboard.incidents.resolve')}
-              </Button>
-            </Popconfirm>
+              {t('dashboard.incidents.resolve')}
+            </Button>
           </Space>
         );
       }
@@ -335,6 +331,14 @@ const IncidentsTable = () => {
           />
         )}
       </Modal>
+
+      <ResolveIncidentModal
+        isOpen={!!activeResolveIncident}
+        onClose={() => setActiveResolveIncident(null)}
+        incident={activeResolveIncident}
+        onResolve={handleResolve}
+        loading={resolvingId !== null}
+      />
     </div>
   );
 };

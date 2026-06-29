@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
+import DriverCreateIncidentModal from '../features/checkin-checkout/DriverCreateIncidentModal';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -52,6 +53,8 @@ const MyBookings = () => {
 
   // Modal display states
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportSessionId, setReportSessionId] = useState(null);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [targetBookingId, setTargetBookingId] = useState(null);
   const [targetBooking, setTargetBooking] = useState(null);
@@ -594,6 +597,18 @@ const MyBookings = () => {
                       <QrCode size={14} /> {t('myBookings.viewQR')}
                     </button>
 
+                    {(booking.sessionStatus === 'InProgress' || booking.sessionStatus === 'Occupied' || booking.sessionStatus === 'Active') ? (
+                      <button
+                        onClick={() => {
+                          setReportSessionId(booking.id);
+                          setIsReportOpen(true);
+                        }}
+                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-amber-200 bg-amber-50 px-4 text-xs font-bold text-amber-700 shadow-sm transition-all hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25 lg:flex-none"
+                      >
+                        <AlertCircle size={14} /> Báo sự cố
+                      </button>
+                    ) : null}
+
                     {booking.sessionStatus === 'Reserved' && (
                       <button
                          onClick={() => handleCancelClick(booking.id)}
@@ -718,6 +733,15 @@ const MyBookings = () => {
         </div>
       )}
 
+      <DriverCreateIncidentModal
+        isOpen={isReportOpen}
+        onClose={() => {
+          setIsReportOpen(false);
+          setReportSessionId(null);
+        }}
+        sessionId={reportSessionId}
+        onSuccess={fetchMyBookings}
+      />
     </div>
   );
 };
