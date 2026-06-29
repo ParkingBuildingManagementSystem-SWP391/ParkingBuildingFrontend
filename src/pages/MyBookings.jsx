@@ -20,6 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
+import { formatDateVN, formatTimeVN } from '../utils/dateTime';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -154,18 +155,9 @@ const MyBookings = () => {
         if (item.bookingTime) {
           // BE sends UTC time. Ensure we append 'Z' if missing so JS parses it as UTC, converting to local VN time.
           const raw = String(item.bookingTime);
-          const d = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
-          if (!isNaN(d.getTime())) {
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            bookedDate = `${day}/${month}/${year}`;
-
-            const hours = String(d.getHours()).padStart(2, '0');
-            const mins = String(d.getMinutes()).padStart(2, '0');
-            bookedTime = `${hours}:${mins}`;
-
-          }
+          const bookingDate = raw.endsWith('Z') ? raw : raw + 'Z';
+          bookedDate = formatDateVN(bookingDate, 'N/A');
+          bookedTime = formatTimeVN(bookingDate, 'N/A');
         }
 
         if (deadlineBaseTime) {
@@ -173,9 +165,7 @@ const MyBookings = () => {
           const base = new Date(rawBase.endsWith('Z') ? rawBase : rawBase + 'Z');
           if (!isNaN(base.getTime())) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
-            const dlHours = String(deadline.getHours()).padStart(2, '0');
-            const dlMins = String(deadline.getMinutes()).padStart(2, '0');
-            deadlineTime = `${dlHours}:${dlMins}`;
+            deadlineTime = formatTimeVN(deadline, 'N/A');
           }
         }
 
@@ -539,12 +529,12 @@ const MyBookings = () => {
                         <div className="space-y-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
                           <div className="flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                            In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) : 'N/A'}
+                            In: {formatTimeVN(booking.checkInTime, 'N/A')}
                           </div>
                           {booking.checkOutTime && (
                             <div className="flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                              Out: {new Date(booking.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                              Out: {formatTimeVN(booking.checkOutTime, 'N/A')}
                             </div>
                           )}
                         </div>

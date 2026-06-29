@@ -28,6 +28,7 @@ import {
 import TicketModal from './TicketModal';
 import QrScannerModal from './QrScannerModal';
 import CreateIncidentModal from './CreateIncidentModal';
+import { formatDateTimeVN, formatTimeVN } from '../../utils/dateTime';
 
 
 const dataURLtoFile = (dataurl, filename) => {
@@ -797,7 +798,7 @@ const GateController = () => {
       title: t('gate.activeTable.time'),
       dataIndex: ['occupiedBy', 'checkInTime'],
       key: 'checkInTime',
-      render: (text) => text ? new Date(text).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'
+      render: (text) => formatTimeVN(text, 'N/A')
     },
     {
       title: t('gate.activeTable.action'),
@@ -1713,12 +1714,12 @@ const GateController = () => {
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.entryTime')}</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
-                          {checkInTime ? new Date(checkInTime).toLocaleString('vi-VN') : "N/A"}
+                          {formatDateTimeVN(checkInTime, "N/A")}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.exitTime')}</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
-                          {checkOutTime ? new Date(checkOutTime).toLocaleString('vi-VN') : "N/A"}
+                          {formatDateTimeVN(checkOutTime, "N/A")}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.paymentStatus')}</span>}>

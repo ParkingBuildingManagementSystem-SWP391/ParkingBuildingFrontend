@@ -19,6 +19,7 @@ import {
 import { parkingService } from '../../services/parkingService';
 import { managerService } from '../../services/managerService';
 import { useAuth } from '../../context/AuthContext';
+import { formatDateTimeVN } from '../../utils/dateTime';
 
 const { Option } = Select;
 
@@ -379,7 +380,7 @@ const LiveStatusTable = () => {
                     {slotDetail.activeSession.checkInTime && (
                       <div className="flex items-center gap-2 text-sm">
                         <Clock size={14} className="text-indigo-400" />
-                        <span className="text-slate-600 dark:text-slate-300">{t('dashboard.liveStatus.checkInTime', { time: new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN') })}</span>
+                        <span className="text-slate-600 dark:text-slate-300">{t('dashboard.liveStatus.checkInTime', { time: formatDateTimeVN(slotDetail.activeSession.checkInTime) })}</span>
                       </div>
                     )}
 

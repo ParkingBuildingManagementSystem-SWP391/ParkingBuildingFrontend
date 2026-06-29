@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Table, Button, Input, Popconfirm, Tooltip, Space, Modal, Image } from 'antd';
-import { toast as message } from '../../components/ToastProvider';
+import { Table, Button, Input, Popconfirm, Tooltip, Space, Modal, Image, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
@@ -14,7 +13,7 @@ import {
   Clock
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
-import ResolveIncidentModal from './ResolveIncidentModal';
+import { formatDateTimeVN } from '../../utils/dateTime';
 
 const IncidentsTable = () => {
   const { t } = useTranslation();
@@ -25,7 +24,9 @@ const IncidentsTable = () => {
   const [filterSeverity, setFilterSeverity] = useState('All');
   const [resolvingId, setResolvingId] = useState(null);
   const [evidenceIncident, setEvidenceIncident] = useState(null);
-  const [activeResolveIncident, setActiveResolveIncident] = useState(null);
+  const [resolveIncidentId, setResolveIncidentId] = useState(null);
+  const [resolutionNotes, setResolutionNotes] = useState('');
+  const [fineAmount, setFineAmount] = useState(50000);
 
   const normalizeIncident = (item, index) => {
     let realId = `incident-${index}`;
@@ -118,20 +119,54 @@ const IncidentsTable = () => {
   }, [incidents, searchText, filterSeverity]);
 
   // Handle Resolve Action
-  const handleResolve = (id, payload) => {
-    setResolvingId(id);
-    managerService.resolveIncident(id, payload).then(() => {
-      setIncidents(prev => prev.map(inc =>
-        inc.id === id ? { ...inc, status: 'Resolved', ...payload } : inc
-      ));
-      message.success(t('dashboard.incidents.resolveSuccess', { id }));
-      setActiveResolveIncident(null);
-    }).catch((err) => {
-      console.error('resolveIncident error:', err);
-      message.error(t('dashboard.incidents.resolveError'));
-    }).finally(() => {
-      setResolvingId(null);
-    });
+  const handleResolve = (id) => {
+    setResolveIncidentId(id);
+    setResolutionNotes('Đã xử lý nộp phạt mất thẻ xe');
+    setFineAmount(50000);
+  };
+
+  const handleResolveSubmit = () => {
+    if (!resolutionNotes.trim()) {
+      message.error(t('dashboard.incidents.promptNotesRequired', 'Vui lòng nhập ghi chú giải quyết.'));
+      return;
+    }
+
+    const parsedFineAmount = Number(fineAmount);
+
+    if (Number.isNaN(parsedFineAmount) || parsedFineAmount < 0) {
+      message.error(t('dashboard.incidents.invalidFine', 'Số tiền phạt không hợp lệ.'));
+      return;
+    }
+
+    const payload = {
+      resolutionNotes: resolutionNotes.trim(),
+      fineAmount: parsedFineAmount,
+    };
+
+    setResolvingId(resolveIncidentId);
+
+    managerService.resolveIncident(resolveIncidentId, payload)
+      .then(() => {
+        setIncidents((prev) =>
+          prev.map((inc) =>
+            inc.id === resolveIncidentId
+              ? { ...inc, status: 'Resolved', ...payload }
+              : inc
+          )
+        );
+
+        message.success(t('dashboard.incidents.resolveSuccess', { id: resolveIncidentId }));
+        setResolveIncidentId(null);
+        setResolutionNotes('');
+        setFineAmount(50000);
+      })
+      .catch((err) => {
+        console.error('resolveIncident error:', err);
+        message.error(t('dashboard.incidents.resolveError'));
+      })
+      .finally(() => {
+        setResolvingId(null);
+      });
   };
 
   // Tag rendering helpers
@@ -205,7 +240,7 @@ const IncidentsTable = () => {
             <MapPin size={14} /> {record.location}
           </div>
           <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-            <Clock size={14} /> {record.timestamp ? new Date(record.timestamp).toLocaleString('vi-VN') : 'N/A'}
+            <Clock size={14} /> {formatDateTimeVN(record.timestamp, 'N/A')}
           </div>
         </div>
       )
@@ -238,7 +273,7 @@ const IncidentsTable = () => {
               type="primary"
               size="small"
               className="rounded-[12px] border-0 bg-emerald-600 font-bold shadow-sm hover:bg-emerald-700"
-              onClick={() => setActiveResolveIncident(record)}
+              onClick={() => handleResolve(record.id)}
             >
               {t('dashboard.incidents.resolve')}
             </Button>
@@ -340,13 +375,48 @@ const IncidentsTable = () => {
         )}
       </Modal>
 
-      <ResolveIncidentModal
-        isOpen={!!activeResolveIncident}
-        onClose={() => setActiveResolveIncident(null)}
-        incident={activeResolveIncident}
-        onResolve={handleResolve}
-        loading={resolvingId !== null}
-      />
+      <Modal
+        title={`${t('dashboard.incidents.resolve', 'Giải quyết sự cố')} #${resolveIncidentId}`}
+        open={!!resolveIncidentId}
+        onOk={handleResolveSubmit}
+        onCancel={() => setResolveIncidentId(null)}
+        confirmLoading={resolvingId !== null}
+        okText={t('dashboard.incidents.confirm', 'Xác nhận')}
+        cancelText={t('dashboard.incidents.cancel', 'Hủy')}
+        destroyOnClose
+      >
+        <div className="space-y-4 py-3">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400">
+              {t('dashboard.incidents.promptNotes', 'Ghi chú giải quyết / Đền bù')}{' '}
+              <span className="text-rose-500">*</span>
+            </label>
+
+            <Input.TextArea
+              rows={3}
+              value={resolutionNotes}
+              onChange={(e) => setResolutionNotes(e.target.value)}
+              placeholder="Nhập ghi chú xử lý, ví dụ: Đã tìm thấy chìa khóa / Khách nộp phạt mất thẻ xe..."
+              className="rounded-lg"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400">
+              {t('dashboard.incidents.promptFine', 'Số tiền phạt / Thu thêm (VND)')}
+            </label>
+
+            <Input
+              type="number"
+              min={0}
+              step={10000}
+              value={fineAmount}
+              onChange={(e) => setFineAmount(e.target.value)}
+              className="rounded-lg w-full"
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

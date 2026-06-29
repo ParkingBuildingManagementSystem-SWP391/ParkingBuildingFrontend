@@ -3,6 +3,7 @@ import { Button, Card, Form, Input, Select, Spin, Tag, message } from 'antd';
 import { CalendarDays, CreditCard, ShieldCheck } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { formatDateTimeVN } from '../utils/dateTime';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
 
@@ -31,13 +32,7 @@ const formatDateTime = (value) => {
   if (!value) return 'Chưa cập nhật';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
+  return formatDateTimeVN(date);
 };
 
 const vehicleTypes = [
