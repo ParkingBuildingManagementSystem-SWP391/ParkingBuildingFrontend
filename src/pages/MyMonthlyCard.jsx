@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Form, Input, Select, Spin, Tag, message } from 'antd';
 import { CalendarDays, CreditCard, ShieldCheck } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
@@ -58,6 +59,81 @@ const MyMonthlyCard = () => {
   const [loadingCard, setLoadingCard] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [slots, setSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const urlSlotId = searchParams.get('selectedSlotId');
+  const urlSlotName = searchParams.get('selectedSlotName');
+  const urlVehicleTypeId = searchParams.get('vehicleTypeId');
+
+  const selectedVehicleTypeId = Form.useWatch('vehicleTypeId', form);
+
+  useEffect(() => {
+    if (selectedVehicleTypeId) {
+      setLoadingSlots(true);
+      api.get(`/Parking/slots?typeId=${selectedVehicleTypeId}&status=Available`)
+        .then(res => {
+          const data = unwrapData(res.data);
+          setSlots(Array.isArray(data) ? data : []);
+        })
+        .catch(err => {
+          console.error("Lỗi tải danh sách ô đỗ:", err);
+          message.error("Không thể tải danh sách vị trí đỗ xe.");
+        })
+        .finally(() => setLoadingSlots(false));
+    } else {
+      setSlots([]);
+    }
+  }, [selectedVehicleTypeId]);
+
+  useEffect(() => {
+    const savedForm = sessionStorage.getItem('monthly_card_reg_form');
+    let savedValues = {};
+    if (savedForm) {
+      try {
+        savedValues = JSON.parse(savedForm);
+        sessionStorage.removeItem('monthly_card_reg_form');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    if (urlSlotId && urlSlotName && urlVehicleTypeId) {
+      const vId = Number(urlVehicleTypeId);
+      const sId = Number(urlSlotId);
+      form.setFieldsValue({
+        vehicleTypeId: vId,
+        slotId: sId,
+        licenseVehicle: savedValues.licenseVehicle || '',
+        durationInMonths: savedValues.durationInMonths || 1
+      });
+      // Nếu chưa fetch được mảng slots đầy đủ, ta set tạm vào để dropdown hiển thị được tên
+      setSlots(prev => prev.some(s => s.slotId === sId) ? prev : [{ slotId: sId, slotName: urlSlotName }, ...prev]);
+    } else if (Object.keys(savedValues).length > 0) {
+      form.setFieldsValue({
+        licenseVehicle: savedValues.licenseVehicle || '',
+        durationInMonths: savedValues.durationInMonths || 1
+      });
+    }
+  }, [urlSlotId, urlSlotName, urlVehicleTypeId, form]);
+
+  const handleGoToMapToSelect = () => {
+    const vehicleTypeId = form.getFieldValue('vehicleTypeId');
+    if (!vehicleTypeId) {
+      message.warning('Vui lòng chọn loại xe trước khi xem bản đồ.');
+      return;
+    }
+    const currentValues = form.getFieldsValue();
+    sessionStorage.setItem('monthly_card_reg_form', JSON.stringify({
+      licenseVehicle: currentValues.licenseVehicle || '',
+      durationInMonths: currentValues.durationInMonths || 1
+    }));
+    navigate(`/parking-map?selectForMonthlyCard=true&vehicleTypeId=${vehicleTypeId}`);
+  };
+
   const fetchCardInfo = useCallback(async () => {
     setLoadingCard(true);
     try {
@@ -87,7 +163,8 @@ const MyMonthlyCard = () => {
     try {
       const response = await api.post('/MonthlyCard/register', {
         tariffId: Number(values.vehicleTypeId),
-        licenseVehicle: values.licenseVehicle.trim().toUpperCase(),
+        slotId: Number(values.slotId),
+        licenseVehicle: (values.licenseVehicle || '').trim().toUpperCase(),
         durationMonths: Number(values.durationInMonths),
         paymentMethod: 'VNPAY'
       });
@@ -125,6 +202,7 @@ const MyMonthlyCard = () => {
     const tariffId = getValue(cardInfo, 'tariffId', 'TariffId', 'packageName', 'PackageName');
     const price = getValue(cardInfo, 'price', 'Price', 'amount', 'Amount', 'amountToPay', 'AmountToPay');
     const status = getValue(cardInfo, 'status', 'Status') || 'Active';
+    const ticketCode = getValue(cardInfo, 'ticketCode', 'TicketCode');
     const detailCards = [
       vehicleTypeName && {
         icon: <ShieldCheck className="mb-3 text-cyan-200" size={22} />,
@@ -162,7 +240,7 @@ const MyMonthlyCard = () => {
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 text-white shadow-2xl shadow-indigo-950/30">
           <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-            <div>
+            <div className="flex-1">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-100">
                 <ShieldCheck size={15} />
                 Monthly Parking Pass
@@ -170,6 +248,22 @@ const MyMonthlyCard = () => {
               <h1 className="mt-5 text-4xl font-black tracking-tight">{licenseVehicle || 'Biển số chưa cập nhật'}</h1>
               <p className="mt-2 text-sm font-medium text-indigo-100">Thẻ vé tháng cho khách hàng thanh toán theo chu kỳ</p>
             </div>
+
+            {/* Khối hiển thị mã QR của vé tháng để check-in/out dự phòng */}
+            {ticketCode && (
+              <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-4 self-center md:self-start">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-200">Mã QR Dự Phòng</span>
+                <div className="bg-white p-2.5 rounded-xl inline-block shadow-sm">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&ecc=M&data=${encodeURIComponent(ticketCode)}`}
+                    alt="Monthly Card QR"
+                    className="w-28 h-28 object-contain"
+                  />
+                </div>
+                <span className="font-mono text-xs font-bold text-indigo-200">{ticketCode}</span>
+              </div>
+            )}
+
             <Tag color={status === 'Active' ? 'green' : 'default'} className="m-0 w-fit rounded-full px-4 py-1 text-sm font-bold">
               {status}
             </Tag>
@@ -213,11 +307,63 @@ const MyMonthlyCard = () => {
           </Form.Item>
 
           <Form.Item
-            name="licenseVehicle"
-            label="Biển số xe"
-            rules={[{ required: true, message: 'Vui lòng nhập biển số xe.' }]}
+            noStyle
+            shouldUpdate={(prevValues, currentValues) => prevValues.vehicleTypeId !== currentValues.vehicleTypeId}
           >
-            <Input placeholder="Ví dụ: 51A12345" size="large" onChange={(event) => form.setFieldsValue({ licenseVehicle: event.target.value.toUpperCase() })} />
+            {({ getFieldValue }) => {
+              const isBicycle = getFieldValue('vehicleTypeId') === 1;
+              return (
+                <Form.Item
+                  name="licenseVehicle"
+                  label={isBicycle ? "Biển số / Mã nhận diện xe đạp (Không bắt buộc)" : "Biển số xe"}
+                  rules={[
+                    {
+                      required: !isBicycle,
+                      message: 'Vui lòng nhập biển số xe.'
+                    }
+                  ]}
+                >
+                  <Input
+                    placeholder={isBicycle ? "Để trống nếu không có biển số" : "Ví dụ: 51A12345"}
+                    size="large"
+                    onChange={(event) => form.setFieldsValue({ licenseVehicle: event.target.value.toUpperCase() })}
+                  />
+                </Form.Item>
+              );
+            }}
+          </Form.Item>
+
+          {/* Trường Chọn Vị Trí Đỗ Xe */}
+          <Form.Item
+            label="Vị trí đỗ xe"
+            required
+            style={{ marginBottom: 0 }}
+          >
+            <div className="flex gap-3">
+              <Form.Item
+                name="slotId"
+                rules={[{ required: true, message: 'Vui lòng chọn vị trí đỗ xe.' }]}
+                className="flex-grow"
+                style={{ marginBottom: 24 }}
+              >
+                <Select
+                  placeholder="Chọn vị trí đỗ xe mong muốn"
+                  options={slots.map(s => ({ value: s.slotId, label: s.slotName }))}
+                  size="large"
+                  loading={loadingSlots}
+                  disabled={!form.getFieldValue('vehicleTypeId') || loadingSlots}
+                />
+              </Form.Item>
+              <Button
+                type="dashed"
+                size="large"
+                onClick={handleGoToMapToSelect}
+                className="flex items-center gap-2 border-indigo-300 text-indigo-600 hover:text-indigo-700 hover:border-indigo-500"
+                style={{ height: 40 }}
+              >
+                Chọn trên sơ đồ
+              </Button>
+            </div>
           </Form.Item>
 
           <Form.Item

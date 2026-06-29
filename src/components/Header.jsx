@@ -16,7 +16,7 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
   const { t, i18n } = useTranslation();
   const { isDarkMode, toggleTheme } = useTheme();
   const normalizedRole = String(role || user?.role || '').toLowerCase();
-  const canAccessMonthlyCard = ['registered_driver', 'driver', 'manager', 'admin'].includes(normalizedRole);
+  const canAccessMonthlyCard = ['registered_driver', 'driver', 'manager'].includes(normalizedRole);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'vi' ? 'en' : 'vi';

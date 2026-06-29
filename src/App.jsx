@@ -40,7 +40,7 @@ const MonthlyCardsRoute = () => {
   const { role } = useAuth();
   const normalizedRole = String(role || '').toLowerCase();
 
-  if (['manager', 'admin'].includes(normalizedRole)) {
+  if (normalizedRole === 'manager') {
     return <MonthlyCardManager />;
   }
 
@@ -98,8 +98,8 @@ function App() {
               <Route path="/staff-logs" element={<StaffLogsPage />} />
             </Route>
 
-            {/* Monthly card route adapts to Manager/Admin vs Registered Driver */}
-            <Route element={<RoleProtectedRoute allowedRoles={['Manager', 'Admin', 'Registered_Driver']} />}>
+            {/* Monthly card route adapts to Manager vs Registered Driver */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Manager', 'Registered_Driver']} />}>
               <Route path="/dashboard/monthly-cards" element={<MonthlyCardsRoute />} />
             </Route>
 

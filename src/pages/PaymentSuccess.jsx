@@ -24,10 +24,12 @@ const PaymentSuccess = () => {
   useEffect(() => {
     if (!invoiceId) {
       if (vnpResponseCode === '00') {
-        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng)
+        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng, MCR: Vé tháng)
         if (vnpTxnRef.startsWith('DEP')) {
           setPaymentState('success_deposit');
           fetchBookingDetails();
+        } else if (vnpTxnRef.startsWith('MCR')) {
+          setPaymentState('success_monthly');
         } else {
           setPaymentState('success_exit');
         }
@@ -65,9 +67,18 @@ const PaymentSuccess = () => {
           setPaymentState('success_deposit');
           clearInterval(intervalId);
           fetchBookingDetails();
+        } else if (currentStatus === 'SUCCESS_MONTHLY') {
+          // Monthly Card Registration Success
+          setPaymentState('success_monthly');
+          clearInterval(intervalId);
         } else if (currentStatus === 'SUCCESS') {
-          // Pre-exit / Full Payment Success
-          setPaymentState('success_exit');
+          // Check if this is a monthly card payment by checking vnpTxnRef
+          if (vnpTxnRef.startsWith('MCR')) {
+            setPaymentState('success_monthly');
+          } else {
+            // Pre-exit / Full Payment Success
+            setPaymentState('success_exit');
+          }
           clearInterval(intervalId);
         } else if (currentStatus === 'SUCCESS_EXIT') {
           // MỚI: Thanh toán trực tiếp tại quầy BOT -> Ra bãi ngay
@@ -86,7 +97,7 @@ const PaymentSuccess = () => {
     intervalId = setInterval(pollStatus, 2000);
 
     return () => clearInterval(intervalId);
-  }, [invoiceId, vnpResponseCode]);
+  }, [invoiceId, vnpResponseCode, vnpTxnRef]);
 
   // Fetch session details from my-bookings to display QR Code if deposited
   const fetchBookingDetails = async () => {
@@ -279,6 +290,50 @@ const PaymentSuccess = () => {
               {t('paymentSuccess.btnBackHome')}
               <ArrowRight size={16} />
             </button>
+          </div>
+        )}
+
+        {/* State 3.2: Monthly Card Registration Success */}
+        {paymentState === 'success_monthly' && (
+          <div className="space-y-7">
+            <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 size={40} className="text-emerald-500" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+                {t('paymentSuccess.monthlySuccess')}
+              </h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
+                {t('paymentSuccess.monthlyDesc')}
+              </p>
+            </div>
+
+            {/* Hộp thông tin thẻ VIP nổi bật */}
+            <div className="mx-auto max-w-xs space-y-2 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10 sm:p-6">
+              <div className="flex items-center justify-center gap-1.5 text-[10px] font-extrabold text-indigo-700 uppercase tracking-widest">
+                <CreditCard size={12} />
+                Thành viên VIP / Vé tháng
+              </div>
+              <p className="text-[11px] text-indigo-800 font-medium leading-relaxed dark:text-indigo-300">
+                Hệ thống AI sẽ tự động nhận diện biển số xe của bạn khi ra vào cổng để mở barrier mà không cần quẹt thẻ hay thanh toán thêm.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="h-12 flex-1 cursor-pointer rounded-[14px] border border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                {t('paymentSuccess.btnHome')}
+              </button>
+              <button
+                onClick={() => navigate('/my-monthly-card')}
+                className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] text-sm transition-all shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              >
+                {t('paymentSuccess.btnMyCard')}
+              </button>
+            </div>
           </div>
         )}
 
