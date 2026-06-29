@@ -237,6 +237,8 @@
     "readyDesc": "Join thousands of users who have already upgraded their parking experience. Register today and get immediate access to our premium facilities."
   },
   "myBookings": {
+    "reportIncident": "Report Incident",
+    "reportIncidentSuccess": "Incident reported successfully!",
     "errVNPayCreate": "Cannot create VNPay payment link.",
     "errTxFailed": "Transaction failed. Please try again.",
     "errSys": "System error: ",

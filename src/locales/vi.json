@@ -237,6 +237,8 @@
     "readyDesc": "Hàng ngàn người dùng đã nâng cấp trải nghiệm đỗ xe của họ. Đăng ký ngay hôm nay để truy cập ngay vào các tiện ích cao cấp của chúng tôi."
   },
   "myBookings": {
+    "reportIncident": "Báo cáo sự cố",
+    "reportIncidentSuccess": "Gửi báo cáo sự cố thành công!",
     "errVNPayCreate": "Không thể tạo liên kết thanh toán VNPay.",
     "errTxFailed": "Giao dịch thất bại. Vui lòng thử lại.",
     "errSys": "Lỗi hệ thống: ",

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
+import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -56,6 +57,8 @@ const MyBookings = () => {
   const [targetBookingId, setTargetBookingId] = useState(null);
   const [targetBooking, setTargetBooking] = useState(null);
   const [payingSessionId, setPayingSessionId] = useState(null);
+  const [isIncidentOpen, setIsIncidentOpen] = useState(false);
+  const [selectedSessionIdForIncident, setSelectedSessionIdForIncident] = useState(null);
 
   const handlePayVNPay = async (booking) => {
     setPayingSessionId(booking.id);
@@ -594,6 +597,19 @@ const MyBookings = () => {
                       <QrCode size={14} /> {t('myBookings.viewQR')}
                     </button>
 
+                    {/* Nút báo cáo sự cố (Chỉ hiển thị cho các lượt đỗ đang diễn ra hoặc đã kết thúc) */}
+                    {booking.sessionStatus !== 'Canceled' && (
+                      <button
+                        onClick={() => {
+                          setSelectedSessionIdForIncident(booking.id);
+                          setIsIncidentOpen(true);
+                        }}
+                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-orange-200 bg-white px-4 text-xs font-bold text-orange-600 shadow-sm transition-all hover:bg-orange-50 dark:border-orange-500/40 dark:bg-slate-800 dark:text-orange-300 dark:hover:bg-orange-500/15 lg:flex-none"
+                      >
+                        <AlertCircle size={14} /> {t('myBookings.reportIncident') || 'Báo cáo sự cố'}
+                      </button>
+                    )}
+
                     {booking.sessionStatus === 'Reserved' && (
                       <button
                          onClick={() => handleCancelClick(booking.id)}
@@ -717,6 +733,20 @@ const MyBookings = () => {
           </div>
         </div>
       )}
+
+      {/* 7. MODAL BÁO CÁO SỰ CỐ DÀNH CHO TÀI XẾ */}
+      <CreateIncidentModal
+        isOpen={isIncidentOpen}
+        onClose={() => {
+          setIsIncidentOpen(false);
+          setSelectedSessionIdForIncident(null);
+        }}
+        activeSessionId={selectedSessionIdForIncident}
+        onSuccess={() => {
+          message.success(t('myBookings.reportIncidentSuccess') || 'Đã gửi báo cáo sự cố!');
+          fetchMyBookings();
+        }}
+      />
 
     </div>
   );
