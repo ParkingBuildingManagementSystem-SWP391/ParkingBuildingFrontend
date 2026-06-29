@@ -599,19 +599,6 @@ const MyBookings = () => {
                       <QrCode size={14} /> {t('myBookings.viewQR')}
                     </button>
 
-<<<<<<< HEAD
-                    {(booking.sessionStatus === 'InProgress' || booking.sessionStatus === 'Occupied' || booking.sessionStatus === 'Active') ? (
-                      <button
-                        onClick={() => {
-                          setReportSessionId(booking.id);
-                          setIsReportOpen(true);
-                        }}
-                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-amber-200 bg-amber-50 px-4 text-xs font-bold text-amber-700 shadow-sm transition-all hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25 lg:flex-none"
-                      >
-                        <AlertCircle size={14} /> Báo sự cố
-                      </button>
-                    ) : null}
-=======
                     {/* Nút báo cáo sự cố (Chỉ hiển thị cho các lượt đỗ đang diễn ra hoặc đã kết thúc) */}
                     {booking.sessionStatus !== 'Canceled' && (
                       <button
@@ -624,7 +611,6 @@ const MyBookings = () => {
                         <AlertCircle size={14} /> {t('myBookings.reportIncident') || 'Báo cáo sự cố'}
                       </button>
                     )}
->>>>>>> Feature/Monthly-Card
 
                     {booking.sessionStatus === 'Reserved' && (
                       <button
