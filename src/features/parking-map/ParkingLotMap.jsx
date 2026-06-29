@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -224,7 +224,17 @@ const ParkingLotMap = () => {
   const highlightFloorId = searchParams.get('floorId');
   const highlightSlotName = searchParams.get('slotName');
 
-  const [activeFloorId, setActiveFloorId] = useState(3); // Default to Floor G (FloorId = 3)
+  const selectForMonthlyCard = searchParams.get('selectForMonthlyCard') === 'true';
+  const paramVehicleTypeId = searchParams.get('vehicleTypeId');
+
+  const [activeFloorId, setActiveFloorId] = useState(() => {
+    if (paramVehicleTypeId) {
+      const typeId = parseInt(paramVehicleTypeId, 10);
+      if (typeId === 3) return 1; // Ô tô -> Tầng B1
+      return 3; // Xe máy/Xe đạp -> Tầng G
+    }
+    return 3; // Default to Floor G (FloorId = 3)
+  });
 
   // Auto switch floor if highlighted from LocateVehicle
   useEffect(() => {
@@ -579,6 +589,21 @@ const ParkingLotMap = () => {
 
   // Slot click handler
   const handleSlotClick = (slot) => {
+    if (selectForMonthlyCard) {
+      if (slot.status === 'Available') {
+        const typeId = Number(slot.typeId);
+        const reqTypeId = Number(paramVehicleTypeId);
+        if (paramVehicleTypeId && typeId !== reqTypeId) {
+          message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
+          return;
+        }
+        navigate(`/my-monthly-card?selectedSlotId=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
+      } else {
+        message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
+      }
+      return;
+    }
+
     if (!user) {
       if (slot.status === 'Available') {
         sessionStorage.setItem('spotflow_pending_booking_slot', slot.id);

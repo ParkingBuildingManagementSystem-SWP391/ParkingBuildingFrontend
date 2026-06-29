@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Form, Input, Select, Spin, Tag, message } from 'antd';
 import { CalendarDays, CreditCard, ShieldCheck } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
@@ -58,6 +59,81 @@ const MyMonthlyCard = () => {
   const [loadingCard, setLoadingCard] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [slots, setSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const urlSlotId = searchParams.get('selectedSlotId');
+  const urlSlotName = searchParams.get('selectedSlotName');
+  const urlVehicleTypeId = searchParams.get('vehicleTypeId');
+
+  const selectedVehicleTypeId = Form.useWatch('vehicleTypeId', form);
+
+  useEffect(() => {
+    if (selectedVehicleTypeId) {
+      setLoadingSlots(true);
+      api.get(`/Parking/slots?typeId=${selectedVehicleTypeId}&status=Available`)
+        .then(res => {
+          const data = unwrapData(res.data);
+          setSlots(Array.isArray(data) ? data : []);
+        })
+        .catch(err => {
+          console.error("Lỗi tải danh sách ô đỗ:", err);
+          message.error("Không thể tải danh sách vị trí đỗ xe.");
+        })
+        .finally(() => setLoadingSlots(false));
+    } else {
+      setSlots([]);
+    }
+  }, [selectedVehicleTypeId]);
+
+  useEffect(() => {
+    const savedForm = sessionStorage.getItem('monthly_card_reg_form');
+    let savedValues = {};
+    if (savedForm) {
+      try {
+        savedValues = JSON.parse(savedForm);
+        sessionStorage.removeItem('monthly_card_reg_form');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    if (urlSlotId && urlSlotName && urlVehicleTypeId) {
+      const vId = Number(urlVehicleTypeId);
+      const sId = Number(urlSlotId);
+      form.setFieldsValue({
+        vehicleTypeId: vId,
+        slotId: sId,
+        licenseVehicle: savedValues.licenseVehicle || '',
+        durationInMonths: savedValues.durationInMonths || 1
+      });
+      // Nếu chưa fetch được mảng slots đầy đủ, ta set tạm vào để dropdown hiển thị được tên
+      setSlots(prev => prev.some(s => s.slotId === sId) ? prev : [{ slotId: sId, slotName: urlSlotName }, ...prev]);
+    } else if (Object.keys(savedValues).length > 0) {
+      form.setFieldsValue({
+        licenseVehicle: savedValues.licenseVehicle || '',
+        durationInMonths: savedValues.durationInMonths || 1
+      });
+    }
+  }, [urlSlotId, urlSlotName, urlVehicleTypeId, form]);
+
+  const handleGoToMapToSelect = () => {
+    const vehicleTypeId = form.getFieldValue('vehicleTypeId');
+    if (!vehicleTypeId) {
+      message.warning('Vui lòng chọn loại xe trước khi xem bản đồ.');
+      return;
+    }
+    const currentValues = form.getFieldsValue();
+    sessionStorage.setItem('monthly_card_reg_form', JSON.stringify({
+      licenseVehicle: currentValues.licenseVehicle || '',
+      durationInMonths: currentValues.durationInMonths || 1
+    }));
+    navigate(`/parking-map?selectForMonthlyCard=true&vehicleTypeId=${vehicleTypeId}`);
+  };
+
   const fetchCardInfo = useCallback(async () => {
     setLoadingCard(true);
     try {
@@ -87,7 +163,8 @@ const MyMonthlyCard = () => {
     try {
       const response = await api.post('/MonthlyCard/register', {
         tariffId: Number(values.vehicleTypeId),
-        licenseVehicle: values.licenseVehicle.trim().toUpperCase(),
+        slotId: Number(values.slotId),
+        licenseVehicle: (values.licenseVehicle || '').trim().toUpperCase(),
         durationMonths: Number(values.durationInMonths),
         paymentMethod: 'VNPAY'
       });
@@ -213,11 +290,63 @@ const MyMonthlyCard = () => {
           </Form.Item>
 
           <Form.Item
-            name="licenseVehicle"
-            label="Biển số xe"
-            rules={[{ required: true, message: 'Vui lòng nhập biển số xe.' }]}
+            noStyle
+            shouldUpdate={(prevValues, currentValues) => prevValues.vehicleTypeId !== currentValues.vehicleTypeId}
           >
-            <Input placeholder="Ví dụ: 51A12345" size="large" onChange={(event) => form.setFieldsValue({ licenseVehicle: event.target.value.toUpperCase() })} />
+            {({ getFieldValue }) => {
+              const isBicycle = getFieldValue('vehicleTypeId') === 1;
+              return (
+                <Form.Item
+                  name="licenseVehicle"
+                  label={isBicycle ? "Biển số / Mã nhận diện xe đạp (Không bắt buộc)" : "Biển số xe"}
+                  rules={[
+                    {
+                      required: !isBicycle,
+                      message: 'Vui lòng nhập biển số xe.'
+                    }
+                  ]}
+                >
+                  <Input
+                    placeholder={isBicycle ? "Để trống nếu không có biển số" : "Ví dụ: 51A12345"}
+                    size="large"
+                    onChange={(event) => form.setFieldsValue({ licenseVehicle: event.target.value.toUpperCase() })}
+                  />
+                </Form.Item>
+              );
+            }}
+          </Form.Item>
+
+          {/* Trường Chọn Vị Trí Đỗ Xe */}
+          <Form.Item
+            label="Vị trí đỗ xe"
+            required
+            style={{ marginBottom: 0 }}
+          >
+            <div className="flex gap-3">
+              <Form.Item
+                name="slotId"
+                rules={[{ required: true, message: 'Vui lòng chọn vị trí đỗ xe.' }]}
+                className="flex-grow"
+                style={{ marginBottom: 24 }}
+              >
+                <Select
+                  placeholder="Chọn vị trí đỗ xe mong muốn"
+                  options={slots.map(s => ({ value: s.slotId, label: s.slotName }))}
+                  size="large"
+                  loading={loadingSlots}
+                  disabled={!form.getFieldValue('vehicleTypeId') || loadingSlots}
+                />
+              </Form.Item>
+              <Button
+                type="dashed"
+                size="large"
+                onClick={handleGoToMapToSelect}
+                className="flex items-center gap-2 border-indigo-300 text-indigo-600 hover:text-indigo-700 hover:border-indigo-500"
+                style={{ height: 40 }}
+              >
+                Chọn trên sơ đồ
+              </Button>
+            </div>
           </Form.Item>
 
           <Form.Item
