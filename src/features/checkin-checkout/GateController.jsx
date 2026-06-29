@@ -22,10 +22,12 @@ import {
   Wallet,
   ListChecks,
   Banknote,
-  ExternalLink
+  ExternalLink,
+  AlertCircle
 } from 'lucide-react';
 import TicketModal from './TicketModal';
 import QrScannerModal from './QrScannerModal';
+import CreateIncidentModal from './CreateIncidentModal';
 
 
 const dataURLtoFile = (dataurl, filename) => {
@@ -271,6 +273,7 @@ const GateController = () => {
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
   const [isLocalQrScannerOpen, setIsLocalQrScannerOpen] = useState(false);
   const [qrScannerTarget, setQrScannerTarget] = useState('entry'); // 'entry' or 'exit'
+  const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
   const [isCheckInConfirmOpen, setIsCheckInConfirmOpen] = useState(false);
   const [bookingCheckInData, setBookingCheckInData] = useState(null);
   const qrInputRef = React.useRef(null);
@@ -1378,6 +1381,15 @@ const GateController = () => {
                 <Keyboard size={15} /> {t('gate.form.manualInput')}
               </Button>
             </div>
+            
+            <Button
+              type="primary"
+              danger
+              onClick={() => setIsCreateIncidentOpen(true)}
+              className="w-full h-11 font-bold rounded-[14px] flex items-center justify-center gap-1.5 mt-3 bg-rose-600 hover:bg-rose-700 border-none shadow-sm shadow-rose-600/20"
+            >
+              <AlertCircle size={15} /> Báo cáo sự cố / Mất thẻ
+            </Button>
           </Card>
         </div>
 
@@ -1942,6 +1954,15 @@ const GateController = () => {
           );
         })()}
       </Modal>
+
+      <CreateIncidentModal 
+        isOpen={isCreateIncidentOpen} 
+        onClose={() => setIsCreateIncidentOpen(false)}
+        activeSessionId={checkoutResult?.sessionId || checkoutResult?.SessionId} 
+        onSuccess={() => {
+          fetchActiveParkedVehicles(); // Reload lại danh sách xe
+        }}
+      />
     </div>
   );
 };
