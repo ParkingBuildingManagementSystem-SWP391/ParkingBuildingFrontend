@@ -563,7 +563,7 @@
         "action": "Thao tác"
       },
       "cameraEvidence": "Xem bằng chứng camera",
-      "noCameraEndpoint": "Chưa có endpoint backend cho bằng chứng camera.",
+      "noCameraEvidence": "Sự cố này không có hình ảnh bằng chứng.",
       "resolveConfirmTitle": "Đánh dấu đã xử lý?",
       "resolveConfirmDesc": "Xác nhận sự cố này đã được xử lý.",
       "confirm": "Xác nhận",

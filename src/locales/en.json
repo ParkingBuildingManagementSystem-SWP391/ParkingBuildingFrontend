@@ -563,7 +563,7 @@
         "action": "Action"
       },
       "cameraEvidence": "View Camera Evidence",
-      "noCameraEndpoint": "No backend endpoint for camera evidence yet.",
+      "noCameraEvidence": "No image proof evidence for this incident.",
       "resolveConfirmTitle": "Mark as resolved?",
       "resolveConfirmDesc": "Confirm this incident has been resolved.",
       "confirm": "Confirm",
