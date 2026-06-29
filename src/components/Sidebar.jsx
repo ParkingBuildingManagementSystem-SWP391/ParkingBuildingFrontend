@@ -5,7 +5,7 @@ import Logo from './Logo';
 import {
   Map, Calendar as CalendarIcon, LayoutDashboard,
   UserPlus, ScanLine, Users, Activity, AlertTriangle,
-  BarChart3, Grid3X3, DollarSign, ClipboardList, X
+  BarChart3, Grid3X3, DollarSign, ClipboardList, X, CreditCard
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -112,6 +112,7 @@ const Sidebar = ({ isMobileOpen = false, onMobileClose }) => {
           <NavButton path="/incidents" icon={AlertTriangle} label={t('sidebar.incidents')} />
           <NavButton path="/analytics" icon={BarChart3} label={t('sidebar.analytics')} />
           <NavButton path="/slot-management" icon={Grid3X3} label={t('sidebar.slotManagement')} />
+          <NavButton path="/dashboard/monthly-cards" icon={CreditCard} label={t('sidebar.monthlyCards', { defaultValue: 'Quản lý vé tháng' })} />
           <NavButton path="/pricing" icon={DollarSign} label={t('sidebar.pricing')} />
           <NavButton path="/staff-logs" icon={ClipboardList} label={t('sidebar.staffLogs')} />
         </div>
