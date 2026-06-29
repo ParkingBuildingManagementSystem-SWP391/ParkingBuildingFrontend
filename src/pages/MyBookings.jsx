@@ -19,11 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
-<<<<<<< HEAD
-import DriverCreateIncidentModal from '../features/checkin-checkout/DriverCreateIncidentModal';
-=======
 import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
->>>>>>> Feature/Monthly-Card
 
 const MyBookings = () => {
   const navigate = useNavigate();
