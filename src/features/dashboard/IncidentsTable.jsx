@@ -27,16 +27,24 @@ const IncidentsTable = () => {
   const [evidenceIncident, setEvidenceIncident] = useState(null);
   const [activeResolveIncident, setActiveResolveIncident] = useState(null);
 
-  const normalizeIncident = (item, index) => ({
-    id: item.id || item.incidentId || item.IncidentId || item.code || `incident-${index}`,
-    severity: item.severity || item.Severity || 'Info',
-    timestamp: item.timestamp || item.createdAt || item.CreatedAt || item.reportedAt || item.ReportedAt,
-    type: item.type || item.Type || item.title || item.Title || 'Sự cố',
-    description: item.description || item.Description || item.message || item.Message || '',
-    location: item.location || item.Location || item.slotName || item.SlotName || item.licenseVehicle || item.LicenseVehicle || '',
-    status: item.status || item.Status || 'Pending',
-    imageProofUrl: item.imageProofUrl || item.ImageProofUrl || ''
-  });
+  const normalizeIncident = (item, index) => {
+    let realId = `incident-${index}`;
+    if (item.id !== undefined && item.id !== null) realId = item.id;
+    else if (item.incidentId !== undefined && item.incidentId !== null) realId = item.incidentId;
+    else if (item.IncidentId !== undefined && item.IncidentId !== null) realId = item.IncidentId;
+    else if (item.code !== undefined && item.code !== null) realId = item.code;
+
+    return {
+      id: realId,
+      severity: item.severity || item.Severity || 'Info',
+      timestamp: item.timestamp || item.createdAt || item.CreatedAt || item.reportedAt || item.ReportedAt,
+      type: item.type || item.Type || item.title || item.Title || 'Sự cố',
+      description: item.description || item.Description || item.message || item.Message || '',
+      location: item.location || item.Location || item.slotName || item.SlotName || item.licenseVehicle || item.LicenseVehicle || '',
+      status: item.status || item.Status || 'Pending',
+      imageProofUrl: item.imageProofUrl || item.ImageProofUrl || ''
+    };
+  };
 
   const isResolved = (status) => status === 'Resolved';
   const isPending = (status) => !isResolved(status);
@@ -223,7 +231,7 @@ const IncidentsTable = () => {
                 icon={<Camera size={14} />}
                 size="small"
                 className="flex items-center justify-center rounded-[12px] border-slate-200 bg-white text-slate-500 hover:text-indigo-600 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-indigo-300"
-                onClick={() => record.imageProofUrl ? setEvidenceIncident(record) : message.info(t('dashboard.incidents.noCameraEndpoint'))}
+                onClick={() => record.imageProofUrl ? setEvidenceIncident(record) : message.info(t('dashboard.incidents.noCameraEvidence'))}
               />
             </Tooltip>
             <Button

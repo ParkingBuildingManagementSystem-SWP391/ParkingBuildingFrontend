@@ -237,6 +237,8 @@
     "readyDesc": "Hàng ngàn người dùng đã nâng cấp trải nghiệm đỗ xe của họ. Đăng ký ngay hôm nay để truy cập ngay vào các tiện ích cao cấp của chúng tôi."
   },
   "myBookings": {
+    "reportIncident": "Báo cáo sự cố",
+    "reportIncidentSuccess": "Gửi báo cáo sự cố thành công!",
     "errVNPayCreate": "Không thể tạo liên kết thanh toán VNPay.",
     "errTxFailed": "Giao dịch thất bại. Vui lòng thử lại.",
     "errSys": "Lỗi hệ thống: ",
@@ -561,7 +563,7 @@
         "action": "Thao tác"
       },
       "cameraEvidence": "Xem bằng chứng camera",
-      "noCameraEndpoint": "Chưa có endpoint backend cho bằng chứng camera.",
+      "noCameraEvidence": "Sự cố này không có hình ảnh bằng chứng.",
       "resolveConfirmTitle": "Đánh dấu đã xử lý?",
       "resolveConfirmDesc": "Xác nhận sự cố này đã được xử lý.",
       "confirm": "Xác nhận",

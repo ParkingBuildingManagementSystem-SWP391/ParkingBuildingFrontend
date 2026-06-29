@@ -38,7 +38,7 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
     
     // Nếu chưa có Cloudinary, tạm thời trả về URL giả lập hoặc log lỗi
     try {
-      const res = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload', {
+      const res = await fetch('https://api.cloudinary.com/v1_1/ddr2erkma/image/upload', {
         method: 'POST',
         body: formData,
       });
