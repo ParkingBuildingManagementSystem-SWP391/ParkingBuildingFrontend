@@ -10,7 +10,8 @@ import {
   Sparkles,
   User,
   UserCheck,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
@@ -41,6 +42,9 @@ const Settings = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -61,25 +65,37 @@ const Settings = () => {
   };
 
   const validateForm = () => {
-    const nextErrors = {};
-    const trimmedName = fullName.trim();
-    const trimmedEmail = email.trim();
-    const trimmedPhone = phoneNumber.trim();
+    const newErrors = {};
 
-    if (trimmedName.length > 100) {
-      nextErrors.fullName = 'Họ tên không được vượt quá 100 ký tự.';
+    if (!fullName.trim()) {
+      newErrors.fullName = t('settings.errFullNameRequired');
     }
 
-    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      nextErrors.email = 'Email không đúng định dạng.';
+    if (!email.trim()) {
+      newErrors.email = t('settings.errEmailRequired');
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = t('settings.errEmailInvalid');
     }
 
-    if (trimmedPhone && !/^[0-9+\-\s()]{8,20}$/.test(trimmedPhone)) {
-      nextErrors.phoneNumber = 'Số điện thoại không đúng định dạng cơ bản.';
+    if (!phoneNumber.trim()) {
+      newErrors.phoneNumber = t('settings.errPhoneRequired');
     }
 
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+    // Validation Đổi mật khẩu
+    if (newPassword) {
+      if (!oldPassword) {
+        newErrors.oldPassword = 'Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu mới!';
+      }
+      if (newPassword.length < 6) {
+        newErrors.newPassword = 'Mật khẩu mới phải từ 6 ký tự trở lên!';
+      }
+      if (newPassword !== confirmPassword) {
+        newErrors.confirmPassword = 'Mật khẩu xác nhận không trùng khớp!';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSaveProfile = async (event) => {
@@ -92,24 +108,28 @@ const Settings = () => {
 
     try {
       const payload = {
-        username: fullName.trim(), // Giao diện 'Họ và tên' -> Backend 'username'
+        username: fullName.trim(),
         email: email.trim(),
-        phoneNumber: phoneNumber.trim()
+        phoneNumber: phoneNumber.trim(),
+        oldPassword: oldPassword ? oldPassword : null,
+        newPassword: newPassword ? newPassword : null
       };
 
-      // Gọi API đặt lại thông tin cá nhân của Backend
+      // Gọi API cập nhật thông tin và mật khẩu mới
       await updateProfile(payload);
 
-      // Cập nhật lại Auth Context ở Client để header & sidebar thay đổi tức thì
-      if (updateUser) {
-          updateUser({
-            username: fullName.trim(),
-            email: email.trim(),
-            phoneNumber: phoneNumber.trim()
-          });
-      }
+      updateUser({
+        username: fullName.trim(),
+        email: email.trim(),
+        phoneNumber: phoneNumber.trim()
+      });
 
-      message.success('Cập nhật thông tin cá nhân thành công!');
+      // Reset các trường mật khẩu sau khi đổi thành công
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      message.success('Cập nhật thông tin cá nhân và mật khẩu thành công!');
     } catch (err) {
       console.error(err);
       message.error(err.response?.data?.error || 'Đã xảy ra lỗi khi lưu thông tin.');
@@ -218,6 +238,58 @@ const Settings = () => {
                 </div>
                 {errors.phoneNumber && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.phoneNumber}</p>}
                 {!isAdmin && <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">Chỉ Quản trị viên (Admin) mới có quyền đổi Số điện thoại</span>}
+              </div>
+            </div>
+
+            {/* Thêm phần Đổi mật khẩu */}
+            <div className="border-t border-slate-100 pt-5 mt-5 dark:border-slate-700 space-y-4">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Đổi mật khẩu (Bỏ trống nếu không đổi)</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Mật khẩu hiện tại</label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      placeholder="Nhập mật khẩu hiện tại"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                  {errors.oldPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.oldPassword}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Mật khẩu mới</label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      placeholder="Tối thiểu 6 ký tự"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                  {errors.newPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.newPassword}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Xác nhận mật khẩu mới</label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      placeholder="Nhập lại mật khẩu mới"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                  {errors.confirmPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.confirmPassword}</p>}
+                </div>
               </div>
             </div>
 
