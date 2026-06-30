@@ -295,7 +295,7 @@ const Settings = () => {
 
             <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
-              <span>Frontend chưa tìm thấy API cập nhật profile cá nhân cho Driver. Các thay đổi sẽ không được lưu cho đến khi backend cung cấp endpoint dùng token hiện tại.</span>
+              <span>Để đổi mật khẩu, hãy nhập mật khẩu hiện tại và mật khẩu mới. Bỏ trống các ô mật khẩu nếu bạn chỉ muốn cập nhật thông tin cá nhân.</span>
             </div>
 
             <div className="flex flex-col-reverse items-center gap-3 border-t border-slate-100 pt-5 dark:border-slate-700 sm:flex-row">
