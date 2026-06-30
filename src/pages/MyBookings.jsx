@@ -330,18 +330,6 @@ const MyBookings = () => {
   return (
     <div className="space-y-8 font-sans select-none pb-12">
 
-      {/* 1. PAGE HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
-            {t('myBookings.pageTitle')}
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {t('myBookings.pageSubtitle')}
-          </p>
-        </div>
-      </div>
-
       {/* 2. OVERVIEW STATISTICS ROW (4 cards) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
