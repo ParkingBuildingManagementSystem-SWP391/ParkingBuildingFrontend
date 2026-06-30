@@ -269,7 +269,6 @@ const GateController = () => {
   const [slots, setSlots] = useState([]);
   const [checkInForm] = Form.useForm();
   const [checkOutForm] = Form.useForm();
-  const [checkInMode, setCheckInMode] = useState('walkin'); // 'walkin' or 'reservation'
 
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
   const [isLocalQrScannerOpen, setIsLocalQrScannerOpen] = useState(false);
@@ -284,6 +283,26 @@ const GateController = () => {
     if (qrScannerTarget === 'entry') {
       checkInForm.setFieldsValue({ ticketCode: decodedText });
       message.success(t('gate.messages.scanBookingSuccess', { code: decodedText }));
+
+      const currentPlate = checkInForm.getFieldValue('plate');
+      if (!currentPlate) {
+        try {
+          const res = await parkingService.scanCheckIn(decodedText);
+          const isSuccess = res?.isSuccess || res?.IsSuccess || (res && !res.error);
+
+          if (isSuccess) {
+            const plateFromDb = res.data?.licenseVehicle || res.data?.LicenseVehicle || res.licenseVehicle || res.LicenseVehicle;
+            if (plateFromDb) {
+              checkInForm.setFieldsValue({ plate: plateFromDb });
+              if (plateFromDb.toUpperCase().startsWith('BIKE_')) {
+                checkInForm.setFieldsValue({ type: 'Bicycle' });
+              }
+            }
+          }
+        } catch (err) {
+          console.error("KhÃ´ng thá»ƒ tá»± Ä‘á»™ng truy váº¥n biá»ƒn sá»‘ tá»« mÃ£ QR cá»•ng vÃ o:", err);
+        }
+      }
     } else {
       checkOutForm.setFieldsValue({ ticketCode: decodedText });
       message.success(t('gate.messages.scanTicketSuccess', { code: decodedText }));
@@ -443,11 +462,13 @@ const GateController = () => {
       }
 
       // Tự động nhận diện chế độ dựa trên việc ô QR có dữ liệu hay không
-      const isQrFlow = !!values.ticketCode || checkInMode === 'reservation';
+      const ticketCode = values.ticketCode?.trim();
+      const licenseVehicle = values.plate?.trim().toUpperCase();
+      const isQrFlow = Boolean(ticketCode);
 
       if (!isQrFlow) {
         const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 3;
-        let finalPlate = values.plate;
+        let finalPlate = licenseVehicle;
         if (vehicleTypeId === 1 && !finalPlate) {
           finalPlate = `BIKE_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
         }
@@ -480,9 +501,6 @@ const GateController = () => {
         }
       } else {
         // Reservation mode
-        const ticketCode = values.ticketCode;
-        const licenseVehicle = values.plate;
-
         const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
         const isSuccess = response?.isSuccess || response?.IsSuccess || response?.success || (response && !response.error);
         
@@ -614,7 +632,6 @@ const GateController = () => {
     // Định tuyến thông minh nếu quét nhầm mã đặt chỗ (booking) vào cổng ra
     if (ticketCode && ticketCode.includes('SLOT:') && !ticketCode.includes('TICKET:WK_') && !ticketCode.startsWith('WK_')) {
       checkOutForm.setFieldsValue({ ticketCode: '' });
-      setCheckInMode('reservation');
       checkInForm.setFieldsValue({ ticketCode });
       message.info(t('gate.messages.autoRouteToCheckIn'));
       setTimeout(() => {
@@ -909,9 +926,9 @@ const GateController = () => {
                         message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
 
                         try {
+                          checkInForm.setFieldsValue({ ticketCode: '' });
                           const checkRes = await parkingService.scanCheckIn(null, predictedPlate);
                           if (checkRes && checkRes.isSuccess) {
-                            setCheckInMode('reservation');
                             checkInForm.setFieldsValue({
                               ticketCode: checkRes.ticketCode || checkRes.TicketCode
                             });
@@ -919,9 +936,11 @@ const GateController = () => {
                             setTimeout(() => {
                               entryQrInputRef.current?.focus();
                             }, 100);
+                          } else {
+                            checkInForm.setFieldsValue({ ticketCode: '' });
                           }
                         } catch (err) {
-                          setCheckInMode('walkin');
+                          checkInForm.setFieldsValue({ ticketCode: '' });
                         }
                       }
                     } else {
@@ -973,16 +992,16 @@ const GateController = () => {
 
                       // --- BỔ SUNG TỰ ĐỘNG KIỂM TRA ĐẶT CHỖ BẰNG BIỂN SỐ ---
                       try {
+                        checkInForm.setFieldsValue({ ticketCode: '' });
                         const checkRes = await parkingService.scanCheckIn(null, predictedPlate);
                         if (checkRes && checkRes.isSuccess) {
-                          setCheckInMode('reservation');
                           checkInForm.setFieldsValue({
                             ticketCode: checkRes.ticketCode || checkRes.TicketCode
                           });
                           message.success(`Phát hiện đặt chỗ của tài xế: ${checkRes.driverName || "N/A"}`);
                         }
                       } catch (err) {
-                        setCheckInMode('walkin');
+                        checkInForm.setFieldsValue({ ticketCode: '' });
                       }
                       // ----------------------------------------------------
                     }
@@ -1018,39 +1037,7 @@ const GateController = () => {
               }}
             />
 
-            {/* Check-In Mode Toggle */}
-            <div className="p-1 bg-slate-100 border border-slate-200/80 rounded-2xl grid grid-cols-2 gap-1 mb-4 shadow-inner dark:border-slate-700 dark:bg-slate-800">
-              <button
-                type="button"
-                onClick={() => {
-                  setCheckInMode('walkin');
-                  checkInForm.resetFields();
-                }}
-                className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
-                  checkInMode === 'walkin'
-                    ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm shadow-indigo-600/30'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-white dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100'
-                }`}
-              >
-                {t('gate.form.checkInMode')}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCheckInMode('reservation');
-                  checkInForm.resetFields();
-                }}
-                className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
-                  checkInMode === 'reservation'
-                    ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm shadow-indigo-600/30'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-white dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100'
-                }`}
-              >
-                {t('gate.form.qrMode')}
-              </button>
-            </div>
-
-            {/* Check-In Form */}
+            {/* Unified Check-In Form */}
             <Form
               form={checkInForm}
               layout="vertical"
@@ -1065,7 +1052,6 @@ const GateController = () => {
               <Form.Item
                 name="ticketCode"
                 label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.qrTicketCode')} (Nếu có)</span>}
-                rules={[{ required: checkInMode === 'reservation', message: t('gate.form.requireQr') }]}
                 className="mb-3"
               >
                 <Input 
@@ -1078,12 +1064,11 @@ const GateController = () => {
               <Form.Item noStyle shouldUpdate={(prev, curr) => prev.type !== curr.type}>
                 {({ getFieldValue }) => {
                   const type = getFieldValue('type') || 'Car';
-                  const isRequired = checkInMode === 'walkin' && type !== 'Bicycle';
                   return (
                     <Form.Item
                       name="plate"
                       label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.plate')}</span>}
-                      rules={[{ required: isRequired, message: t('gate.form.requirePlate') }]}
+                      rules={[{ required: type !== 'Bicycle', message: t('gate.form.requirePlate') }]}
                       className="mb-3"
                     >
                       <Input
@@ -1096,49 +1081,61 @@ const GateController = () => {
                 }}
               </Form.Item>
 
-              {checkInMode === 'walkin' && (
-                <div className="grid grid-cols-1 gap-4 mb-3">
-                  <Form.Item
-                    name="type"
-                    label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.type')}</span>}
-                    rules={[{ required: true, message: t('gate.form.requireType') }]}
-                    initialValue="Car"
-                    className="mb-0"
-                  >
-                    <Radio.Group className="flex w-full" buttonStyle="solid">
-                      <Radio.Button value="Car" className="flex-1 text-center h-11 leading-[42px] font-semibold text-sm">{t('gate.form.car')}</Radio.Button>
-                      <Radio.Button value="Motorbike" className="flex-1 text-center h-11 leading-[42px] font-semibold text-sm">{t('gate.form.motorbike')}</Radio.Button>
-                      <Radio.Button value="Bicycle" className="flex-1 text-center h-11 leading-[42px] font-semibold text-sm">{t('gate.form.bicycle')}</Radio.Button>
-                    </Radio.Group>
-                  </Form.Item>
-                </div>
-              )}
+              <Form.Item noStyle shouldUpdate={(prev, curr) => prev.ticketCode !== curr.ticketCode}>
+                {({ getFieldValue }) => {
+                  const ticketCode = getFieldValue('ticketCode');
+                  if (ticketCode) return null;
 
-              <div className="pt-2">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="w-full h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:!from-emerald-400 hover:!to-emerald-500 border-none font-bold rounded-[14px] transition-all shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 flex items-center justify-center gap-1.5 text-white"
-                >
-                  <Sparkles size={15}/> {checkInMode === 'reservation' ? t('gate.form.verifyQrOpen') : t('gate.form.printTicketOpen')}
-                </Button>
-              </div>
+                  return (
+                    <div className="grid grid-cols-1 gap-4 mb-3">
+                      <Form.Item
+                        name="type"
+                        label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.type')}</span>}
+                        rules={[{ required: true, message: t('gate.form.requireType') }]}
+                        initialValue="Car"
+                        className="mb-0"
+                      >
+                        <Radio.Group className="flex w-full" buttonStyle="solid">
+                          <Radio.Button value="Car" className="flex-1 text-center h-11 leading-[42px] font-semibold text-sm">{t('gate.form.car')}</Radio.Button>
+                          <Radio.Button value="Motorbike" className="flex-1 text-center h-11 leading-[42px] font-semibold text-sm">{t('gate.form.motorbike')}</Radio.Button>
+                          <Radio.Button value="Bicycle" className="flex-1 text-center h-11 leading-[42px] font-semibold text-sm">{t('gate.form.bicycle')}</Radio.Button>
+                        </Radio.Group>
+                      </Form.Item>
+                    </div>
+                  );
+                }}
+              </Form.Item>
+
+              <Form.Item noStyle shouldUpdate={(prev, curr) => prev.ticketCode !== curr.ticketCode}>
+                {({ getFieldValue }) => {
+                  const ticketCode = getFieldValue('ticketCode');
+                  return (
+                    <div className="pt-2">
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        className="w-full h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:!from-emerald-400 hover:!to-emerald-500 border-none font-bold rounded-[14px] transition-all shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 flex items-center justify-center gap-1.5 text-white"
+                      >
+                        <Sparkles size={15}/> {ticketCode ? t('gate.form.verifyQrOpen') : t('gate.form.printTicketOpen')}
+                      </Button>
+                    </div>
+                  );
+                }}
+              </Form.Item>
             </Form>
 
-            {checkInMode === 'reservation' && (
-              <div className="flex gap-2 mt-3">
-                <Button
-                  type="dashed"
-                  onClick={() => {
-                    setQrScannerTarget('entry');
-                    setIsLocalQrScannerOpen(true);
-                  }}
-                  className="w-full h-11 border-[1.5px] border-indigo-200 text-indigo-600 font-bold rounded-[14px] flex items-center justify-center gap-1.5 hover:border-indigo-400"
-                >
-                  <QrCode size={15} /> {t('gate.form.scanQrCamera')}
-                </Button>
-              </div>
-            )}
+            <div className="flex gap-2 mt-3">
+              <Button
+                type="dashed"
+                onClick={() => {
+                  setQrScannerTarget('entry');
+                  setIsLocalQrScannerOpen(true);
+                }}
+                className="w-full h-11 border-[1.5px] border-indigo-200 text-indigo-600 font-bold rounded-[14px] flex items-center justify-center gap-1.5 hover:border-indigo-400"
+              >
+                <QrCode size={15} /> {t('gate.form.scanQrCamera')}
+              </Button>
+            </div>
           </Card>
         </div>
 
