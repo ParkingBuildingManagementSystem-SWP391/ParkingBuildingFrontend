@@ -648,11 +648,11 @@
       "vehicleType": "Vehicle Type"
     },
     "messages": {
-      "scanBookingSuccess": "Booking code recognized: {{code}}",
+      "scanBookingSuccess": "Monthly pass/booking QR recognized: {{code}}",
       "scanTicketSuccess": "Ticket code recognized: {{code}}",
       "walkinSuccess": "Walk-in check-in successful!",
       "checkinFailed": "Check-in failed.",
-      "bookingSuccess": "Booking check-in successful! Barrier opened.",
+      "bookingSuccess": "Monthly pass/booking check-in successful! Barrier opened.",
       "bookingFailed": "Check-in failed. Please check QR code/ticket code.",
       "plateRequired": "Please enter license plate!",
       "plateMismatch": "License plate does not match!",
@@ -704,7 +704,7 @@
       "checkoutProcess": "Process Check-out & Verify",
       "manualInput": "Manual input / External scanner",
       "scanQrExit": "Scan Ticket QR - Exit Gate",
-      "scanQrEntry": "Scan Booking QR - Entry Gate",
+      "scanQrEntry": "Scan Monthly Pass/Booking QR - Entry Gate",
       "enterOrScan": "Enter or scan ticket code",
       "enterOrScanDesc": "After the camera recognizes the license plate, please scan the QR code using the external scanner or enter the ticket code and press Enter to process check-out."
     },
