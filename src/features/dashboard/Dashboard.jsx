@@ -28,6 +28,8 @@ const defaultPricingData = [
     dayRate: 2000,
     nightRate: 3000,
     fullDayRate: 5000,
+    firstHourPrice: 0,
+    nextHourPrice: 0,
     monthlyPrice: 120000,
     maxHoursPerTurn: null
   },
@@ -38,6 +40,8 @@ const defaultPricingData = [
     dayRate: 4000,
     nightRate: 6000,
     fullDayRate: 10000,
+    firstHourPrice: 0,
+    nextHourPrice: 0,
     monthlyPrice: 250000,
     maxHoursPerTurn: null
   },
@@ -48,6 +52,8 @@ const defaultPricingData = [
     dayRate: 20000,
     nightRate: 30000,
     fullDayRate: 50000,
+    firstHourPrice: 20000,
+    nextHourPrice: 10000,
     monthlyPrice: 1500000,
     maxHoursPerTurn: 4
   }
@@ -164,6 +170,8 @@ const Dashboard = ({ section = 'overview' }) => {
         dayRate: row.dayRate,
         nightRate: row.nightRate,
         fullDayRate: row.fullDayRate,
+        firstHourPrice: isCarPricing ? row.firstHourPrice : 0,
+        nextHourPrice: isCarPricing ? row.nextHourPrice : 0,
         monthlyPrice: row.monthlyPrice,
         maxHoursPerTurn: isCarPricing ? row.maxHoursPerTurn : null
       });
@@ -830,7 +838,9 @@ const Dashboard = ({ section = 'overview' }) => {
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.dayRate')}</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.nightRate')}</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.fullDayRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Giá Vé Tháng</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.firstHourPrice')}</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.nextHourPrice')}</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.monthlyPrice')}</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.maxHours')}</th>
                     {canEditPricing && (
                       <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
@@ -885,6 +895,38 @@ const Dashboard = ({ section = 'overview' }) => {
                           addonAfter="VND"
                           className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
                         />
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        {isCarPricing ? (
+                          <InputNumber
+                            min={0}
+                            value={row.firstHourPrice}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'firstHourPrice', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                          />
+                        ) : (
+                          <span className="text-slate-400 font-bold dark:text-slate-500">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        {isCarPricing ? (
+                          <InputNumber
+                            min={0}
+                            value={row.nextHourPrice}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'nextHourPrice', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                          />
+                        ) : (
+                          <span className="text-slate-400 font-bold dark:text-slate-500">N/A</span>
+                        )}
                       </td>
                       <td className="px-4 py-4 align-middle">
                         <InputNumber

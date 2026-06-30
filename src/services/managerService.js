@@ -83,6 +83,8 @@ export const managerService = {
         nightRate: Number(data.nightRate),
         fullDayRate: Number(data.fullDayRate),
         monthlyPrice: Number(data.monthlyPrice),
+        firstHourPrice: Number(data.firstHourPrice || 0),
+        nextHourPrice: Number(data.nextHourPrice || 0),
         maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
           ? Number(data.maxHoursPerTurn)
           : null
