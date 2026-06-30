@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import PaymentSuccess from './pages/PaymentSuccess';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 
 // Protected Pages (Admin & Driver Features)
@@ -55,6 +56,7 @@ function App() {
           {/* Public auth pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/" element={<Home />} />
