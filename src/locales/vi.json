@@ -441,7 +441,7 @@
     "loadingText2": "Đang đối khớp trạng thái hóa đơn... (Lần {{attempts}}/{{maxAttempts}})",
     "checkingResult": "Đang kiểm tra kết quả",
     "monthlySuccess": "Đăng Ký Vé Tháng Thành Công!",
-    "monthlyDesc": "Vé tháng của bạn đã được kích hoạt thành công trên hệ thống. Bây giờ bạn có thể sử dụng biển số xe đã đăng ký để ra vào bãi đỗ xe.",
+    "monthlyDesc": "Vé tháng của bạn đã được kích hoạt thành công trên hệ thống. Hãy dùng mã QR vé tháng khi vào bãi; biển số thực tế sẽ được ghi nhận tại cổng.",
     "btnMyCard": "Vé Tháng Của Tôi",
     "depositSuccess": "Đặt Cọc Giữ Chỗ Thành Công!",
     "depositDesc": "Hóa đơn của bạn đã được đối soát. Vé giữ chỗ 15 phút đã được kích hoạt.",
@@ -648,11 +648,11 @@
       "vehicleType": "Loại Phương Tiện"
     },
     "messages": {
-      "scanBookingSuccess": "Đã nhận diện mã đặt chỗ: {{code}}",
+      "scanBookingSuccess": "Đã nhận diện mã QR vé tháng/đặt chỗ: {{code}}",
       "scanTicketSuccess": "Đã nhận diện mã vé: {{code}}",
       "walkinSuccess": "Check-in vãng lai thành công!",
       "checkinFailed": "Check-in thất bại.",
-      "bookingSuccess": "Check-in bằng QR đặt chỗ thành công! Barrier đã mở.",
+      "bookingSuccess": "Check-in bằng QR vé tháng/đặt chỗ thành công! Barrier đã mở.",
       "bookingFailed": "Check-in thất bại. Vui lòng kiểm tra mã QR/mã vé.",
       "plateRequired": "Vui lòng nhập biển số xe!",
       "plateMismatch": "Biển số không khớp!",
@@ -704,7 +704,7 @@
       "checkoutProcess": "Xử lý check-out & xác minh",
       "manualInput": "Nhập mã thủ công / máy quét ngoài",
       "scanQrExit": "Quét mã QR vé - Cổng ra",
-      "scanQrEntry": "Quét QR Đặt Chỗ - Cổng Vào",
+      "scanQrEntry": "Quét QR Vé tháng/Đặt chỗ - Cổng Vào",
       "enterOrScan": "Nhập hoặc quét mã vé",
       "enterOrScanDesc": "Sau khi camera đã nhận diện biển số, hãy quét mã QR bằng máy quét ngoài hoặc nhập mã vé rồi nhấn Enter để xử lý check-out."
     },
