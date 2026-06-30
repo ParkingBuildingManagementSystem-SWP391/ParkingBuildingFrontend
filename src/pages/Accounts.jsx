@@ -4,7 +4,7 @@ import { Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
-import { formatDateVN, formatLongDateVN } from '../utils/dateTime';
+import { formatDateVN } from '../utils/dateTime';
 
 const Accounts = () => {
   const { t } = useTranslation();
@@ -89,11 +89,6 @@ const Accounts = () => {
   useEffect(() => {
     loadUsers();
   }, []);
-
-  // Dynamic Date subtitle
-  const getFormattedDate = () => {
-    return formatLongDateVN();
-  };
 
   // Helper mapping role tags for readable view
   const displayRoleIdName = (roleId) => {
@@ -326,19 +321,6 @@ const Accounts = () => {
   return (
     <div className="min-h-full w-full select-none bg-slate-50 pb-12 font-sans dark:bg-slate-900">
       <div className="space-y-8">
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="flex items-center gap-2.5 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-sm">
-                <Users size={20} strokeWidth={2.5} />
-              </span>
-              {t('accounts.allUsersTitle')}
-            </h1>
-            <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{getFormattedDate()}</p>
-          </div>
-        </div>
-
         {/* Error / Offline Banner */}
         {errorBanner && (
           <div className="flex items-center gap-2.5 rounded-[14px] border border-amber-200 bg-amber-50 p-3.5 text-sm font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">

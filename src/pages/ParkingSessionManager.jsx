@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Modal, Select, Spin, Tag } from 'antd';
-import { Car, Eye, RotateCcw, Search, Ticket } from 'lucide-react';
+import { Eye, RotateCcw, Search, Ticket } from 'lucide-react';
 import parkingSessionService from '../services/parkingSessionService';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
@@ -342,16 +342,6 @@ const ParkingSessionManager = () => {
   return (
     <div className="min-h-full space-y-6 bg-slate-50 dark:bg-slate-900">
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div className="mb-5 flex items-start gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm">
-            <Car size={22} />
-          </span>
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('parkingSession.pageTitle')}</h1>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('parkingSession.pageDesc')}</p>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Input
             size="large"

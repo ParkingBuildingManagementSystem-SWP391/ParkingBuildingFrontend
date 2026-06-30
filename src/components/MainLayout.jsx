@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import PageHeader from './PageHeader';
 import AppFooter from './AppFooter';
+import { formatLongDateVN } from '../utils/dateTime';
 
 const RoleFloatingActionButton = ({ icon: Icon, label, onClick }) => (
   <div className="fixed bottom-5 right-5 z-40 sm:bottom-8 sm:right-8">
@@ -55,6 +57,71 @@ const MainLayout = () => {
     : null;
 
   const fabConfig = driverFabConfig || staffFabConfig;
+  const contentMaxWidthClass = isFullWidthLayout ? 'max-w-none' : 'max-w-[1600px]';
+  const contentPaddingClass = isFullWidthLayout
+    ? 'px-3 sm:px-4 md:px-5'
+    : 'px-4 sm:px-6 md:px-8';
+  const contentSpacingClass = isFullWidthLayout
+    ? 'px-3 py-3 pb-24 sm:px-4 sm:py-4 sm:pb-24 md:px-5 md:py-5 md:pb-24'
+    : 'px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8';
+
+  const getPageMeta = () => {
+    const path = location.pathname;
+
+    const routeMeta = {
+      '/dashboard/monthly-cards': {
+        title: normalizedRole === 'manager' ? t('monthlyCard.managerTitle') : t('monthlyCard.title'),
+        subtitle: normalizedRole === 'manager'
+          ? t('monthlyCard.managerSubtitle')
+          : t('monthlyCard.paymentRequestSubtitle')
+      },
+      '/my-monthly-card': {
+        title: t('monthlyCard.title'),
+        subtitle: t('monthlyCard.subtitle')
+      },
+      '/my-bookings': {
+        title: t('myBookings.pageTitle'),
+        subtitle: t('myBookings.pageSubtitle')
+      },
+      '/create-account': {
+        title: t('createAccount.pageTitle'),
+        subtitle: t('createAccount.pageSubtitle')
+      },
+      '/staff-management': {
+        title: t('staff.pageTitle'),
+        subtitle: t('staff.pageDesc')
+      },
+      '/admin/parking-sessions': {
+        title: t('parkingSession.pageTitle'),
+        subtitle: t('parkingSession.pageDesc')
+      },
+      '/about': {
+        title: '',
+        subtitle: ''
+      }
+    };
+
+    if (path === '/dashboard') {
+      return {
+        title: t('header.title.dashboard'),
+        subtitle: formatLongDateVN()
+      };
+    }
+
+    if (routeMeta[path]) return routeMeta[path];
+
+    const routeKey = path.replace(/^\/+/, '');
+    if (!routeKey) {
+      return { title: '', subtitle: '' };
+    }
+
+    return {
+      title: t(`header.title.${routeKey}`, { defaultValue: t('header.title.default') }),
+      subtitle: t(`header.subtitle.${routeKey}`, { defaultValue: t('header.subtitle.default') })
+    };
+  };
+
+  const pageMeta = getPageMeta();
 
   return (
     <div className="flex min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500">
@@ -78,9 +145,15 @@ const MainLayout = () => {
         
         {/* Scrollable Page Content */}
         <main className="min-w-0 flex-1 w-full bg-slate-50 transition-colors duration-300 dark:bg-slate-900">
+          <PageHeader
+            title={pageMeta.title}
+            subtitle={pageMeta.subtitle}
+            contentClassName={contentMaxWidthClass}
+            paddingClassName={contentPaddingClass}
+          />
           <div className="min-h-full flex flex-col">
-            <div className={`flex-1 w-full ${isFullWidthLayout ? 'px-3 py-3 pb-24 sm:px-4 sm:py-4 sm:pb-24 md:px-5 md:py-5 md:pb-24' : 'px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8'}`}>
-              <div className={`${isFullWidthLayout ? 'max-w-none' : 'max-w-[1600px]'} mx-auto w-full animate-fade-in`}>
+            <div className={`flex-1 w-full ${contentSpacingClass}`}>
+              <div className={`${contentMaxWidthClass} mx-auto w-full animate-fade-in`}>
                 <Outlet />
               </div>
             </div>

@@ -89,9 +89,7 @@ const StaffManagement = () => {
     <div className="min-h-full bg-slate-50 space-y-6 dark:bg-slate-950">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{t('staff.pageTitle')}</h1>
-          <p className="text-slate-500 text-sm mt-1 dark:text-slate-400">{t('staff.pageDesc')}</p>
-          {error && <p className="text-rose-500 text-sm mt-2 font-semibold">{error}</p>}
+          {error && <p className="text-rose-500 text-sm font-semibold">{error}</p>}
         </div>
         <Button
           type="primary"

@@ -149,11 +149,7 @@ const MonthlyCardManager = () => {
 
   return (
     <div className="px-4 py-6">
-      <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Quản lý vé tháng</h1>
-          <p className="mt-1 text-sm text-slate-500">Theo dõi danh sách thẻ, vị trí cố định và trạng thái hiệu lực.</p>
-        </div>
+      <div className="mb-5 flex justify-end">
         <Space>
           <Button icon={<RefreshCw size={15} />} onClick={fetchMonthlyCards}>
             Làm mới
