@@ -278,6 +278,7 @@ const GateController = () => {
   const [isCheckInConfirmOpen, setIsCheckInConfirmOpen] = useState(false);
   const [bookingCheckInData, setBookingCheckInData] = useState(null);
   const qrInputRef = React.useRef(null);
+  const entryQrInputRef = React.useRef(null);
 
   const handleLocalQrScanSuccess = async (decodedText) => {
     if (qrScannerTarget === 'entry') {
@@ -441,7 +442,10 @@ const GateController = () => {
         return;
       }
 
-      if (checkInMode === 'walkin') {
+      // Tự động nhận diện chế độ dựa trên việc ô QR có dữ liệu hay không
+      const isQrFlow = !!values.ticketCode || checkInMode === 'reservation';
+
+      if (!isQrFlow) {
         const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 3;
         let finalPlate = values.plate;
         if (vehicleTypeId === 1 && !finalPlate) {
@@ -1058,16 +1062,18 @@ const GateController = () => {
                 <Input type="hidden" />
               </Form.Item>
 
-              {checkInMode === 'reservation' && (
-                <Form.Item
-                  name="ticketCode"
-                  label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.qrTicketCode')}</span>}
-                  rules={[{ required: true, message: t('gate.form.requireQr') }]}
-                  className="mb-3"
-                >
-                  <Input placeholder="e.g. QR_B5F9A1D8" className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" />
-                </Form.Item>
-              )}
+              <Form.Item
+                name="ticketCode"
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.qrTicketCode')} (Nếu có)</span>}
+                rules={[{ required: checkInMode === 'reservation', message: t('gate.form.requireQr') }]}
+                className="mb-3"
+              >
+                <Input 
+                  ref={entryQrInputRef}
+                  placeholder="Quét mã QR đặt chỗ hoặc thẻ tháng..." 
+                  className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" 
+                />
+              </Form.Item>
 
               <Form.Item noStyle shouldUpdate={(prev, curr) => prev.type !== curr.type}>
                 {({ getFieldValue }) => {
