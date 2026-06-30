@@ -87,7 +87,9 @@ export const managerService = {
         nextHourPrice: Number(data.nextHourPrice || 0),
         maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
           ? Number(data.maxHoursPerTurn)
-          : null
+          : null,
+        firstHourRate: Number(data.firstHourRate ?? 0),
+        subsequentHourRate: Number(data.subsequentHourRate ?? 0)
       });
       return response.data;
     } catch (error) {

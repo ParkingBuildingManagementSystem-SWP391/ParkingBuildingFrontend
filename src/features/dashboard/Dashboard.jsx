@@ -31,7 +31,9 @@ const defaultPricingData = [
     firstHourPrice: 0,
     nextHourPrice: 0,
     monthlyPrice: 120000,
-    maxHoursPerTurn: null
+    maxHoursPerTurn: null,
+    firstHourRate: 0,
+    subsequentHourRate: 0
   },
   {
     vehicleTypeId: 2,
@@ -43,7 +45,9 @@ const defaultPricingData = [
     firstHourPrice: 0,
     nextHourPrice: 0,
     monthlyPrice: 250000,
-    maxHoursPerTurn: null
+    maxHoursPerTurn: null,
+    firstHourRate: 0,
+    subsequentHourRate: 0
   },
   {
     vehicleTypeId: 3,
@@ -55,7 +59,9 @@ const defaultPricingData = [
     firstHourPrice: 20000,
     nextHourPrice: 10000,
     monthlyPrice: 1500000,
-    maxHoursPerTurn: 4
+    maxHoursPerTurn: 4,
+    firstHourRate: 10000,
+    subsequentHourRate: 5000
   }
 ];
 
@@ -173,7 +179,9 @@ const Dashboard = ({ section = 'overview' }) => {
         firstHourPrice: isCarPricing ? row.firstHourPrice : 0,
         nextHourPrice: isCarPricing ? row.nextHourPrice : 0,
         monthlyPrice: row.monthlyPrice,
-        maxHoursPerTurn: isCarPricing ? row.maxHoursPerTurn : null
+        maxHoursPerTurn: isCarPricing ? row.maxHoursPerTurn : null,
+        firstHourRate: isCarPricing ? row.firstHourRate : 0,
+        subsequentHourRate: isCarPricing ? row.subsequentHourRate : 0
       });
       message.success(t('dashboard.pricingUpdateSuccess', { vehicleType: getVehicleTypeLabel(row.vehicleType) }));
     } catch (err) {
@@ -940,21 +948,44 @@ const Dashboard = ({ section = 'overview' }) => {
                           className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
                         />
                       </td>
+
+                      {/* Cột Giá Giờ Đầu */}
                       <td className="px-4 py-4 align-middle">
                         {isCarPricing ? (
                           <InputNumber
-                            min={1}
-                            max={24}
-                            value={row.maxHoursPerTurn}
-                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'maxHoursPerTurn', value ?? 1) : undefined}
+                            min={0}
+                            value={row.firstHourRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'firstHourRate', value ?? 0) : undefined}
                             disabled={!canEditPricing}
-                            addonAfter="giờ"
-                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100"
                           />
                         ) : (
-                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-400">{t('dashboard.pricingTable.notApplicable')}</span>
+                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-400">N/A</span>
                         )}
                       </td>
+
+                      {/* Cột Giá Giờ Tiếp Theo */}
+                      <td className="px-4 py-4 align-middle">
+                        {isCarPricing ? (
+                          <InputNumber
+                            min={0}
+                            value={row.subsequentHourRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'subsequentHourRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100"
+                          />
+                        ) : (
+                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-400">N/A</span>
+                        )}
+                      </td>
+
+
                       {canEditPricing && (
                         <td className="px-4 py-4 align-middle text-right">
                           <Button

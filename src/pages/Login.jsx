@@ -191,9 +191,9 @@ const Login = () => {
 
             {/* Quên mật khẩu */}
             <div className="flex justify-end">
-              <a href="#" className="text-[13px] font-bold text-indigo-600 transition-colors hover:text-indigo-700">
+              <Link to="/forgot-password" className="text-[13px] font-bold text-indigo-600 transition-colors hover:text-indigo-700">
                 {t('login.forgotPassword')}
-              </a>
+              </Link>
             </div>
 
             {/* Nút đăng nhập */}

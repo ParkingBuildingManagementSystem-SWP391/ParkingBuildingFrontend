@@ -70,16 +70,6 @@ const CreateAccount = () => {
     <div className="font-sans select-none pb-12">
       <div className="max-w-3xl mx-auto space-y-8">
 
-        {/* PAGE HEADER */}
-        <div className="space-y-1">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            {t('createAccount.pageTitle')}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {t('createAccount.pageSubtitle')}
-          </p>
-        </div>
-
         {/* FORM CARD */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 dark:border-slate-700 dark:bg-slate-900">
           <form onSubmit={handleSubmit} className="space-y-6">
