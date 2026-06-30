@@ -166,7 +166,6 @@ const Home = () => {
           <a className="flex items-center gap-1 text-indigo-600 transition-colors hover:text-indigo-700 dark:hover:text-indigo-300" href="/#locate-vehicle">
             <Search size={14} /> {t('home.navLocate')}
           </a>
-          <Link className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" to="/pricing">{t('home.navPricing')}</Link>
           <a className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" href="#contact">{t('home.navContact')}</a>
         </nav>
 
@@ -308,12 +307,6 @@ const Home = () => {
               >
                 {t('home.btnBook')}
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                to="/parking-map"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-7 py-4 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto"
-              >
-                {t('home.btnViewMap')}
               </Link>
             </div>
           </div>

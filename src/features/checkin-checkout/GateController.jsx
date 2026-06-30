@@ -18,7 +18,6 @@ import {
   Upload as UploadIcon,
   ShieldCheck,
   QrCode,
-  Keyboard,
   Wallet,
   ListChecks,
   Banknote,
@@ -270,7 +269,6 @@ const GateController = () => {
   const [checkInForm] = Form.useForm();
   const [checkOutForm] = Form.useForm();
 
-  const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
   const [isLocalQrScannerOpen, setIsLocalQrScannerOpen] = useState(false);
   const [qrScannerTarget, setQrScannerTarget] = useState('entry'); // 'entry' or 'exit'
   const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
@@ -1372,17 +1370,9 @@ const GateController = () => {
                   setQrScannerTarget('exit');
                   setIsLocalQrScannerOpen(true);
                 }}
-                className="flex-1 h-11 border-[1.5px] border-indigo-200 text-indigo-600 font-bold rounded-[14px] flex items-center justify-center gap-1.5 hover:border-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-11 border-[1.5px] border-indigo-200 text-indigo-600 font-bold rounded-[14px] flex items-center justify-center gap-1.5 hover:border-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <QrCode size={15} /> {t('gate.form.scanQrCamera')}
-              </Button>
-              <Button
-                type="default"
-                disabled={false}
-                onClick={() => setIsQrPopupOpen(true)}
-                className="flex-1 h-11 font-bold border-[1.5px] border-slate-200 bg-white rounded-[14px] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                <Keyboard size={15} /> {t('gate.form.manualInput')}
               </Button>
             </div>
             
@@ -1432,41 +1422,6 @@ const GateController = () => {
           />
         )}
       </Card>
-
-      <Modal
-        title={<span className="font-extrabold text-slate-900 tracking-tight flex items-center gap-2 dark:text-slate-100"><QrCode size={18} className="text-indigo-500" />{t('gate.form.scanQrExit')}</span>}
-        open={isQrPopupOpen}
-        onCancel={() => setIsQrPopupOpen(false)}
-        footer={null}
-        width={520}
-        centered
-        destroyOnClose
-      >
-        <div className="space-y-4 pt-2">
-          <Alert
-            message={t('gate.form.enterOrScan')}
-            description={t('gate.form.enterOrScanDesc')}
-            type="info"
-            showIcon
-            className="rounded-2xl"
-          />
-          <Input
-            autoFocus
-            placeholder={t('gate.form.scanOrEnter')}
-            className="h-12 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
-            onPressEnter={(e) => {
-              const ticketCode = e.target.value?.trim();
-              if (!ticketCode) {
-                message.error(t('gate.form.requireQr'));
-                return;
-              }
-              checkOutForm.setFieldsValue({ ticketCode });
-              setIsQrPopupOpen(false);
-              checkOutForm.submit();
-            }}
-          />
-        </div>
-      </Modal>
 
       {/* Local Webcam QR Scanner Modal */}
       <QrScannerModal

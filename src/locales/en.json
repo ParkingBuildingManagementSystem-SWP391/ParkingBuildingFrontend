@@ -441,7 +441,7 @@
     "loadingText2": "Matching invoice status... (Attempt {{attempts}}/{{maxAttempts}})",
     "checkingResult": "Checking Result",
     "monthlySuccess": "Monthly Card Registered Successfully!",
-    "monthlyDesc": "Your monthly card has been successfully activated. You can now use your registered license plate to enter and exit the parking building.",
+    "monthlyDesc": "Your monthly pass has been successfully activated. Use the monthly pass QR code at entry; the actual license plate will be captured at the gate.",
     "btnMyCard": "My Monthly Card",
     "depositSuccess": "Booking Deposit Successful!",
     "depositDesc": "Your invoice has been verified. The 15-minute reservation ticket is activated.",

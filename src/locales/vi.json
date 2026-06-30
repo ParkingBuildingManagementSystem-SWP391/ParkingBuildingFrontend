@@ -441,7 +441,7 @@
     "loadingText2": "Đang đối khớp trạng thái hóa đơn... (Lần {{attempts}}/{{maxAttempts}})",
     "checkingResult": "Đang kiểm tra kết quả",
     "monthlySuccess": "Đăng Ký Vé Tháng Thành Công!",
-    "monthlyDesc": "Vé tháng của bạn đã được kích hoạt thành công trên hệ thống. Bây giờ bạn có thể sử dụng biển số xe đã đăng ký để ra vào bãi đỗ xe.",
+    "monthlyDesc": "Vé tháng của bạn đã được kích hoạt thành công trên hệ thống. Hãy dùng mã QR vé tháng khi vào bãi; biển số thực tế sẽ được ghi nhận tại cổng.",
     "btnMyCard": "Vé Tháng Của Tôi",
     "depositSuccess": "Đặt Cọc Giữ Chỗ Thành Công!",
     "depositDesc": "Hóa đơn của bạn đã được đối soát. Vé giữ chỗ 15 phút đã được kích hoạt.",
