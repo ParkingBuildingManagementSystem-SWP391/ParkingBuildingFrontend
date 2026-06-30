@@ -158,10 +158,7 @@ const MyMonthlyCard = () => {
     try {
       const response = await api.post('/MonthlyCard/register', {
         tariffId: Number(values.vehicleTypeId),
-        slotId: Number(values.slotId),
-        licenseVehicle: (values.licenseVehicle || '').trim().toUpperCase(),
-        durationMonths: Number(values.durationInMonths),
-        paymentMethod: 'VNPAY'
+        durationMonths: Number(values.durationInMonths)
       });
       const paymentUrl = getPaymentUrl(response.data);
       if (paymentUrl) {
@@ -189,25 +186,25 @@ const MyMonthlyCard = () => {
   }
 
   if (cardInfo) {
-    const licenseVehicle = getValue(cardInfo, 'licenseVehicle', 'LicenseVehicle', 'plateNumber', 'PlateNumber');
-    const vehicleTypeName = getValue(cardInfo, 'vehicleTypeName', 'VehicleTypeName', 'typeName', 'TypeName');
-    const slotName = getValue(cardInfo, 'slotName', 'SlotName', 'unitName');
+    const ticketCode = getValue(cardInfo, 'ticketCode', 'TicketCode');
+    const tariffId = getValue(cardInfo, 'tariffId', 'TariffId');
     const startTime = getValue(cardInfo, 'startDate', 'StartDate', 'startTime', 'StartTime');
     const endTime = getValue(cardInfo, 'endDate', 'EndDate', 'endTime', 'EndTime');
-    const tariffId = getValue(cardInfo, 'tariffId', 'TariffId', 'packageName', 'PackageName');
-    const price = getValue(cardInfo, 'price', 'Price', 'amount', 'Amount', 'amountToPay', 'AmountToPay');
     const status = getValue(cardInfo, 'status', 'Status') || 'Active';
-    const ticketCode = getValue(cardInfo, 'ticketCode', 'TicketCode');
+
+    // Map tariffId sang Tên loại xe & Chi phí thực tế
+    const tariffMapping = {
+      1: { name: 'Xe đạp (Bicycle)', price: 120000 },
+      2: { name: 'Xe máy (Motorbike)', price: 250000 },
+      3: { name: 'Ô tô (Car)', price: 1500000 }
+    };
+    const mappedTariff = tariffMapping[tariffId] || { name: `Gói vé #${tariffId}`, price: 0 };
+
     const detailCards = [
-      vehicleTypeName && {
+      {
         icon: <ShieldCheck className="mb-3 text-cyan-200" size={22} />,
-        label: 'Loại xe',
-        value: vehicleTypeName
-      },
-      slotName && {
-        icon: <ShieldCheck className="mb-3 text-cyan-200" size={22} />,
-        label: 'Vị trí',
-        value: slotName
+        label: 'Loại xe / Gói cước',
+        value: mappedTariff.name
       },
       {
         icon: <CalendarDays className="mb-3 text-emerald-200" size={22} />,
@@ -219,52 +216,31 @@ const MyMonthlyCard = () => {
         label: 'Ngày hết hạn',
         value: formatDateTime(endTime)
       },
-      tariffId && {
+      {
         icon: <CreditCard className="mb-3 text-pink-200" size={22} />,
-        label: 'Gói vé',
-        value: tariffId
-      },
-      price !== undefined && {
-        icon: <CreditCard className="mb-3 text-pink-200" size={22} />,
-        label: 'Chi phí',
-        value: `${Number(price).toLocaleString('vi-VN')} VND`
+        label: 'Chi phí gói',
+        value: mappedTariff.price > 0 ? `${mappedTariff.price.toLocaleString('vi-VN')} VND / tháng` : 'Miễn phí'
       }
-    ].filter(Boolean);
+    ];
 
     return (
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 text-white shadow-2xl shadow-indigo-950/30">
           <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-            <div className="flex-1">
+            <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-100">
                 <ShieldCheck size={15} />
-                Monthly Parking Pass
+                Vé tháng đỗ xe tự động (Dynamic Pass)
               </div>
-              <h1 className="mt-5 text-4xl font-black tracking-tight">{licenseVehicle || 'Biển số chưa cập nhật'}</h1>
-              <p className="mt-2 text-sm font-medium text-indigo-100">Thẻ vé tháng cho khách hàng thanh toán theo chu kỳ</p>
+              <h1 className="mt-5 text-4xl font-black tracking-tight">{mappedTariff.name}</h1>
+              <p className="mt-2 text-sm font-medium text-indigo-100">Thẻ vé tháng đỗ xe thông minh - Cấp chỗ đỗ trống tự động khi quét QR vào cổng.</p>
             </div>
-
-            {/* Khối hiển thị mã QR của vé tháng để check-in/out dự phòng */}
-            {ticketCode && (
-              <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-4 self-center md:self-start">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-200">Mã QR Dự Phòng</span>
-                <div className="bg-white p-2.5 rounded-xl inline-block shadow-sm">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&ecc=M&data=${encodeURIComponent(ticketCode)}`}
-                    alt="Monthly Card QR"
-                    className="w-28 h-28 object-contain"
-                  />
-                </div>
-                <span className="font-mono text-xs font-bold text-indigo-200">{ticketCode}</span>
-              </div>
-            )}
-
-            <Tag color={status === 'Active' ? 'green' : 'default'} className="m-0 w-fit rounded-full px-4 py-1 text-sm font-bold">
-              {status}
+            <Tag color={status === 'Active' || status === 'MonthlyCardActive' ? 'green' : 'default'} className="m-0 w-fit rounded-full px-4 py-1 text-sm font-bold">
+              {status === 'MonthlyCardActive' ? 'Đang hoạt động' : status}
             </Tag>
           </div>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {detailCards.map((item) => (
               <div key={item.label} className="rounded-2xl border border-white/10 bg-white/10 p-4">
                 {item.icon}
@@ -273,6 +249,21 @@ const MyMonthlyCard = () => {
               </div>
             ))}
           </div>
+
+          {ticketCode && (
+            <div className="mt-10 flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-2xl p-6 max-w-sm mx-auto">
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-4 text-center">Mã QR Vé Tháng Của Bạn</p>
+              <div className="bg-white p-3 rounded-2xl shadow-lg">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ticketCode)}`}
+                  alt="QR Code"
+                  className="w-[180px] h-[180px]"
+                />
+              </div>
+              <p className="mt-4 font-mono font-bold text-lg tracking-widest text-indigo-100">{ticketCode}</p>
+              <p className="text-[10px] text-indigo-300/80 mt-1 text-center font-medium">Sử dụng mã QR này quét tại đầu đọc ở cổng vào/ra để đỗ xe</p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -283,7 +274,7 @@ const MyMonthlyCard = () => {
       <Card className="rounded-2xl border-slate-100 shadow-sm">
         <div className="mb-6">
           <h1 className="text-2xl font-black tracking-tight text-slate-900">Đăng ký vé tháng</h1>
-          <p className="mt-1 text-sm text-slate-500">Chọn loại xe, nhập biển số và thời hạn để tạo yêu cầu thanh toán VNPay.</p>
+          <p className="mt-1 text-sm text-slate-500">Chọn loại xe và thời hạn để tạo yêu cầu thanh toán VNPay.</p>
         </div>
 
         <Form
@@ -299,66 +290,6 @@ const MyMonthlyCard = () => {
             rules={[{ required: true, message: 'Vui lòng chọn loại xe.' }]}
           >
             <Select placeholder="Chọn loại xe" options={vehicleTypes} size="large" />
-          </Form.Item>
-
-          <Form.Item
-            noStyle
-            shouldUpdate={(prevValues, currentValues) => prevValues.vehicleTypeId !== currentValues.vehicleTypeId}
-          >
-            {({ getFieldValue }) => {
-              const isBicycle = getFieldValue('vehicleTypeId') === 1;
-              return (
-                <Form.Item
-                  name="licenseVehicle"
-                  label={isBicycle ? "Biển số / Mã nhận diện xe đạp (Không bắt buộc)" : "Biển số xe"}
-                  rules={[
-                    {
-                      required: !isBicycle,
-                      message: 'Vui lòng nhập biển số xe.'
-                    }
-                  ]}
-                >
-                  <Input
-                    placeholder={isBicycle ? "Để trống nếu không có biển số" : "Ví dụ: 51A12345"}
-                    size="large"
-                    onChange={(event) => form.setFieldsValue({ licenseVehicle: event.target.value.toUpperCase() })}
-                  />
-                </Form.Item>
-              );
-            }}
-          </Form.Item>
-
-          {/* Trường Chọn Vị Trí Đỗ Xe */}
-          <Form.Item
-            label="Vị trí đỗ xe"
-            required
-            style={{ marginBottom: 0 }}
-          >
-            <div className="flex gap-3">
-              <Form.Item
-                name="slotId"
-                rules={[{ required: true, message: 'Vui lòng chọn vị trí đỗ xe.' }]}
-                className="flex-grow"
-                style={{ marginBottom: 24 }}
-              >
-                <Select
-                  placeholder="Chọn vị trí đỗ xe mong muốn"
-                  options={slots.map(s => ({ value: s.slotId, label: s.slotName }))}
-                  size="large"
-                  loading={loadingSlots}
-                  disabled={!form.getFieldValue('vehicleTypeId') || loadingSlots}
-                />
-              </Form.Item>
-              <Button
-                type="dashed"
-                size="large"
-                onClick={handleGoToMapToSelect}
-                className="flex items-center gap-2 border-indigo-300 text-indigo-600 hover:text-indigo-700 hover:border-indigo-500"
-                style={{ height: 40 }}
-              >
-                Chọn trên sơ đồ
-              </Button>
-            </div>
           </Form.Item>
 
           <Form.Item
