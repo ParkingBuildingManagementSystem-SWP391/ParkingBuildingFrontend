@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Form, Input, Select, Spin, Tag, message } from 'antd';
+import { Button, Card, Form, Select, Spin, Tag, message } from 'antd';
 import { CalendarDays, CreditCard, ShieldCheck } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { formatDateTimeVN } from '../utils/dateTime';
+import { getStatusLabel, getVehicleTypeLabel } from '../utils/i18nLabels';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
 
@@ -28,27 +30,15 @@ const getPaymentUrl = (payload) => {
   return '';
 };
 
-const formatDateTime = (value) => {
-  if (!value) return 'Chưa cập nhật';
+const formatDateTime = (value, t) => {
+  if (!value) return t('common.notUpdated');
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return formatDateTimeVN(date);
 };
 
-const vehicleTypes = [
-  { value: 1, label: 'Xe đạp' },
-  { value: 2, label: 'Xe máy' },
-  { value: 3, label: 'Ô tô' }
-];
-
-const durations = [
-  { value: 1, label: '1 tháng' },
-  { value: 3, label: '3 tháng' },
-  { value: 6, label: '6 tháng' },
-  { value: 12, label: '12 tháng' }
-];
-
 const MyMonthlyCard = () => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [cardInfo, setCardInfo] = useState(null);
   const [loadingCard, setLoadingCard] = useState(true);
@@ -65,6 +55,16 @@ const MyMonthlyCard = () => {
   const urlVehicleTypeId = searchParams.get('vehicleTypeId');
 
   const selectedVehicleTypeId = Form.useWatch('vehicleTypeId', form);
+  const vehicleTypes = [
+    { value: 1, label: t('vehicleTypes.bicycle') },
+    { value: 2, label: t('vehicleTypes.motorbike') },
+    { value: 3, label: t('vehicleTypes.car') }
+  ];
+
+  const durations = [1, 3, 6, 12].map((month) => ({
+    value: month,
+    label: t(month === 1 ? 'monthlyCard.durationMonth' : 'monthlyCard.durationMonths', { count: month })
+  }));
 
   useEffect(() => {
     if (selectedVehicleTypeId) {
@@ -75,14 +75,14 @@ const MyMonthlyCard = () => {
           setSlots(Array.isArray(data) ? data : []);
         })
         .catch(err => {
-          console.error("Lỗi tải danh sách ô đỗ:", err);
-          message.error("Không thể tải danh sách vị trí đỗ xe.");
+          console.error(t('monthlyCard.loadSlotsLog'), err);
+          message.error(t('monthlyCard.errors.loadSlots'));
         })
         .finally(() => setLoadingSlots(false));
     } else {
       setSlots([]);
     }
-  }, [selectedVehicleTypeId]);
+  }, [selectedVehicleTypeId, t]);
 
   useEffect(() => {
     const savedForm = sessionStorage.getItem('monthly_card_reg_form');
@@ -118,7 +118,7 @@ const MyMonthlyCard = () => {
   const handleGoToMapToSelect = () => {
     const vehicleTypeId = form.getFieldValue('vehicleTypeId');
     if (!vehicleTypeId) {
-      message.warning('Vui lòng chọn loại xe trước khi xem bản đồ.');
+      message.warning(t('monthlyCard.errors.selectVehicleBeforeMap'));
       return;
     }
     const currentValues = form.getFieldsValue();
@@ -138,16 +138,13 @@ const MyMonthlyCard = () => {
     } catch (error) {
       if (error.response?.status !== 404) {
         const status = error.response?.status;
-        const fallback = status === 403
-          ? 'Bạn không có quyền xem thông tin vé tháng.'
-          : 'Không thể tải thông tin vé tháng.';
-        message.error(error.response?.data?.message || error.response?.data?.error || fallback);
+        message.error(error.response?.data?.message || error.response?.data?.error || (status === 403 ? t('monthlyCard.errors.noViewPermission') : t('monthlyCard.errors.loadCard')));
       }
       setCardInfo(null);
     } finally {
       setLoadingCard(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchCardInfo();
@@ -165,12 +162,12 @@ const MyMonthlyCard = () => {
         window.location.href = paymentUrl;
         return;
       }
-      message.error(response.data?.message || 'Không nhận được URL thanh toán VNPay từ hệ thống.');
+      message.error(response.data?.message || t('monthlyCard.errors.noPaymentUrl'));
     } catch (error) {
       const status = error.response?.status;
       const fallback = status === 403
-        ? 'Bạn không có quyền đăng ký vé tháng.'
-        : 'Không thể tạo đăng ký vé tháng.';
+        ? t('monthlyCard.errors.noRegisterPermission')
+        : t('monthlyCard.errors.createRegistration');
       message.error(error.response?.data?.message || error.response?.data?.error || fallback);
     } finally {
       setSubmitting(false);
@@ -192,34 +189,33 @@ const MyMonthlyCard = () => {
     const endTime = getValue(cardInfo, 'endDate', 'EndDate', 'endTime', 'EndTime');
     const status = getValue(cardInfo, 'status', 'Status') || 'Active';
 
-    // Map tariffId sang Tên loại xe & Chi phí thực tế
     const tariffMapping = {
-      1: { name: 'Xe đạp (Bicycle)', price: 120000 },
-      2: { name: 'Xe máy (Motorbike)', price: 250000 },
-      3: { name: 'Ô tô (Car)', price: 1500000 }
+      1: { name: getVehicleTypeLabel('Bicycle', t), price: 120000 },
+      2: { name: getVehicleTypeLabel('Motorbike', t), price: 250000 },
+      3: { name: getVehicleTypeLabel('Car', t), price: 1500000 }
     };
-    const mappedTariff = tariffMapping[tariffId] || { name: `Gói vé #${tariffId}`, price: 0 };
+    const mappedTariff = tariffMapping[tariffId] || { name: t('monthlyCard.planNumber', { id: tariffId }), price: 0 };
 
     const detailCards = [
       {
         icon: <ShieldCheck className="mb-3 text-cyan-200" size={22} />,
-        label: 'Loại xe / Gói cước',
+        label: t('monthlyCard.vehiclePlan'),
         value: mappedTariff.name
       },
       {
         icon: <CalendarDays className="mb-3 text-emerald-200" size={22} />,
-        label: 'Ngày bắt đầu',
-        value: formatDateTime(startTime)
+        label: t('monthlyCard.startDate'),
+        value: formatDateTime(startTime, t)
       },
       {
         icon: <CalendarDays className="mb-3 text-amber-200" size={22} />,
-        label: 'Ngày hết hạn',
-        value: formatDateTime(endTime)
+        label: t('monthlyCard.endDate'),
+        value: formatDateTime(endTime, t)
       },
       {
         icon: <CreditCard className="mb-3 text-pink-200" size={22} />,
-        label: 'Chi phí gói',
-        value: mappedTariff.price > 0 ? `${mappedTariff.price.toLocaleString('vi-VN')} VND / tháng` : 'Miễn phí'
+        label: t('monthlyCard.packageCost'),
+        value: mappedTariff.price > 0 ? t('monthlyCard.monthlyPrice', { price: mappedTariff.price.toLocaleString('vi-VN') }) : t('monthlyCard.free')
       }
     ];
 
@@ -230,13 +226,13 @@ const MyMonthlyCard = () => {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-100">
                 <ShieldCheck size={15} />
-                Vé tháng đỗ xe tự động (Dynamic Pass)
+                {t('monthlyCard.dynamicPass')}
               </div>
               <h1 className="mt-5 text-4xl font-black tracking-tight">{mappedTariff.name}</h1>
-              <p className="mt-2 text-sm font-medium text-indigo-100">Thẻ vé tháng đỗ xe thông minh - Cấp chỗ đỗ trống tự động khi quét QR vào cổng.</p>
+              <p className="mt-2 text-sm font-medium text-indigo-100">{t('monthlyCard.smartDescription')}</p>
             </div>
             <Tag color={status === 'Active' || status === 'MonthlyCardActive' ? 'green' : 'default'} className="m-0 w-fit rounded-full px-4 py-1 text-sm font-bold">
-              {status === 'MonthlyCardActive' ? 'Đang hoạt động' : status}
+              {getStatusLabel(status, t)}
             </Tag>
           </div>
 
@@ -252,16 +248,16 @@ const MyMonthlyCard = () => {
 
           {ticketCode && (
             <div className="mt-10 flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-2xl p-6 max-w-sm mx-auto">
-              <p className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-4 text-center">Mã QR Vé Tháng Của Bạn</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-4 text-center">{t('monthlyCard.qrTitle')}</p>
               <div className="bg-white p-3 rounded-2xl shadow-lg">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ticketCode)}`}
-                  alt="QR Code"
+                  alt={t('monthlyCard.qrAlt')}
                   className="w-[180px] h-[180px]"
                 />
               </div>
               <p className="mt-4 font-mono font-bold text-lg tracking-widest text-indigo-100">{ticketCode}</p>
-              <p className="text-[10px] text-indigo-300/80 mt-1 text-center font-medium">Sử dụng mã QR này quét tại đầu đọc ở cổng vào/ra để đỗ xe</p>
+              <p className="text-[10px] text-indigo-300/80 mt-1 text-center font-medium">{t('monthlyCard.qrInstruction')}</p>
             </div>
           )}
         </div>
@@ -272,11 +268,6 @@ const MyMonthlyCard = () => {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <Card className="rounded-2xl border-slate-100 shadow-sm">
-        <div className="mb-6">
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Đăng ký vé tháng</h1>
-          <p className="mt-1 text-sm text-slate-500">Chọn loại xe và thời hạn để tạo yêu cầu thanh toán VNPay.</p>
-        </div>
-
         <Form
           form={form}
           layout="vertical"
@@ -286,22 +277,22 @@ const MyMonthlyCard = () => {
         >
           <Form.Item
             name="vehicleTypeId"
-            label="Loại xe"
-            rules={[{ required: true, message: 'Vui lòng chọn loại xe.' }]}
+            label={t('monthlyCard.vehicleType')}
+            rules={[{ required: true, message: t('monthlyCard.errors.selectVehicle') }]}
           >
-            <Select placeholder="Chọn loại xe" options={vehicleTypes} size="large" />
+            <Select placeholder={t('monthlyCard.vehicleTypePlaceholder')} options={vehicleTypes} size="large" />
           </Form.Item>
 
           <Form.Item
             name="durationInMonths"
-            label="Thời hạn"
-            rules={[{ required: true, message: 'Vui lòng chọn thời hạn.' }]}
+            label={t('monthlyCard.duration')}
+            rules={[{ required: true, message: t('monthlyCard.errors.selectDuration') }]}
           >
             <Select options={durations} size="large" />
           </Form.Item>
 
           <Button type="primary" htmlType="submit" loading={submitting} size="large" block className="h-12 rounded-xl bg-indigo-600 font-bold">
-            Thanh Toán Ngay qua VNPay
+            {t('monthlyCard.payNow')}
           </Button>
         </Form>
       </Card>

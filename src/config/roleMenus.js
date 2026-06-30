@@ -30,13 +30,17 @@ export const normalizeRole = (role) => (
     .replace(/\s+/g, '_')
 );
 
-export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES }) => {
+const label = (t, key, fallback) => (
+  typeof t === 'function' ? t(key, { defaultValue: fallback }) : fallback
+);
+
+export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t }) => {
   const normalizedRole = normalizeRole(role);
 
   const commonNavigation = [
     {
       key: 'home',
-      label: 'Trang chủ',
+      label: label(t, 'dropdown.home', 'Trang chủ'),
       path: routes.home,
       icon: Home
     }
@@ -48,19 +52,19 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES }) => {
     roleNavigation = [
       {
         key: 'parking-map',
-        label: 'Bản đồ bãi đỗ',
+        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
         path: routes.parkingMap,
         icon: Map
       },
       {
         key: 'my-bookings',
-        label: 'Lịch đặt chỗ của tôi',
+        label: label(t, 'dropdown.myBookings', 'Lịch đặt chỗ của tôi'),
         path: routes.myBookings,
         icon: CalendarCheck
       },
       {
         key: 'monthly-card',
-        label: 'Vé tháng',
+        label: label(t, 'dropdown.monthlyCard', 'Vé tháng'),
         path: routes.monthlyCard,
         icon: CreditCard
       }
@@ -71,13 +75,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES }) => {
     roleNavigation = [
       {
         key: 'checkin-checkout',
-        label: 'Check-in / Check-out',
+        label: label(t, 'dropdown.checkinCheckout', 'Check-in / Check-out'),
         path: routes.checkinCheckout,
         icon: ScanLine
       },
       {
         key: 'parking-map',
-        label: 'Bản đồ bãi đỗ',
+        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
         path: routes.parkingMap,
         icon: Map
       }
@@ -88,13 +92,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES }) => {
     roleNavigation = [
       {
         key: 'manager-dashboard',
-        label: 'Dashboard quản lý',
+        label: label(t, 'dropdown.dashboard', 'Bảng điều khiển'),
         path: routes.managerDashboard,
         icon: LayoutDashboard
       },
       {
         key: 'parking-map',
-        label: 'Bản đồ bãi đỗ',
+        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
         path: routes.parkingMap,
         icon: Map
       }
@@ -105,19 +109,19 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES }) => {
     roleNavigation = [
       {
         key: 'admin-dashboard',
-        label: 'Trang quản trị',
+        label: label(t, 'dropdown.dashboard', 'Bảng điều khiển'),
         path: routes.adminDashboard,
         icon: Shield
       },
       {
         key: 'admin-parking-sessions',
-        label: 'Quản lý phiên đỗ xe',
+        label: label(t, 'dropdown.parkingSessions', 'Quản lý phiên đỗ xe'),
         path: routes.adminParkingSessions,
         icon: CarFront
       },
       {
         key: 'parking-map',
-        label: 'Bản đồ bãi đỗ',
+        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
         path: routes.parkingMap,
         icon: Map
       }
@@ -129,13 +133,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES }) => {
     accountItems: [
       {
         key: 'profile',
-        label: 'Trang cá nhân',
+        label: label(t, 'dropdown.profile', 'Trang cá nhân'),
         path: routes.profile,
         icon: Settings
       },
       {
         key: 'logout',
-        label: 'Đăng xuất',
+        label: label(t, 'dropdown.logout', 'Đăng xuất'),
         danger: true,
         icon: LogOut
       }
