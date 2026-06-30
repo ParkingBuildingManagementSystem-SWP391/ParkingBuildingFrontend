@@ -9,9 +9,9 @@ import { ToastProvider } from './components/ToastProvider';
 // Public Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Unauthorized from './pages/Unauthorized';
 import PaymentSuccess from './pages/PaymentSuccess';
-import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 
 // Protected Pages (Admin & Driver Features)
