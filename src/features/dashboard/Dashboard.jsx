@@ -29,7 +29,9 @@ const defaultPricingData = [
     nightRate: 3000,
     fullDayRate: 5000,
     monthlyPrice: 120000,
-    maxHoursPerTurn: null
+    maxHoursPerTurn: null,
+    firstHourRate: 0,
+    subsequentHourRate: 0
   },
   {
     vehicleTypeId: 2,
@@ -39,7 +41,9 @@ const defaultPricingData = [
     nightRate: 6000,
     fullDayRate: 10000,
     monthlyPrice: 250000,
-    maxHoursPerTurn: null
+    maxHoursPerTurn: null,
+    firstHourRate: 0,
+    subsequentHourRate: 0
   },
   {
     vehicleTypeId: 3,
@@ -49,7 +53,9 @@ const defaultPricingData = [
     nightRate: 30000,
     fullDayRate: 50000,
     monthlyPrice: 1500000,
-    maxHoursPerTurn: 4
+    maxHoursPerTurn: 4,
+    firstHourRate: 10000,
+    subsequentHourRate: 5000
   }
 ];
 
@@ -164,7 +170,10 @@ const Dashboard = ({ section = 'overview' }) => {
         dayRate: row.dayRate,
         nightRate: row.nightRate,
         fullDayRate: row.fullDayRate,
-        monthlyPrice: row.monthlyPrice
+        monthlyPrice: row.monthlyPrice,
+        maxHoursPerTurn: isCarPricing ? row.maxHoursPerTurn : null,
+        firstHourRate: isCarPricing ? row.firstHourRate : 0,
+        subsequentHourRate: isCarPricing ? row.subsequentHourRate : 0
       });
       message.success(t('dashboard.pricingUpdateSuccess', { vehicleType: getVehicleTypeLabel(row.vehicleType) }));
     } catch (err) {
@@ -829,6 +838,8 @@ const Dashboard = ({ section = 'overview' }) => {
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.dayRate')}</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.nightRate')}</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.fullDayRate')}</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Giá Giờ Đầu</th>
+                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Giá Giờ Sau</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Giá Vé Tháng</th>
                     {canEditPricing && (
                       <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
@@ -896,6 +907,43 @@ const Dashboard = ({ section = 'overview' }) => {
                           className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
                         />
                       </td>
+
+                      {/* Cột Giá Giờ Đầu */}
+                      <td className="px-4 py-4 align-middle">
+                        {isCarPricing ? (
+                          <InputNumber
+                            min={0}
+                            value={row.firstHourRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'firstHourRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100"
+                          />
+                        ) : (
+                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-400">N/A</span>
+                        )}
+                      </td>
+
+                      {/* Cột Giá Giờ Tiếp Theo */}
+                      <td className="px-4 py-4 align-middle">
+                        {isCarPricing ? (
+                          <InputNumber
+                            min={0}
+                            value={row.subsequentHourRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'subsequentHourRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100"
+                          />
+                        ) : (
+                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-400">N/A</span>
+                        )}
+                      </td>
+
 
                       {canEditPricing && (
                         <td className="px-4 py-4 align-middle text-right">
