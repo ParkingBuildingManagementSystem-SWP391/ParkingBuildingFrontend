@@ -564,6 +564,7 @@
       },
       "cameraEvidence": "Xem bằng chứng camera",
       "noCameraEvidence": "Sự cố này không có hình ảnh bằng chứng.",
+      "noCameraEndpoint": "Sự cố này không có hình ảnh bằng chứng.",
       "resolveConfirmTitle": "Đánh dấu đã xử lý?",
       "resolveConfirmDesc": "Xác nhận sự cố này đã được xử lý.",
       "confirm": "Xác nhận",
