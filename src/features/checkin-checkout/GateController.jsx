@@ -215,7 +215,7 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
 
   return (
     <Modal
-      title={<span className="font-extrabold text-slate-900 text-base uppercase tracking-tight flex items-center gap-2 dark:text-slate-100"><CheckCircle size={18} className="text-emerald-500" />{t('gate.bookingCheckIn.title')}</span>}
+      title={<span className="font-extrabold text-slate-900 text-base uppercase tracking-tight flex items-center gap-2"><CheckCircle size={18} className="text-emerald-500" />Xác nhận Check-in</span>}
       open={isOpen}
       onCancel={onClose}
       footer={[
@@ -223,9 +223,9 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
           key="ok"
           type="primary"
           onClick={onClose}
-          className="h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:!from-emerald-400 hover:!to-emerald-500 border-none font-bold rounded-[14px] px-6 shadow-md hover:-translate-y-0.5 transition-all"
+          className="h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:!from-emerald-400 hover:!to-emerald-500 border-none font-bold rounded-[14px] px-6 shadow-md transition-all"
         >
-          {t('gate.bookingCheckIn.confirmBtn')}
+          Xác nhận cho xe vào
         </Button>
       ]}
       centered
@@ -233,29 +233,29 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
       destroyOnClose
     >
       <div className="space-y-4 py-3">
-        {/* Vị trí ô đỗ được làm nổi bật */}
-        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border border-emerald-100 rounded-2xl p-5 text-center shadow-sm dark:border-emerald-500/40 dark:from-emerald-500/15 dark:to-emerald-500/5">
-          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1 dark:text-emerald-300">{t('gate.bookingCheckIn.assignedSlot')}</span>
-          <span className="text-4xl font-black text-emerald-700 tracking-wide dark:text-emerald-300">{data.slotName || data.SlotName || "N/A"}</span>
+        {/* Vị trí ô đỗ được Backend cấp động */}
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border border-emerald-100 rounded-2xl p-5 text-center shadow-sm">
+          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">Vị trí ô đỗ phân phối</span>
+          <span className="text-4xl font-black text-emerald-700 tracking-wide">{data.slotName || data.SlotName || "N/A"}</span>
         </div>
 
         {/* Bảng chi tiết thông tin */}
-        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3 dark:border-slate-700 dark:bg-slate-800">
-          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs dark:border-slate-700">
-            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.driverName')}</span>
-            <span className="text-slate-900 font-black dark:text-slate-100">{data.driverName || data.DriverName || data.fullName || data.FullName || "N/A"}</span>
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
+          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
+            <span className="text-slate-500 font-bold uppercase tracking-wider">Họ và tên chủ thẻ</span>
+            <span className="text-slate-900 font-black">{data.driverName || data.DriverName || data.fullName || data.FullName || "N/A"}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs dark:border-slate-700">
-            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.phone')}</span>
-            <span className="text-slate-900 font-bold font-mono dark:text-slate-100">{data.driverPhone || data.DriverPhone || data.phoneNumber || data.PhoneNumber || "N/A"}</span>
+          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
+            <span className="text-slate-500 font-bold uppercase tracking-wider">Số điện thoại</span>
+            <span className="text-slate-900 font-bold font-mono">{data.driverPhone || data.DriverPhone || data.phoneNumber || data.PhoneNumber || "N/A"}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs dark:border-slate-700">
-            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.plate')}</span>
-            <span className="text-slate-900 font-black font-mono dark:text-slate-100">{data.licenseVehicle || data.LicenseVehicle || "N/A"}</span>
+          <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
+            <span className="text-slate-500 font-bold uppercase tracking-wider">Biển số xe</span>
+            <span className="text-slate-900 font-black font-mono">{data.licenseVehicle || data.LicenseVehicle || "N/A"}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.bookingCheckIn.vehicleType')}</span>
-            <span className="text-slate-900 font-bold dark:text-slate-100">{data.vehicleTypeName || data.VehicleTypeName || data.vehicleType || "Car"}</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider">Loại phương tiện</span>
+            <span className="text-slate-900 font-bold">{data.vehicleTypeName || data.VehicleTypeName || data.vehicleType || "Car"}</span>
           </div>
         </div>
       </div>
