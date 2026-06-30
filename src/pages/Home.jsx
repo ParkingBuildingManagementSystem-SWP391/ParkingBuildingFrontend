@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ChevronDown, LogOut, Settings, Map, Zap, ShieldCheck, CreditCard,
+  ChevronDown, Map, Zap, ShieldCheck, CreditCard,
   Search, CalendarCheck, CarFront, ArrowRight, Star, Users, Clock, Activity,
   Sun, Moon, Languages
 } from 'lucide-react';
@@ -12,6 +12,7 @@ import heroImage from '../assets/logo/parking-hero.png';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import LocateVehicle from './LocateVehicle';
+import { getRoleMenuItems } from '../config/roleMenus';
 
 /* ── tiny animated counter ── */
 const AnimatedNumber = ({ target, suffix = '' }) => {
@@ -51,11 +52,13 @@ const Home = () => {
   const { t, i18n } = useTranslation();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const userMenuRef = useRef(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const displayName = user?.fullName || user?.name || user?.username || user?.email || t('home.defaultAccount');
   const displayRole = user?.role || user?.userRole || user?.roles?.[0] || role || t('header.userRole');
+  const { navigationItems, accountItems } = getRoleMenuItems({ role: displayRole });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -78,7 +81,37 @@ const Home = () => {
     i18n.changeLanguage(newLang);
   };
 
+  const navigateFromMenu = (path) => {
+    setIsUserMenuOpen(false);
+    navigate(path);
+  };
+
   const handleLogout = () => { setIsUserMenuOpen(false); logout(); navigate('/login'); };
+
+  const isActivePath = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
+  const menuItemClass = (path, danger = false) => {
+    if (danger) {
+      return 'flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-500/10';
+    }
+
+    const active = path && isActivePath(path);
+    return [
+      'flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold transition-colors dark:text-slate-200',
+      active
+        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-200'
+        : 'text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+    ].join(' ');
+  };
+
+  const menuIconClass = (path) => (
+    path && isActivePath(path)
+      ? 'text-indigo-600 dark:text-indigo-300'
+      : 'text-slate-400'
+  );
 
   /* ── data arrays ── */
   const features = [
@@ -178,17 +211,57 @@ const Home = () => {
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 top-full z-50 mt-2 w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-                    <Link to="/settings" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
-                      <Settings size={15} className="text-slate-400" />
-                      {t('header.profile')}
-                    </Link>
-                    <button onClick={handleLogout}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-rose-600 hover:bg-rose-50">
-                      <LogOut size={15} />
-                      {t('header.logout')}
-                    </button>
+                  <div className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-100 bg-white py-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                      Điều hướng
+                    </div>
+                    {navigationItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuItemClass(item.path)}
+                        >
+                          <Icon size={15} className={menuIconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
+                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                      Tài khoản
+                    </div>
+                    {accountItems.map((item) => {
+                      const Icon = item.icon;
+                      if (item.danger) {
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={handleLogout}
+                            className={menuItemClass(null, true)}
+                          >
+                            <Icon size={15} />
+                            {item.label}
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuItemClass(item.path)}
+                        >
+                          <Icon size={15} className={menuIconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
