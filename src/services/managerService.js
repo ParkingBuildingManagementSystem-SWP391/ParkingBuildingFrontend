@@ -82,10 +82,7 @@ export const managerService = {
         dayRate: Number(data.dayRate),
         nightRate: Number(data.nightRate),
         fullDayRate: Number(data.fullDayRate),
-        monthlyPrice: Number(data.monthlyPrice),
-        maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
-          ? Number(data.maxHoursPerTurn)
-          : null
+        monthlyPrice: Number(data.monthlyPrice)
       });
       return response.data;
     } catch (error) {
