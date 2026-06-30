@@ -217,7 +217,7 @@ const Accounts = () => {
       };
 
       // Call correct backend route using shared axios instance
-      await api.post('/Admin/update-user', payload);
+      await api.put('/Admin/update-user', payload);
 
       message.success(`${t('accounts.modSuccess')} ${selectedUser.name}!`);
 
@@ -239,35 +239,20 @@ const Accounts = () => {
     setSubmitting(true);
     try {
       const userId = parseInt(editUser.id);
+      
+      // Chuẩn bị payload gửi đúng API của Admin
       const payload = {
         userId: userId,
-        username: editUsername.trim(),
+        roleName: "", // Để trống để không thay đổi Role hiện tại
+        userName: editUsername.trim(),
         email: editEmail.trim(),
         phoneNumber: editPhoneNumber.trim()
       };
 
-      let success = false;
-      let errorMsg = "";
+      // Gọi đúng API PUT đã chuẩn hóa của Backend
+      await api.put('/Admin/update-user', payload);
 
-      // Try recommended PUT /api/User/update
-      try {
-        await api.put('/User/update', payload);
-        success = true;
-      } catch (e) {
-        errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-      }
-
-      // Try recommended PUT /api/Admin/user/update fallback
-      if (!success) {
-        try {
-          await api.put('/Admin/user/update', payload);
-          success = true;
-        } catch (e) {
-          errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-        }
-      }
-
-      // Update local state immediately so table updates visually
+      // Cập nhật local state khi lưu thành công thực sự xuống Database
       setAccounts(prev =>
         prev.map(acc =>
           acc.id === userId
@@ -277,12 +262,12 @@ const Accounts = () => {
       );
 
       message.success(`${t('accounts.updSuccess')} ${editUsername.trim()}!`);
-
       closeEditModal();
-      loadUsers(); // Reload dynamic user list
+      loadUsers(); // Tải lại danh sách mới từ DB
     } catch (err) {
       console.error(err);
-      message.error(err.message || t('accounts.updFail'));
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || t('accounts.updFail');
+      message.error(errMsg);
     } finally {
       setSubmitting(false);
     }
