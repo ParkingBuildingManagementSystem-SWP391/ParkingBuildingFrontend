@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
+import { updateProfile } from '../services/authService';
 
 const getUserValue = (user, ...keys) => {
   for (const key of keys) {
@@ -24,15 +25,16 @@ const getUserValue = (user, ...keys) => {
 };
 
 const normalizeProfile = (user) => ({
-  username: getUserValue(user, 'username', 'Username'),
-  fullName: getUserValue(user, 'fullName', 'FullName', 'name', 'Name'),
+  username: getUserValue(user, 'email', 'Email'), // Hiển thị Email đăng nhập ở ô đầu tiên bị khóa
+  fullName: getUserValue(user, 'username', 'Username'), // Hiển thị Họ Tên ở ô thứ hai cho sửa
   email: getUserValue(user, 'email', 'Email'),
   phoneNumber: getUserValue(user, 'phoneNumber', 'PhoneNumber', 'phone', 'Phone')
 });
 
 const Settings = () => {
   const { t } = useTranslation();
-  const { user, role } = useAuth();
+  const { user, role, updateUser } = useAuth();
+  const isAdmin = String(role || '').toLowerCase() === 'admin';
 
   const initialProfile = useMemo(() => normalizeProfile(user), [user]);
   const [username, setUsername] = useState('');
@@ -80,7 +82,7 @@ const Settings = () => {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSaveProfile = (event) => {
+  const handleSaveProfile = async (event) => {
     event.preventDefault();
 
     if (!validateForm()) {
@@ -88,7 +90,30 @@ const Settings = () => {
       return;
     }
 
-    message.error('Backend chưa có API cập nhật profile cho người dùng hiện tại. Không thể lưu thay đổi giả lập.');
+    try {
+      const payload = {
+        username: fullName.trim(), // Giao diện 'Họ và tên' -> Backend 'username'
+        email: email.trim(),
+        phoneNumber: phoneNumber.trim()
+      };
+
+      // Gọi API đặt lại thông tin cá nhân của Backend
+      await updateProfile(payload);
+
+      // Cập nhật lại Auth Context ở Client để header & sidebar thay đổi tức thì
+      if (updateUser) {
+          updateUser({
+            username: fullName.trim(),
+            email: email.trim(),
+            phoneNumber: phoneNumber.trim()
+          });
+      }
+
+      message.success('Cập nhật thông tin cá nhân thành công!');
+    } catch (err) {
+      console.error(err);
+      message.error(err.response?.data?.error || 'Đã xảy ra lỗi khi lưu thông tin.');
+    }
   };
 
   const handleCancelChanges = () => {
@@ -131,7 +156,7 @@ const Settings = () => {
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('settings.labelUsername')}</label>
+                <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tài khoản đăng nhập (Email)</label>
                 <div className="relative">
                   <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
                   <input
@@ -142,7 +167,7 @@ const Settings = () => {
                     className="h-12 w-full cursor-not-allowed select-none rounded-[14px] border-[1.5px] border-slate-200 bg-slate-100 pl-12 pr-4 text-sm font-semibold text-slate-500 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500"
                   />
                 </div>
-                <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">{t('settings.hintUsername')}</span>
+                <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">Tên đăng nhập bằng Email không thể thay đổi</span>
               </div>
 
               <div className="space-y-1.5">
@@ -169,11 +194,13 @@ const Settings = () => {
                     type="email"
                     placeholder={t('settings.phEmail')}
                     value={email}
+                    disabled={!isAdmin}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                    className={`h-12 w-full rounded-[14px] border-[1.5px] pl-12 pr-4 text-sm font-semibold transition-all placeholder:text-slate-400 focus:outline-none outline-none ${!isAdmin ? 'border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed select-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500' : 'border-slate-200 bg-slate-50 text-slate-900 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800'}`}
                   />
                 </div>
                 {errors.email && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.email}</p>}
+                {!isAdmin && <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">Chỉ Quản trị viên (Admin) mới có quyền đổi Email</span>}
               </div>
 
               <div className="space-y-1.5">
@@ -184,11 +211,13 @@ const Settings = () => {
                     type="text"
                     placeholder={t('settings.phPhone')}
                     value={phoneNumber}
+                    disabled={!isAdmin}
                     onChange={(event) => setPhoneNumber(event.target.value)}
-                    className="h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 font-mono text-sm font-bold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                    className={`h-12 w-full rounded-[14px] border-[1.5px] pl-12 pr-4 font-mono text-sm font-bold transition-all placeholder:text-slate-400 focus:outline-none outline-none ${!isAdmin ? 'border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed select-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500' : 'border-slate-200 bg-slate-50 text-slate-900 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800'}`}
                   />
                 </div>
                 {errors.phoneNumber && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.phoneNumber}</p>}
+                {!isAdmin && <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">Chỉ Quản trị viên (Admin) mới có quyền đổi Số điện thoại</span>}
               </div>
             </div>
 

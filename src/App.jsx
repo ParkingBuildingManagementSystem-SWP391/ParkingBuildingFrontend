@@ -9,6 +9,7 @@ import { ToastProvider } from './components/ToastProvider';
 // Public Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Unauthorized from './pages/Unauthorized';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Home from './pages/Home';
@@ -55,6 +56,7 @@ function App() {
           {/* Public auth pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/" element={<Home />} />
