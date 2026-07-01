@@ -233,12 +233,17 @@ const ActiveCardView = ({ cardInfo, onRefresh, t }) => {
 const RegistrationView = ({ onRegister, submitting, t }) => {
   const [selectedPlan, setSelectedPlan]         = useState(null);
   const [selectedDuration, setSelectedDuration] = useState(1);
-  const [plans, setPlans] = useState(PLANS);
+  const [plans, setPlans] = useState([
+    { id: 1, key: 'Bicycle', Icon: Bike, price: 120000, accent: 'emerald' },
+    { id: 2, key: 'Motorbike', Icon: Truck, price: 250000, accent: 'indigo' },
+    { id: 3, key: 'Car', Icon: Car, price: 1500000, accent: 'rose' },
+  ]);
 
   useEffect(() => {
     const fetchTariffs = async () => {
       try {
         const res = await api.get('/MonthlyCard/tariffs');
+
         const serverTariffs = Array.isArray(res.data)
           ? res.data
           : res.data?.data;
@@ -246,15 +251,20 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
         if (Array.isArray(serverTariffs)) {
           setPlans(prevPlans =>
             prevPlans.map(plan => {
-              const matched = serverTariffs.find(t => Number(t.tariffId) === Number(plan.id));
-              return matched
-                ? { ...plan, price: Number(matched.monthlyPrice || plan.price) }
+              const matched = serverTariffs.find(
+                tariff => Number(tariff.tariffId) === Number(plan.id)
+              );
+
+              const monthlyPrice = Number(matched?.monthlyPrice);
+
+              return matched && Number.isFinite(monthlyPrice)
+                ? { ...plan, price: monthlyPrice }
                 : plan;
             })
           );
         }
       } catch (err) {
-        console.error('Failed to load monthly card tariffs:', err);
+        console.error('Lỗi khi tải bảng giá vé tháng từ Backend:', err);
       }
     };
 
