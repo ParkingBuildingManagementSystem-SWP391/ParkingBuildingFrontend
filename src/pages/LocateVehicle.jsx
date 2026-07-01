@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Car, AlertTriangle, Clock, Building2, Sparkles, ArrowRight } from 'lucide-react';
-import { formatTimeVN } from '../utils/dateTime';
+import { formatVietnamTime } from '../utils/dateTime';
 
 const LocateVehicle = () => {
   const [licensePlate, setLicensePlate] = useState('');
@@ -186,7 +186,7 @@ const LocateVehicle = () => {
                       />
                       <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg bg-slate-900/80 px-2.5 py-1 text-[10px] font-medium text-white shadow-sm backdrop-blur-md">
                         <Clock className="h-3 w-3" strokeWidth={2.5} />
-                        Vào bãi: {formatTimeVN(result.checkInTime, 'N/A')}
+                        Vào bãi: {formatVietnamTime(result.checkInTime)}
                       </div>
                     </div>
                   </div>

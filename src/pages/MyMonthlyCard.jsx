@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
-import { formatDateTimeVN } from '../utils/dateTime';
+import { formatVietnamDateTime } from '../utils/dateTime';
 import { getVehicleTypeLabel } from '../utils/i18nLabels';
 
 /* ─── helpers ─── */
@@ -44,9 +44,7 @@ const getPaymentUrl = (payload) => {
 
 const formatDateTime = (value, t) => {
   if (!value) return t('common.notUpdated');
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return formatDateTimeVN(date);
+  return formatVietnamDateTime(value);
 };
 
 /* ─── constants ─── */

@@ -4,7 +4,7 @@ import { Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
-import { formatDateVN } from '../utils/dateTime';
+import { formatVietnamDate } from '../utils/dateTime';
 
 const Accounts = () => {
   const { t } = useTranslation();
@@ -43,7 +43,7 @@ const Accounts = () => {
     else if (u.roleId || u.RoleId) roleId = Number(u.roleId || u.RoleId);
 
     const uid = u.id || u.Id || u.userId || u.UserId || 1;
-    const fakeDate = formatDateVN(new Date(2025, uid % 12, (uid * 3) % 28 + 1));
+    const fakeDate = formatVietnamDate(new Date(2025, uid % 12, (uid * 3) % 28 + 1));
     const joinedDate = u.createdAt || u.CreatedAt || u.joined || u.Joined;
 
     return {
@@ -53,7 +53,7 @@ const Accounts = () => {
       phoneNumber: u.phoneNumber || u.PhoneNumber || '',
       roleId: roleId,
       status: u.isDeleted || u.IsDeleted ? 'Inactive' : 'Active', // Mapping to status toggle
-      joined: formatDateVN(joinedDate, joinedDate || fakeDate)
+      joined: joinedDate ? formatVietnamDate(joinedDate) : fakeDate
     };
   };
 

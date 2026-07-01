@@ -20,7 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
-import { formatDateVN, formatTimeVN } from '../utils/dateTime';
+import { formatVietnamDate, formatVietnamTime } from '../utils/dateTime';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -156,8 +156,8 @@ const MyBookings = () => {
           // BE sends UTC time. Ensure we append 'Z' if missing so JS parses it as UTC, converting to local VN time.
           const raw = String(item.bookingTime);
           const bookingDate = raw.endsWith('Z') ? raw : raw + 'Z';
-          bookedDate = formatDateVN(bookingDate, 'N/A');
-          bookedTime = formatTimeVN(bookingDate, 'N/A');
+          bookedDate = formatVietnamDate(bookingDate);
+          bookedTime = formatVietnamTime(bookingDate);
         }
 
         if (deadlineBaseTime) {
@@ -165,7 +165,7 @@ const MyBookings = () => {
           const base = new Date(rawBase.endsWith('Z') ? rawBase : rawBase + 'Z');
           if (!isNaN(base.getTime())) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
-            deadlineTime = formatTimeVN(deadline, 'N/A');
+            deadlineTime = formatVietnamTime(deadline);
           }
         }
 
@@ -532,12 +532,12 @@ const MyBookings = () => {
                         <div className="space-y-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
                           <div className="flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                            In: {formatTimeVN(booking.checkInTime, 'N/A')}
+                            In: {formatVietnamTime(booking.checkInTime)}
                           </div>
                           {booking.checkOutTime && (
                             <div className="flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                              Out: {formatTimeVN(booking.checkOutTime, 'N/A')}
+                              Out: {formatVietnamTime(booking.checkOutTime)}
                             </div>
                           )}
                         </div>
