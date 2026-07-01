@@ -2,7 +2,7 @@
   "header": {
     "title": {
       "parking-map": "Bản đồ trực tiếp",
-      "dashboard": "Bảng điều khiển quản lý",
+      "dashboard": "Bảng quản lý",
       "live-status": "Trạng thái trực tiếp",
       "incidents": "Sự cố",
       "analytics": "Phân tích",
@@ -98,7 +98,7 @@
     "showingZone": "Khu",
     "prev": "Trước",
     "next": "Sau",
-    "bookingInstruction": "{{count}} chỗ còn trống ngay lúc này — nhấn vào chỗ màu xanh để đặt chỗ",
+    "bookingInstruction": "{{count}} chỗ còn trống ngay lúc này - nhấn vào chỗ màu xanh để đặt chỗ",
     "zone": "Khu",
     "vehicleTypeLabel": "Loại xe",
     "fixedVehicleTypeNote": "Loại xe được cố định theo tầng/khu đã chọn",
@@ -888,6 +888,9 @@
   },
   "common": {
     "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "collapseSidebar": "Thu gọn sidebar",
+    "expandSidebar": "Mở rộng sidebar",
     "backHome": "Về trang chủ",
     "notifications": "Thông báo",
     "switchToEnglish": "Switch to English",

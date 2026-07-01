@@ -4,6 +4,16 @@ import { Mail, Lock, Key, ArrowLeft } from 'lucide-react';
 import { forgotPassword, resetPassword } from '../services/authService';
 import { toast as message } from '../components/ToastProvider';
 
+const getErrorMessage = (error, fallback) => (
+  error?.response?.data?.error
+  || error?.response?.data?.message
+  || error?.response?.data?.title
+  || (typeof error?.response?.data === 'string' ? error.response.data : null)
+  || error?.message
+  || (typeof error === 'string' ? error : null)
+  || fallback
+);
+
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -24,7 +34,7 @@ const ForgotPassword = () => {
       message.success(data.message || 'Mã OTP đã được gửi về Email của bạn.');
       setStep(2); // Chuyển sang bước nhập OTP
     } catch (err) {
-      message.error(err.response?.data?.error || 'Không thể gửi yêu cầu. Vui lòng kiểm tra lại email.');
+      message.error(getErrorMessage(err, 'Không thể gửi yêu cầu. Vui lòng kiểm tra lại email.'));
     } finally {
       setLoading(false);
     }
@@ -43,7 +53,7 @@ const ForgotPassword = () => {
       message.success(data.message || 'Đổi mật khẩu thành công!');
       navigate('/login'); // Chuyển hướng về trang đăng nhập
     } catch (err) {
-      message.error(err.response?.data?.error || 'Đã có lỗi xảy ra. OTP có thể sai hoặc hết hạn.');
+      message.error(getErrorMessage(err, 'Đã có lỗi xảy ra. OTP có thể sai hoặc hết hạn.'));
     } finally {
       setLoading(false);
     }

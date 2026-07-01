@@ -114,9 +114,10 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true }) => {
       ? 'text-indigo-600 dark:text-indigo-300'
       : 'text-slate-400'
   );
+  const headerHeightClass = hasSidebar ? 'min-h-[72px] lg:h-24' : 'min-h-[72px]';
 
   return (
-    <header className="flex min-h-[72px] w-full min-w-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 select-none transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 sm:px-6 md:px-8">
+    <header className={`flex ${headerHeightClass} w-full min-w-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 select-none transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 sm:px-6 md:px-8`}>
       <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
         {hasSidebar && (
           <button

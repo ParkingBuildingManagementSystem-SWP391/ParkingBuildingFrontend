@@ -25,6 +25,7 @@ const RoleFloatingActionButton = ({ icon: Icon, label, onClick }) => (
 
 const MainLayout = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { user, role } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -64,6 +65,9 @@ const MainLayout = () => {
   const contentSpacingClass = isFullWidthLayout
     ? 'px-3 py-3 pb-24 sm:px-4 sm:py-4 sm:pb-24 md:px-5 md:py-5 md:pb-24'
     : 'px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8';
+  const sidebarOffsetClass = showSidebar
+    ? (isSidebarCollapsed ? 'lg:ml-[88px]' : 'lg:ml-[280px]')
+    : '';
 
   const getPageMeta = () => {
     const path = location.pathname;
@@ -124,22 +128,25 @@ const MainLayout = () => {
   const pageMeta = getPageMeta();
 
   return (
-    <div className="flex min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500">
+    <div className="min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500">
       
       {/* Fixed Left Sidebar */}
       {showSidebar && (
         <Sidebar
+          collapsed={isSidebarCollapsed}
+          onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={() => setIsMobileSidebarOpen(false)}
         />
       )}
       
       {/* Main Content Area */}
-      <div className="relative z-0 flex min-w-0 flex-1 flex-col">
+      <div className={`relative z-0 flex min-h-screen min-w-0 flex-col transition-all duration-300 ease-in-out ${sidebarOffsetClass}`}>
         
         {/* Top Navigation Bar */}
         <Header
           hasSidebar={showSidebar}
+          showLogo={!showSidebar}
           onOpenSidebar={() => setIsMobileSidebarOpen(true)}
         />
         
