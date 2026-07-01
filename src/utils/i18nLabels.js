@@ -40,15 +40,28 @@ export const getStatusLabel = (status, t) => {
 export const getVehicleTypeLabel = (type, t) => {
   const normalized = String(type || '').trim().toLowerCase();
 
-  if (normalized.includes('bike') || normalized.includes('bicycle') || normalized.includes('xe đạp')) {
-    return t('vehicleTypes.bicycle');
-  }
-
-  if (normalized.includes('motor') || normalized.includes('moto') || normalized.includes('xe máy')) {
+  if (
+    normalized.includes('motorbike') ||
+    normalized.includes('motor') ||
+    normalized.includes('moto') ||
+    normalized.includes('xe máy')
+  ) {
     return t('vehicleTypes.motorbike');
   }
 
-  if (normalized.includes('car') || normalized.includes('ô tô') || normalized.includes('oto')) {
+  if (
+    normalized.includes('bike') ||
+    normalized.includes('bicycle') ||
+    normalized.includes('xe đạp')
+  ) {
+    return t('vehicleTypes.bicycle');
+  }
+
+  if (
+    normalized.includes('car') ||
+    normalized.includes('ô tô') ||
+    normalized.includes('oto')
+  ) {
     return t('vehicleTypes.car');
   }
 

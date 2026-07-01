@@ -1,6 +1,5 @@
 import {
   CalendarCheck,
-  CarFront,
   CreditCard,
   Home,
   LayoutDashboard,
@@ -8,7 +7,7 @@ import {
   Map,
   ScanLine,
   Settings,
-  Shield
+  Users
 } from 'lucide-react';
 
 export const ROLE_MENU_ROUTES = {
@@ -20,6 +19,7 @@ export const ROLE_MENU_ROUTES = {
   monthlyCard: '/my-monthly-card',
   managerDashboard: '/dashboard',
   adminDashboard: '/dashboard',
+  adminAccounts: '/accounts',
   adminParkingSessions: '/admin/parking-sessions'
 };
 
@@ -34,8 +34,9 @@ const label = (t, key, fallback) => (
   typeof t === 'function' ? t(key, { defaultValue: fallback }) : fallback
 );
 
-export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t }) => {
+export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPath = '/' }) => {
   const normalizedRole = normalizeRole(role);
+  const isHomePage = currentPath === routes.home || currentPath === '/home';
 
   const commonNavigation = [
     {
@@ -90,46 +91,45 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t }) => {
 
   if (normalizedRole === 'manager') {
     roleNavigation = [
-      {
-        key: 'manager-dashboard',
-        label: label(t, 'dropdown.dashboard', 'Bảng điều khiển'),
-        path: routes.managerDashboard,
-        icon: LayoutDashboard
-      },
-      {
-        key: 'parking-map',
-        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
-        path: routes.parkingMap,
-        icon: Map
-      }
+      isHomePage
+        ? {
+            key: 'manager-dashboard',
+            label: label(t, 'dropdown.dashboard', 'Bảng điều khiển'),
+            path: routes.managerDashboard,
+            icon: LayoutDashboard
+          }
+        : {
+            key: 'home',
+            label: label(t, 'dropdown.home', 'Trang chủ'),
+            path: routes.home,
+            icon: Home
+          }
     ];
   }
 
   if (normalizedRole === 'admin') {
     roleNavigation = [
-      {
-        key: 'admin-dashboard',
-        label: label(t, 'dropdown.dashboard', 'Bảng điều khiển'),
-        path: routes.adminDashboard,
-        icon: Shield
-      },
-      {
-        key: 'admin-parking-sessions',
-        label: label(t, 'dropdown.parkingSessions', 'Quản lý phiên đỗ xe'),
-        path: routes.adminParkingSessions,
-        icon: CarFront
-      },
-      {
-        key: 'parking-map',
-        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
-        path: routes.parkingMap,
-        icon: Map
-      }
+      isHomePage
+        ? {
+            key: 'admin-accounts',
+            label: label(t, 'sidebar.userAccounts', 'Quản lý người dùng'),
+            path: routes.adminAccounts,
+            icon: Users
+          }
+        : {
+            key: 'home',
+            label: label(t, 'dropdown.home', 'Trang chủ'),
+            path: routes.home,
+            icon: Home
+          }
     ];
   }
 
   return {
-    navigationItems: [...commonNavigation, ...roleNavigation].filter((item) => Boolean(item.path)),
+    navigationItems: [
+      ...(normalizedRole === 'admin' || normalizedRole === 'manager' ? [] : commonNavigation),
+      ...roleNavigation
+    ].filter((item) => Boolean(item.path)),
     accountItems: [
       {
         key: 'profile',
