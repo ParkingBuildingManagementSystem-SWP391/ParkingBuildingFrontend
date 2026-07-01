@@ -233,8 +233,35 @@ const ActiveCardView = ({ cardInfo, onRefresh, t }) => {
 const RegistrationView = ({ onRegister, submitting, t }) => {
   const [selectedPlan, setSelectedPlan]         = useState(null);
   const [selectedDuration, setSelectedDuration] = useState(1);
+  const [plans, setPlans] = useState(PLANS);
 
-  const plan = PLANS.find(p => p.id === selectedPlan);
+  useEffect(() => {
+    const fetchTariffs = async () => {
+      try {
+        const res = await api.get('/MonthlyCard/tariffs');
+        const serverTariffs = Array.isArray(res.data)
+          ? res.data
+          : res.data?.data;
+
+        if (Array.isArray(serverTariffs)) {
+          setPlans(prevPlans =>
+            prevPlans.map(plan => {
+              const matched = serverTariffs.find(t => Number(t.tariffId) === Number(plan.id));
+              return matched
+                ? { ...plan, price: Number(matched.monthlyPrice || plan.price) }
+                : plan;
+            })
+          );
+        }
+      } catch (err) {
+        console.error('Failed to load monthly card tariffs:', err);
+      }
+    };
+
+    fetchTariffs();
+  }, []);
+
+  const plan = plans.find(p => p.id === selectedPlan);
   const { Icon } = plan || {};
   const cls = plan ? accentCls[plan.accent] : null;
   const discountRate = selectedDuration >= 12 ? 0.1 : selectedDuration >= 6 ? 0.05 : 0;
@@ -271,7 +298,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Chọn loại xe</p>
             <div className="grid gap-3 sm:grid-cols-3">
-              {PLANS.map((p) => {
+              {plans.map((p) => {
                 const PIcon = p.Icon;
                 const pCls  = accentCls[p.accent];
                 const isSel = selectedPlan === p.id;

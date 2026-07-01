@@ -13,7 +13,7 @@ import {
   Moon,
   Sun
 } from 'lucide-react';
-import { getRoleMenuItems } from '../config/roleMenus';
+import { getRoleMenuItems, normalizeRole } from '../config/roleMenus';
 import { getRoleLabel } from '../utils/i18nLabels';
 
 const getCurrentRole = (user, role) => (
@@ -34,9 +34,12 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true }) => {
   const { isDarkMode, toggleTheme } = useTheme();
 
   const currentRole = getCurrentRole(user, role);
+  const normalizedRole = normalizeRole(currentRole);
+  const usesCompactRoleMenu = normalizedRole === 'admin' || normalizedRole === 'manager';
   const { navigationItems, accountItems } = getRoleMenuItems({
     role: currentRole,
-    t
+    t,
+    currentPath: location.pathname
   });
 
   const toggleLanguage = () => {
@@ -199,57 +202,106 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true }) => {
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:bg-slate-900 dark:border-slate-700">
-                <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  {t('dropdown.navigation')}
-                </div>
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.key}
-                      type="button"
-                      onClick={() => navigateFromMenu(item.path)}
-                      className={menuButtonClass(item.path)}
-                    >
-                      <Icon size={15} className={iconClass(item.path)} />
-                      {item.label}
-                    </button>
-                  );
-                })}
+              <div className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:bg-slate-900 dark:border-slate-700">
+                {usesCompactRoleMenu ? (
+                  <div className="py-1">
+                    {navigationItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                    {accountItems.map((item) => {
+                      const Icon = item.icon;
+                      if (item.danger) {
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={handleLogout}
+                            className={`${menuButtonClass(null, 'danger')} mt-1 border-t border-slate-100 pt-3 dark:border-slate-700`}
+                          >
+                            <Icon size={15} />
+                            {item.label}
+                          </button>
+                        );
+                      }
 
-                <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
-                <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  {t('dropdown.account')}
-                </div>
-                {accountItems.map((item) => {
-                  const Icon = item.icon;
-                  if (item.danger) {
-                    return (
-                      <button
-                        key={item.key}
-                        type="button"
-                        onClick={handleLogout}
-                        className={menuButtonClass(null, 'danger')}
-                      >
-                        <Icon size={15} />
-                        {item.label}
-                      </button>
-                    );
-                  }
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <>
+                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                      {t('dropdown.navigation')}
+                    </div>
+                    {navigationItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
 
-                  return (
-                    <button
-                      key={item.key}
-                      type="button"
-                      onClick={() => navigateFromMenu(item.path)}
-                      className={menuButtonClass(item.path)}
-                    >
-                      <Icon size={15} className={iconClass(item.path)} />
-                      {item.label}
-                    </button>
-                  );
-                })}
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
+                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                      {t('dropdown.account')}
+                    </div>
+                    {accountItems.map((item) => {
+                      const Icon = item.icon;
+                      if (item.danger) {
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={handleLogout}
+                            className={menuButtonClass(null, 'danger')}
+                          >
+                            <Icon size={15} />
+                            {item.label}
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </>
+                )}
               </div>
             )}
           </div>

@@ -12,7 +12,7 @@ import heroImage from '../assets/logo/parking-hero.png';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import LocateVehicle from './LocateVehicle';
-import { getRoleMenuItems } from '../config/roleMenus';
+import { getRoleMenuItems, normalizeRole } from '../config/roleMenus';
 import { getRoleLabel } from '../utils/i18nLabels';
 
 /* ── tiny animated counter ── */
@@ -60,7 +60,13 @@ const Home = () => {
   const displayName = user?.fullName || user?.name || user?.username || user?.email || t('home.defaultAccount');
   const rawDisplayRole = user?.role || user?.roleName || user?.userRole || user?.roles?.[0] || role;
   const displayRole = getRoleLabel(rawDisplayRole, t);
-  const { navigationItems, accountItems } = getRoleMenuItems({ role: rawDisplayRole, t });
+  const normalizedRole = normalizeRole(rawDisplayRole);
+  const usesCompactRoleMenu = normalizedRole === 'admin' || normalizedRole === 'manager';
+  const { navigationItems, accountItems } = getRoleMenuItems({
+    role: rawDisplayRole,
+    t,
+    currentPath: location.pathname
+  });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -212,56 +218,105 @@ const Home = () => {
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-100 bg-white py-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                      {t('dropdown.navigation')}
-                    </div>
-                    {navigationItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <button
-                          key={item.key}
-                          type="button"
-                          onClick={() => navigateFromMenu(item.path)}
-                          className={menuItemClass(item.path)}
-                        >
-                          <Icon size={15} className={menuIconClass(item.path)} />
-                          {item.label}
-                        </button>
-                      );
-                    })}
+                    {usesCompactRoleMenu ? (
+                      <div className="py-1">
+                        {navigationItems.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
+                        {accountItems.map((item) => {
+                          const Icon = item.icon;
+                          if (item.danger) {
+                            return (
+                              <button
+                                key={item.key}
+                                type="button"
+                                onClick={handleLogout}
+                                className={`${menuItemClass(null, true)} mt-1 border-t border-slate-100 pt-3 dark:border-slate-700`}
+                              >
+                                <Icon size={15} />
+                                {item.label}
+                              </button>
+                            );
+                          }
 
-                    <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
-                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                      {t('dropdown.account')}
-                    </div>
-                    {accountItems.map((item) => {
-                      const Icon = item.icon;
-                      if (item.danger) {
-                        return (
-                          <button
-                            key={item.key}
-                            type="button"
-                            onClick={handleLogout}
-                            className={menuItemClass(null, true)}
-                          >
-                            <Icon size={15} />
-                            {item.label}
-                          </button>
-                        );
-                      }
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                          {t('dropdown.navigation')}
+                        </div>
+                        {navigationItems.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
 
-                      return (
-                        <button
-                          key={item.key}
-                          type="button"
-                          onClick={() => navigateFromMenu(item.path)}
-                          className={menuItemClass(item.path)}
-                        >
-                          <Icon size={15} className={menuIconClass(item.path)} />
-                          {item.label}
-                        </button>
-                      );
-                    })}
+                        <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
+                        <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                          {t('dropdown.account')}
+                        </div>
+                        {accountItems.map((item) => {
+                          const Icon = item.icon;
+                          if (item.danger) {
+                            return (
+                              <button
+                                key={item.key}
+                                type="button"
+                                onClick={handleLogout}
+                                className={menuItemClass(null, true)}
+                              >
+                                <Icon size={15} />
+                                {item.label}
+                              </button>
+                            );
+                          }
+
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
