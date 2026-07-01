@@ -35,7 +35,8 @@ const MainLayout = () => {
   const isGuestLayout = !user || ['guest', 'public'].includes(normalizedRole);
   const isDriverLayout = ['driver', 'registered_driver', 'member', 'customer'].includes(normalizedRole);
   const isStaffLayout = normalizedRole === 'staff';
-  const showSidebar = ['admin', 'manager'].includes(normalizedRole);
+  const isSettingsPage = location.pathname === '/settings';
+  const showSidebar = ['admin', 'manager'].includes(normalizedRole) && !isSettingsPage;
   const isFullWidthLayout = isGuestLayout || isDriverLayout || !showSidebar;
   const isParkingMapPage = location.pathname === '/parking-map';
   const isBookingsPage = location.pathname === '/my-bookings';
@@ -73,6 +74,10 @@ const MainLayout = () => {
     const path = location.pathname;
 
     const routeMeta = {
+      '/settings': {
+        title: '',
+        subtitle: ''
+      },
       '/dashboard/monthly-cards': {
         title: normalizedRole === 'manager' ? t('monthlyCard.managerTitle') : t('monthlyCard.title'),
         subtitle: normalizedRole === 'manager'
@@ -128,54 +133,56 @@ const MainLayout = () => {
   const pageMeta = getPageMeta();
 
   return (
-    <div className="min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500">
+    <div className="min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500 flex flex-col">
       
-      {/* Fixed Left Sidebar */}
-      {showSidebar && (
-        <Sidebar
-          collapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
-          isMobileOpen={isMobileSidebarOpen}
-          onMobileClose={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
-      
-      {/* Main Content Area */}
-      <div className={`relative z-0 flex min-h-screen min-w-0 flex-col transition-all duration-300 ease-in-out ${sidebarOffsetClass}`}>
-        
-        {/* Top Navigation Bar */}
-        <Header
-          hasSidebar={showSidebar}
-          showLogo={!showSidebar}
-          onOpenSidebar={() => setIsMobileSidebarOpen(true)}
-        />
-        
-        {/* Scrollable Page Content */}
-        <main className="min-w-0 flex-1 w-full bg-slate-50 transition-colors duration-300 dark:bg-slate-900">
-          <PageHeader
-            title={pageMeta.title}
-            subtitle={pageMeta.subtitle}
-            contentClassName={contentMaxWidthClass}
-            paddingClassName={contentPaddingClass}
-          />
-          <div className="min-h-full flex flex-col">
-            <div className={`flex-1 w-full ${contentSpacingClass}`}>
-              <div className={`${contentMaxWidthClass} mx-auto w-full animate-fade-in`}>
-                <Outlet />
-              </div>
-            </div>
-            <AppFooter />
-          </div>
-        </main>
-
-        {fabConfig && (
-          <RoleFloatingActionButton
-            icon={fabConfig.icon}
-            label={fabConfig.label}
-            onClick={() => navigate(fabConfig.target)}
+      <div className="relative z-0 flex min-h-screen min-w-0 flex-1">
+        {/* Fixed Left Sidebar */}
+        {showSidebar && (
+          <Sidebar
+            collapsed={isSidebarCollapsed}
+            onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
+            isMobileOpen={isMobileSidebarOpen}
+            onMobileClose={() => setIsMobileSidebarOpen(false)}
           />
         )}
         
+        {/* Main Content Area */}
+        <div className={`relative z-0 flex min-h-screen min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out ${sidebarOffsetClass}`}>
+          
+          {/* Top Navigation Bar */}
+          <Header
+            hasSidebar={showSidebar}
+            showLogo={!showSidebar}
+            onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+          />
+          
+          {/* Scrollable Page Content */}
+          <main className="min-w-0 flex-1 w-full bg-slate-50 transition-colors duration-300 dark:bg-slate-900 flex flex-col">
+            <PageHeader
+              title={pageMeta.title}
+              subtitle={pageMeta.subtitle}
+              contentClassName={contentMaxWidthClass}
+              paddingClassName={contentPaddingClass}
+            />
+            <div className="flex-1 w-full flex flex-col justify-between">
+              <div className={`flex-1 w-full ${contentSpacingClass}`}>
+                <div className={`${contentMaxWidthClass} mx-auto w-full animate-fade-in`}>
+                  <Outlet />
+                </div>
+              </div>
+              <AppFooter />
+            </div>
+          </main>
+
+          {fabConfig && (
+            <RoleFloatingActionButton
+              icon={fabConfig.icon}
+              label={fabConfig.label}
+              onClick={() => navigate(fabConfig.target)}
+            />
+          )}
+          
+        </div>
       </div>
     </div>
   );

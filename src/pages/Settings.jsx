@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Lock,
@@ -50,10 +51,11 @@ const Settings = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [showPasswords, setShowPasswords] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -64,11 +66,26 @@ const Settings = () => {
     setOldPassword('');
     setNewPassword('');
     setConfirmNewPassword('');
+    setShowPasswordSection(false);
     setErrors({});
   }, [initialProfile]);
 
-  const wantsPasswordChange = [oldPassword, newPassword, confirmNewPassword]
-    .some((value) => value.trim() !== '');
+  const handleTogglePasswordSection = () => {
+    setShowPasswordSection(prev => {
+      const next = !prev;
+      if (!next) {
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmNewPassword('');
+        setShowPasswords(false);
+        setErrors(prevErrors => {
+          const { oldPassword, newPassword, confirmNewPassword, ...rest } = prevErrors;
+          return rest;
+        });
+      }
+      return next;
+    });
+  };
 
   const inputClass = 'h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800';
   const passwordInputClass = 'h-12 w-full rounded-[14px] border-[1.5px] border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500';
@@ -94,17 +111,22 @@ const Settings = () => {
       nextErrors.phoneNumber = 'Số điện thoại không đúng định dạng cơ bản.';
     }
 
-    if (wantsPasswordChange) {
-      if (!oldPassword.trim()) {
-        nextErrors.oldPassword = 'Vui lòng nhập mật khẩu hiện tại.';
-      }
+    if (showPasswordSection) {
+      const wantsPasswordChange = [oldPassword, newPassword, confirmNewPassword]
+        .some((value) => value.trim() !== '');
 
-      if (newPassword.length < 6) {
-        nextErrors.newPassword = 'Mật khẩu mới phải từ 6 ký tự trở lên.';
-      }
+      if (wantsPasswordChange) {
+        if (!oldPassword.trim()) {
+          nextErrors.oldPassword = 'Vui lòng nhập mật khẩu hiện tại.';
+        }
 
-      if (confirmNewPassword !== newPassword) {
-        nextErrors.confirmNewPassword = 'Xác nhận mật khẩu mới không khớp.';
+        if (newPassword.length < 6) {
+          nextErrors.newPassword = 'Mật khẩu mới phải từ 6 ký tự trở lên.';
+        }
+
+        if (confirmNewPassword !== newPassword) {
+          nextErrors.confirmNewPassword = 'Xác nhận mật khẩu mới không khớp.';
+        }
       }
     }
 
@@ -127,6 +149,9 @@ const Settings = () => {
         phoneNumber: phoneNumber.trim()
       };
 
+      const wantsPasswordChange = showPasswordSection && [oldPassword, newPassword, confirmNewPassword]
+        .some((value) => value.trim() !== '');
+
       if (wantsPasswordChange) {
         payload.oldPassword = oldPassword;
         payload.newPassword = newPassword;
@@ -146,6 +171,9 @@ const Settings = () => {
       setNewPassword('');
       setConfirmNewPassword('');
       setErrors({});
+      if (wantsPasswordChange) {
+        setShowPasswordSection(false);
+      }
       message.success(result?.message || (wantsPasswordChange
         ? 'Cập nhật hồ sơ và đổi mật khẩu thành công!'
         : 'Cập nhật thông tin cá nhân thành công!'));
@@ -162,18 +190,19 @@ const Settings = () => {
     setOldPassword('');
     setNewPassword('');
     setConfirmNewPassword('');
+    setShowPasswordSection(false);
     setErrors({});
-    message.info(t('settings.infoDiscard'));
+    message.info('Đã hủy bỏ các thay đổi.');
   };
 
   return (
     <div className="relative mx-auto max-w-4xl space-y-6 font-sans">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-          {t('settings.titlePersonalInfo')}
+          Cài đặt tài khoản
         </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          {t('settings.descPersonalInfo')}
+        <p className="mt-1 text-sm text-slate-550 dark:text-slate-400 font-medium">
+          Quản lý thông tin cá nhân và thiết lập bảo mật của bạn
         </p>
       </div>
 
@@ -186,10 +215,10 @@ const Settings = () => {
               </div>
               <div>
                 <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
-                  {t('settings.titlePersonalInfo')}
+                  Thông tin cá nhân
                 </h2>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  {t('settings.descPersonalInfo')}
+                  Cập nhật các thông tin cơ bản về tài khoản
                 </p>
               </div>
             </div>
@@ -281,77 +310,118 @@ const Settings = () => {
               </div>
             </div>
 
-            <div className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60 sm:p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300">
-                    <Lock size={18} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-                      Thay đổi mật khẩu tài khoản
-                    </h3>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      Bỏ trống nếu bạn chỉ muốn cập nhật thông tin cá nhân.
-                    </p>
-                  </div>
-                </div>
+            {!showPasswordSection ? (
+              <div className="rounded-2xl border border-slate-150 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/40">
                 <button
                   type="button"
-                  onClick={() => setShowPasswords((prev) => !prev)}
-                  className="inline-flex h-10 items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 text-xs font-extrabold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                  onClick={handleTogglePasswordSection}
+                  className="flex w-full items-center justify-between text-left group"
                 >
-                  {showPasswords ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-white text-indigo-600 shadow-sm border border-slate-100 dark:bg-slate-900 dark:text-indigo-300 dark:border-slate-800">
+                      <Lock size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">
+                        Thay đổi mật khẩu
+                      </h3>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                        Cập nhật mật khẩu đăng nhập tài khoản
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-xs font-bold text-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100/50 dark:border-indigo-900/30 px-3.5 py-2 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                    Thay đổi
+                  </div>
                 </button>
               </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Mật khẩu hiện tại</label>
-                  <div className="relative">
-                    <Lock size={18} className={iconClass} />
-                    <input
-                      type={showPasswords ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      value={oldPassword}
-                      onChange={(event) => setOldPassword(event.target.value)}
-                      className={passwordInputClass}
-                    />
+            ) : (
+              <div className="space-y-4 rounded-2xl border border-slate-150 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/45 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-white text-indigo-600 shadow-sm border border-slate-100 dark:bg-slate-900 dark:text-indigo-300 dark:border-slate-800">
+                      <Lock size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                        Thay đổi mật khẩu tài khoản
+                      </h3>
+                      <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                        Cập nhật mật khẩu đăng nhập tài khoản
+                      </p>
+                    </div>
                   </div>
-                  {errors.oldPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.oldPassword}</p>}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords((prev) => !prev)}
+                      className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      {showPasswords ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleTogglePasswordSection}
+                      className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-500 hover:text-rose-600 hover:border-rose-200 transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+                    >
+                      Đóng lại
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Mật khẩu mới</label>
-                  <div className="relative">
-                    <Lock size={18} className={iconClass} />
-                    <input
-                      type={showPasswords ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                      className={passwordInputClass}
-                    />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className={labelClass}>Mật khẩu hiện tại</label>
+                      <Link to="/forgot-password" className="text-[10px] font-extrabold text-indigo-600 hover:underline">
+                        Quên mật khẩu?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <Lock size={18} className={iconClass} />
+                      <input
+                        type={showPasswords ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        value={oldPassword}
+                        onChange={(event) => setOldPassword(event.target.value)}
+                        className={passwordInputClass}
+                      />
+                    </div>
+                    {errors.oldPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.oldPassword}</p>}
                   </div>
-                  {errors.newPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.newPassword}</p>}
-                </div>
 
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Xác nhận mật khẩu mới</label>
-                  <div className="relative">
-                    <Lock size={18} className={iconClass} />
-                    <input
-                      type={showPasswords ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      value={confirmNewPassword}
-                      onChange={(event) => setConfirmNewPassword(event.target.value)}
-                      className={passwordInputClass}
-                    />
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Mật khẩu mới</label>
+                    <div className="relative">
+                      <Lock size={18} className={iconClass} />
+                      <input
+                        type={showPasswords ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        value={newPassword}
+                        onChange={(event) => setNewPassword(event.target.value)}
+                        className={passwordInputClass}
+                      />
+                    </div>
+                    {errors.newPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.newPassword}</p>}
                   </div>
-                  {errors.confirmNewPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.confirmNewPassword}</p>}
+
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Xác nhận mật khẩu mới</label>
+                    <div className="relative">
+                      <Lock size={18} className={iconClass} />
+                      <input
+                        type={showPasswords ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        value={confirmNewPassword}
+                        onChange={(event) => setConfirmNewPassword(event.target.value)}
+                        className={passwordInputClass}
+                      />
+                    </div>
+                    {errors.confirmNewPassword && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.confirmNewPassword}</p>}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="flex flex-col-reverse items-center gap-3 border-t border-slate-100 pt-5 dark:border-slate-700 sm:flex-row">
               <button
@@ -360,7 +430,7 @@ const Settings = () => {
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-6 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:w-auto"
               >
                 <X size={16} />
-                {t('settings.btnCancel')}
+                Hủy thay đổi
               </button>
 
               <button
@@ -368,7 +438,7 @@ const Settings = () => {
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-8 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:w-auto"
               >
                 <Save size={16} />
-                {t('settings.btnSave')}
+                Lưu thay đổi
               </button>
             </div>
           </form>
