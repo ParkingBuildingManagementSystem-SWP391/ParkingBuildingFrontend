@@ -888,6 +888,9 @@
   },
   "common": {
     "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
     "backHome": "Back to home",
     "notifications": "Notifications",
     "switchToEnglish": "Switch to English",
