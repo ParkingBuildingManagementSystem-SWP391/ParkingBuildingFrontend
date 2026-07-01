@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Form, Input, Button, Alert, Table, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
+import { Card, Form, Input, Button, Alert, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { parkingService } from '../../services/parkingService';
 import { toast as message } from '../../components/ToastProvider';
@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   QrCode,
   Wallet,
-  ListChecks,
   Banknote,
   ExternalLink,
   AlertCircle
@@ -265,7 +264,6 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
 
 const GateController = () => {
   const { t } = useTranslation();
-  const [slots, setSlots] = useState([]);
   const [checkInForm] = Form.useForm();
   const [checkOutForm] = Form.useForm();
 
@@ -363,63 +361,7 @@ const GateController = () => {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [changeDue, setChangeDue] = useState(null);
 
-  const fetchActiveParkedVehicles = useCallback(async () => {
-    try {
-      const [floorG, floorB1, floorB2] = await Promise.all([
-        parkingService.getSlotsByFloor(3),
-        parkingService.getSlotsByFloor(1),
-        parkingService.getSlotsByFloor(2)
-      ]);
 
-      const allSlots = [];
-      const mapFloorSlots = (backendSlots, floorId, floorName) => {
-        return (backendSlots || []).map((s) => {
-          const slotStatus = s.slotStatus ? s.slotStatus.trim() : 'Available';
-          let type = 'Car';
-          if (s.typeId === 1) type = 'Bicycle';
-          else if (s.typeId === 2) type = 'Motorbike';
-          else if (s.typeId === 3) type = 'Car';
-
-          return {
-            id: s.slotName,
-            status: slotStatus,
-            floor: floorName,
-            type: type,
-            occupiedBy: slotStatus !== 'Available' ? {
-              plate: null,
-              checkInTime: null,
-              type,
-              hasSessionData: false
-            } : null
-          };
-        });
-      };
-
-      allSlots.push(...mapFloorSlots(floorG, 3, 'Floor G'));
-      allSlots.push(...mapFloorSlots(floorB1, 1, 'Floor B1'));
-      allSlots.push(...mapFloorSlots(floorB2, 2, 'Floor B2'));
-
-      setSlots(allSlots);
-    } catch (err) {
-      console.error("Failed to load active parked slots from backend:", err);
-    }
-  }, []);
-
-  const loadData = () => {
-    fetchActiveParkedVehicles();
-  };
-
-  useEffect(() => {
-    loadData();
-    const handleStateChange = () => {
-      loadData();
-    };
-    window.addEventListener('parking_state_changed', handleStateChange);
-
-    return () => {
-      window.removeEventListener('parking_state_changed', handleStateChange);
-    };
-  }, [fetchActiveParkedVehicles]);
 
   // Cleanup object URLs on unmount or before creating new ones
   useEffect(() => {
@@ -493,7 +435,6 @@ const GateController = () => {
             setEntryImagePreviewUrl(null);
           }
           setEntryOcrResult(null);
-          fetchActiveParkedVehicles();
         } else {
           message.error(response?.message || t('gate.messages.checkinFailed'));
         }
@@ -512,7 +453,6 @@ const GateController = () => {
             setEntryImagePreviewUrl(null);
           }
           setEntryOcrResult(null);
-          fetchActiveParkedVehicles();
         } else {
           message.error(response?.message || t('gate.messages.bookingFailed'));
         }
@@ -570,13 +510,11 @@ const GateController = () => {
         setCashReceived(totalAmt.toString());
         if (isPaid) {
           message.success(messageText || t('gate.messages.prePaidCheckout'));
-          fetchActiveParkedVehicles();
           setTimeout(() => {
             handleCloseCheckoutResultModal();
           }, 3000);
         } else {
           message.success(t('gate.messages.checkoutOpened'));
-          fetchActiveParkedVehicles();
         }
       }
     } catch (err) {
@@ -669,7 +607,6 @@ const GateController = () => {
           IsPaid: true,
           message: t('gate.messages.cashComplete')
         }));
-        fetchActiveParkedVehicles();
         setTimeout(() => {
           handleCloseCheckoutResultModal();
         }, 3000);
@@ -701,7 +638,6 @@ const GateController = () => {
           IsPaid: true,
           message: t('gate.messages.vnpayComplete')
         }));
-        fetchActiveParkedVehicles();
         setTimeout(() => {
           handleCloseCheckoutResultModal();
         }, 2000);
@@ -734,7 +670,6 @@ const GateController = () => {
               IsPaid: true,
               message: t('gate.messages.vnpayComplete')
             }));
-            fetchActiveParkedVehicles();
             clearInterval(intervalId);
             setTimeout(() => {
               handleCloseCheckoutResultModal();
@@ -749,7 +684,7 @@ const GateController = () => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isCheckoutResultModalOpen, selectedPaymentMethod, checkoutResult, fetchActiveParkedVehicles]);
+  }, [isCheckoutResultModalOpen, selectedPaymentMethod, checkoutResult]);
 
   // Immediate check-out shortcut from table list
   const handleDirectCheckOut = (plate) => {
@@ -781,65 +716,7 @@ const GateController = () => {
     }
   };
 
-  const occupiedSlots = slots.filter(s => s.status === 'Occupied' && s.occupiedBy);
 
-  // Columns for active parked list
-  const parkedColumns = [
-    {
-      title: t('gate.activeTable.slot'),
-      dataIndex: 'id',
-      key: 'id',
-      render: (text) => (
-        <Tag color="blue" className="font-bold border-indigo-200 text-indigo-600 rounded-lg px-2.5 py-0.5">
-          {text}
-        </Tag>
-      )
-    },
-    {
-      title: t('gate.activeTable.plate'),
-      dataIndex: ['occupiedBy', 'plate'],
-      key: 'plate',
-      render: (text) => (
-        <span className="font-mono text-slate-900 font-extrabold bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg shadow-sm text-xs">
-          {text || 'N/A'}
-        </span>
-      )
-    },
-    {
-      title: t('gate.activeTable.type'),
-      dataIndex: ['occupiedBy', 'type'],
-      key: 'type',
-      render: (type, record) => (
-        <span className="text-xs font-semibold text-slate-600 capitalize">{getVehicleTypeLabel(type || record.type)}</span>
-      )
-    },
-    {
-      title: t('gate.activeTable.time'),
-      dataIndex: ['occupiedBy', 'checkInTime'],
-      key: 'checkInTime',
-      render: (text) => formatTimeVN(text, 'N/A')
-    },
-    {
-      title: t('gate.activeTable.action'),
-      key: 'actions',
-      render: (_, record) => {
-        const plate = record.occupiedBy?.plate;
-        return (
-          <Button
-            type="primary"
-            danger
-            size="small"
-            disabled={!plate}
-            title={!plate ? t('gate.activeTable.noDataTitle') : undefined}
-            onClick={() => handleDirectCheckOut(plate)}
-            className="flex items-center gap-1 h-7 rounded-lg text-[11px] font-bold"
-          >
-            {t('gate.activeTable.checkoutBtn')}
-          </Button>
-        );
-      }
-    }
-  ];
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none bg-slate-50 dark:bg-slate-950">
@@ -1389,39 +1266,7 @@ const GateController = () => {
 
       </div>
 
-      {/* BOTTOM ROW - FULL WIDTH: Active Parked Vehicles directory table */}
-      <Card
-        title={
-          <div className="flex items-center justify-between w-full py-1">
-            <span className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5 dark:text-slate-100">
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center dark:border-indigo-500/40 dark:bg-indigo-500/15">
-                <ListChecks size={18} className="text-indigo-600" />
-              </div>
-              {t('gate.activeTable.parkedTitle')}
-              <span className="ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 font-extrabold text-xs dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-300">{occupiedSlots.length} {t('gate.activeTable.carsInLot')}</span>
-            </span>
-          </div>
-        }
-        className="rounded-2xl border border-slate-100 shadow-sm overflow-hidden dark:border-slate-700 dark:bg-slate-900"
-      >
-        {occupiedSlots.length === 0 ? (
-          <div className="text-center py-20 text-slate-400 flex flex-col items-center dark:text-slate-500">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-3 dark:border-emerald-500/40 dark:bg-emerald-500/15">
-              <CheckCircle size={32} className="text-emerald-400" />
-            </div>
-            <h3 className="text-slate-900 font-extrabold tracking-tight dark:text-slate-100">{t('gate.activeTable.emptyTitle')}</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-xs dark:text-slate-400">{t('gate.activeTable.emptyDesc')}</p>
-          </div>
-        ) : (
-          <Table
-            columns={parkedColumns}
-            dataSource={occupiedSlots}
-            rowKey="id"
-            pagination={{ pageSize: 5, showTotal: (total) => t('gate.activeTable.totalCars', { total }) }}
-            className="custom-antd-table text-slate-800"
-          />
-        )}
-      </Card>
+
 
       {/* Local Webcam QR Scanner Modal */}
       <QrScannerModal
@@ -1918,9 +1763,7 @@ const GateController = () => {
         isOpen={isCreateIncidentOpen} 
         onClose={() => setIsCreateIncidentOpen(false)}
         activeSessionId={checkoutResult?.sessionId || checkoutResult?.SessionId} 
-        onSuccess={() => {
-          fetchActiveParkedVehicles(); // Reload lại danh sách xe
-        }}
+        onSuccess={() => {}}
       />
     </div>
   );

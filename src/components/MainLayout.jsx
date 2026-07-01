@@ -154,16 +154,20 @@ const MainLayout = () => {
             hasSidebar={showSidebar}
             showLogo={!showSidebar}
             onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+            pageTitle={pageMeta?.title}
+            pageSubtitle={pageMeta?.subtitle}
           />
           
           {/* Scrollable Page Content */}
           <main className="min-w-0 flex-1 w-full bg-slate-50 transition-colors duration-300 dark:bg-slate-900 flex flex-col">
-            <PageHeader
-              title={pageMeta.title}
-              subtitle={pageMeta.subtitle}
-              contentClassName={contentMaxWidthClass}
-              paddingClassName={contentPaddingClass}
-            />
+            {!showSidebar && (
+              <PageHeader
+                title={pageMeta.title}
+                subtitle={pageMeta.subtitle}
+                contentClassName={contentMaxWidthClass}
+                paddingClassName={contentPaddingClass}
+              />
+            )}
             <div className="flex-1 w-full flex flex-col justify-between">
               <div className={`flex-1 w-full ${contentSpacingClass}`}>
                 <div className={`${contentMaxWidthClass} mx-auto w-full animate-fade-in`}>

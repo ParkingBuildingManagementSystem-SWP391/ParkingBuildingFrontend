@@ -24,7 +24,7 @@ const getCurrentRole = (user, role) => (
   || role
 );
 
-const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true }) => {
+const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true, pageTitle, pageSubtitle }) => {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -142,6 +142,18 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true }) => {
             <Logo size="default" className="hidden sm:flex" />
           </Link>
         )}
+        {!showLogo && pageTitle && (
+          <div className="min-w-0 pr-4">
+            <h1 className="truncate text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
+              {pageTitle}
+            </h1>
+            {pageSubtitle && (
+              <p className="mt-0.5 sm:mt-1 truncate text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+                {pageSubtitle}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
@@ -194,7 +206,7 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true }) => {
                 <span className="max-w-[120px] truncate text-[13px] font-bold text-slate-900 dark:text-slate-100">
                   {getDisplayName()}
                 </span>
-                <span className="max-w-[120px] truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                <span className="max-w-[120px] truncate text-[11px] font-medium text-slate-555 dark:text-slate-400">
                   {getDisplayRole()}
                 </span>
               </div>
