@@ -107,13 +107,13 @@
     "bicycleOpt": "Bicycle"
   },
   "login": {
-    "errorEmptyFields": "Please enter your email/username and password.",
+    "errorEmptyFields": "Please enter your email and password.",
     "errorAuth": "Authentication failed. Please try again.",
     "errorGoogleAuth": "Google authentication failed.",
     "errorGoogleLogin": "Failed to login with Google.",
     "welcome": "Welcome back!",
     "subtitle": "Log in to continue",
-    "emailPlaceholder": "Email or username",
+    "emailPlaceholder": "Enter Your Email",
     "passwordPlaceholder": "Password",
     "forgotPassword": "Forgot password?",
     "loginButton": "Log in",
@@ -132,7 +132,7 @@
   },
   "register": {
     "errorEmptyFields": "Please fill in all required fields.",
-    "errorRegister": "Failed to register. Username or email may already exist.",
+    "errorRegister": "Failed to register. Email may already exist.",
     "errorOtpFormat": "Please enter a valid 6-digit OTP.",
     "errorOtpVerify": "Invalid or expired OTP code.",
     "errorGoogleAuth": "Google authentication failed.",

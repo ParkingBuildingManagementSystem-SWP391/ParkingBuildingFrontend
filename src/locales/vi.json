@@ -107,13 +107,13 @@
     "bicycleOpt": "Xe đạp"
   },
   "login": {
-    "errorEmptyFields": "Vui lòng nhập email/tên đăng nhập và mật khẩu.",
+    "errorEmptyFields": "Vui lòng nhập email và mật khẩu.",
     "errorAuth": "Lỗi xác thực. Vui lòng thử lại.",
     "errorGoogleAuth": "Xác thực Google thất bại.",
     "errorGoogleLogin": "Đăng nhập Google không thành công.",
     "welcome": "Chào mừng trở lại!",
     "subtitle": "Đăng nhập để tiếp tục",
-    "emailPlaceholder": "Email hoặc tên đăng nhập",
+    "emailPlaceholder": "Nhập Email của bạn",
     "passwordPlaceholder": "Mật khẩu",
     "forgotPassword": "Quên mật khẩu?",
     "loginButton": "Đăng nhập",
@@ -132,7 +132,7 @@
   },
   "register": {
     "errorEmptyFields": "Vui lòng điền đầy đủ thông tin.",
-    "errorRegister": "Đăng ký thất bại. Tên đăng nhập hoặc email có thể đã tồn tại.",
+    "errorRegister": "Đăng ký thất bại. Email có thể đã tồn tại.",
     "errorOtpFormat": "Vui lòng nhập mã OTP 6 chữ số hợp lệ.",
     "errorOtpVerify": "Mã OTP không hợp lệ hoặc đã hết hạn.",
     "errorGoogleAuth": "Xác thực Google thất bại.",
