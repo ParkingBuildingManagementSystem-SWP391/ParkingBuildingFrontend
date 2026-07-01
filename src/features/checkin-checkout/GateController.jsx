@@ -26,7 +26,7 @@ import {
 import TicketModal from './TicketModal';
 import QrScannerModal from './QrScannerModal';
 import CreateIncidentModal from './CreateIncidentModal';
-import { formatDateTimeVN, formatTimeVN } from '../../utils/dateTime';
+import { formatVietnamDateTime } from '../../utils/dateTime';
 
 
 const dataURLtoFile = (dataurl, filename) => {
@@ -1517,12 +1517,12 @@ const GateController = () => {
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.entryTime')}</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
-                          {formatDateTimeVN(checkInTime, "N/A")}
+                          {formatVietnamDateTime(checkInTime)}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.exitTime')}</span>}>
                         <span className="text-[10px] text-slate-600 font-medium">
-                          {formatDateTimeVN(checkOutTime, "N/A")}
+                          {formatVietnamDateTime(checkOutTime)}
                         </span>
                       </Descriptions.Item>
                       <Descriptions.Item label={<span className="text-[11px] font-bold text-slate-500">{t('gate.checkoutModal.paymentStatus')}</span>}>
