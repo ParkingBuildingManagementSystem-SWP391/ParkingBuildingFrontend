@@ -9,6 +9,7 @@ import { ToastProvider } from './components/ToastProvider';
 // Public Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Unauthorized from './pages/Unauthorized';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Home from './pages/Home';
@@ -21,8 +22,9 @@ import Settings from './pages/Settings';
 import Accounts from './pages/Accounts';
 import CreateAccount from './pages/CreateAccount';
 import ParkingSessionManager from './pages/ParkingSessionManager';
-import MyMonthlyCard from './pages/MyMonthlyCard';
-import MonthlyCardManager from './pages/MonthlyCardManager';
+import MyMembership from './pages/MyMembership';
+import MembershipManager from './pages/MembershipManager';
+import MyWallet from './pages/MyWallet';
 
 // Feature Components (Dashboard, Parking Map, Check-in counter)
 import Dashboard, {
@@ -36,15 +38,15 @@ import Dashboard, {
 import ParkingLotMap from './features/parking-map/ParkingLotMap';
 import GateController from './features/checkin-checkout/GateController';
 
-const MonthlyCardsRoute = () => {
+const MembershipRoute = () => {
   const { role } = useAuth();
   const normalizedRole = String(role || '').toLowerCase();
 
-  if (['manager', 'admin'].includes(normalizedRole)) {
-    return <MonthlyCardManager />;
+  if (normalizedRole === 'manager') {
+    return <MembershipManager />;
   }
 
-  return <MyMonthlyCard />;
+  return <MyMembership />;
 };
 
 function App() {
@@ -55,6 +57,7 @@ function App() {
           {/* Public auth pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/" element={<Home />} />
@@ -98,9 +101,10 @@ function App() {
               <Route path="/staff-logs" element={<StaffLogsPage />} />
             </Route>
 
-            {/* Monthly card route adapts to Manager/Admin vs Registered Driver */}
-            <Route element={<RoleProtectedRoute allowedRoles={['Manager', 'Admin', 'Registered_Driver']} />}>
-              <Route path="/dashboard/monthly-cards" element={<MonthlyCardsRoute />} />
+            {/* Membership management route adapts to Manager vs Registered Driver */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Manager', 'Registered_Driver']} />}>
+              <Route path="/dashboard/memberships" element={<MembershipRoute />} />
+              <Route path="/dashboard/monthly-cards" element={<Navigate to="/dashboard/memberships" replace />} />
             </Route>
 
             {/* Staff/Manager operations paths */}
@@ -111,11 +115,13 @@ function App() {
             {/* Driver/Customer-only paths */}
             <Route element={<RoleProtectedRoute allowedRoles={['Driver', 'Member', 'Registered_Driver', 'Customer']} />}>
               <Route path="/my-bookings" element={<MyBookings />} />
+              <Route path="/my-wallet" element={<MyWallet />} />
             </Route>
 
-            {/* Registered driver monthly card */}
+            {/* Registered driver membership */}
             <Route element={<RoleProtectedRoute allowedRoles={['Registered_Driver']} />}>
-              <Route path="/my-monthly-card" element={<MyMonthlyCard />} />
+              <Route path="/my-membership" element={<MyMembership />} />
+              <Route path="/my-monthly-card" element={<Navigate to="/my-membership" replace />} />
             </Route>
             
           </Route>

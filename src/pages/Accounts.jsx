@@ -4,6 +4,7 @@ import { Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
+import { formatVietnamDate } from '../utils/dateTime';
 
 const Accounts = () => {
   const { t } = useTranslation();
@@ -42,7 +43,8 @@ const Accounts = () => {
     else if (u.roleId || u.RoleId) roleId = Number(u.roleId || u.RoleId);
 
     const uid = u.id || u.Id || u.userId || u.UserId || 1;
-    const fakeDate = new Date(2025, uid % 12, (uid * 3) % 28 + 1).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const fakeDate = formatVietnamDate(new Date(2025, uid % 12, (uid * 3) % 28 + 1));
+    const joinedDate = u.createdAt || u.CreatedAt || u.joined || u.Joined;
 
     return {
       id: uid,
@@ -51,7 +53,7 @@ const Accounts = () => {
       phoneNumber: u.phoneNumber || u.PhoneNumber || '',
       roleId: roleId,
       status: u.isDeleted || u.IsDeleted ? 'Inactive' : 'Active', // Mapping to status toggle
-      joined: u.createdAt || u.CreatedAt || u.joined || u.Joined || fakeDate
+      joined: joinedDate ? formatVietnamDate(joinedDate) : fakeDate
     };
   };
 
@@ -87,12 +89,6 @@ const Accounts = () => {
   useEffect(() => {
     loadUsers();
   }, []);
-
-  // Dynamic Date subtitle
-  const getFormattedDate = () => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date().toLocaleDateString('en-US', options);
-  };
 
   // Helper mapping role tags for readable view
   const displayRoleIdName = (roleId) => {
@@ -216,7 +212,7 @@ const Accounts = () => {
       };
 
       // Call correct backend route using shared axios instance
-      await api.post('/Admin/update-user', payload);
+      await api.put('/Admin/update-user', payload);
 
       message.success(`${t('accounts.modSuccess')} ${selectedUser.name}!`);
 
@@ -238,35 +234,20 @@ const Accounts = () => {
     setSubmitting(true);
     try {
       const userId = parseInt(editUser.id);
+      
+      // Chuẩn bị payload gửi đúng API của Admin
       const payload = {
         userId: userId,
-        username: editUsername.trim(),
+        roleName: "", // Để trống để không thay đổi Role hiện tại
+        userName: editUsername.trim(),
         email: editEmail.trim(),
         phoneNumber: editPhoneNumber.trim()
       };
 
-      let success = false;
-      let errorMsg = "";
+      // Gọi đúng API PUT đã chuẩn hóa của Backend
+      await api.put('/Admin/update-user', payload);
 
-      // Try recommended PUT /api/User/update
-      try {
-        await api.put('/User/update', payload);
-        success = true;
-      } catch (e) {
-        errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-      }
-
-      // Try recommended PUT /api/Admin/user/update fallback
-      if (!success) {
-        try {
-          await api.put('/Admin/user/update', payload);
-          success = true;
-        } catch (e) {
-          errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-        }
-      }
-
-      // Update local state immediately so table updates visually
+      // Cập nhật local state khi lưu thành công thực sự xuống Database
       setAccounts(prev =>
         prev.map(acc =>
           acc.id === userId
@@ -276,12 +257,12 @@ const Accounts = () => {
       );
 
       message.success(`${t('accounts.updSuccess')} ${editUsername.trim()}!`);
-
       closeEditModal();
-      loadUsers(); // Reload dynamic user list
+      loadUsers(); // Tải lại danh sách mới từ DB
     } catch (err) {
       console.error(err);
-      message.error(err.message || t('accounts.updFail'));
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || t('accounts.updFail');
+      message.error(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -340,19 +321,6 @@ const Accounts = () => {
   return (
     <div className="min-h-full w-full select-none bg-slate-50 pb-12 font-sans dark:bg-slate-900">
       <div className="space-y-8">
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="flex items-center gap-2.5 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-sm">
-                <Users size={20} strokeWidth={2.5} />
-              </span>
-              {t('accounts.allUsersTitle')}
-            </h1>
-            <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{getFormattedDate()}</p>
-          </div>
-        </div>
-
         {/* Error / Offline Banner */}
         {errorBanner && (
           <div className="flex items-center gap-2.5 rounded-[14px] border border-amber-200 bg-amber-50 p-3.5 text-sm font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">

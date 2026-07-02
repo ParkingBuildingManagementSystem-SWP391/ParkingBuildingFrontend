@@ -15,7 +15,7 @@ const PaymentSuccess = () => {
   const paymentType = searchParams.get('type');
   const invoiceId = searchParams.get('invoiceId') || localStorage.getItem('pending_invoice_id');
 
-  // Page States: 'polling' | 'success_deposit' | 'success_exit' | 'failed' | 'timeout'
+  // Page States: 'polling' | 'success_wallet' | 'success_membership' | 'success_deposit' | 'success_exit' | 'success_exit_bot' | 'failed' | 'timeout'
   const [paymentState, setPaymentState] = useState('polling');
   const [loadingText, setLoadingText] = useState(t('paymentSuccess.loadingText1'));
   const [sessionDetail, setSessionDetail] = useState(null);
@@ -32,7 +32,7 @@ const PaymentSuccess = () => {
 
     if (status === 'SUCCESS_WALLET') return 'success_wallet';
     if (status === 'SUCCESS_MEMBERSHIP' || status === 'SUCCESS_MONTHLY') return 'success_membership';
-    if (status === 'Deposited') return 'success_deposit';
+    if (status === 'DEPOSITED' || status === 'Deposited') return 'success_deposit';
     if (status === 'SUCCESS_EXIT') return 'success_exit_bot';
 
     if (normalizedTxnRef.startsWith('WDEP')) return 'success_wallet';
@@ -44,6 +44,11 @@ const PaymentSuccess = () => {
 
   // Polling logic to confirm with C# Backend
   useEffect(() => {
+    if (vnpResponseCode === '00' && (normalizedPaymentType === 'wallet' || normalizedTxnRef.startsWith('WDEP'))) {
+      setPaymentState('success_wallet');
+      return;
+    }
+
     if (!invoiceId) {
       if (vnpResponseCode === '00') {
         // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng)

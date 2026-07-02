@@ -129,3 +129,21 @@ export const authService = {
     window.location.href = '/login';
   }
 };
+
+// Gửi yêu cầu mã OTP quên mật khẩu
+export const forgotPassword = async (email) => {
+    const response = await api.post('/Auth/forgot-password', { email });
+    return response.data;
+};
+
+// Đặt lại mật khẩu sử dụng mã OTP
+export const resetPassword = async (email, otpCode, newPassword) => {
+    const response = await api.post('/Auth/reset-password', { email, otpCode, newPassword });
+    return response.data;
+};
+
+// Tự cập nhật thông tin cá nhân (Tên, Email, SĐT)
+export const updateProfile = async (profileData) => {
+    const response = await api.put('/Auth/update-profile', profileData);
+    return response.data;
+};

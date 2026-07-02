@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import PageHeader from './PageHeader';
 import AppFooter from './AppFooter';
+import { formatLongDateVN } from '../utils/dateTime';
 
 const RoleFloatingActionButton = ({ icon: Icon, label, onClick }) => (
   <div className="fixed bottom-5 right-5 z-40 sm:bottom-8 sm:right-8">
@@ -23,6 +25,7 @@ const RoleFloatingActionButton = ({ icon: Icon, label, onClick }) => (
 
 const MainLayout = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { user, role } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -32,7 +35,8 @@ const MainLayout = () => {
   const isGuestLayout = !user || ['guest', 'public'].includes(normalizedRole);
   const isDriverLayout = ['driver', 'registered_driver', 'member', 'customer'].includes(normalizedRole);
   const isStaffLayout = normalizedRole === 'staff';
-  const showSidebar = ['admin', 'manager'].includes(normalizedRole);
+  const isSettingsPage = location.pathname === '/settings';
+  const showSidebar = ['admin', 'manager'].includes(normalizedRole) && !isSettingsPage;
   const isFullWidthLayout = isGuestLayout || isDriverLayout || !showSidebar;
   const isParkingMapPage = location.pathname === '/parking-map';
   const isBookingsPage = location.pathname === '/my-bookings';
@@ -55,47 +59,138 @@ const MainLayout = () => {
     : null;
 
   const fabConfig = driverFabConfig || staffFabConfig;
+  const contentMaxWidthClass = isFullWidthLayout ? 'max-w-none' : 'max-w-[1600px]';
+  const contentPaddingClass = isFullWidthLayout
+    ? 'px-3 sm:px-4 md:px-5'
+    : 'px-4 sm:px-6 md:px-8';
+  const contentSpacingClass = isFullWidthLayout
+    ? 'px-3 py-3 pb-24 sm:px-4 sm:py-4 sm:pb-24 md:px-5 md:py-5 md:pb-24'
+    : 'px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8';
+  const sidebarOffsetClass = showSidebar
+    ? (isSidebarCollapsed ? 'lg:ml-[88px]' : 'lg:ml-[280px]')
+    : '';
+
+  const getPageMeta = () => {
+    const path = location.pathname;
+
+    const routeMeta = {
+      '/settings': {
+        title: '',
+        subtitle: ''
+      },
+      '/dashboard/memberships': {
+        title: normalizedRole === 'manager' ? t('membership.managerTitle') : t('membership.title'),
+        subtitle: normalizedRole === 'manager'
+          ? t('membership.managerSubtitle')
+          : t('membership.paymentRequestSubtitle')
+      },
+      '/my-membership': {
+        title: t('membership.title'),
+        subtitle: t('membership.subtitle')
+      },
+      '/my-bookings': {
+        title: t('myBookings.pageTitle'),
+        subtitle: t('myBookings.pageSubtitle')
+      },
+      '/my-wallet': {
+        title: t('wallet.title', { defaultValue: 'Ví của tôi' }),
+        subtitle: t('wallet.subtitle', { defaultValue: 'Quản lý số dư và lịch sử giao dịch ví' })
+      },
+      '/create-account': {
+        title: t('createAccount.pageTitle'),
+        subtitle: t('createAccount.pageSubtitle')
+      },
+      '/staff-management': {
+        title: t('staff.pageTitle'),
+        subtitle: t('staff.pageDesc')
+      },
+      '/admin/parking-sessions': {
+        title: t('parkingSession.pageTitle'),
+        subtitle: t('parkingSession.pageDesc')
+      },
+      '/about': {
+        title: '',
+        subtitle: ''
+      }
+    };
+
+    if (path === '/dashboard') {
+      return {
+        title: t('header.title.dashboard'),
+        subtitle: formatLongDateVN()
+      };
+    }
+
+    if (routeMeta[path]) return routeMeta[path];
+
+    const routeKey = path.replace(/^\/+/, '');
+    if (!routeKey) {
+      return { title: '', subtitle: '' };
+    }
+
+    return {
+      title: t(`header.title.${routeKey}`, { defaultValue: t('header.title.default') }),
+      subtitle: t(`header.subtitle.${routeKey}`, { defaultValue: t('header.subtitle.default') })
+    };
+  };
+
+  const pageMeta = getPageMeta();
 
   return (
-    <div className="flex min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500">
+    <div className="min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/30 transition-colors duration-500 flex flex-col">
       
-      {/* Fixed Left Sidebar */}
-      {showSidebar && (
-        <Sidebar
-          isMobileOpen={isMobileSidebarOpen}
-          onMobileClose={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
-      
-      {/* Main Content Area */}
-      <div className="relative z-0 flex min-w-0 flex-1 flex-col">
-        
-        {/* Top Navigation Bar */}
-        <Header
-          hasSidebar={showSidebar}
-          onOpenSidebar={() => setIsMobileSidebarOpen(true)}
-        />
-        
-        {/* Scrollable Page Content */}
-        <main className="min-w-0 flex-1 w-full bg-slate-50 transition-colors duration-300 dark:bg-slate-900">
-          <div className="min-h-full flex flex-col">
-            <div className={`flex-1 w-full ${isFullWidthLayout ? 'px-3 py-3 pb-24 sm:px-4 sm:py-4 sm:pb-24 md:px-5 md:py-5 md:pb-24' : 'px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8'}`}>
-              <div className={`${isFullWidthLayout ? 'max-w-none' : 'max-w-[1600px]'} mx-auto w-full animate-fade-in`}>
-                <Outlet />
-              </div>
-            </div>
-            <AppFooter />
-          </div>
-        </main>
-
-        {fabConfig && (
-          <RoleFloatingActionButton
-            icon={fabConfig.icon}
-            label={fabConfig.label}
-            onClick={() => navigate(fabConfig.target)}
+      <div className="relative z-0 flex min-h-screen min-w-0 flex-1">
+        {/* Fixed Left Sidebar */}
+        {showSidebar && (
+          <Sidebar
+            collapsed={isSidebarCollapsed}
+            onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
+            isMobileOpen={isMobileSidebarOpen}
+            onMobileClose={() => setIsMobileSidebarOpen(false)}
           />
         )}
         
+        {/* Main Content Area */}
+        <div className={`relative z-0 flex min-h-screen min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out ${sidebarOffsetClass}`}>
+          
+          {/* Top Navigation Bar */}
+          <Header
+            hasSidebar={showSidebar}
+            showLogo={!showSidebar}
+            onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+            pageTitle={pageMeta?.title}
+            pageSubtitle={pageMeta?.subtitle}
+          />
+          
+          {/* Scrollable Page Content */}
+          <main className="min-w-0 flex-1 w-full bg-slate-50 transition-colors duration-300 dark:bg-slate-900 flex flex-col">
+            {!showSidebar && (
+              <PageHeader
+                title={pageMeta.title}
+                subtitle={pageMeta.subtitle}
+                contentClassName={contentMaxWidthClass}
+                paddingClassName={contentPaddingClass}
+              />
+            )}
+            <div className="flex-1 w-full flex flex-col justify-between">
+              <div className={`flex-1 w-full ${contentSpacingClass}`}>
+                <div className={`${contentMaxWidthClass} mx-auto w-full animate-fade-in`}>
+                  <Outlet />
+                </div>
+              </div>
+              <AppFooter />
+            </div>
+          </main>
+
+          {fabConfig && (
+            <RoleFloatingActionButton
+              icon={fabConfig.icon}
+              label={fabConfig.label}
+              onClick={() => navigate(fabConfig.target)}
+            />
+          )}
+          
+        </div>
       </div>
     </div>
   );

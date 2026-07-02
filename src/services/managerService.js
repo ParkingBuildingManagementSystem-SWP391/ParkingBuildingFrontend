@@ -31,10 +31,9 @@ export const managerService = {
     }
   },
 
-  getIncidents: async () => {
+  getIncidents: async (params) => {
     try {
-      // TODO backend: implement GET /api/Manager/incidents returning an array of incident records.
-      const response = await api.get('/Manager/incidents');
+      const response = await api.get('/incident-reports', { params });
       return response.data;
     } catch (error) {
       console.error('getIncidents error:', error);
@@ -42,10 +41,9 @@ export const managerService = {
     }
   },
 
-  resolveIncident: async (incidentId) => {
+  resolveIncident: async (incidentId, data) => {
     try {
-      // TODO backend: implement PUT /api/Manager/incidents/{incidentId}/resolve.
-      const response = await api.put(`/Manager/incidents/${incidentId}/resolve`);
+      const response = await api.put(`/incident-reports/${incidentId}/resolve`, data);
       return response.data;
     } catch (error) {
       console.error(`resolveIncident error for incident ${incidentId}:`, error);
@@ -87,7 +85,9 @@ export const managerService = {
         monthlyPrice: Number(data.monthlyPrice),
         maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
           ? Number(data.maxHoursPerTurn)
-          : null
+          : null,
+        firstHourRate: Number(data.firstHourRate ?? 0),
+        subsequentHourRate: Number(data.subsequentHourRate ?? 0)
       });
       return response.data;
     } catch (error) {
@@ -96,22 +96,22 @@ export const managerService = {
     }
   },
 
-  getMonthlyCards: async () => {
+  getMemberships: async () => {
     try {
       const response = await api.get('/Manager/monthly-cards');
       return response.data;
     } catch (error) {
-      console.error('getMonthlyCards error:', error);
+      console.error('getMemberships error:', error);
       throw error;
     }
   },
 
-  cancelMonthlyCard: async (monthlyCardId) => {
+  cancelMembership: async (membershipCardId) => {
     try {
-      const response = await api.put(`/Manager/monthly-card/${monthlyCardId}/cancel`);
+      const response = await api.put(`/Manager/monthly-card/${membershipCardId}/cancel`);
       return response.data;
     } catch (error) {
-      console.error(`cancelMonthlyCard error for card ${monthlyCardId}:`, error);
+      console.error(`cancelMembership error for card ${membershipCardId}:`, error);
       throw error;
     }
   }

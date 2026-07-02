@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -25,6 +25,7 @@ import motorbikeIcon from '../../assets/vehicles/motorbike.png';
 import bikeIcon from '../../assets/vehicles/bike.png';
 import i18n from '../../i18n';
 import { useTranslation } from 'react-i18next';
+import { createVietnamWallTimeIso, formatVietnamDateTime, getVietnamDateParts } from '../../utils/dateTime';
 
 
 
@@ -207,11 +208,11 @@ const chunkSlots = (slots, size) => {
 };
 
 const getDefaultExpectedCheckInTimeParts = () => {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() + 30); // Default to 30 mins in the future, not realtime
+  const d = new Date(Date.now() + 30 * 60 * 1000); // Default to 30 mins in the future, not realtime
+  const parts = getVietnamDateParts(d);
   return {
-    hour: d.getHours(),
-    minute: d.getMinutes(),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
   };
 };
 
@@ -224,7 +225,17 @@ const ParkingLotMap = () => {
   const highlightFloorId = searchParams.get('floorId');
   const highlightSlotName = searchParams.get('slotName');
 
-  const [activeFloorId, setActiveFloorId] = useState(3); // Default to Floor G (FloorId = 3)
+  const selectForMembership = searchParams.get('selectForMembership') === 'true';
+  const paramVehicleTypeId = searchParams.get('vehicleTypeId');
+
+  const [activeFloorId, setActiveFloorId] = useState(() => {
+    if (paramVehicleTypeId) {
+      const typeId = parseInt(paramVehicleTypeId, 10);
+      if (typeId === 3) return 1; // Ô tô -> Tầng B1
+      return 3; // Xe máy/Xe đạp -> Tầng G
+    }
+    return 3; // Default to Floor G (FloorId = 3)
+  });
 
   // Auto switch floor if highlighted from LocateVehicle
   useEffect(() => {
@@ -579,6 +590,21 @@ const ParkingLotMap = () => {
 
   // Slot click handler
   const handleSlotClick = (slot) => {
+    if (selectForMembership) {
+      if (slot.status === 'Available') {
+        const typeId = Number(slot.typeId);
+        const reqTypeId = Number(paramVehicleTypeId);
+        if (paramVehicleTypeId && typeId !== reqTypeId) {
+          message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
+          return;
+        }
+        navigate(`/my-membership?selectedSlotId=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
+      } else {
+        message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
+      }
+      return;
+    }
+
     if (!user) {
       if (slot.status === 'Available') {
         sessionStorage.setItem('spotflow_pending_booking_slot', slot.id);
@@ -613,11 +639,14 @@ const ParkingLotMap = () => {
   };
 
   const buildExpectedCheckInIso = () => {
-    const expectedDate = new Date();
-    expectedDate.setHours(expectedHour, expectedMinute, 0, 0);
+    let expectedDate = new Date(createVietnamWallTimeIso({ hour: expectedHour, minute: expectedMinute }));
 
     if (expectedDate <= new Date()) {
-      expectedDate.setDate(expectedDate.getDate() + 1);
+      expectedDate = new Date(createVietnamWallTimeIso({
+        hour: expectedHour,
+        minute: expectedMinute,
+        baseDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      }));
     }
 
     // Send the standard UTC ISO string. The backend treats it as UTC and computes the time diff correctly.
@@ -1422,13 +1451,13 @@ const ParkingLotMap = () => {
                         {slotDetail.activeSession.checkInTime && (
                           <div className="flex justify-between items-center">
                             <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian vào thực tế:</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(slotDetail.activeSession.checkInTime).toLocaleString('vi-VN')}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatVietnamDateTime(slotDetail.activeSession.checkInTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.bookingTime && (
                           <div className="flex justify-between items-center">
                             <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian đặt trước:</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">{new Date(slotDetail.activeSession.bookingTime).toLocaleString('vi-VN')}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatVietnamDateTime(slotDetail.activeSession.bookingTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.customer && (

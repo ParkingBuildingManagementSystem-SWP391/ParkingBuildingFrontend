@@ -1,13 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import Logo from './Logo';
 import {
-  Home, LogOut, Sun, Moon, Bell, Settings, ChevronDown, LogIn, Languages, Menu, CreditCard
+  Bell,
+  ChevronDown,
+  Languages,
+  LogIn,
+  Menu,
+  Moon,
+  Sun
 } from 'lucide-react';
+import { getRoleMenuItems, normalizeRole } from '../config/roleMenus';
+import { getRoleLabel } from '../utils/i18nLabels';
 
-const Header = ({ onOpenSidebar, hasSidebar = true }) => {
+const getCurrentRole = (user, role) => (
+  user?.role
+  || user?.roleName
+  || user?.userRole
+  || user?.roles?.[0]
+  || role
+);
+
+const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true, pageTitle, pageSubtitle }) => {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,17 +32,19 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const { isDarkMode, toggleTheme } = useTheme();
-  const normalizedRole = String(role || user?.role || '').toLowerCase();
-  const canAccessMonthlyCard = ['registered_driver', 'driver', 'manager', 'admin'].includes(normalizedRole);
+
+  const currentRole = getCurrentRole(user, role);
+  const normalizedRole = normalizeRole(currentRole);
+  const usesCompactRoleMenu = normalizedRole === 'admin' || normalizedRole === 'manager';
+  const { navigationItems, accountItems } = getRoleMenuItems({
+    role: currentRole,
+    t,
+    currentPath: location.pathname
+  });
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'vi' ? 'en' : 'vi';
     i18n.changeLanguage(newLang);
-  };
-
-  const getFormattedDate = () => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date().toLocaleDateString('vi-VN', options);
   };
 
   useEffect(() => {
@@ -54,30 +73,14 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
     || user?.name
     || user?.username
     || user?.email
-    || 'Tài khoản'
+    || t('home.defaultAccount')
   );
 
-  const getDisplayRole = () => (
-    user?.role
-    || user?.userRole
-    || user?.roles?.[0]
-    || role
-    || 'Người dùng'
-  );
+  const getDisplayRole = () => getRoleLabel(currentRole, t);
 
-  const handleGoHome = () => {
+  const navigateFromMenu = (path) => {
     setIsUserMenuOpen(false);
-    navigate('/');
-  };
-
-  const handleGoToProfile = () => {
-    setIsUserMenuOpen(false);
-    navigate('/settings');
-  };
-
-  const handleGoToMonthlyCards = () => {
-    setIsUserMenuOpen(false);
-    navigate('/dashboard/monthly-cards');
+    navigate(path);
   };
 
   const handleLogout = () => {
@@ -90,72 +93,97 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
     navigate('/login');
   };
 
-  const getPageTitle = () => {
-    const path = location.pathname.substring(1);
-    if (!path) return t('header.title.default');
-    return t(`header.title.${path}`, { defaultValue: t('header.title.default') });
+  const isActivePath = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  const getPageSubtitle = () => {
-    if (location.pathname === '/dashboard') {
-      return getFormattedDate();
+  const menuButtonClass = (path, tone = 'default') => {
+    if (tone === 'danger') {
+      return 'flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-500/10';
     }
-    const path = location.pathname.substring(1);
-    if (!path) return t('header.subtitle.default');
-    return t(`header.subtitle.${path}`, { defaultValue: t('header.subtitle.default') });
+
+    const isActive = path && isActivePath(path);
+    return [
+      'flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold transition-colors dark:text-slate-200',
+      isActive
+        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-200'
+        : 'text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+    ].join(' ');
   };
+
+  const iconClass = (path) => (
+    path && isActivePath(path)
+      ? 'text-indigo-600 dark:text-indigo-300'
+      : 'text-slate-400'
+  );
+  const headerHeightClass = hasSidebar ? 'min-h-[72px] lg:h-24' : 'min-h-[72px]';
 
   return (
-    <header className="flex min-h-[84px] w-full min-w-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 select-none transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 sm:px-6 md:min-h-[96px] md:px-8">
-
-      {/* Left: Dynamic Page Title */}
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+    <header className={`flex ${headerHeightClass} w-full min-w-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 select-none transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 sm:px-6 md:px-8`}>
+      <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
         {hasSidebar && (
-        <button
-          type="button"
-          onClick={onOpenSidebar}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700 lg:hidden"
-          aria-label="Mở menu"
-        >
-          <Menu size={20} />
-        </button>
+          <button
+            type="button"
+            onClick={onOpenSidebar}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700 lg:hidden"
+            aria-label={t('common.openMenu')}
+          >
+            <Menu size={20} />
+          </button>
         )}
-        <div className="flex min-w-0 flex-col">
-          <h1 className="max-w-full break-words text-xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-2xl md:text-3xl">
-            {getPageTitle()}
-          </h1>
-          <p className="mt-1 max-w-full break-words text-sm font-normal leading-snug text-slate-500 dark:text-slate-400 md:text-base">
-            {getPageSubtitle()}
-          </p>
-        </div>
+        {showLogo && (
+          <Link
+            to="/"
+            className="flex shrink-0 items-center rounded-2xl transition-colors hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:hover:bg-slate-800 dark:focus:ring-indigo-900/40"
+            aria-label={t('common.backHome')}
+          >
+            <Logo size="small" showText={false} className="sm:hidden" />
+            <Logo size="default" className="hidden sm:flex" />
+          </Link>
+        )}
+        {!showLogo && pageTitle && (
+          <div className="min-w-0 pr-4">
+            <h1 className="truncate text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
+              {pageTitle}
+            </h1>
+            {pageSubtitle && (
+              <p className="mt-0.5 sm:mt-1 truncate text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+                {pageSubtitle}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Right: Actions & Indicators */}
       <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-
-
-
-        {/* Notifications */}
-        <button className="hidden sm:flex w-10 h-10 rounded-full items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+        <button
+          type="button"
+          className="hidden sm:flex w-10 h-10 rounded-full items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+          aria-label={t('common.notifications')}
+        >
           <Bell size={18} strokeWidth={2} />
           <span className="absolute -top-1 -right-1 w-[18px] h-[18px] bg-[#FF3B30] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
             2
           </span>
         </button>
 
-        {/* Dark Mode Toggle */}
         <button
+          type="button"
           onClick={toggleTheme}
           className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-[#FF9500] hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700"
+          aria-label={t('home.toggleTheme')}
+          title={t('home.toggleTheme')}
         >
           {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
-        {/* Language Switcher Toggle */}
         <button
+          type="button"
           onClick={toggleLanguage}
           className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-          title={i18n.language === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+          aria-label={t('home.toggleLanguage')}
+          title={i18n.language === 'vi' ? t('common.switchToEnglish') : t('common.switchToVietnamese')}
         >
           <Languages size={18} />
           <span className="absolute -bottom-1 -right-1 bg-indigo-100 text-indigo-700 text-[9px] font-bold px-1 rounded-sm border border-white">
@@ -166,8 +194,10 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
         {user ? (
           <div className="relative" ref={userMenuRef}>
             <button
+              type="button"
               onClick={() => setIsUserMenuOpen((prev) => !prev)}
               className="flex items-center gap-2 sm:gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-2 sm:pr-3 text-left shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700"
+              aria-label={t('dropdown.account')}
             >
               <div className="w-9 h-9 rounded-full bg-[#FF4B6E] flex items-center justify-center text-white text-[11px] font-bold shadow-sm">
                 {getInitials(getDisplayName())}
@@ -176,58 +206,127 @@ const Header = ({ onOpenSidebar, hasSidebar = true }) => {
                 <span className="max-w-[120px] truncate text-[13px] font-bold text-slate-900 dark:text-slate-100">
                   {getDisplayName()}
                 </span>
-                <span className="max-w-[120px] truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                  {getDisplayRole() || t('header.userRole')}
+                <span className="max-w-[120px] truncate text-[11px] font-medium text-slate-555 dark:text-slate-400">
+                  {getDisplayRole()}
                 </span>
               </div>
               <ChevronDown size={15} className={`hidden sm:block text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:bg-slate-900 dark:border-slate-700">
-                <button
-                  onClick={handleGoHome}
-                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <Home size={15} className="text-slate-400" />
-                  Trang chủ
-                </button>
-                <button
-                  onClick={handleGoToProfile}
-                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  <Settings size={15} className="text-slate-400" />
-                  {t('header.profile')}
-                </button>
-                {canAccessMonthlyCard && (
-                  <button
-                    onClick={handleGoToMonthlyCards}
-                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <CreditCard size={15} className="text-slate-400" />
-                    Vé tháng
-                  </button>
+              <div className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:bg-slate-900 dark:border-slate-700">
+                {usesCompactRoleMenu ? (
+                  <div className="py-1">
+                    {navigationItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                    {accountItems.map((item) => {
+                      const Icon = item.icon;
+                      if (item.danger) {
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={handleLogout}
+                            className={`${menuButtonClass(null, 'danger')} mt-1 border-t border-slate-100 pt-3 dark:border-slate-700`}
+                          >
+                            <Icon size={15} />
+                            {item.label}
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <>
+                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                      {t('dropdown.navigation')}
+                    </div>
+                    {navigationItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
+                    <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                      {t('dropdown.account')}
+                    </div>
+                    {accountItems.map((item) => {
+                      const Icon = item.icon;
+                      if (item.danger) {
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={handleLogout}
+                            className={menuButtonClass(null, 'danger')}
+                          >
+                            <Icon size={15} />
+                            {item.label}
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => navigateFromMenu(item.path)}
+                          className={menuButtonClass(item.path)}
+                        >
+                          <Icon size={15} className={iconClass(item.path)} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </>
                 )}
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-50"
-                >
-                  <LogOut size={15} />
-                  {t('header.logout')}
-                </button>
               </div>
             )}
           </div>
         ) : (
           <button
+            type="button"
             onClick={handleLogin}
             className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2.5 sm:px-4 text-[13px] font-bold text-slate-700 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
           >
             <LogIn size={16} className="text-slate-400" />
-            <span className="hidden sm:inline">Đăng nhập</span>
+            <span className="hidden sm:inline">{t('home.btnLogin')}</span>
           </button>
         )}
-
       </div>
     </header>
   );

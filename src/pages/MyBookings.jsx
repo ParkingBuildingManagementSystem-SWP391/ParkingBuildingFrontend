@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
+import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
+import { formatVietnamDate, formatVietnamTime } from '../utils/dateTime';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -52,10 +54,14 @@ const MyBookings = () => {
 
   // Modal display states
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportSessionId, setReportSessionId] = useState(null);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [targetBookingId, setTargetBookingId] = useState(null);
   const [targetBooking, setTargetBooking] = useState(null);
   const [payingSessionId, setPayingSessionId] = useState(null);
+  const [isIncidentOpen, setIsIncidentOpen] = useState(false);
+  const [selectedSessionIdForIncident, setSelectedSessionIdForIncident] = useState(null);
 
   const handlePayVNPay = async (booking) => {
     setPayingSessionId(booking.id);
@@ -149,18 +155,9 @@ const MyBookings = () => {
         if (item.bookingTime) {
           // BE sends UTC time. Ensure we append 'Z' if missing so JS parses it as UTC, converting to local VN time.
           const raw = String(item.bookingTime);
-          const d = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
-          if (!isNaN(d.getTime())) {
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            bookedDate = `${day}/${month}/${year}`;
-
-            const hours = String(d.getHours()).padStart(2, '0');
-            const mins = String(d.getMinutes()).padStart(2, '0');
-            bookedTime = `${hours}:${mins}`;
-
-          }
+          const bookingDate = raw.endsWith('Z') ? raw : raw + 'Z';
+          bookedDate = formatVietnamDate(bookingDate);
+          bookedTime = formatVietnamTime(bookingDate);
         }
 
         if (deadlineBaseTime) {
@@ -168,15 +165,17 @@ const MyBookings = () => {
           const base = new Date(rawBase.endsWith('Z') ? rawBase : rawBase + 'Z');
           if (!isNaN(base.getTime())) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
-            const dlHours = String(deadline.getHours()).padStart(2, '0');
-            const dlMins = String(deadline.getMinutes()).padStart(2, '0');
-            deadlineTime = `${dlHours}:${dlMins}`;
+            deadlineTime = formatVietnamTime(deadline);
           }
         }
+
+        const isMembership = (item.ticketCode || item.TicketCode || '').startsWith('MC_');
+        const ticketType = isMembership ? 'Membership' : 'Booking';
 
         return {
           id: item.sessionId || item.SessionId || idx + 1,
           ticketId: item.ticketCode || item.TicketCode || item.ticket?.ticketCode || item.Ticket?.TicketCode || `TKT-${item.sessionId || item.SessionId || idx + 1}`,
+          ticketType: ticketType, // <--- Trường phân loại mới
           vehicleType: vehicleType,
           status: isActiveSession(item.sessionStatus || item.SessionStatus) ? 'Active' : 'Cancelled / Expired',
           sessionStatus: item.sessionStatus || item.SessionStatus || 'Expired',
@@ -329,18 +328,6 @@ const MyBookings = () => {
 
   return (
     <div className="space-y-8 font-sans select-none pb-12">
-
-      {/* 1. PAGE HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
-            {t('myBookings.pageTitle')}
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {t('myBookings.pageSubtitle')}
-          </p>
-        </div>
-      </div>
 
       {/* 2. OVERVIEW STATISTICS ROW (4 cards) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -497,6 +484,16 @@ const MyBookings = () => {
                         <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                           {booking.vehicleType}
                         </span>
+                        {/* Badge phân loại Membership / Đặt chỗ */}
+                        {booking.ticketType === 'Membership' ? (
+                          <span className="rounded-md bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:bg-purple-500/15 dark:text-purple-300">
+                            Membership
+                          </span>
+                        ) : (
+                          <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                            Đặt Chỗ
+                          </span>
+                        )}
                         <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
                           isActiveSession(booking.sessionStatus)
                             ? booking.sessionStatus === 'Reserved'
@@ -534,12 +531,12 @@ const MyBookings = () => {
                         <div className="space-y-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
                           <div className="flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                            In: {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) : 'N/A'}
+                            In: {formatVietnamTime(booking.checkInTime)}
                           </div>
                           {booking.checkOutTime && (
                             <div className="flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                              Out: {new Date(booking.checkOutTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                              Out: {formatVietnamTime(booking.checkOutTime)}
                             </div>
                           )}
                         </div>
@@ -549,7 +546,16 @@ const MyBookings = () => {
                     {/* Financial Metric */}
                     <div className="flex flex-col items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('myBookings.billing')}</span>
-                      {booking.totalAmount !== null && booking.totalAmount !== undefined ? (
+                      {booking.ticketType === 'Membership' ? (
+                        <div>
+                          <span className="text-sm font-extrabold text-purple-600 block">
+                            0 đ (Membership)
+                          </span>
+                          <span className="text-[10px] font-bold uppercase text-emerald-500">
+                            Đã thanh toán gói
+                          </span>
+                        </div>
+                      ) : booking.totalAmount !== null && booking.totalAmount !== undefined ? (
                         <div>
                           <span className="text-sm font-extrabold text-indigo-700 block">
                             {booking.totalAmount.toLocaleString('vi-VN')} đ
@@ -593,6 +599,19 @@ const MyBookings = () => {
                     >
                       <QrCode size={14} /> {t('myBookings.viewQR')}
                     </button>
+
+                    {/* Nút báo cáo sự cố (Chỉ hiển thị cho các lượt đỗ đang diễn ra hoặc đã kết thúc) */}
+                    {booking.sessionStatus !== 'Canceled' && (
+                      <button
+                        onClick={() => {
+                          setSelectedSessionIdForIncident(booking.id);
+                          setIsIncidentOpen(true);
+                        }}
+                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-orange-200 bg-white px-4 text-xs font-bold text-orange-600 shadow-sm transition-all hover:bg-orange-50 dark:border-orange-500/40 dark:bg-slate-800 dark:text-orange-300 dark:hover:bg-orange-500/15 lg:flex-none"
+                      >
+                        <AlertCircle size={14} /> {t('myBookings.reportIncident') || 'Báo cáo sự cố'}
+                      </button>
+                    )}
 
                     {booking.sessionStatus === 'Reserved' && (
                       <button
@@ -718,6 +737,19 @@ const MyBookings = () => {
         </div>
       )}
 
+      {/* 7. MODAL BÁO CÁO SỰ CỐ DÀNH CHO TÀI XẾ */}
+      <CreateIncidentModal
+        isOpen={isIncidentOpen}
+        onClose={() => {
+          setIsIncidentOpen(false);
+          setSelectedSessionIdForIncident(null);
+        }}
+        activeSessionId={selectedSessionIdForIncident}
+        onSuccess={() => {
+          message.success(t('myBookings.reportIncidentSuccess') || 'Đã gửi báo cáo sự cố!');
+          fetchMyBookings();
+        }}
+      />
     </div>
   );
 };

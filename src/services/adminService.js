@@ -8,7 +8,7 @@ export const adminService = {
 
   // Update a user's information and role (Admin only)
   updateUser: async (userData) => {
-    return await api.post('/Admin/update-user', userData);
+    return await api.put('/Admin/update-user', userData);
   },
 
   // Create a new user account (Admin only)

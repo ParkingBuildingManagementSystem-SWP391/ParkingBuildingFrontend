@@ -23,6 +23,11 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
   const [isScanning, setIsScanning] = useState(false);
   const qrScannerRef = useRef(null);
   const scannerContainerId = "local-qr-reader";
+  const isOpenRef = useRef(isOpen);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   // Request cameras on open
   useEffect(() => {
@@ -65,6 +70,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
 
     // Small delay to ensure DOM element is ready
     setTimeout(() => {
+      if (!isOpenRef.current) return;
       try {
         const html5QrCode = new Html5Qrcode(scannerContainerId);
         qrScannerRef.current = html5QrCode;
@@ -90,7 +96,12 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
           (errorMessage) => {
             // Constant scanning feedback, ignore
           }
-        ).catch((err) => {
+        ).then(() => {
+          // If the modal was closed while starting, stop it immediately
+          if (!isOpenRef.current) {
+            stopScanner(false);
+          }
+        }).catch((err) => {
           console.error("Failed to start QR scanner", err);
           setIsScanning(false);
         });
@@ -103,21 +114,49 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
 
   const stopScanner = (isUnmounting = false) => {
     if (qrScannerRef.current && qrScannerRef.current.isScanning) {
-      return qrScannerRef.current.stop()
-        .then(() => {
-          qrScannerRef.current = null;
-          if (!isUnmounting) {
-            setIsScanning(false);
+      const container = document.getElementById(scannerContainerId);
+      if (!container) {
+        // DOM element already gone, manually stop tracks if available to release camera and prevent lock
+        try {
+          if (qrScannerRef.current.localMediaStream) {
+            qrScannerRef.current.localMediaStream.getTracks().forEach(track => track.stop());
           }
-        })
-        .catch((err) => {
-          console.warn("Failed to stop QR scanner", err);
-          qrScannerRef.current = null;
-        });
+        } catch (e) {
+          // Ignore manual stop track error
+        }
+        qrScannerRef.current = null;
+        if (!isUnmounting) {
+          setIsScanning(false);
+        }
+        return Promise.resolve();
+      }
+
+      try {
+        return qrScannerRef.current.stop()
+          .then(() => {
+            qrScannerRef.current = null;
+            if (!isUnmounting) {
+              setIsScanning(false);
+            }
+          })
+          .catch((err) => {
+            console.warn("Failed to stop QR scanner", err);
+            qrScannerRef.current = null;
+          });
+      } catch (err) {
+        console.warn("Synchronous error stopping QR scanner", err);
+        qrScannerRef.current = null;
+        return Promise.resolve();
+      }
     }
     return Promise.resolve();
   };
 
+  const handleClose = () => {
+    stopScanner(false).then(() => {
+      onClose();
+    });
+  };
 
   const handleDeviceChange = (value) => {
     setSelectedDevice(value);
@@ -134,9 +173,9 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
           </div>
         }
         open={isOpen}
-        onCancel={onClose}
+        onCancel={handleClose}
         footer={[
-          <Button key="close" type="dashed" onClick={onClose} className="font-bold h-10 px-5 rounded-[14px] border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100">
+          <Button key="close" type="dashed" onClick={handleClose} className="font-bold h-10 px-5 rounded-[14px] border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-slate-100">
             {t('gate.qrScanner.close')}
           </Button>
         ]}
@@ -170,7 +209,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
                   <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4 border-indigo-500 rounded-tr-md"></div>
                   <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4 border-indigo-500 rounded-bl-md"></div>
                   <div className="absolute bottom-0 right-0 w-5 h-5 border-b-4 border-r-4 border-indigo-500 rounded-br-md"></div>
-                  
+
                   {/* Laser line anim */}
                   <div className="absolute left-2 right-2 h-0.5 bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-qr-laser"></div>
                 </div>

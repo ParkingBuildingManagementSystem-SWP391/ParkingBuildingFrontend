@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Space, Table, Tag, Typography, message } from 'antd';
 import { Ban, RefreshCw } from 'lucide-react';
 import { managerService } from '../services/managerService';
+import { formatVietnamDateTime } from '../utils/dateTime';
 
 const { Text } = Typography;
 
@@ -16,15 +17,7 @@ const getValue = (source, ...keys) => {
 
 const formatDateTime = (value) => {
   if (!value) return 'Chưa cập nhật';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
+  return formatVietnamDateTime(value);
 };
 
 const statusColorMap = {
@@ -34,46 +27,46 @@ const statusColorMap = {
   Cancelled: 'red'
 };
 
-const MonthlyCardManager = () => {
+const MembershipManager = () => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cancelingIds, setCancelingIds] = useState({});
 
-  const fetchMonthlyCards = useCallback(async () => {
+  const fetchMemberships = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await managerService.getMonthlyCards();
+      const response = await managerService.getMemberships();
       const data = unwrapData(response);
       setCards(Array.isArray(data) ? data : []);
     } catch (error) {
-      message.error(error.response?.data?.message || 'Không thể tải danh sách vé tháng.');
+      message.error(error.response?.data?.message || 'Không thể tải danh sách Membership.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchMonthlyCards();
-  }, [fetchMonthlyCards]);
+    fetchMemberships();
+  }, [fetchMemberships]);
 
   const handleCancel = (record) => {
-    const cardId = getValue(record, 'monthlyCardId', 'cardId', 'id');
-    const licenseVehicle = getValue(record, 'licenseVehicle', 'LicenseVehicle') || 'thẻ này';
+    const cardId = getValue(record, 'membershipCardId', 'MembershipCardId', 'cardId', 'id');
+    const licenseVehicle = getValue(record, 'licenseVehicle', 'LicenseVehicle') || 'Membership này';
 
     Modal.confirm({
-      title: 'Hủy thẻ tháng',
-      content: `Bạn có chắc chắn muốn hủy vé tháng của xe ${licenseVehicle}?`,
-      okText: 'Hủy thẻ',
+      title: 'Hủy Membership',
+      content: `Bạn có chắc chắn muốn hủy Membership của xe ${licenseVehicle}?`,
+      okText: 'Hủy Membership',
       okButtonProps: { danger: true },
       cancelText: 'Đóng',
       async onOk() {
         setCancelingIds((prev) => ({ ...prev, [cardId]: true }));
         try {
-          await managerService.cancelMonthlyCard(cardId);
-          message.success('Đã hủy vé tháng.');
-          fetchMonthlyCards();
+          await managerService.cancelMembership(cardId);
+          message.success('Đã hủy Membership.');
+          fetchMemberships();
         } catch (error) {
-          message.error(error.response?.data?.message || error.response?.data?.error || 'Không thể hủy vé tháng.');
+          message.error(error.response?.data?.message || error.response?.data?.error || 'Không thể hủy Membership.');
         } finally {
           setCancelingIds((prev) => ({ ...prev, [cardId]: false }));
         }
@@ -134,7 +127,7 @@ const MonthlyCardManager = () => {
       key: 'actions',
       align: 'right',
       render: (_, record) => {
-        const cardId = getValue(record, 'monthlyCardId', 'cardId', 'id');
+        const cardId = getValue(record, 'membershipCardId', 'MembershipCardId', 'cardId', 'id');
         const status = getValue(record, 'status', 'Status') || 'Active';
         const isCanceled = ['Canceled', 'Cancelled'].includes(status);
         return (
@@ -154,20 +147,16 @@ const MonthlyCardManager = () => {
 
   return (
     <div className="px-4 py-6">
-      <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Quản lý vé tháng</h1>
-          <p className="mt-1 text-sm text-slate-500">Theo dõi danh sách thẻ, vị trí cố định và trạng thái hiệu lực.</p>
-        </div>
+      <div className="mb-5 flex justify-end">
         <Space>
-          <Button icon={<RefreshCw size={15} />} onClick={fetchMonthlyCards}>
+          <Button icon={<RefreshCw size={15} />} onClick={fetchMemberships}>
             Làm mới
           </Button>
         </Space>
       </div>
 
       <Table
-        rowKey={(record) => getValue(record, 'monthlyCardId', 'cardId', 'id') || `${getValue(record, 'licenseVehicle')}-${getValue(record, 'slotName')}`}
+        rowKey={(record) => getValue(record, 'membershipCardId', 'MembershipCardId', 'cardId', 'id') || `${getValue(record, 'licenseVehicle')}-${getValue(record, 'slotName')}`}
         columns={columns}
         dataSource={cards}
         loading={loading}
@@ -179,4 +168,4 @@ const MonthlyCardManager = () => {
   );
 };
 
-export default MonthlyCardManager;
+export default MembershipManager;

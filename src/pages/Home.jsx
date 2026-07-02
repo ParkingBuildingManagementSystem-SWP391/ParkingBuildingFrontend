@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ChevronDown, LogOut, Settings, Map, Zap, ShieldCheck, CreditCard,
+  ChevronDown, Map, Zap, ShieldCheck, CreditCard,
   Search, CalendarCheck, CarFront, ArrowRight, Star, Users, Clock, Activity,
   Sun, Moon, Languages
 } from 'lucide-react';
@@ -12,6 +12,8 @@ import heroImage from '../assets/logo/parking-hero.png';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import LocateVehicle from './LocateVehicle';
+import { getRoleMenuItems, normalizeRole } from '../config/roleMenus';
+import { getRoleLabel } from '../utils/i18nLabels';
 
 /* ── tiny animated counter ── */
 const AnimatedNumber = ({ target, suffix = '' }) => {
@@ -51,11 +53,20 @@ const Home = () => {
   const { t, i18n } = useTranslation();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const userMenuRef = useRef(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const displayName = user?.fullName || user?.name || user?.username || user?.email || t('home.defaultAccount');
-  const displayRole = user?.role || user?.userRole || user?.roles?.[0] || role || t('header.userRole');
+  const rawDisplayRole = user?.role || user?.roleName || user?.userRole || user?.roles?.[0] || role;
+  const displayRole = getRoleLabel(rawDisplayRole, t);
+  const normalizedRole = normalizeRole(rawDisplayRole);
+  const usesCompactRoleMenu = normalizedRole === 'admin' || normalizedRole === 'manager';
+  const { navigationItems, accountItems } = getRoleMenuItems({
+    role: rawDisplayRole,
+    t,
+    currentPath: location.pathname
+  });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -78,7 +89,37 @@ const Home = () => {
     i18n.changeLanguage(newLang);
   };
 
+  const navigateFromMenu = (path) => {
+    setIsUserMenuOpen(false);
+    navigate(path);
+  };
+
   const handleLogout = () => { setIsUserMenuOpen(false); logout(); navigate('/login'); };
+
+  const isActivePath = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
+  const menuItemClass = (path, danger = false) => {
+    if (danger) {
+      return 'flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-500/10';
+    }
+
+    const active = path && isActivePath(path);
+    return [
+      'flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-semibold transition-colors dark:text-slate-200',
+      active
+        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-200'
+        : 'text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+    ].join(' ');
+  };
+
+  const menuIconClass = (path) => (
+    path && isActivePath(path)
+      ? 'text-indigo-600 dark:text-indigo-300'
+      : 'text-slate-400'
+  );
 
   /* ── data arrays ── */
   const features = [
@@ -114,27 +155,32 @@ const Home = () => {
       `}</style>
 
       {/* ══════════════════ HEADER ══════════════════ */}
-      <header className="sticky top-0 z-50 w-full max-w-full border-b border-slate-100 bg-white/80 backdrop-blur-xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/85">
-        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
-          <Link to="/" className="flex min-w-0 flex-1 items-center">
-            <Logo className="max-w-[210px] sm:max-w-[250px]" />
+      <header className="sticky top-0 z-50 flex min-h-[72px] w-full min-w-0 items-center justify-between gap-3 border-b border-slate-100 bg-white/95 px-4 py-3 select-none backdrop-blur-xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900/95 sm:px-6 md:px-8">
+        <div className="flex min-w-0 flex-1 items-center">
+          <Link
+            to="/"
+            className="flex shrink-0 items-center rounded-2xl transition-colors hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:hover:bg-slate-800 dark:focus:ring-indigo-900/40"
+            aria-label={t('common.backHome')}
+          >
+            <Logo size="small" showText={false} className="sm:hidden" />
+            <Logo size="default" className="hidden sm:flex" />
           </Link>
+        </div>
 
-          <nav className="hidden items-center gap-8 text-[13px] font-bold text-slate-500 dark:text-slate-300 md:flex">
-            <Link className="text-indigo-600" to="/">{t('home.navHome')}</Link>
-            <Link className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" to="/parking-map">{t('home.navBook')}</Link>
-            <a className="transition-colors text-indigo-600 hover:text-indigo-700 flex items-center gap-1" href="/#locate-vehicle">
-              <Search size={14} /> {t('home.navLocate')}
-            </a>
-            <Link className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" to="/pricing">{t('home.navPricing')}</Link>
-            <a   className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" href="#contact">{t('home.navContact')}</a>
-          </nav>
+        <nav className="hidden shrink-0 items-center gap-8 text-[13px] font-bold text-slate-500 dark:text-slate-300 md:flex">
+          <Link className="text-indigo-600" to="/">{t('home.navHome')}</Link>
+          <a className="flex items-center gap-1 text-indigo-600 transition-colors hover:text-indigo-700 dark:hover:text-indigo-300" href="/#locate-vehicle">
+            <Search size={14} /> {t('home.navLocate')}
+          </a>
+          <a className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-300" href="#contact">{t('home.navContact')}</a>
+        </nav>
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex min-w-0 flex-1 justify-end">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-amber-500 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-amber-500 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
               aria-label={t('home.toggleTheme')}
               title={t('home.toggleTheme')}
             >
@@ -144,7 +190,7 @@ const Home = () => {
             <button
               type="button"
               onClick={toggleLanguage}
-              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
               aria-label={t('home.toggleLanguage')}
               title={t('home.toggleLanguage')}
             >
@@ -154,48 +200,130 @@ const Home = () => {
               </span>
             </button>
 
-            <Link
-              to="/parking-map"
-              className="hidden shrink-0 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:inline-flex"
-            >
-              {t('home.btnBook')}
-            </Link>
-
             {user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen((p) => !p)}
-                  className="flex min-w-0 items-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-2.5 py-2 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 sm:gap-2.5 sm:px-3"
+                  className="flex min-w-0 items-center gap-2 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-2 text-left shadow-[0_2px_5px_rgba(0,0,0,0.02)] transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 sm:gap-3 sm:pr-3"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-black text-white">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FF4B6E] text-[11px] font-bold text-white shadow-sm">
                     {getInitials(displayName)}
                   </div>
-                  <div className="hidden leading-tight sm:block">
-                    <p className="max-w-[120px] truncate text-sm font-bold text-slate-900 dark:text-slate-100">{displayName}</p>
-                    <p className="max-w-[120px] truncate text-[11px] font-semibold text-slate-400 dark:text-slate-400">{displayRole}</p>
+                  <div className="hidden flex-col leading-tight lg:flex">
+                    <p className="max-w-[120px] truncate text-[13px] font-bold text-slate-900 dark:text-slate-100">{displayName}</p>
+                    <p className="max-w-[120px] truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">{displayRole}</p>
                   </div>
-                  <ChevronDown size={14} className={`text-slate-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={15} className={`hidden text-slate-400 transition-transform sm:block ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 top-full z-50 mt-2 w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-                    <Link to="/settings" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
-                      <Settings size={15} className="text-slate-400" />
-                      {t('header.profile')}
-                    </Link>
-                    <button onClick={handleLogout}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-rose-600 hover:bg-rose-50">
-                      <LogOut size={15} />
-                      {t('header.logout')}
-                    </button>
+                  <div className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-100 bg-white py-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                    {usesCompactRoleMenu ? (
+                      <div className="py-1">
+                        {navigationItems.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
+                        {accountItems.map((item) => {
+                          const Icon = item.icon;
+                          if (item.danger) {
+                            return (
+                              <button
+                                key={item.key}
+                                type="button"
+                                onClick={handleLogout}
+                                className={`${menuItemClass(null, true)} mt-1 border-t border-slate-100 pt-3 dark:border-slate-700`}
+                              >
+                                <Icon size={15} />
+                                {item.label}
+                              </button>
+                            );
+                          }
+
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                          {t('dropdown.navigation')}
+                        </div>
+                        {navigationItems.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
+
+                        <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
+                        <div className="px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                          {t('dropdown.account')}
+                        </div>
+                        {accountItems.map((item) => {
+                          const Icon = item.icon;
+                          if (item.danger) {
+                            return (
+                              <button
+                                key={item.key}
+                                type="button"
+                                onClick={handleLogout}
+                                className={menuItemClass(null, true)}
+                              >
+                                <Icon size={15} />
+                                {item.label}
+                              </button>
+                            );
+                          }
+
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => navigateFromMenu(item.path)}
+                              className={menuItemClass(item.path)}
+                            >
+                              <Icon size={15} className={menuIconClass(item.path)} />
+                              {item.label}
+                            </button>
+                          );
+                        })}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
             ) : (
               <Link
                 to="/login"
-                className="shrink-0 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:px-4"
+                className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 px-4 text-[13px] font-bold text-white shadow-[0_10px_20px_-12px_rgba(79,70,229,0.85)] transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-900 sm:px-5"
               >
                 {t('home.btnLogin')}
               </Link>
@@ -234,12 +362,6 @@ const Home = () => {
               >
                 {t('home.btnBook')}
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                to="/parking-map"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-7 py-4 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto"
-              >
-                {t('home.btnViewMap')}
               </Link>
             </div>
           </div>
