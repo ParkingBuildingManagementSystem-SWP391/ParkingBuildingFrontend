@@ -170,7 +170,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
                   <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4 border-indigo-500 rounded-tr-md"></div>
                   <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4 border-indigo-500 rounded-bl-md"></div>
                   <div className="absolute bottom-0 right-0 w-5 h-5 border-b-4 border-r-4 border-indigo-500 rounded-br-md"></div>
-                  
+
                   {/* Laser line anim */}
                   <div className="absolute left-2 right-2 h-0.5 bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-qr-laser"></div>
                 </div>
