@@ -78,19 +78,23 @@ const MainLayout = () => {
         title: '',
         subtitle: ''
       },
-      '/dashboard/monthly-cards': {
-        title: normalizedRole === 'manager' ? t('monthlyCard.managerTitle') : t('monthlyCard.title'),
+      '/dashboard/memberships': {
+        title: normalizedRole === 'manager' ? t('membership.managerTitle') : t('membership.title'),
         subtitle: normalizedRole === 'manager'
-          ? t('monthlyCard.managerSubtitle')
-          : t('monthlyCard.paymentRequestSubtitle')
+          ? t('membership.managerSubtitle')
+          : t('membership.paymentRequestSubtitle')
       },
-      '/my-monthly-card': {
-        title: t('monthlyCard.title'),
-        subtitle: t('monthlyCard.subtitle')
+      '/my-membership': {
+        title: t('membership.title'),
+        subtitle: t('membership.subtitle')
       },
       '/my-bookings': {
         title: t('myBookings.pageTitle'),
         subtitle: t('myBookings.pageSubtitle')
+      },
+      '/my-wallet': {
+        title: t('wallet.title', { defaultValue: 'Ví của tôi' }),
+        subtitle: t('wallet.subtitle', { defaultValue: 'Quản lý số dư và lịch sử giao dịch ví' })
       },
       '/create-account': {
         title: t('createAccount.pageTitle'),

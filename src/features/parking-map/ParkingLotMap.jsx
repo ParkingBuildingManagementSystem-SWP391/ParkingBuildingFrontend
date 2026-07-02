@@ -225,7 +225,7 @@ const ParkingLotMap = () => {
   const highlightFloorId = searchParams.get('floorId');
   const highlightSlotName = searchParams.get('slotName');
 
-  const selectForMonthlyCard = searchParams.get('selectForMonthlyCard') === 'true';
+  const selectForMembership = searchParams.get('selectForMembership') === 'true';
   const paramVehicleTypeId = searchParams.get('vehicleTypeId');
 
   const [activeFloorId, setActiveFloorId] = useState(() => {
@@ -590,7 +590,7 @@ const ParkingLotMap = () => {
 
   // Slot click handler
   const handleSlotClick = (slot) => {
-    if (selectForMonthlyCard) {
+    if (selectForMembership) {
       if (slot.status === 'Available') {
         const typeId = Number(slot.typeId);
         const reqTypeId = Number(paramVehicleTypeId);
@@ -598,7 +598,7 @@ const ParkingLotMap = () => {
           message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
           return;
         }
-        navigate(`/my-monthly-card?selectedSlotId=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
+        navigate(`/my-membership?selectedSlotId=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
       } else {
         message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
       }

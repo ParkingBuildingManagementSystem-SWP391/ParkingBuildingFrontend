@@ -169,9 +169,8 @@ const MyBookings = () => {
           }
         }
 
-        // Kiểm tra xem là vé tháng hay đặt chỗ
-        const isMonthly = (item.ticketCode || item.TicketCode || '').startsWith('MC_');
-        const ticketType = isMonthly ? 'MonthlyCard' : 'Booking';
+        const isMembership = (item.ticketCode || item.TicketCode || '').startsWith('MC_');
+        const ticketType = isMembership ? 'Membership' : 'Booking';
 
         return {
           id: item.sessionId || item.SessionId || idx + 1,
@@ -485,10 +484,10 @@ const MyBookings = () => {
                         <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                           {booking.vehicleType}
                         </span>
-                        {/* Badge phân loại Vé tháng / Đặt chỗ */}
-                        {booking.ticketType === 'MonthlyCard' ? (
+                        {/* Badge phân loại Membership / Đặt chỗ */}
+                        {booking.ticketType === 'Membership' ? (
                           <span className="rounded-md bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:bg-purple-500/15 dark:text-purple-300">
-                            Vé Tháng
+                            Membership
                           </span>
                         ) : (
                           <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
@@ -547,10 +546,10 @@ const MyBookings = () => {
                     {/* Financial Metric */}
                     <div className="flex flex-col items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('myBookings.billing')}</span>
-                      {booking.ticketType === 'MonthlyCard' ? (
+                      {booking.ticketType === 'Membership' ? (
                         <div>
                           <span className="text-sm font-extrabold text-purple-600 block">
-                            0 đ (Vé tháng)
+                            0 đ (Membership)
                           </span>
                           <span className="text-[10px] font-bold uppercase text-emerald-500">
                             Đã thanh toán gói

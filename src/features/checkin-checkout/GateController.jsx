@@ -991,7 +991,7 @@ const GateController = () => {
               >
                 <Input 
                   ref={entryQrInputRef}
-                  placeholder="Quét mã QR đặt chỗ hoặc thẻ tháng..." 
+                  placeholder="Quét mã QR đặt chỗ hoặc Membership..."
                   className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" 
                 />
               </Form.Item>
