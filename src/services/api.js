@@ -3,10 +3,11 @@ import axios from 'axios';
 // src/services/api.js
 const api = axios.create({
   baseURL: '/api',
+  timeout: 40000,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // Allow license plate AI service cold start
+  // Allow license plate AI service cold start
 });
 
 
