@@ -50,7 +50,7 @@ const dataURLtoFile = (dataurl, filename) => {
 
 const resizeAndCompressImage = (input, filename, maxWidth = 1280, maxHeight = 720, quality = 0.8) => {
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    const img = new window.Image();
     
     if (input instanceof File || input instanceof Blob) {
       img.src = URL.createObjectURL(input);
