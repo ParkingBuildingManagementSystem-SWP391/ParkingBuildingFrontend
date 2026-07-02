@@ -98,7 +98,7 @@ export const managerService = {
 
   getMemberships: async () => {
     try {
-      const response = await api.get('/Manager/monthly-cards');
+      const response = await api.get('/MembershipCard/tiers');
       return response.data;
     } catch (error) {
       console.error('getMemberships error:', error);
