@@ -48,6 +48,65 @@ const dataURLtoFile = (dataurl, filename) => {
   }
 };
 
+const resizeAndCompressImage = (input, filename, maxWidth = 1280, maxHeight = 720, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    
+    if (input instanceof File || input instanceof Blob) {
+      img.src = URL.createObjectURL(input);
+    } else if (typeof input === 'string') {
+      img.src = input;
+    } else {
+      reject(new Error("Invalid input type. Must be a File, Blob, or base64 dataURL."));
+      return;
+    }
+
+    img.onload = () => {
+      if (input instanceof File || input instanceof Blob) {
+        URL.revokeObjectURL(img.src);
+      }
+
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], filename, { type: 'image/jpeg' });
+          resolve(file);
+        } else {
+          reject(new Error("Canvas export failed"));
+        }
+      }, 'image/jpeg', quality);
+    };
+
+    img.onerror = (err) => {
+      if (input instanceof File || input instanceof Blob) {
+        URL.revokeObjectURL(img.src);
+      }
+      reject(err);
+    };
+  });
+};
+
 
 const scanKeyframes = `
 @keyframes laserScan {
@@ -759,7 +818,7 @@ const GateController = () => {
                 setEntryOcrResult(null);
                 checkInForm.setFieldValue('tempImageUrl', null);
                 try {
-                  const file = dataURLtoFile(imageSrc, "entry_capture.jpg");
+                  const file = await resizeAndCompressImage(imageSrc, "entry_capture.jpg", 1280, 720, 0.8);
                   if (!file) throw new Error("Ảnh chụp không hợp lệ.");
                   const type = checkInForm.getFieldValue('type') || 'Car';
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
@@ -839,9 +898,10 @@ const GateController = () => {
                 setEntryOcrResult(null);
                 checkInForm.setFieldValue('tempImageUrl', null);
                 try {
+                  const compressedFile = await resizeAndCompressImage(file, "entry_capture.jpg", 1280, 720, 0.8);
                   const type = checkInForm.getFieldValue('type') || 'Car';
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
-                  const result = await parkingService.recognizeLicensePlate(file, typeId);
+                  const result = await parkingService.recognizeLicensePlate(compressedFile, typeId);
 
                   const isSuccess = result?.isSuccess || result?.IsSuccess;
                   const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
@@ -949,6 +1009,7 @@ const GateController = () => {
                       <Input
                         onChange={handlePlateChange}
                         placeholder={type === 'Bicycle' ? t('gate.form.optionalBicycle') : 'e.g. 30A-123.45'}
+                        suffix={entryScanning ? <RefreshCw className="animate-spin text-emerald-500" size={16} /> : null}
                         className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                       />
                     </Form.Item>
@@ -1049,7 +1110,7 @@ const GateController = () => {
                 setExitOcrResult(null);
                 checkOutForm.setFieldValue('tempImageUrl', null);
                 try {
-                  const file = dataURLtoFile(imageSrc, "exit_capture.jpg");
+                  const file = await resizeAndCompressImage(imageSrc, "exit_capture.jpg", 1280, 720, 0.8);
                   if (!file) throw new Error("Ảnh chụp không hợp lệ.");
 
                   const currentPlate = checkOutForm.getFieldValue('plate') || '';
@@ -1112,11 +1173,12 @@ const GateController = () => {
                 setExitOcrResult(null);
                 checkOutForm.setFieldValue('tempImageUrl', null);
                 try {
+                  const compressedFile = await resizeAndCompressImage(file, "exit_capture.jpg", 1280, 720, 0.8);
                   const currentPlate = checkOutForm.getFieldValue('plate') || '';
                   const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
                   
                   if (isBike) {
-                    const result = await parkingService.recognizeLicensePlate(file, 1);
+                    const result = await parkingService.recognizeLicensePlate(compressedFile, 1);
                     const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl || result?.imageUrl || result?.ImageUrl;
                     
                     URL.revokeObjectURL(url);
@@ -1124,7 +1186,7 @@ const GateController = () => {
                     checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
                     message.success("Đã ghi nhận ảnh chụp xe đạp cổng ra.");
                   } else {
-                    const result = await parkingService.recognizeLicensePlate(file, 3);
+                    const result = await parkingService.recognizeLicensePlate(compressedFile, 3);
                     const isSuccess = result?.isSuccess || result?.IsSuccess;
                     const predictedPlate = result?.predictedPlate || result?.PredictedPlate;
                     const imageUrl = result?.imageUrl || result?.ImageUrl;
@@ -1223,7 +1285,7 @@ const GateController = () => {
                 rules={[{ required: true, message: t('gate.form.requirePlate') }]}
                 className="mb-2"
               >
-                <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] uppercase font-bold focus:bg-white focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" />
+                <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" suffix={exitScanning ? <RefreshCw className="animate-spin text-indigo-500" size={16} /> : null} className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] uppercase font-bold focus:bg-white focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" />
               </Form.Item>
 
 
