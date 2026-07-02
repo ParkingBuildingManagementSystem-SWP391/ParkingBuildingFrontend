@@ -7,7 +7,8 @@ import {
   Map,
   ScanLine,
   Settings,
-  Users
+  Users,
+  Wallet
 } from 'lucide-react';
 
 export const ROLE_MENU_ROUTES = {
@@ -16,7 +17,8 @@ export const ROLE_MENU_ROUTES = {
   parkingMap: '/parking-map',
   checkinCheckout: '/checkin-checkout',
   myBookings: '/my-bookings',
-  monthlyCard: '/my-monthly-card',
+  myWallet: '/my-wallet',
+  myMembership: '/my-membership',
   managerDashboard: '/dashboard',
   adminDashboard: '/dashboard',
   adminAccounts: '/accounts',
@@ -49,7 +51,7 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
 
   let roleNavigation = [];
 
-  if (normalizedRole === 'driver' || normalizedRole === 'registered_driver') {
+  if (['driver', 'member', 'registered_driver', 'customer'].includes(normalizedRole)) {
     roleNavigation = [
       {
         key: 'parking-map',
@@ -64,9 +66,15 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
         icon: CalendarCheck
       },
       {
-        key: 'monthly-card',
-        label: label(t, 'dropdown.monthlyCard', 'Vé tháng'),
-        path: routes.monthlyCard,
+        key: 'my-wallet',
+        label: label(t, 'sidebar.myWallet', 'Ví của tôi'),
+        path: routes.myWallet,
+        icon: Wallet
+      },
+      {
+        key: 'my-membership',
+        label: label(t, 'dropdown.membership', 'Membership'),
+        path: routes.myMembership,
         icon: CreditCard
       }
     ];

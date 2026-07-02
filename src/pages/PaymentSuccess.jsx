@@ -24,12 +24,12 @@ const PaymentSuccess = () => {
   useEffect(() => {
     if (!invoiceId) {
       if (vnpResponseCode === '00') {
-        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng, MCR: Vé tháng)
+        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng, MCR: Membership)
         if (vnpTxnRef.startsWith('DEP')) {
           setPaymentState('success_deposit');
           fetchBookingDetails();
         } else if (vnpTxnRef.startsWith('MCR')) {
-          setPaymentState('success_monthly');
+          setPaymentState('success_membership');
         } else {
           setPaymentState('success_exit');
         }
@@ -68,13 +68,12 @@ const PaymentSuccess = () => {
           clearInterval(intervalId);
           fetchBookingDetails();
         } else if (currentStatus === 'SUCCESS_MONTHLY') {
-          // Monthly Card Registration Success
-          setPaymentState('success_monthly');
+          setPaymentState('success_membership');
           clearInterval(intervalId);
         } else if (currentStatus === 'SUCCESS') {
-          // Check if this is a monthly card payment by checking vnpTxnRef
+          // Check if this is a membership payment by checking vnpTxnRef
           if (vnpTxnRef.startsWith('MCR')) {
-            setPaymentState('success_monthly');
+            setPaymentState('success_membership');
           } else {
             // Pre-exit / Full Payment Success
             setPaymentState('success_exit');
@@ -293,8 +292,8 @@ const PaymentSuccess = () => {
           </div>
         )}
 
-        {/* State 3.2: Monthly Card Registration Success */}
-        {paymentState === 'success_monthly' && (
+        {/* State 3.2: Membership Registration Success */}
+        {paymentState === 'success_membership' && (
           <div className="space-y-7">
             <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 size={40} className="text-emerald-500" />
@@ -302,10 +301,10 @@ const PaymentSuccess = () => {
 
             <div className="space-y-2">
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-                {t('paymentSuccess.monthlySuccess')}
+                {t('paymentSuccess.membershipSuccess')}
               </h2>
               <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
-                {t('paymentSuccess.monthlyDesc')}
+                {t('paymentSuccess.membershipDesc')}
               </p>
             </div>
 
@@ -313,7 +312,7 @@ const PaymentSuccess = () => {
             <div className="mx-auto max-w-xs space-y-2 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10 sm:p-6">
               <div className="flex items-center justify-center gap-1.5 text-[10px] font-extrabold text-indigo-700 uppercase tracking-widest">
                 <CreditCard size={12} />
-                Thành viên VIP / Vé tháng
+                Membership Pass
               </div>
               <p className="text-[11px] text-indigo-800 font-medium leading-relaxed dark:text-indigo-300">
                 Hệ thống AI sẽ tự động nhận diện biển số xe của bạn khi ra vào cổng để mở barrier mà không cần quẹt thẻ hay thanh toán thêm.
@@ -328,7 +327,7 @@ const PaymentSuccess = () => {
                 {t('paymentSuccess.btnHome')}
               </button>
               <button
-                onClick={() => navigate('/my-monthly-card')}
+                onClick={() => navigate('/my-membership')}
                 className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] text-sm transition-all shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 {t('paymentSuccess.btnMyCard')}
