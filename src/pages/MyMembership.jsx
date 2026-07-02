@@ -50,6 +50,7 @@ const asArray = (payload) => {
   if (Array.isArray(data?.items)) return data.items;
   if (Array.isArray(data?.slots)) return data.slots;
   if (Array.isArray(data?.tiers)) return data.tiers;
+  if (Array.isArray(data?.cards)) return data.cards;
   return [];
 };
 
@@ -267,18 +268,18 @@ const RegistrationView = ({ tiers, onTiersLoaded, onRegister, submitting, t }) =
     const fetchTiers = async () => {
       setLoadingTiers(true);
       try {
-        const response = await membershipService.getTiers();
+        const response = await membershipService.getMembershipTiers();
         const serverTiers = asArray(response).map(normalizeTier);
+        onTiersLoaded(serverTiers);
         if (serverTiers.length) {
-          onTiersLoaded(serverTiers);
           setSelectedTierId((current) => current || serverTiers[0].tierId);
         } else {
-          setSelectedTierId((current) => current || DEFAULT_TIERS[0].tierId);
+          setSelectedTierId(null);
         }
       } catch (error) {
         console.error('load membership tiers error:', error);
-        toast.error(error.response?.data?.message || 'Không thể tải danh sách gói Membership. Đang dùng dữ liệu mặc định.');
-        setSelectedTierId((current) => current || tiers[0]?.tierId || DEFAULT_TIERS[0].tierId);
+        onTiersLoaded([]);
+        setSelectedTierId(null);
       } finally {
         setLoadingTiers(false);
       }
@@ -495,9 +496,15 @@ const MyMembership = () => {
   const fetchCardInfo = useCallback(async () => {
     setLoadingCard(true);
     try {
-      const response = await membershipService.getMyCard();
+      const response = await membershipService.getMyMembershipCard();
       const data = unwrapData(response);
-      setCardInfo(data?.card ?? data);
+      const cards = data?.cards || response?.cards || response?.data?.cards || [];
+      if (Array.isArray(cards)) {
+        setCardInfo(cards.length > 0 ? cards[0] : null);
+        return;
+      }
+
+      setCardInfo(data?.card ?? data ?? null);
     } catch (error) {
       if (error.response?.status !== 404) {
         console.error('load membership card error:', error);

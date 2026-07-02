@@ -1,14 +1,22 @@
 import api from './api';
 
 export const membershipService = {
-  getMyCard: async () => {
+  getMyMembershipCard: async () => {
     const response = await api.get('/MembershipCard/my-card');
     return response.data;
   },
 
-  getTiers: async () => {
+  getMyCard: async () => {
+    return membershipService.getMyMembershipCard();
+  },
+
+  getMembershipTiers: async () => {
     const response = await api.get('/MembershipCard/tiers');
     return response.data;
+  },
+
+  getTiers: async () => {
+    return membershipService.getMembershipTiers();
   },
 
   getAvailableSlots: async (typeId) => {
