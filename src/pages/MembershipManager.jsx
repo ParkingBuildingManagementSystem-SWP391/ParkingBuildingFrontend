@@ -415,7 +415,7 @@ const MembershipManager = () => {
               { value: 'Active', label: 'Active' },
               { value: 'PendingPayment', label: 'PendingPayment' },
               { value: 'Expired', label: 'Expired' },
-              { value: 'Canceled', label: 'Canceled' },
+              { value: 'Cancelled', label: 'Cancelled' },
             ]}
           />
 

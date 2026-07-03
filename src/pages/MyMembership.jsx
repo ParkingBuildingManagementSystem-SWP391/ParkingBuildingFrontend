@@ -79,6 +79,36 @@ const getTierDuration = (tier) => Number(getValue(tier, 'durationMonths', 'durat
 const getSlotId = (slot) => Number(getValue(slot, 'slotId', 'id', 'SlotId'));
 const getSlotName = (slot, t) => getValue(slot, 'slotName', 'name', 'SlotName') || t('membership.slotFallback', { id: getSlotId(slot) });
 
+const getCardTypeId = (card) => {
+  const tier = card?.tier || card?.Tier || {};
+  return Number(
+    getValue(card, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId') ||
+    getValue(tier, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId')
+  );
+};
+
+const getCardVehicles = (card) => {
+  const vehicles = getValue(card, 'licenseVehicles', 'LicenseVehicles', 'vehicles', 'Vehicles') || [];
+  const list = Array.isArray(vehicles) ? vehicles : [vehicles];
+  return list
+    .map((vehicle) => (
+      typeof vehicle === 'string'
+        ? vehicle
+        : getValue(vehicle, 'licenseVehicle', 'LicenseVehicle', 'plate', 'Plate')
+    ))
+    .filter(Boolean);
+};
+
+const getCardSlots = (card) => {
+  const slots = getValue(card, 'slots', 'Slots', 'membershipSlots', 'MembershipSlots') || [];
+  if (Array.isArray(slots) && slots.length) return slots;
+
+  const slotId = getValue(card, 'slotId', 'SlotId');
+  const slotName = getValue(card, 'slotName', 'SlotName');
+  const slotStatus = getValue(card, 'slotStatus', 'SlotStatus');
+  return slotId || slotName ? [{ slotId, slotName, slotStatus }] : [];
+};
+
 const getTierPrice = (tier, fallback = 0) => {
   const totalPrice = Number(getValue(tier, 'price', 'totalPrice', 'amount'));
   if (Number.isFinite(totalPrice) && totalPrice > 0) return totalPrice;
@@ -88,36 +118,28 @@ const getTierPrice = (tier, fallback = 0) => {
   return Number.isFinite(monthlyPrice) && monthlyPrice > 0 ? monthlyPrice * duration : fallback;
 };
 
-function groupMembershipCards(cards) {
-  const groups = {};
+const normalizeMembershipCard = (card) => {
+  const tier = card?.tier || card?.Tier || {};
+  const typeId = getCardTypeId(card);
 
-  cards.forEach((card) => {
-    const tier = card?.tier || {};
-    const tierId = getValue(tier, 'tierId', 'id') || getValue(card, 'tierId', 'membershipTierId') || 'unknown';
-    const startTime = getValue(card, 'startTime', 'startDate', 'StartTime', 'StartDate') || '';
-    const endTime = getValue(card, 'endTime', 'endDate', 'EndTime', 'EndDate') || '';
-    const key = `${tierId}_${startTime}_${endTime}`;
+  return {
+    ...card,
+    membershipCardId: getValue(card, 'membershipCardId', 'MembershipCardId', 'id', 'Id'),
+    ticketCode: getValue(card, 'ticketCode', 'TicketCode'),
+    startTime: getValue(card, 'startTime', 'startDate', 'StartTime', 'StartDate') || '',
+    endTime: getValue(card, 'endTime', 'endDate', 'EndTime', 'EndDate') || '',
+    tier: {
+      tierId: getValue(tier, 'tierId', 'TierId', 'id') || getValue(card, 'tierId', 'TierId', 'membershipTierId'),
+      tierName: getValue(tier, 'tierName', 'TierName', 'name') || getValue(card, 'tierName', 'TierName') || 'Membership',
+      typeId,
+      durationMonths: getTierDuration(tier) || Number(getValue(card, 'durationMonths', 'DurationMonths')),
+    },
+    vehicles: getCardVehicles(card),
+    slots: getCardSlots(card),
+  };
+};
 
-    if (!groups[key]) {
-      groups[key] = {
-        tier: {
-          tierId,
-          tierName: getValue(tier, 'tierName', 'name') || getValue(card, 'tierName') || 'Membership',
-          typeId: getTierTypeId(tier) || Number(getValue(card, 'typeId', 'vehicleTypeId', 'tariffId')),
-          durationMonths: getTierDuration(tier) || Number(getValue(card, 'durationMonths')),
-        },
-        startTime,
-        endTime,
-        vehicles: getValue(card, 'vehicles', 'licenseVehicles') || [],
-        slots: [],
-      };
-    }
-
-    groups[key].slots.push(card);
-  });
-
-  return Object.values(groups);
-}
+const normalizeMembershipCards = (cards) => cards.map(normalizeMembershipCard);
 
 const LoadingSkeleton = () => (
   <div className="mx-auto max-w-5xl px-4 py-8 animate-pulse space-y-4">
@@ -237,10 +259,14 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
                 <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Ô đỗ xe cố định</p>
                 <div className="space-y-2">
                   {slots.length > 0 ? slots.map((s) => (
-                    <div key={s.slotId} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-900">
+                    <div key={getValue(s, 'slotId', 'SlotId', 'slotName', 'SlotName')} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-900">
                       <CalendarCheck size={14} className="shrink-0 text-emerald-500" />
-                      <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{s.slotName}</span>
-                      <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Reserved</span>
+                      <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                        {getValue(s, 'slotName', 'SlotName') || t('membership.slotFallback', { id: getValue(s, 'slotId', 'SlotId') })}
+                      </span>
+                      <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                        {getValue(s, 'slotStatus', 'SlotStatus') || 'Reserved'}
+                      </span>
                     </div>
                   )) : (
                     <p className="text-xs text-slate-400">Chưa có ô đỗ</p>
@@ -270,7 +296,7 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
   );
 };
 
-const RegistrationView = ({ onRegister, submitting, t }) => {
+const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialVehicleTypeId = Number(searchParams.get('vehicleTypeId')) || null;
@@ -286,6 +312,16 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
   const [licenseVehicles, setLicenseVehicles] = useState(['']);
   const [paymentMethod, setPaymentMethod] = useState('AUTO');
   const [loadingTiers, setLoadingTiers] = useState(false);
+  const activeTypeIdSet = useMemo(() => new Set(activeTypeIds.map(Number)), [activeTypeIds]);
+  const availablePlans = useMemo(() => PLANS.filter((planItem) => !activeTypeIdSet.has(Number(planItem.id))), [activeTypeIdSet]);
+
+  useEffect(() => {
+    if (selectedTypeId && !activeTypeIdSet.has(Number(selectedTypeId))) return;
+
+    const nextPlan = availablePlans[0];
+    setSelectedTypeId(nextPlan?.id || null);
+    clearSelectedSlot();
+  }, [activeTypeIdSet, availablePlans, selectedTypeId]);
 
   useEffect(() => {
     if (initialSlotId) setSelectedSlotId(initialSlotId);
@@ -328,6 +364,11 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
   };
 
   const handleSelectType = (typeId) => {
+    if (activeTypeIdSet.has(Number(typeId))) {
+      message.info('Bạn đã có Membership đang Active cho loại xe này.');
+      return;
+    }
+
     setSelectedTypeId(typeId);
     clearSelectedSlot();
   };
@@ -381,9 +422,15 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
     const plates = licenseVehicles
       .map((plate) => plate.trim().toUpperCase())
       .filter(Boolean);
+    const uniquePlates = new Set(plates);
 
     if (!plates.length) {
       message.error(t('membership.errors.enterLicensePlate'));
+      return;
+    }
+
+    if (uniquePlates.size !== plates.length) {
+      message.error('Biển số trong cùng một gói không được trùng nhau.');
       return;
     }
 
@@ -395,10 +442,21 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
     onRegister({
       tierId: getTierId(selectedTier),
       slotId: selectedSlotId,
+      slotIds: [selectedSlotId],
       licenseVehicles: plates,
       paymentMethod,
     });
   };
+
+  if (!availablePlans.length) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 pb-8">
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 text-sm font-semibold text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+          Bạn đã có Membership Active cho tất cả loại xe hiện có. Hãy hủy gói cũ nếu muốn đăng ký lại cùng loại xe.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 py-8">
@@ -423,22 +481,26 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                 const PIcon = item.Icon;
                 const itemCls = accentCls[item.accent];
                 const isSelected = selectedTypeId === item.id;
+                const isActiveType = activeTypeIdSet.has(Number(item.id));
                 return (
                   <button
                     key={item.id}
+                    disabled={isActiveType}
                     onClick={() => handleSelectType(item.id)}
                     className={`relative rounded-xl border-2 p-4 text-left transition-all duration-150 ${
                       isSelected
                         ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10 shadow-sm'
                         : 'border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/30'
-                    }`}
+                    } ${isActiveType ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
                     {isSelected && <CheckCircle2 size={16} className="absolute right-3 top-3 text-indigo-600 dark:text-indigo-400" />}
                     <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border ${itemCls.icon}`}>
                       <PIcon size={20} />
                     </div>
                     <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(item.key, t)}</p>
-                    <p className="mt-0.5 text-xs font-semibold text-slate-400">{t('membership.membershipParking')}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-400">
+                      {isActiveType ? 'Đã có gói Active' : t('membership.membershipParking')}
+                    </p>
                   </button>
                 );
               })}
@@ -467,7 +529,9 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                         -{duration.discount}
                       </span>
                     )}
-                    <p className={`text-sm font-extrabold ${isSelected ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>{duration.label}</p>
+                    <p className={`text-sm font-extrabold ${isSelected ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>
+                      {t('membership.durationMonths', { count: duration.value })}
+                    </p>
                     <p className="mt-1 text-[10px] font-semibold text-slate-400">{1} ô đỗ</p>
                   </button>
                 );
@@ -596,7 +660,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membership.payment')}</p>
                 <div className="mt-2 grid grid-cols-1 gap-2">
-                  {['AUTO'].map((method) => (
+                  {['AUTO', 'VNPAY', 'WALLET'].map((method) => (
                     <button
                       key={method}
                       type="button"
@@ -607,8 +671,8 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                           : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-900'
                       }`}
                     >
-                      <Wallet size={14} />
-                      AUTO
+                      {method === 'VNPAY' ? <CreditCard size={14} /> : <Wallet size={14} />}
+                      {method}
                     </button>
                   ))}
                 </div>
@@ -691,6 +755,12 @@ const MyMembership = () => {
     fetchCardInfo();
   }, [fetchCardInfo]);
 
+  const activeCards = useMemo(() => normalizeMembershipCards(cards), [cards]);
+  const activeTypeIds = useMemo(
+    () => [...new Set(activeCards.map((card) => getCardTypeId(card)).filter(Boolean))],
+    [activeCards]
+  );
+
   const handleCancel = async (cardId) => {
     if (!window.confirm('Bạn có chắc muốn hủy thẻ thành viên? Hành động này không thể hoàn tác và slot sẽ được giải phóng.')) return;
     try {
@@ -734,8 +804,19 @@ const MyMembership = () => {
   };
 
   if (loadingCard) return <LoadingSkeleton />;
-  if (cards.length > 0) return <ActiveMembershipView cards={cards} onRefresh={fetchCardInfo} onCancel={handleCancel} t={t} />;
-  return <RegistrationView onRegister={handleRegister} submitting={submitting} t={t} />;
+  return (
+    <>
+      {activeCards.length > 0 && (
+        <ActiveMembershipView cards={activeCards} onRefresh={fetchCardInfo} onCancel={handleCancel} t={t} />
+      )}
+      <RegistrationView
+        activeTypeIds={activeTypeIds}
+        onRegister={handleRegister}
+        submitting={submitting}
+        t={t}
+      />
+    </>
+  );
 };
 
 export default MyMembership;
