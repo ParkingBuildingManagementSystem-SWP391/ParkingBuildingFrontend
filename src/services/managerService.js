@@ -53,7 +53,7 @@ export const managerService = {
 
   getStaffLogs: async () => {
     try {
-      // TODO backend: implement GET /api/Manager/staff-logs returning an array of staff activity logs.
+      // TODO backend: implement GET /Manager/staff-logs returning an array of staff activity logs.
       const response = await api.get('/Manager/staff-logs');
       return response.data;
     } catch (error) {
@@ -82,12 +82,11 @@ export const managerService = {
         dayRate: Number(data.dayRate),
         nightRate: Number(data.nightRate),
         fullDayRate: Number(data.fullDayRate),
-        monthlyPrice: Number(data.monthlyPrice),
+        firstHourRate: Number(data.firstHourRate ?? 0),
+        subsequentHourRate: Number(data.subsequentHourRate ?? 0),
         maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
           ? Number(data.maxHoursPerTurn)
-          : null,
-        firstHourRate: Number(data.firstHourRate ?? 0),
-        subsequentHourRate: Number(data.subsequentHourRate ?? 0)
+          : null
       });
       return response.data;
     } catch (error) {
@@ -99,8 +98,9 @@ export const managerService = {
   updateMembershipPricing: async (data) => {
     try {
       const response = await api.put('/Manager/update-membership-pricing', {
-        tierId: Number(data.tierId),
-        monthlyPrice: Number(data.monthlyPrice),
+        TypeId: Number(data.typeId),
+        DurationMonths: Number(data.durationMonths),
+        Price: Number(data.price),
       });
       return response.data;
     } catch (error) {
@@ -109,9 +109,14 @@ export const managerService = {
     }
   },
 
-  getMemberships: async () => {
+  getMembershipTiers: async () => {
+    const response = await api.get('/MembershipCard/tiers');
+    return response.data;
+  },
+
+  getMemberships: async (params = {}) => {
     try {
-      const response = await api.get('/MembershipCard/tiers');
+      const response = await api.get('/Manager/membership-cards', { params });
       return response.data;
     } catch (error) {
       console.error('getMemberships error:', error);
@@ -125,7 +130,7 @@ export const managerService = {
 
   cancelMembership: async (membershipCardId) => {
     try {
-      const response = await api.put(`/Manager/monthly-card/${membershipCardId}/cancel`);
+      const response = await api.delete(`/Manager/membership-cards/${membershipCardId}/cancel`);
       return response.data;
     } catch (error) {
       console.error(`cancelMembership error for card ${membershipCardId}:`, error);

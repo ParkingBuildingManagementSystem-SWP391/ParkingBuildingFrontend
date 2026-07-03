@@ -616,8 +616,8 @@
       "dayRate": "Giá ban ngày",
       "nightRate": "Giá ban đêm",
       "fullDayRate": "Giá cả ngày",
-      "firstHourPrice": "Giá giờ đầu",
-      "nextHourPrice": "Giá giờ sau",
+      "firstHourRate": "Giá giờ đầu",
+      "subsequentHourRate": "Giá giờ sau",
       "monthlyPrice": "Phí Membership",
       "maxHours": "Giờ tối đa mỗi lượt",
       "action": "Thao tác",
@@ -896,7 +896,36 @@
   },
   "wallet": {
     "title": "Ví của tôi",
-    "subtitle": "Quản lý số dư và lịch sử giao dịch ví"
+    "subtitle": "Quản lý số dư ví và lịch sử giao dịch",
+    "eWallet": "Ví điện tử",
+    "refresh": "Làm mới",
+    "loading": "Đang tải...",
+    "depositMoney": "Nạp tiền vào ví",
+    "vnpayNote": "Thanh toán qua cổng VNPay.",
+    "depositAmount": "Số tiền nạp",
+    "amountPlaceholder": "Nhập số tiền",
+    "deposit": "Nạp tiền",
+    "processing": "Đang xử lý...",
+    "transactionHistory": "Lịch sử giao dịch",
+    "emptyHistory": "Chưa có giao dịch ví.",
+    "transactionTypes": {
+      "payment": "Thanh toán",
+      "deposit": "Nạp tiền"
+    },
+    "table": {
+      "time": "Thời gian",
+      "type": "Loại",
+      "amount": "Số tiền",
+      "status": "Trạng thái"
+    },
+    "messages": {
+      "depositCreated": "Tạo yêu cầu nạp ví thành công."
+    },
+    "errors": {
+      "load": "Không thể tải thông tin ví.",
+      "minimumDeposit": "Số tiền nạp tối thiểu là 10.000đ.",
+      "createDeposit": "Không thể tạo giao dịch nạp ví."
+    }
   },
   "common": {
     "openMenu": "Mở menu",
@@ -910,8 +939,9 @@
     "notUpdated": "Chưa cập nhật"
   },
   "membership": {
-    "title": "Membership của tôi",
+    "title": "Gói thành viên",
     "subtitle": "Quản lý và đăng ký Membership cho phương tiện của bạn",
+    "label": "Gói thành viên",
     "managerTitle": "Quản lý Membership",
     "managerSubtitle": "Theo dõi danh sách thẻ thành viên, vị trí cố định và trạng thái hiệu lực.",
     "paymentRequestSubtitle": "Chọn gói, nhập biển số và vị trí ô đỗ cố định để tạo yêu cầu thanh toán",
@@ -924,8 +954,44 @@
     "qrTitle": "Mã QR Membership của bạn",
     "qrAlt": "Mã QR Membership",
     "qrInstruction": "Sử dụng mã QR này quét tại đầu đọc ở cổng vào/ra để đỗ xe",
-    "registerTitle": "Đăng ký Membership",
+    "registerTitle": "Đăng ký gói thành viên",
+    "registerSubtitle": "Chọn gói, số ô đỗ theo thời hạn và thanh toán một lần.",
     "registerDescription": "Chọn loại xe và thời hạn để tạo yêu cầu thanh toán VNPay.",
+    "activeTitle": "Gói thành viên đang hoạt động",
+    "activeSubtitle": "Mỗi ô đỗ có một mã QR riêng.",
+    "refresh": "Làm mới",
+    "membershipParking": "Gửi xe theo gói thành viên",
+    "selectVehicleType": "Chọn loại xe",
+    "registrationDuration": "Thời hạn đăng ký",
+    "selectSlots": "Chọn ô đỗ",
+    "selectedSlots": "Đã chọn {{selected}}/{{total}} ô đỗ",
+    "selectVehicleAndDurationFirst": "Chọn loại xe và thời hạn trước.",
+    "loadingSlots": "Đang tải ô đỗ...",
+    "noAvailableSlots": "Không có ô đỗ trống phù hợp.",
+    "licensePlate": "Biển số xe",
+    "licensePlateLabel": "Biển số xe",
+    "addLicensePlate": "Thêm biển số",
+    "licensePlatePlaceholder": "Ví dụ: 51F-123.45",
+    "maxLicensePlatesHint": "Tối đa {{count}} biển số cho gói đang chọn.",
+    "registrationSummary": "Tóm tắt đăng ký",
+    "payment": "Thanh toán",
+    "total": "Tổng cộng",
+    "choosePackageToViewTotal": "Chọn gói để xem tổng tiền",
+    "processing": "Đang xử lý...",
+    "validity": "Hiệu lực",
+    "validUntil": "đến {{date}}",
+    "validityPeriod": "Thời hạn hiệu lực",
+    "daysLeft": "Còn {{count}} ngày",
+    "slotNumber": "Ô đỗ #{{number}}",
+    "slotFallback": "Ô đỗ {{id}}",
+    "slotsCount": "{{count}} ô đỗ",
+    "noCode": "Chưa có mã",
+    "noTierConfig": "Gói này chưa có cấu hình tier từ Backend.",
+    "perks": {
+      "ownQrPerSlot": "Mỗi ô đỗ có QR riêng",
+      "autoPlateRecognition": "Tự động nhận diện biển số",
+      "centralMembershipManagement": "Quản lý tập trung trong gói thành viên"
+    },
     "vehicleType": "Loại xe",
     "vehicleTypePlaceholder": "Chọn loại xe",
     "duration": "Thời hạn",
@@ -944,7 +1010,13 @@
       "noRegisterPermission": "Bạn không có quyền đăng ký Membership.",
       "createRegistration": "Không thể tạo đăng ký Membership.",
       "selectVehicle": "Vui lòng chọn loại xe.",
-      "selectDuration": "Vui lòng chọn thời hạn."
+      "selectDuration": "Vui lòng chọn thời hạn.",
+      "loadTiers": "Không thể tải danh sách gói thành viên.",
+      "loadAvailableSlots": "Không thể tải danh sách ô đỗ còn trống.",
+      "maxLicensePlates": "Gói này chỉ hỗ trợ tối đa {{count}} biển số.",
+      "selectValidPackage": "Vui lòng chọn gói thành viên hợp lệ.",
+      "selectExactSlots": "Vui lòng chọn đúng {{count}} ô đỗ.",
+      "enterLicensePlate": "Vui lòng nhập ít nhất 1 biển số."
     },
     "durationMonth": "{{count}} tháng"
   },

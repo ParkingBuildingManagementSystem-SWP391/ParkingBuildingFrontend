@@ -28,9 +28,9 @@ const PLANS = [
 ];
 
 const DURATIONS = [
-  { value: 1, label: '1 tháng', discount: null },
-  { value: 6, label: '6 tháng', discount: '5%' },
-  { value: 12, label: '12 tháng', discount: '10%' },
+  { value: 1, discount: null },
+  { value: 6, discount: '5%' },
+  { value: 12, discount: '10%' },
 ];
 
 const accentCls = {
@@ -77,7 +77,7 @@ const getTierId = (tier) => getValue(tier, 'tierId', 'id', 'membershipTierId');
 const getTierTypeId = (tier) => Number(getValue(tier, 'typeId', 'vehicleTypeId', 'tariffId'));
 const getTierDuration = (tier) => Number(getValue(tier, 'durationMonths', 'durationInMonths', 'months'));
 const getSlotId = (slot) => Number(getValue(slot, 'slotId', 'id', 'SlotId'));
-const getSlotName = (slot) => getValue(slot, 'slotName', 'name', 'SlotName') || `Slot ${getSlotId(slot)}`;
+const getSlotName = (slot, t) => getValue(slot, 'slotName', 'name', 'SlotName') || t('membership.slotFallback', { id: getSlotId(slot) });
 
 const getTierPrice = (tier, fallback = 0) => {
   const totalPrice = Number(getValue(tier, 'price', 'totalPrice', 'amount'));
@@ -144,7 +144,7 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
           className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
           <RefreshCw size={14} />
-          Làm mới
+          {t('membership.refresh')}
         </button>
       </div>
 
@@ -178,7 +178,7 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
                 <div>
                   <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                     <ShieldCheck size={10} />
-                    Membership
+                    {t('membership.label')}
                   </div>
                   <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
                     {getValue(tier, 'tierName', 'name') || 'Membership'}
@@ -206,8 +206,8 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
             {/* Progress */}
             <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-700">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Thời hạn hiệu lực</span>
-                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{daysLeft} ngày còn lại</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{t('membership.validityPeriod')}</span>
+                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{t('membership.daysLeft', { count: daysLeft })}</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 <div className={`h-full rounded-full transition-all duration-700 ${cls.bar}`} style={{ width: `${Math.max(2, 100 - progressPct)}%` }} />
@@ -300,7 +300,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
         setTiers(unwrapArray(response));
       } catch (error) {
         console.error('Membership tiers error:', error);
-        message.error('Không thể tải danh sách gói Membership.');
+        message.error(t('membership.errors.loadTiers'));
       } finally {
         setLoadingTiers(false);
       }
@@ -357,7 +357,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
   const addPlate = () => {
     if (licenseVehicles.length >= maxVehicles) {
-      message.error(`Gói này chỉ hỗ trợ tối đa ${maxVehicles} biển số.`);
+      message.error(t('membership.errors.maxLicensePlates', { count: maxVehicles }));
       return;
     }
     setLicenseVehicles((prev) => [...prev, '']);
@@ -369,7 +369,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
   const handleSubmit = () => {
     if (!selectedTier) {
-      message.error('Vui lòng chọn gói Membership hợp lệ.');
+      message.error(t('membership.errors.selectValidPackage'));
       return;
     }
 
@@ -383,12 +383,12 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
       .filter(Boolean);
 
     if (!plates.length) {
-      message.error('Vui lòng nhập ít nhất 1 biển số.');
+      message.error(t('membership.errors.enterLicensePlate'));
       return;
     }
 
     if (plates.length > maxVehicles) {
-      message.error(`Gói này chỉ hỗ trợ tối đa ${maxVehicles} biển số.`);
+      message.error(t('membership.errors.maxLicensePlates', { count: maxVehicles }));
       return;
     }
 
@@ -417,7 +417,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
       <div className="grid gap-4 xl:grid-cols-3">
         <div className="space-y-4 xl:col-span-2">
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Chọn loại xe</p>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.selectVehicleType')}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               {PLANS.map((item) => {
                 const PIcon = item.Icon;
@@ -438,7 +438,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                       <PIcon size={20} />
                     </div>
                     <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(item.key, t)}</p>
-                    <p className="mt-0.5 text-xs font-semibold text-slate-400">Membership parking</p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-400">{t('membership.membershipParking')}</p>
                   </button>
                 );
               })}
@@ -446,7 +446,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
           </div>
 
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Thời hạn đăng ký</p>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.registrationDuration')}</p>
             <div className="grid grid-cols-3 gap-3">
               {DURATIONS.map((duration) => {
                 const isSelected = selectedDuration === duration.value;
@@ -474,7 +474,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
               })}
             </div>
             {selectedTypeId && !selectedTier && !loadingTiers && (
-              <p className="mt-3 text-xs font-semibold text-rose-500">Gói này chưa có cấu hình tier từ Backend.</p>
+              <p className="mt-3 text-xs font-semibold text-rose-500">{t('membership.noTierConfig')}</p>
             )}
           </div>
 
@@ -513,9 +513,9 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
             {false && (!selectedTier ? (
               <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">Chọn loại xe và thời hạn trước.</div>
             ) : loadingSlots ? (
-              <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">Đang tải ô đỗ...</div>
+              <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">{t('membership.loadingSlots')}</div>
             ) : availableSlots.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">Không có ô đỗ trống phù hợp.</div>
+              <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">{t('membership.noAvailableSlots')}</div>
             ) : (
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {availableSlots.map((slot) => {
@@ -549,8 +549,8 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Biển số xe</p>
-              <button type="button" onClick={addPlate} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">Thêm biển số</button>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.licensePlate')}</p>
+              <button type="button" onClick={addPlate} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">{t('membership.addLicensePlate')}</button>
             </div>
             <div className="space-y-2">
               {licenseVehicles.map((plate, index) => (
@@ -559,7 +559,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                     type="text"
                     value={plate}
                     onChange={(event) => updatePlate(index, event.target.value)}
-                    placeholder="Ví dụ: 51F-123.45"
+                    placeholder={t('membership.licensePlatePlaceholder')}
                     className="h-11 flex-1 rounded-[14px] border border-slate-200 bg-slate-50 px-4 text-sm font-bold uppercase tracking-wider text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                   {licenseVehicles.length > 1 && (
@@ -574,12 +574,12 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[11px] font-medium text-slate-400">Tối đa {maxVehicles} biển số cho gói đang chọn.</p>
+            <p className="mt-2 text-[11px] font-medium text-slate-400">{t('membership.maxLicensePlatesHint', { count: maxVehicles })}</p>
           </div>
         </div>
 
         <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <p className="mb-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tóm tắt đăng ký</p>
+          <p className="mb-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.registrationSummary')}</p>
 
           {plan && cls ? (
             <div className="flex-1 space-y-4">
@@ -594,7 +594,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
               </div>
 
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thanh toán</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membership.payment')}</p>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {['VNPAY', 'WALLET'].map((method) => (
                     <button
@@ -608,7 +608,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                       }`}
                     >
                       {method === 'WALLET' ? <Wallet size={14} /> : <CreditCard size={14} />}
-                      {method}
+                      {method === 'WALLET' ? t('wallet.eWallet') : method}
                     </button>
                   ))}
                 </div>
@@ -616,7 +616,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
               <div className="border-t border-slate-100 pt-3 dark:border-slate-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Tổng cộng</span>
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{t('membership.total')}</span>
                   <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">{totalPrice.toLocaleString('vi-VN')} đ</span>
                 </div>
               </div>
@@ -625,7 +625,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                 {['Giữ 1 ô cố định trong suốt thời hạn thẻ', 'Tự động nhận diện biển số', 'Quản lý tập trung trong Membership'].map((perk) => (
                   <li key={perk} className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                     <CheckCircle2 size={11} className="shrink-0 text-emerald-500" />
-                    {perk}
+                    {t(`membership.perks.${perk}`)}
                   </li>
                 ))}
               </ul>
@@ -633,7 +633,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-10 dark:border-slate-700">
               <Wallet size={26} className="mb-2 text-slate-300 dark:text-slate-600" />
-              <p className="text-xs text-slate-400 dark:text-slate-500">Chọn gói để xem tổng tiền</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">{t('membership.choosePackageToViewTotal')}</p>
             </div>
           )}
 
@@ -652,12 +652,12 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
-                Đang xử lý...
+                {t('membership.processing')}
               </>
             ) : (
               <>
                 <CreditCard size={15} />
-                Đăng ký Membership
+                {t('membership.registerTitle')}
               </>
             )}
           </button>
