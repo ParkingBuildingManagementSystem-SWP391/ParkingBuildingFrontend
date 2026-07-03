@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Input, Modal, Select, Space, Table, Tag, Typography, message } from 'antd';
-import { Ban, RefreshCw } from 'lucide-react';
+import { Button, Input, InputNumber, Modal, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Ban, DollarSign, RefreshCw } from 'lucide-react';
 import { managerService } from '../services/managerService';
 import { formatVietnamDateTime } from '../utils/dateTime';
 
@@ -13,6 +13,17 @@ const unwrapMembershipCards = (payload) => {
   if (Array.isArray(data?.data)) return data.data;
   if (Array.isArray(data?.cards)) return data.cards;
   if (Array.isArray(data?.data?.cards)) return data.data.cards;
+
+  return [];
+};
+
+const unwrapMembershipTiers = (payload) => {
+  const data = payload?.data ?? payload;
+
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.tiers)) return data.tiers;
+  if (Array.isArray(data?.data?.tiers)) return data.data.tiers;
 
   return [];
 };
@@ -58,6 +69,10 @@ const MembershipManager = () => {
   const [cancelingIds, setCancelingIds] = useState({});
   const [statusFilter, setStatusFilter] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [tiers, setTiers] = useState([]);
+  const [loadingTiers, setLoadingTiers] = useState(false);
+  const [savingTierIds, setSavingTierIds] = useState({});
+  const [tierPrices, setTierPrices] = useState({});
 
   const fetchMemberships = useCallback(async () => {
     setLoading(true);
@@ -74,9 +89,61 @@ const MembershipManager = () => {
     }
   }, [searchText, statusFilter]);
 
+  const fetchTiers = useCallback(async () => {
+    setLoadingTiers(true);
+    try {
+      const response = await managerService.getMembershipTiers();
+      const tierList = unwrapMembershipTiers(response);
+      setTiers(tierList);
+      setTierPrices(
+        tierList.reduce((acc, tier) => {
+          const tierId = getValue(tier, 'tierId', 'TierId');
+          if (tierId !== undefined && tierId !== null) {
+            acc[tierId] = Number(getValue(tier, 'price', 'Price') || 0);
+          }
+          return acc;
+        }, {})
+      );
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Không thể tải cấu hình giá Membership.');
+    } finally {
+      setLoadingTiers(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMemberships();
   }, [fetchMemberships]);
+
+  useEffect(() => {
+    fetchTiers();
+  }, [fetchTiers]);
+
+  const handleSaveTierPrice = async (tier) => {
+    const tierId = getValue(tier, 'tierId', 'TierId');
+    const typeId = getValue(tier, 'typeId', 'TypeId');
+    const durationMonths = getValue(tier, 'durationMonths', 'DurationMonths');
+    const price = tierPrices[tierId];
+
+    setSavingTierIds((prev) => ({ ...prev, [tierId]: true }));
+    try {
+      await managerService.updateMembershipPricing({
+        typeId,
+        durationMonths,
+        price,
+      });
+      message.success('Đã cập nhật giá gói Membership.');
+      fetchTiers();
+    } catch (error) {
+      message.error(
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Không thể cập nhật giá gói Membership.'
+      );
+    } finally {
+      setSavingTierIds((prev) => ({ ...prev, [tierId]: false }));
+    }
+  };
 
   const handleCancel = (record) => {
     const membershipCardId = getValue(record, 'membershipCardId', 'MembershipCardId', 'id', 'Id');
@@ -107,6 +174,73 @@ const MembershipManager = () => {
       }
     });
   };
+
+  const tierColumns = [
+    {
+      title: 'Tên gói',
+      key: 'tierName',
+      render: (_, record) => (
+        <Text strong>{getValue(record, 'tierName', 'TierName') || 'Chưa cập nhật'}</Text>
+      )
+    },
+    {
+      title: 'Loại xe',
+      key: 'vehicleType',
+      render: (_, record) => (
+        <Tag color="blue">
+          {getValue(record, 'vehicleType', 'VehicleType', 'vehicleTypeName', 'VehicleTypeName') || 'N/A'}
+        </Tag>
+      )
+    },
+    {
+      title: 'Thời hạn',
+      key: 'durationMonths',
+      render: (_, record) => `${getValue(record, 'durationMonths', 'DurationMonths') || 0} tháng`
+    },
+    {
+      title: 'Xe tối đa',
+      key: 'maxVehicles',
+      render: (_, record) => getValue(record, 'maxVehicles', 'MaxVehicles') || 0
+    },
+    {
+      title: 'Giá',
+      key: 'price',
+      render: (_, record) => {
+        const tierId = getValue(record, 'tierId', 'TierId');
+
+        return (
+          <InputNumber
+            min={0}
+            value={tierPrices[tierId]}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+            onChange={(value) => setTierPrices((prev) => ({ ...prev, [tierId]: value ?? 0 }))}
+            addonAfter="VND"
+            className="w-full max-w-[220px]"
+          />
+        );
+      }
+    },
+    {
+      title: '',
+      key: 'actions',
+      align: 'right',
+      render: (_, record) => {
+        const tierId = getValue(record, 'tierId', 'TierId');
+
+        return (
+          <Button
+            type="primary"
+            icon={<DollarSign size={15} />}
+            loading={Boolean(savingTierIds[tierId])}
+            onClick={() => handleSaveTierPrice(record)}
+          >
+            Lưu
+          </Button>
+        );
+      }
+    }
+  ];
 
   const columns = [
     {
@@ -239,6 +373,29 @@ const MembershipManager = () => {
 
   return (
     <div className="px-4 py-6">
+      <div className="mb-6 rounded-2xl bg-white p-5 shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <Typography.Title level={4} className="!mb-1">
+              Cấu hình giá gói Membership
+            </Typography.Title>
+            <Text type="secondary">Giá Membership được lưu theo MembershipTier.</Text>
+          </div>
+          <Button icon={<RefreshCw size={15} />} onClick={fetchTiers} loading={loadingTiers}>
+            Làm mới
+          </Button>
+        </div>
+
+        <Table
+          rowKey={(record) => getValue(record, 'tierId', 'TierId')}
+          columns={tierColumns}
+          dataSource={tiers}
+          loading={loadingTiers}
+          pagination={false}
+          scroll={{ x: 900 }}
+        />
+      </div>
+
       <div className="mb-5 flex justify-end">
         <Space wrap>
           <Input.Search
