@@ -96,6 +96,19 @@ export const managerService = {
     }
   },
 
+  updateMembershipPricing: async (data) => {
+    try {
+      const response = await api.put('/Manager/update-membership-pricing', {
+        tierId: Number(data.tierId),
+        monthlyPrice: Number(data.monthlyPrice),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('updateMembershipPricing error:', error);
+      throw error;
+    }
+  },
+
   getMemberships: async () => {
     try {
       const response = await api.get('/MembershipCard/tiers');
@@ -106,6 +119,10 @@ export const managerService = {
     }
   },
 
+  getMonthlyCards: async () => {
+    return managerService.getMemberships();
+  },
+
   cancelMembership: async (membershipCardId) => {
     try {
       const response = await api.put(`/Manager/monthly-card/${membershipCardId}/cancel`);
@@ -114,5 +131,9 @@ export const managerService = {
       console.error(`cancelMembership error for card ${membershipCardId}:`, error);
       throw error;
     }
+  },
+
+  cancelMonthlyCard: async (membershipCardId) => {
+    return managerService.cancelMembership(membershipCardId);
   }
 };

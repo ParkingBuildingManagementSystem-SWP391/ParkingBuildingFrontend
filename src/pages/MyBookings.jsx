@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
 import { parkingService } from '../services/parkingService';
 
 import {
@@ -66,15 +65,12 @@ const MyBookings = () => {
   const handlePayVNPay = async (booking) => {
     setPayingSessionId(booking.id);
     try {
-      const response = await api.post('/Payments/vnpay/create', {
-        sessionId: parseInt(booking.id),
-        ipAddress: "127.0.0.1"
-      });
-      if (response.data && response.data.success && response.data.paymentUrl) {
+      const response = await parkingService.createVnPayPayment(booking.id);
+      if (response && response.success && response.paymentUrl) {
         // Redirect to VNPay payment URL
-        window.location.href = response.data.paymentUrl;
+        window.location.href = response.paymentUrl;
       } else {
-        message.error(response.data?.message || t('myBookings.errVNPayCreate'));
+        message.error(response?.message || t('myBookings.errVNPayCreate'));
       }
     } catch (err) {
       console.error("VNPay payment creation error:", err);
@@ -117,27 +113,19 @@ const MyBookings = () => {
     setLoading(true);
     setError('');
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-
-      // Add cache-buster to prevent browser/Cloudflare from returning stale 'Reserved' data
-      const timestamp = new Date().getTime();
-      const response = await api.get(`/Parking/my-bookings?t=${timestamp}`, config);
-
       // Map properties from .NET DTO response
-      const dashboard = response.data || {};
-      const data = dashboard.bookingsList || [];
+      const dashboard = await parkingService.getMyBookings();
+      const data = Array.isArray(dashboard)
+        ? dashboard
+        : dashboard?.bookingsList || dashboard?.data?.bookingsList || dashboard?.data || [];
 
       // Update statistics state
       setStats({
-        totalBookings: dashboard.totalBookings || 0,
-        activeBookings: dashboard.activeBookings || 0,
-        completedBookings: dashboard.completedBookings || 0,
-        canceledBookings: dashboard.canceledBookings || 0,
-        totalAmountSpent: dashboard.totalAmountSpent || 0
+        totalBookings: dashboard?.totalBookings || dashboard?.data?.totalBookings || 0,
+        activeBookings: dashboard?.activeBookings || dashboard?.data?.activeBookings || 0,
+        completedBookings: dashboard?.completedBookings || dashboard?.data?.completedBookings || 0,
+        canceledBookings: dashboard?.canceledBookings || dashboard?.data?.canceledBookings || 0,
+        totalAmountSpent: dashboard?.totalAmountSpent || dashboard?.data?.totalAmountSpent || 0
       });
 
       const mapped = data.map((item, idx) => {

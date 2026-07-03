@@ -143,6 +143,62 @@ export const parkingService = {
   },
 
   // 7. Lấy trạng thái thanh toán của hóa đơn
+  getMyBookings: async () => {
+    try {
+      const timestamp = new Date().getTime();
+      const response = await api.get(`/Parking/my-bookings?t=${timestamp}`);
+      return response.data;
+    } catch (error) {
+      const serverMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Không thể tải danh sách đặt chỗ.';
+      throw serverMessage;
+    }
+  },
+
+  getActiveSessions: async () => {
+    try {
+      const response = await api.get('/Parking/active-sessions');
+      return response.data;
+    } catch (error) {
+      const serverMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Không thể tải danh sách xe đang đỗ.';
+      throw serverMessage;
+    }
+  },
+
+  locateVehicle: async (licensePlate) => {
+    try {
+      const formattedPlate = String(licensePlate || '')
+        .replace(/[.\-\s]/g, '')
+        .toUpperCase();
+
+      const response = await api.get('/Parking/locate', {
+        params: { licensePlate: formattedPlate },
+      });
+
+      return response.data;
+    } catch (error) {
+      const serverMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Không tìm thấy phương tiện đang đỗ trong bãi.';
+      throw serverMessage;
+    }
+  },
+
+  getPaymentStatusById: async (invoiceId) => {
+    try {
+      const response = await api.get(`/Payments/status/${invoiceId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Payment status check failed.';
+    }
+  },
+
   getPaymentStatus: async (invoiceId) => {
     try {
       const response = await api.get(`/Payments/status/${invoiceId}`);

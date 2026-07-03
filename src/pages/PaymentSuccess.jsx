@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Clock, ArrowRight, CreditCard, ShieldAlert, QrCode, Wallet } from 'lucide-react';
-import api from '../services/api';
+import { parkingService } from '../services/parkingService';
 import { useTranslation } from 'react-i18next';
 
 const PaymentSuccess = () => {
@@ -83,8 +83,14 @@ const PaymentSuccess = () => {
       attempts++;
       setLoadingText(t('paymentSuccess.loadingText2', { attempts, maxAttempts }));
       try {
-        const response = await api.get(`/Payments/status/${invoiceId}`);
-        const currentStatus = String(response.data?.status || '').trim();
+        const response = await parkingService.getPaymentStatusById(invoiceId);
+        const currentStatus = String(
+          response?.status ||
+          response?.data?.status ||
+          response?.paymentStatus ||
+          response?.data?.paymentStatus ||
+          ''
+        ).trim();
         const currentStatusKey = currentStatus.toUpperCase();
 
         if (currentStatusKey === 'DEPOSITED') {
@@ -121,8 +127,10 @@ const PaymentSuccess = () => {
   // Fetch session details from my-bookings to display QR Code if deposited
   const fetchBookingDetails = async () => {
     try {
-      const response = await api.get('/Parking/my-bookings');
-      const bookings = response.data?.bookingsList || [];
+      const response = await parkingService.getMyBookings();
+      const bookings = Array.isArray(response)
+        ? response
+        : response?.bookingsList || response?.data?.bookingsList || response?.data || [];
       // Find the booking that has deposit status or matches invoice (fallback to first active booking)
       const matched = bookings.find(b => b.paymentStatus === 'Deposited' || b.sessionStatus === 'Reserved');
       if (matched) {

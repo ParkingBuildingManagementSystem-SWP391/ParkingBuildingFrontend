@@ -598,7 +598,7 @@ const ParkingLotMap = () => {
           message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
           return;
         }
-        navigate(`/my-membership?selectedSlotId=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
+        navigate(`/my-membership?slotIds=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
       } else {
         message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
       }
