@@ -4,7 +4,7 @@ import { Eye, RotateCcw, Search, Ticket } from 'lucide-react';
 import parkingSessionService from '../services/parkingSessionService';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
-import { formatDateTimeVN, vietnamDateInputToIso } from '../utils/dateTime';
+import { formatVietnamDateTime, vietnamDateInputToIso } from '../utils/dateTime';
 
 const initialFilters = {
   licenseVehicle: '',
@@ -94,9 +94,7 @@ const getStatusColor = (status) => {
 
 const formatDateTime = (value, t) => {
   if (!value) return t('parkingSession.notAvail');
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-  return formatDateTimeVN(date);
+  return formatVietnamDateTime(value);
 };
 
 const getPageNumbers = (currentPage, totalPages) => {

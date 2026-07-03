@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
-import { formatDateVN, formatTimeVN } from '../utils/dateTime';
+import { formatVietnamDate, formatVietnamTime } from '../utils/dateTime';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -144,8 +144,8 @@ const MyBookings = () => {
           // BE sends UTC time. Ensure we append 'Z' if missing so JS parses it as UTC, converting to local VN time.
           const raw = String(item.bookingTime);
           const bookingDate = raw.endsWith('Z') ? raw : raw + 'Z';
-          bookedDate = formatDateVN(bookingDate, 'N/A');
-          bookedTime = formatTimeVN(bookingDate, 'N/A');
+          bookedDate = formatVietnamDate(bookingDate);
+          bookedTime = formatVietnamTime(bookingDate);
         }
 
         if (deadlineBaseTime) {
@@ -153,13 +153,12 @@ const MyBookings = () => {
           const base = new Date(rawBase.endsWith('Z') ? rawBase : rawBase + 'Z');
           if (!isNaN(base.getTime())) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
-            deadlineTime = formatTimeVN(deadline, 'N/A');
+            deadlineTime = formatVietnamTime(deadline);
           }
         }
 
-        // Kiểm tra xem là vé tháng hay đặt chỗ
-        const isMonthly = (item.ticketCode || item.TicketCode || '').startsWith('MC_');
-        const ticketType = isMonthly ? 'MonthlyCard' : 'Booking';
+        const isMembership = (item.ticketCode || item.TicketCode || '').startsWith('MC_');
+        const ticketType = isMembership ? 'Membership' : 'Booking';
 
         return {
           id: item.sessionId || item.SessionId || idx + 1,
@@ -474,7 +473,7 @@ const MyBookings = () => {
                           {booking.vehicleType}
                         </span>
                         {/* Badge phân loại Membership / Đặt chỗ */}
-                        {booking.ticketType === 'MonthlyCard' ? (
+                        {booking.ticketType === 'Membership' ? (
                           <span className="rounded-md bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:bg-purple-500/15 dark:text-purple-300">
                             Membership
                           </span>
@@ -520,12 +519,12 @@ const MyBookings = () => {
                         <div className="space-y-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
                           <div className="flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                            In: {formatTimeVN(booking.checkInTime, 'N/A')}
+                            In: {formatVietnamTime(booking.checkInTime)}
                           </div>
                           {booking.checkOutTime && (
                             <div className="flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                              Out: {formatTimeVN(booking.checkOutTime, 'N/A')}
+                              Out: {formatVietnamTime(booking.checkOutTime)}
                             </div>
                           )}
                         </div>
@@ -535,7 +534,7 @@ const MyBookings = () => {
                     {/* Financial Metric */}
                     <div className="flex flex-col items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('myBookings.billing')}</span>
-                      {booking.ticketType === 'MonthlyCard' ? (
+                      {booking.ticketType === 'Membership' ? (
                         <div>
                           <span className="text-sm font-extrabold text-purple-600 block">
                             0 đ (Membership)

@@ -109,23 +109,31 @@ export const managerService = {
     }
   },
 
-  getMonthlyCards: async () => {
+  getMemberships: async () => {
     try {
-      const response = await api.get('/Manager/monthly-cards');
+      const response = await api.get('/MembershipCard/tiers');
       return response.data;
     } catch (error) {
-      console.error('getMonthlyCards error:', error);
+      console.error('getMemberships error:', error);
       throw error;
     }
   },
 
-  cancelMonthlyCard: async (monthlyCardId) => {
+  getMonthlyCards: async () => {
+    return managerService.getMemberships();
+  },
+
+  cancelMembership: async (membershipCardId) => {
     try {
-      const response = await api.put(`/Manager/monthly-card/${monthlyCardId}/cancel`);
+      const response = await api.put(`/Manager/monthly-card/${membershipCardId}/cancel`);
       return response.data;
     } catch (error) {
-      console.error(`cancelMonthlyCard error for card ${monthlyCardId}:`, error);
+      console.error(`cancelMembership error for card ${membershipCardId}:`, error);
       throw error;
     }
+  },
+
+  cancelMonthlyCard: async (membershipCardId) => {
+    return managerService.cancelMembership(membershipCardId);
   }
 };

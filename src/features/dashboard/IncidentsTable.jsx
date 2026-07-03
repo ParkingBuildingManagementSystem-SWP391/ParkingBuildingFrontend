@@ -13,7 +13,7 @@ import {
   Clock
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
-import { formatDateTimeVN } from '../../utils/dateTime';
+import { formatVietnamDateTime } from '../../utils/dateTime';
 
 const IncidentsTable = () => {
   const { t } = useTranslation();
@@ -26,7 +26,6 @@ const IncidentsTable = () => {
   const [evidenceIncident, setEvidenceIncident] = useState(null);
   const [resolveIncidentId, setResolveIncidentId] = useState(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
-  const [fineAmount, setFineAmount] = useState(50000);
 
   const normalizeIncident = (item, index) => {
     let realId = `incident-${index}`;
@@ -122,7 +121,6 @@ const IncidentsTable = () => {
   const handleResolve = (id) => {
     setResolveIncidentId(id);
     setResolutionNotes('Đã xử lý nộp phạt mất thẻ xe');
-    setFineAmount(50000);
   };
 
   const handleResolveSubmit = () => {
@@ -131,16 +129,9 @@ const IncidentsTable = () => {
       return;
     }
 
-    const parsedFineAmount = Number(fineAmount);
-
-    if (Number.isNaN(parsedFineAmount) || parsedFineAmount < 0) {
-      message.error(t('dashboard.incidents.invalidFine', 'Số tiền phạt không hợp lệ.'));
-      return;
-    }
-
     const payload = {
       resolutionNotes: resolutionNotes.trim(),
-      fineAmount: parsedFineAmount,
+      fineAmount: 0,
     };
 
     setResolvingId(resolveIncidentId);
@@ -158,7 +149,6 @@ const IncidentsTable = () => {
         message.success(t('dashboard.incidents.resolveSuccess', { id: resolveIncidentId }));
         setResolveIncidentId(null);
         setResolutionNotes('');
-        setFineAmount(50000);
       })
       .catch((err) => {
         console.error('resolveIncident error:', err);
@@ -240,7 +230,7 @@ const IncidentsTable = () => {
             <MapPin size={14} /> {record.location}
           </div>
           <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-            <Clock size={14} /> {formatDateTimeVN(record.timestamp, 'N/A')}
+            <Clock size={14} /> {formatVietnamDateTime(record.timestamp)}
           </div>
         </div>
       )
@@ -401,20 +391,6 @@ const IncidentsTable = () => {
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-slate-600 dark:text-slate-400">
-              {t('dashboard.incidents.promptFine', 'Số tiền phạt / Thu thêm (VND)')}
-            </label>
-
-            <Input
-              type="number"
-              min={0}
-              step={10000}
-              value={fineAmount}
-              onChange={(e) => setFineAmount(e.target.value)}
-              className="rounded-lg w-full"
-            />
-          </div>
         </div>
       </Modal>
     </div>

@@ -1,4 +1,4 @@
-import {
+﻿import {
   CalendarCheck,
   CreditCard,
   Home,
@@ -7,7 +7,8 @@ import {
   Map,
   ScanLine,
   Settings,
-  Users
+  Users,
+  Wallet
 } from 'lucide-react';
 
 export const ROLE_MENU_ROUTES = {
@@ -16,7 +17,8 @@ export const ROLE_MENU_ROUTES = {
   parkingMap: '/parking-map',
   checkinCheckout: '/checkin-checkout',
   myBookings: '/my-bookings',
-  monthlyCard: '/my-membership',
+  myWallet: '/my-wallet',
+  myMembership: '/my-membership',
   managerDashboard: '/dashboard',
   adminDashboard: '/dashboard',
   adminAccounts: '/accounts',
@@ -41,7 +43,7 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
   const commonNavigation = [
     {
       key: 'home',
-      label: label(t, 'dropdown.home', 'Trang chủ'),
+      label: label(t, 'dropdown.home', 'Trang chá»§'),
       path: routes.home,
       icon: Home
     }
@@ -49,24 +51,30 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
 
   let roleNavigation = [];
 
-  if (normalizedRole === 'driver' || normalizedRole === 'registered_driver') {
+  if (['driver', 'member', 'registered_driver', 'customer'].includes(normalizedRole)) {
     roleNavigation = [
       {
         key: 'parking-map',
-        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
+        label: label(t, 'dropdown.parkingMap', 'Báº£n Ä‘á»“ bÃ£i Ä‘á»—'),
         path: routes.parkingMap,
         icon: Map
       },
       {
         key: 'my-bookings',
-        label: label(t, 'dropdown.myBookings', 'Lịch đặt chỗ của tôi'),
+        label: label(t, 'dropdown.myBookings', 'Lá»‹ch Ä‘áº·t chá»— cá»§a tÃ´i'),
         path: routes.myBookings,
         icon: CalendarCheck
       },
       {
-        key: 'monthly-card',
-        label: label(t, 'dropdown.monthlyCard', 'Membership'),
-        path: routes.monthlyCard,
+        key: 'my-wallet',
+        label: label(t, 'sidebar.myWallet', 'Ví của tôi'),
+        path: routes.myWallet,
+        icon: Wallet
+      },
+      {
+        key: 'my-membership',
+        label: label(t, 'dropdown.membership', 'Membership'),
+        path: routes.myMembership,
         icon: CreditCard
       }
     ];
@@ -82,7 +90,7 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
       },
       {
         key: 'parking-map',
-        label: label(t, 'dropdown.parkingMap', 'Bản đồ bãi đỗ'),
+        label: label(t, 'dropdown.parkingMap', 'Báº£n Ä‘á»“ bÃ£i Ä‘á»—'),
         path: routes.parkingMap,
         icon: Map
       }
@@ -94,13 +102,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
       isHomePage
         ? {
             key: 'manager-dashboard',
-            label: label(t, 'dropdown.dashboard', 'Bảng điều khiển'),
+            label: label(t, 'dropdown.dashboard', 'Báº£ng Ä‘iá»u khiá»ƒn'),
             path: routes.managerDashboard,
             icon: LayoutDashboard
           }
         : {
             key: 'home',
-            label: label(t, 'dropdown.home', 'Trang chủ'),
+            label: label(t, 'dropdown.home', 'Trang chá»§'),
             path: routes.home,
             icon: Home
           }
@@ -112,13 +120,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
       isHomePage
         ? {
             key: 'admin-accounts',
-            label: label(t, 'sidebar.userAccounts', 'Quản lý người dùng'),
+            label: label(t, 'sidebar.userAccounts', 'Quáº£n lÃ½ ngÆ°á»i dÃ¹ng'),
             path: routes.adminAccounts,
             icon: Users
           }
         : {
             key: 'home',
-            label: label(t, 'dropdown.home', 'Trang chủ'),
+            label: label(t, 'dropdown.home', 'Trang chá»§'),
             path: routes.home,
             icon: Home
           }
@@ -133,13 +141,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
     accountItems: [
       {
         key: 'profile',
-        label: label(t, 'dropdown.profile', 'Trang cá nhân'),
+        label: label(t, 'dropdown.profile', 'Trang cÃ¡ nhÃ¢n'),
         path: routes.profile,
         icon: Settings
       },
       {
         key: 'logout',
-        label: label(t, 'dropdown.logout', 'Đăng xuất'),
+        label: label(t, 'dropdown.logout', 'ÄÄƒng xuáº¥t'),
         danger: true,
         icon: LogOut
       }
