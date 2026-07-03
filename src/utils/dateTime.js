@@ -1,42 +1,43 @@
+import i18n from 'i18next';
+
 export const VIETNAM_TIME_ZONE = 'Asia/Ho_Chi_Minh';
 export const VIETNAM_LOCALE = 'vi-VN';
 
+export const getActiveLocale = () => {
+  return i18n.language === 'en' ? 'en-US' : 'vi-VN';
+};
+
 const dateTimeFormatters = {
-  dateTime: new Intl.DateTimeFormat(VIETNAM_LOCALE, {
-    timeZone: VIETNAM_TIME_ZONE,
+  dateTime: {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }),
-  date: new Intl.DateTimeFormat(VIETNAM_LOCALE, {
-    timeZone: VIETNAM_TIME_ZONE,
+  },
+  date: {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  }),
-  time: new Intl.DateTimeFormat(VIETNAM_LOCALE, {
-    timeZone: VIETNAM_TIME_ZONE,
+  },
+  time: {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }),
-  timeWithSeconds: new Intl.DateTimeFormat(VIETNAM_LOCALE, {
-    timeZone: VIETNAM_TIME_ZONE,
+  },
+  timeWithSeconds: {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
     hour12: false,
-  }),
-  longDate: new Intl.DateTimeFormat(VIETNAM_LOCALE, {
-    timeZone: VIETNAM_TIME_ZONE,
+  },
+  longDate: {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }),
+  },
 };
 
 export const toDate = (value) => {
@@ -45,9 +46,14 @@ export const toDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const formatWith = (value, formatter, fallback = '') => {
+const formatWith = (value, options, fallback = '') => {
   const date = toDate(value);
-  return date ? formatter.format(date) : fallback;
+  if (!date) return fallback;
+  const locale = getActiveLocale();
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: VIETNAM_TIME_ZONE,
+    ...options,
+  }).format(date);
 };
 
 export const formatDateTimeVN = (value, fallback = '') =>
