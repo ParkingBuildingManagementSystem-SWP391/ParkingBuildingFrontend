@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { managerService } from '../../services/managerService';
-import LiveStatusTable from './LiveStatusTable';
 import IncidentsTable from './IncidentsTable';
 import {
   ShieldAlert,
@@ -257,6 +256,8 @@ const Dashboard = ({ section = 'overview' }) => {
     }
 
     const sectionLabels = {
+      'parking-map': t('dashboard.parkingMap', { defaultValue: 'Sơ đồ bãi xe' }),
+      'live-status': t('dashboard.liveStatus', { defaultValue: 'Trạng thái trực tiếp' }),
       'slot-management': t('dashboard.slotManagement', { defaultValue: 'Quản lý chỗ đỗ' }),
       'staff-logs': t('dashboard.staffLogs', { defaultValue: 'Nhật ký nhân viên' })
     };
@@ -679,8 +680,6 @@ const Dashboard = ({ section = 'overview' }) => {
             </div>
 
           </div>
-        ) : section === 'live-status' ? (
-          <LiveStatusTable />
         ) : section === 'incidents' ? (
           <IncidentsTable />
         ) : section === 'analytics' ? (
@@ -989,10 +988,11 @@ const Dashboard = ({ section = 'overview' }) => {
   }
 };
 
-export const LiveStatusPage = () => <Dashboard section="live-status" />;
+export const ManagerParkingPage = () => <Dashboard section="parking-management" />;
+export const LiveStatusPage = ManagerParkingPage;
 export const IncidentsPage = () => <Dashboard section="incidents" />;
 export const AnalyticsPage = () => <Dashboard section="analytics" />;
-export const SlotManagementPage = () => <Dashboard section="slot-management" />;
+export const SlotManagementPage = ManagerParkingPage;
 export const PricingPage = () => <Dashboard section="pricing" />;
 export const StaffLogsPage = () => <Dashboard section="staff-logs" />;
 
