@@ -48,7 +48,7 @@ const incidentReportService = {
   /**
    * 3. Tạo báo cáo sự cố mới
    * Vai trò: Staff, Registered_Driver
-   * @param {Object} data - { sessionId (nullable), issueType, description, imageProofUrl }
+   * @param {Object} data - { licenseVehicle, issueType, description, imageProofUrl }
    */
   createIncident: async (data, signal) => {
     try {
@@ -65,7 +65,7 @@ const incidentReportService = {
    * 4. Giải quyết sự cố (Resolve)
    * Vai trò: Manager
    * @param {number} incidentId
-   * @param {Object} data - { resolutionNotes, fineAmount }
+   * @param {Object} data - { resolutionNotes }
    */
   resolveIncident: async (incidentId, data, signal) => {
     try {

@@ -1864,7 +1864,13 @@ const GateController = () => {
       <CreateIncidentModal 
         isOpen={isCreateIncidentOpen} 
         onClose={() => setIsCreateIncidentOpen(false)}
-        activeSessionId={checkoutResult?.sessionId || checkoutResult?.SessionId} 
+        licenseVehicle={
+          checkoutResult?.licenseVehicle ||
+          checkoutResult?.LicenseVehicle ||
+          checkoutResult?.checkOutLicensePlate ||
+          checkoutResult?.CheckOutLicensePlate ||
+          checkOutForm.getFieldValue('plate')
+        }
         onSuccess={() => {}}
       />
     </div>

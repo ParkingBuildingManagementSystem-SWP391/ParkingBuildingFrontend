@@ -6,7 +6,7 @@ import incidentReportService from '../../services/incidentReportService';
 const { Option } = Select;
 const { TextArea } = Input;
 
-const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSuccess }) => {
+const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }) => {
   const [form] = Form.useForm();
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -16,10 +16,10 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
     if (isOpen) {
       form.setFieldsValue({
         issueType: form.getFieldValue('issueType') || 'Lost Ticket',
-        sessionId: activeSessionId || undefined,
+        licenseVehicle: licenseVehicle || undefined,
       });
     }
-  }, [activeSessionId, form, isOpen]);
+  }, [form, isOpen, licenseVehicle]);
 
   const issueTypes = [
     { value: 'Lost Ticket', label: 'Mất thẻ giữ xe' },
@@ -63,9 +63,17 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
         setUploading(false);
       }
 
-      const sessionId = activeSessionId || values.sessionId;
+      const normalizedPlate = (licenseVehicle || values.licenseVehicle || '')
+        .trim()
+        .toUpperCase();
+
+      if (!normalizedPlate) {
+        message.error('Vui lòng nhập biển số xe.');
+        return;
+      }
+
       const payload = {
-        sessionId: sessionId ? parseInt(sessionId, 10) : null,
+        licenseVehicle: normalizedPlate,
         issueType: values.issueType,
         description: values.description,
         imageProofUrl,
@@ -101,7 +109,7 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
         onFinish={handleSubmit}
         initialValues={{
           issueType: 'Lost Ticket',
-          sessionId: activeSessionId,
+          licenseVehicle,
         }}
       >
         <Form.Item
@@ -117,12 +125,13 @@ const CreateIncidentModal = ({ isOpen, onClose, activeSessionId = null, onSucces
         </Form.Item>
 
         <Form.Item
-          name="sessionId"
-          label="Mã lượt đỗ liên quan (Session ID):"
+          name="licenseVehicle"
+          label="Biển số xe:"
+          rules={[{ required: true, message: 'Vui lòng nhập biển số xe!' }]}
         >
           <Input
-            disabled={!!activeSessionId}
-            placeholder="Có thể bỏ trống nếu là sự cố chung..."
+            disabled={!!licenseVehicle}
+            placeholder="VD: 51A12345"
           />
         </Form.Item>
 

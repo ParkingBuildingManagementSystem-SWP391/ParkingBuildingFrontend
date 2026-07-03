@@ -60,7 +60,7 @@ const MyBookings = () => {
   const [targetBooking, setTargetBooking] = useState(null);
   const [payingSessionId, setPayingSessionId] = useState(null);
   const [isIncidentOpen, setIsIncidentOpen] = useState(false);
-  const [selectedSessionIdForIncident, setSelectedSessionIdForIncident] = useState(null);
+  const [selectedLicenseVehicleForIncident, setSelectedLicenseVehicleForIncident] = useState('');
 
   const handlePayVNPay = async (booking) => {
     setPayingSessionId(booking.id);
@@ -230,7 +230,7 @@ const MyBookings = () => {
   };
 
   const normalizePaymentStatus = (status) => String(status || '').trim().toLowerCase();
-  const isPaymentCompleted = (status) => ['success', 'paid', 'completed'].includes(normalizePaymentStatus(status));
+  const isPaymentCompleted = (status) => ['success', 'paid', 'completed', 'deposited'].includes(normalizePaymentStatus(status));
   const isDepositPaymentDue = (booking) => (
     booking.sessionStatus === 'Reserved' &&
     String(booking.paymentMethod || '').toUpperCase() === 'VNPAY' &&
@@ -592,7 +592,7 @@ const MyBookings = () => {
                     {booking.sessionStatus !== 'Canceled' && (
                       <button
                         onClick={() => {
-                          setSelectedSessionIdForIncident(booking.id);
+                          setSelectedLicenseVehicleForIncident(booking.contact);
                           setIsIncidentOpen(true);
                         }}
                         className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-orange-200 bg-white px-4 text-xs font-bold text-orange-600 shadow-sm transition-all hover:bg-orange-50 dark:border-orange-500/40 dark:bg-slate-800 dark:text-orange-300 dark:hover:bg-orange-500/15 lg:flex-none"
@@ -730,9 +730,9 @@ const MyBookings = () => {
         isOpen={isIncidentOpen}
         onClose={() => {
           setIsIncidentOpen(false);
-          setSelectedSessionIdForIncident(null);
+          setSelectedLicenseVehicleForIncident('');
         }}
-        activeSessionId={selectedSessionIdForIncident}
+        licenseVehicle={selectedLicenseVehicleForIncident}
         onSuccess={() => {
           message.success(t('myBookings.reportIncidentSuccess') || 'Đã gửi báo cáo sự cố!');
           fetchMyBookings();

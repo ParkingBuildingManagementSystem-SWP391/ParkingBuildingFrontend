@@ -390,7 +390,6 @@ const IncidentsTable = () => {
               className="rounded-lg"
             />
           </div>
-
         </div>
       </Modal>
     </div>
