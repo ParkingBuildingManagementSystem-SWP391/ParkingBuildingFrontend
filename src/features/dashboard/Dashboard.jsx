@@ -827,7 +827,7 @@ const Dashboard = ({ section = 'overview' }) => {
             </div>
 
             <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
-              <table className="w-full min-w-[1200px] border-collapse text-left">
+              <table className="w-full min-w-[1050px] border-collapse text-left">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 dark:bg-slate-800 dark:border-slate-700">
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.vehicleType')}</th>
@@ -836,7 +836,6 @@ const Dashboard = ({ section = 'overview' }) => {
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.fullDayRate')}</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.firstHourRate')}</th>
                     <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.subsequentHourRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.maxHours')}</th>
                     {canEditPricing && (
                       <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
                     )}
@@ -923,22 +922,6 @@ const Dashboard = ({ section = 'overview' }) => {
                           <span className="text-slate-400 font-bold dark:text-slate-500">N/A</span>
                         )}
                       </td>
-                      {/* Cột Giờ tối đa mỗi lượt */}
-                      <td className="px-4 py-4 align-middle">
-                        {isCarPricing ? (
-                          <InputNumber
-                            min={1}
-                            value={row.maxHoursPerTurn}
-                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'maxHoursPerTurn', value ?? null) : undefined}
-                            disabled={!canEditPricing}
-                            addonAfter="h"
-                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100"
-                          />
-                        ) : (
-                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-400">N/A</span>
-                        )}
-                      </td>
-
                       {canEditPricing && (
                         <td className="px-4 py-4 align-middle text-right">
                           <Button
