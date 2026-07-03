@@ -14,7 +14,7 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import { membershipService } from '../services/membershipService';
@@ -64,13 +64,6 @@ const unwrapArray = (payload) => {
   if (Array.isArray(data?.tiers)) return data.tiers;
   if (Array.isArray(data?.slots)) return data.slots;
   return [];
-};
-
-const getRequiredSlotCount = (durationMonths) => {
-  if (Number(durationMonths) === 1) return 1;
-  if (Number(durationMonths) === 6) return 2;
-  if (Number(durationMonths) === 12) return 3;
-  return 1;
 };
 
 const formatDateTime = (value) => {
@@ -133,9 +126,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-const ActiveMembershipView = ({ cards, onRefresh, t }) => {
-  const groups = groupMembershipCards(cards);
-
+const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
   return (
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-8">
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
@@ -145,7 +136,7 @@ const ActiveMembershipView = ({ cards, onRefresh, t }) => {
           </div>
           <div>
             <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Membership đang hoạt động</h1>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Mỗi ô đỗ có một mã QR riêng.</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Quét mã QR khi vào/ra bãi đỗ.</p>
           </div>
         </div>
         <button
@@ -157,20 +148,28 @@ const ActiveMembershipView = ({ cards, onRefresh, t }) => {
         </button>
       </div>
 
-      {groups.map((group, groupIndex) => {
-        const plan = PLANS.find((item) => item.id === Number(group.tier.typeId)) || PLANS[1];
+      {cards.map((card, idx) => {
+        const tier = card?.tier || {};
+        const plan = PLANS.find((item) => item.id === Number(getValue(tier, 'typeId', 'vehicleTypeId'))) || PLANS[1];
         const { Icon } = plan;
         const cls = accentCls[plan.accent];
         const now = new Date();
-        const start = group.startTime ? new Date(group.startTime) : now;
-        const end = group.endTime ? new Date(group.endTime) : now;
+        const start = card.startTime ? new Date(card.startTime) : now;
+        const end = card.endTime ? new Date(card.endTime) : now;
         const totalMs = end - start;
         const usedMs = now - start;
         const daysLeft = Math.max(0, Math.ceil((end - now) / 86400000));
         const progressPct = totalMs > 0 ? Math.min(100, Math.max(0, (usedMs / totalMs) * 100)) : 0;
+        const ticketCode = getValue(card, 'ticketCode', 'TicketCode');
+        const slots = card.slots || [];
+        const vehicles = card.vehicles || [];
+        const qrUrl = ticketCode
+          ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticketCode)}&bgcolor=ffffff&color=1e293b&margin=10`
+          : '';
 
         return (
-          <div key={`${group.tier.tierId}-${group.startTime}-${groupIndex}`} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <div key={card.membershipCardId || idx} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            {/* Header */}
             <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 dark:border-slate-700 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-center gap-4">
                 <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${cls.icon}`}>
@@ -182,20 +181,29 @@ const ActiveMembershipView = ({ cards, onRefresh, t }) => {
                     Membership
                   </div>
                   <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-                    {group.tier.tierName}
+                    {getValue(tier, 'tierName', 'name') || 'Membership'}
                   </h2>
                   <p className="mt-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    {getVehicleTypeLabel(plan.key, t)} · {group.slots.length} ô đỗ
+                    {getVehicleTypeLabel(plan.key, t)} · {slots.length} ô đỗ · {vehicles.length} biển số
                   </p>
                 </div>
               </div>
-              <div className="text-left sm:text-right">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hiệu lực</p>
-                <p className="mt-1 text-sm font-extrabold text-slate-800 dark:text-slate-100">{formatDateTime(group.startTime)}</p>
-                <p className="text-xs font-medium text-slate-500">đến {formatDateTime(group.endTime)}</p>
+              <div className="flex flex-col items-end gap-2">
+                <div className="text-right">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hiệu lực</p>
+                  <p className="mt-1 text-sm font-extrabold text-slate-800 dark:text-slate-100">{formatDateTime(card.startTime)}</p>
+                  <p className="text-xs font-medium text-slate-500">đến {formatDateTime(card.endTime)}</p>
+                </div>
+                <button
+                  onClick={() => onCancel(card.membershipCardId)}
+                  className="inline-flex items-center gap-1.5 rounded-[10px] border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-500/40 dark:bg-transparent dark:hover:bg-rose-500/10"
+                >
+                  <X size={12} /> Hủy thẻ
+                </button>
               </div>
             </div>
 
+            {/* Progress */}
             <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-700">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Thời hạn hiệu lực</span>
@@ -206,44 +214,54 @@ const ActiveMembershipView = ({ cards, onRefresh, t }) => {
               </div>
             </div>
 
-            <div className="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
-              {group.slots.map((card, index) => {
-                const ticketCode = getValue(card, 'ticketCode', 'TicketCode');
-                const slotName = getValue(card, 'slotName', 'SlotName') || getValue(card, 'slot', 'Slot')?.slotName || `Slot ${index + 1}`;
-                const slotId = getValue(card, 'slotId', 'SlotId');
-                const license = getValue(card, 'licenseVehicle', 'LicenseVehicle') || getValue(card, 'licensePlate');
-                const qrUrl = ticketCode
-                  ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ticketCode)}&bgcolor=ffffff&color=1e293b&margin=10`
-                  : '';
-
-                return (
-                  <div key={ticketCode || `${slotId}-${index}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ô đỗ #{index + 1}</p>
-                        <p className="text-lg font-black text-slate-900 dark:text-slate-100">{slotName}</p>
-                      </div>
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                        Active
-                      </span>
-                    </div>
-                    {qrUrl && (
-                      <div className="mb-3 flex justify-center rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700">
-                        <img src={qrUrl} alt={`QR ${ticketCode}`} className="h-36 w-36 object-contain" />
-                      </div>
-                    )}
-                    <div className="space-y-2 text-xs">
-                      <div className="flex items-start gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-900">
-                        <Ticket size={14} className="mt-0.5 shrink-0 text-slate-400" />
-                        <span className="break-all font-mono font-extrabold tracking-wider text-slate-800 dark:text-slate-100">{ticketCode || 'Chưa có mã'}</span>
-                      </div>
-                      {license && (
-                        <p className="font-semibold text-slate-500 dark:text-slate-400">Biển số: <span className="font-bold text-slate-700 dark:text-slate-200">{license}</span></p>
-                      )}
-                    </div>
+            {/* Body: QR + Slots + Vehicles */}
+            <div className="grid gap-4 p-5 md:grid-cols-3">
+              {/* QR Code */}
+              <div className="flex flex-col items-center rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Mã QR check-in</p>
+                {qrUrl ? (
+                  <img src={qrUrl} alt={`QR ${ticketCode}`} className="h-40 w-40 object-contain rounded-xl" />
+                ) : (
+                  <div className="flex h-40 w-40 items-center justify-center rounded-xl bg-slate-200 text-slate-400">
+                    <QrCode size={32} />
                   </div>
-                );
-              })}
+                )}
+                <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-white px-2 py-1.5 dark:bg-slate-900">
+                  <Ticket size={12} className="shrink-0 text-slate-400" />
+                  <span className="break-all font-mono text-[10px] font-extrabold tracking-wider text-slate-700 dark:text-slate-200">{ticketCode}</span>
+                </div>
+              </div>
+
+              {/* Slots */}
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Ô đỗ xe cố định</p>
+                <div className="space-y-2">
+                  {slots.length > 0 ? slots.map((s) => (
+                    <div key={s.slotId} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-900">
+                      <CalendarCheck size={14} className="shrink-0 text-emerald-500" />
+                      <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{s.slotName}</span>
+                      <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Reserved</span>
+                    </div>
+                  )) : (
+                    <p className="text-xs text-slate-400">Chưa có ô đỗ</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Vehicles */}
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Biển số đăng ký</p>
+                <div className="space-y-2">
+                  {vehicles.length > 0 ? vehicles.map((plate) => (
+                    <div key={plate} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-900">
+                      <CheckCircle2 size={14} className="shrink-0 text-indigo-500" />
+                      <span className="font-mono text-sm font-extrabold tracking-wider text-slate-900 dark:text-slate-100">{plate}</span>
+                    </div>
+                  )) : (
+                    <p className="text-xs text-slate-400">Chưa có biển số</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -253,15 +271,26 @@ const ActiveMembershipView = ({ cards, onRefresh, t }) => {
 };
 
 const RegistrationView = ({ onRegister, submitting, t }) => {
-  const [selectedTypeId, setSelectedTypeId] = useState(null);
-  const [selectedDuration, setSelectedDuration] = useState(1);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialVehicleTypeId = Number(searchParams.get('vehicleTypeId')) || null;
+  const initialDuration = Number(searchParams.get('durationMonths')) || 1;
+  const initialSlotId = Number(searchParams.get('slotIds')) || null;
+  const initialSlotName = searchParams.get('selectedSlotName') || '';
+
+  const [selectedTypeId, setSelectedTypeId] = useState(initialVehicleTypeId);
+  const [selectedDuration, setSelectedDuration] = useState([1, 6, 12].includes(initialDuration) ? initialDuration : 1);
   const [tiers, setTiers] = useState([]);
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [selectedSlotIds, setSelectedSlotIds] = useState([]);
+  const [selectedSlotId, setSelectedSlotId] = useState(null);
+  const [selectedSlotName, setSelectedSlotName] = useState('');
   const [licenseVehicles, setLicenseVehicles] = useState(['']);
   const [paymentMethod, setPaymentMethod] = useState('VNPAY');
   const [loadingTiers, setLoadingTiers] = useState(false);
-  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  useEffect(() => {
+    if (initialSlotId) setSelectedSlotId(initialSlotId);
+    if (initialSlotName) setSelectedSlotName(initialSlotName);
+  }, [initialSlotId, initialSlotName]);
 
   useEffect(() => {
     const fetchTiers = async () => {
@@ -287,50 +316,39 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
     );
   }, [selectedDuration, selectedTypeId, tiers]);
 
-  const requiredSlotCount = selectedTier ? getRequiredSlotCount(getTierDuration(selectedTier)) : 0;
-  const maxVehicles = Number(getValue(selectedTier, 'maxVehicles', 'vehicleLimit')) || requiredSlotCount || 1;
+  const maxVehicles = Number(getValue(selectedTier, 'maxVehicles', 'vehicleLimit')) || 1;
   const plan = PLANS.find((item) => item.id === Number(selectedTypeId));
   const cls = plan ? accentCls[plan.accent] : null;
   const fallbackPrice = plan ? plan.price * selectedDuration : 0;
   const totalPrice = selectedTier ? getTierPrice(selectedTier, fallbackPrice) : fallbackPrice;
 
-  useEffect(() => {
-    setSelectedSlotIds([]);
-    setLicenseVehicles(['']);
+  const clearSelectedSlot = () => {
+    setSelectedSlotId(null);
+    setSelectedSlotName('');
+  };
+
+  const handleSelectType = (typeId) => {
+    setSelectedTypeId(typeId);
+    clearSelectedSlot();
+  };
+
+  const handleSelectDuration = (duration) => {
+    setSelectedDuration(duration);
+    clearSelectedSlot();
+  };
+
+  const openParkingMapForSlot = () => {
     if (!selectedTypeId || !selectedTier) {
-      setAvailableSlots([]);
+      message.error('Vui lòng chọn loại xe và thời hạn trước.');
       return;
     }
 
-    const fetchSlots = async () => {
-      setLoadingSlots(true);
-      try {
-        const response = await membershipService.getAvailableSlots(selectedTypeId);
-        setAvailableSlots(unwrapArray(response));
-      } catch (error) {
-        console.error('Available slots error:', error);
-        setAvailableSlots([]);
-        message.error('Không thể tải danh sách ô đỗ còn trống.');
-      } finally {
-        setLoadingSlots(false);
-      }
-    };
-
-    fetchSlots();
-  }, [selectedTier, selectedTypeId]);
-
-  const toggleSlot = (slotId) => {
-    setSelectedSlotIds((prev) => {
-      if (prev.includes(slotId)) {
-        return prev.filter((id) => id !== slotId);
-      }
-
-      if (prev.length >= requiredSlotCount) {
-        return prev;
-      }
-
-      return [...prev, slotId];
+    const params = new URLSearchParams({
+      selectForMembership: 'true',
+      vehicleTypeId: String(selectedTypeId),
+      durationMonths: String(selectedDuration),
     });
+    navigate(`/parking-map?${params.toString()}`);
   };
 
   const updatePlate = (index, value) => {
@@ -355,8 +373,8 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
       return;
     }
 
-    if (selectedSlotIds.length !== requiredSlotCount) {
-      message.error(`Vui lòng chọn đúng ${requiredSlotCount} ô đỗ.`);
+    if (!selectedSlotId) {
+      message.error('Vui lòng chọn 1 ô đỗ cố định.');
       return;
     }
 
@@ -376,7 +394,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
     onRegister({
       tierId: getTierId(selectedTier),
-      slotIds: selectedSlotIds,
+      slotIds: [selectedSlotId],
       licenseVehicles: plates,
       paymentMethod,
     });
@@ -391,7 +409,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
           </div>
           <div>
             <h1 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Đăng ký Membership</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Chọn gói, số ô đỗ theo thời hạn và thanh toán một lần.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Chọn gói, 1 ô đỗ cố định và thanh toán một lần.</p>
           </div>
         </div>
       </div>
@@ -408,7 +426,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setSelectedTypeId(item.id)}
+                    onClick={() => handleSelectType(item.id)}
                     className={`relative rounded-xl border-2 p-4 text-left transition-all duration-150 ${
                       isSelected
                         ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10 shadow-sm'
@@ -437,7 +455,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                   <button
                     key={duration.value}
                     disabled={!tierExists}
-                    onClick={() => setSelectedDuration(duration.value)}
+                    onClick={() => handleSelectDuration(duration.value)}
                     className={`relative rounded-xl border-2 py-3 text-center transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
                       isSelected
                         ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
@@ -450,7 +468,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                       </span>
                     )}
                     <p className={`text-sm font-extrabold ${isSelected ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>{duration.label}</p>
-                    <p className="mt-1 text-[10px] font-semibold text-slate-400">{getRequiredSlotCount(duration.value)} ô đỗ</p>
+                    <p className="mt-1 text-[10px] font-semibold text-slate-400">{1} ô đỗ</p>
                   </button>
                 );
               })}
@@ -462,13 +480,37 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Chọn ô đỗ</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Chọn 1 ô đỗ cố định</p>
               <span className="text-xs font-bold text-indigo-600 dark:text-indigo-300">
-                Đã chọn {selectedSlotIds.length}/{requiredSlotCount} ô đỗ
+                {selectedSlotId ? 'Đã chọn 1 ô đỗ' : 'Chưa chọn ô đỗ'}
               </span>
             </div>
 
-            {!selectedTier ? (
+            <div className="mb-4 flex flex-col gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+              <div>
+                <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {selectedSlotId ? selectedSlotName || `Slot ${selectedSlotId}` : 'Chưa có ô đỗ cố định'}
+                </p>
+                <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Mở Parking Map để chọn một ô màu xanh còn trống đúng loại xe đã đăng ký.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={!selectedTier}
+                onClick={openParkingMapForSlot}
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-[14px] px-4 text-sm font-extrabold transition ${
+                  selectedTier
+                    ? 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700'
+                    : 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-900 dark:text-slate-600'
+                }`}
+              >
+                <CalendarCheck size={16} />
+                {selectedSlotId ? 'Đổi ô trên Parking Map' : 'Chọn ô trên Parking Map'}
+              </button>
+            </div>
+
+            {false && (!selectedTier ? (
               <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">Chọn loại xe và thời hạn trước.</div>
             ) : loadingSlots ? (
               <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">Đang tải ô đỗ...</div>
@@ -478,26 +520,31 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {availableSlots.map((slot) => {
                   const slotId = getSlotId(slot);
-                  const isSelected = selectedSlotIds.includes(slotId);
-                  const isDisabled = !isSelected && selectedSlotIds.length >= requiredSlotCount;
+                  const isSelected = selectedSlotId === slotId;
                   return (
                     <button
                       key={slotId}
-                      disabled={isDisabled}
-                      onClick={() => toggleSlot(slotId)}
-                      className={`flex items-center justify-between rounded-xl border px-3 py-3 text-left transition-all disabled:cursor-not-allowed disabled:opacity-45 ${
+                      type="button"
+                      onClick={() => selectSlot(slotId)}
+                      className={`flex items-center justify-between rounded-xl border px-3 py-3 text-left transition-all ${
                         isSelected
                           ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
                           : 'border-slate-100 bg-slate-50 text-slate-700 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                       }`}
                     >
                       <span className="text-sm font-extrabold">{getSlotName(slot)}</span>
-                      {isSelected && <CheckCircle2 size={16} />}
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                        isSelected
+                          ? 'border-indigo-500 bg-indigo-600 text-white'
+                          : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900'
+                      }`}>
+                        {isSelected && <CheckCircle2 size={13} />}
+                      </span>
                     </button>
                   );
                 })}
               </div>
-            )}
+            ))}
           </div>
 
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -542,7 +589,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{getVehicleTypeLabel(plan.key, t)}</p>
-                  <p className="text-[10px] text-slate-400">{selectedDuration} tháng · {requiredSlotCount || 0} ô đỗ</p>
+                  <p className="text-[10px] text-slate-400">{selectedDuration} tháng · 1 ô đỗ</p>
                 </div>
               </div>
 
@@ -575,7 +622,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
               </div>
 
               <ul className="space-y-1.5 pt-1">
-                {['Mỗi ô đỗ có QR riêng', 'Tự động nhận diện biển số', 'Quản lý tập trung trong Membership'].map((perk) => (
+                {['Giữ 1 ô cố định trong suốt thời hạn thẻ', 'Tự động nhận diện biển số', 'Quản lý tập trung trong Membership'].map((perk) => (
                   <li key={perk} className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                     <CheckCircle2 size={11} className="shrink-0 text-emerald-500" />
                     {perk}
@@ -644,6 +691,17 @@ const MyMembership = () => {
     fetchCardInfo();
   }, [fetchCardInfo]);
 
+  const handleCancel = async (cardId) => {
+    if (!window.confirm('Bạn có chắc muốn hủy thẻ thành viên? Hành động này không thể hoàn tác và slot sẽ được giải phóng.')) return;
+    try {
+      await membershipService.cancelMembershipCard(cardId);
+      message.success('Đã hủy thẻ thành viên thành công.');
+      fetchCardInfo();
+    } catch {
+      message.error('Không thể hủy thẻ. Vui lòng thử lại.');
+    }
+  };
+
   const handleRegister = async (payload) => {
     setSubmitting(true);
     try {
@@ -659,14 +717,14 @@ const MyMembership = () => {
       navigate('/membership/success', { state: { result } });
     } catch (error) {
       const status = error.response?.status;
-      message.error(error.response?.data?.message || error.response?.data?.error || (status === 403 ? 'Tài khoản chưa có quyền đăng ký Membership.' : 'Không thể tạo đăng ký Membership.'));
+      message.error(error.message || (status === 403 ? 'Tài khoản chưa có quyền đăng ký Membership.' : 'Không thể tạo đăng ký Membership.'));
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loadingCard) return <LoadingSkeleton />;
-  if (cards.length > 0) return <ActiveMembershipView cards={cards} onRefresh={fetchCardInfo} t={t} />;
+  if (cards.length > 0) return <ActiveMembershipView cards={cards} onRefresh={fetchCardInfo} onCancel={handleCancel} t={t} />;
   return <RegistrationView onRegister={handleRegister} submitting={submitting} t={t} />;
 };
 

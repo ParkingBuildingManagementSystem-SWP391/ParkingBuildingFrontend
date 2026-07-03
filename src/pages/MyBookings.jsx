@@ -157,7 +157,8 @@ const MyBookings = () => {
           }
         }
 
-        const isMembership = (item.ticketCode || item.TicketCode || '').startsWith('MC_');
+        const normalizedTicketCode = String(item.ticketCode || item.TicketCode || '').toUpperCase();
+        const isMembership = normalizedTicketCode.startsWith('MBC_') || normalizedTicketCode.startsWith('MCR_') || normalizedTicketCode.startsWith('MC_');
         const ticketType = isMembership ? 'Membership' : 'Booking';
 
         return {

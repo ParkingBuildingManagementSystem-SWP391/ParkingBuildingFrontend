@@ -14,7 +14,9 @@ import {
   UserCheck,
   AlertTriangle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  CreditCard,
+  Wallet
 } from 'lucide-react';
 import { parkingService } from '../../services/parkingService';
 import { managerService } from '../../services/managerService';
@@ -227,6 +229,7 @@ const ParkingLotMap = () => {
 
   const selectForMembership = searchParams.get('selectForMembership') === 'true';
   const paramVehicleTypeId = searchParams.get('vehicleTypeId');
+  const membershipDuration = searchParams.get('durationMonths');
 
   const [activeFloorId, setActiveFloorId] = useState(() => {
     if (paramVehicleTypeId) {
@@ -287,6 +290,7 @@ const ParkingLotMap = () => {
   // Form states for booking
   const [bookingVehicleType, setBookingVehicleType] = useState('Motorcycle');
   const [bookingPlate, setBookingPlate] = useState('');
+  const [bookingPaymentMethod, setBookingPaymentMethod] = useState('VNPAY');
   const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
   const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
 
@@ -598,7 +602,13 @@ const ParkingLotMap = () => {
           message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
           return;
         }
-        navigate(`/my-membership?slotIds=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
+        const returnParams = new URLSearchParams({
+          slotIds: String(slot.slotId || slot.dbSlotId || slot.id),
+          selectedSlotName: String(slot.id),
+          vehicleTypeId: String(typeId),
+        });
+        if (membershipDuration) returnParams.set('durationMonths', membershipDuration);
+        navigate(`/my-membership?${returnParams.toString()}`);
       } else {
         message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
       }
@@ -726,7 +736,7 @@ const ParkingLotMap = () => {
         vehicleTypeId: finalVehicleTypeId,
         licenseVehicle: cleanPlate,
         expectedCheckInTime,
-        paymentMethod: 'VNPAY'
+        paymentMethod: bookingPaymentMethod
       });
 
       const responseData = response?.data || response || {};
@@ -747,6 +757,8 @@ const ParkingLotMap = () => {
         window.location.href = paymentUrl;
       } else if (requiresPayment) {
         message.success(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
+      } else if (bookingPaymentMethod === 'WALLET') {
+        message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} và thanh toán cọc bằng ví thành công!`);
       } else {
         message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} thành công!`);
       }
@@ -1345,6 +1357,36 @@ const ParkingLotMap = () => {
 
                   <p className="rounded-[14px] border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700 dark:border-orange-500/40 dark:bg-orange-500/15 dark:text-orange-300">
                     ⚠️ Lưu ý: Lịch đặt chỗ sẽ tự động bị hủy nếu bạn không check-in tại cổng trong vòng 15 phút sau thời gian dự kiến.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Phuong thuc thanh toan coc</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: 'VNPAY', label: 'VNPay', Icon: CreditCard },
+                      { value: 'WALLET', label: 'Vi dien tu', Icon: Wallet },
+                    ].map(({ value, label, Icon }) => {
+                      const isSelected = bookingPaymentMethod === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setBookingPaymentMethod(value)}
+                          className={`flex h-11 items-center justify-center gap-2 rounded-[14px] border text-xs font-extrabold transition ${
+                            isSelected
+                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
+                              : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                          }`}
+                        >
+                          <Icon size={15} />
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                    Neu booking khong can coc, he thong se giu cho ngay va bo qua buoc thanh toan.
                   </p>
                 </div>
 
