@@ -14,7 +14,9 @@ import {
   UserCheck,
   AlertTriangle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  CreditCard,
+  Wallet
 } from 'lucide-react';
 import { parkingService } from '../../services/parkingService';
 import { managerService } from '../../services/managerService';
@@ -287,6 +289,7 @@ const ParkingLotMap = () => {
   // Form states for booking
   const [bookingVehicleType, setBookingVehicleType] = useState('Motorcycle');
   const [bookingPlate, setBookingPlate] = useState('');
+  const [bookingPaymentMethod, setBookingPaymentMethod] = useState('VNPAY');
   const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
   const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
 
@@ -468,6 +471,7 @@ const ParkingLotMap = () => {
     const defaultVehicleType = allowedBookingVehicleTypes[0]?.value || (activeFloorId === 3 ? 'Motorcycle' : 'Car');
     setBookingVehicleType(defaultVehicleType);
     setBookingPlate('');
+    setBookingPaymentMethod('VNPAY');
     const defaultExpectedTime = getDefaultExpectedCheckInTimeParts();
     setExpectedHour(defaultExpectedTime.hour);
     setExpectedMinute(defaultExpectedTime.minute);
@@ -726,7 +730,7 @@ const ParkingLotMap = () => {
         vehicleTypeId: finalVehicleTypeId,
         licenseVehicle: cleanPlate,
         expectedCheckInTime,
-        paymentMethod: 'VNPAY'
+        paymentMethod: bookingPaymentMethod
       });
 
       const responseData = response?.data || response || {};
@@ -739,6 +743,7 @@ const ParkingLotMap = () => {
       const paymentUrl = responseData.paymentUrl || responseData.PaymentUrl || responseData.vnpayUrl || responseData.VnPayUrl;
       const depositAmount = responseData.depositAmount ?? responseData.DepositAmount ?? responseData.amount ?? responseData.Amount;
       const paymentStatus = responseData.paymentStatus || responseData.PaymentStatus;
+      const walletPaid = bookingPaymentMethod === 'WALLET';
 
       setIsBookingModalOpen(false);
       if (requiresPayment && paymentUrl) {
@@ -748,7 +753,13 @@ const ParkingLotMap = () => {
       } else if (requiresPayment) {
         message.success(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
       } else {
-        message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} thành công!`);
+        message.success(
+          responseData.message ||
+          responseData.Message ||
+          (walletPaid
+            ? `Đặt chỗ ${selectedSlot.id} thành công. Tiền cọc đã được trừ từ ví.`
+            : `Đặt chỗ ${selectedSlot.id} thành công!`)
+        );
       }
       if (paymentStatus) {
         console.info('Booking payment status:', paymentStatus);
@@ -1342,6 +1353,30 @@ const ParkingLotMap = () => {
                       </span>
                     </div>
                   )}
+
+                  <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800">
+                    <label className="mb-2 block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Phương thức thanh toán cọc
+                    </label>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {['VNPAY', 'WALLET'].map((method) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setBookingPaymentMethod(method)}
+                          className={`flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-extrabold transition ${
+                            bookingPaymentMethod === method
+                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
+                              : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                          }`}
+                        >
+                          {method === 'WALLET' ? <Wallet size={14} /> : <CreditCard size={14} />}
+                          {method}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   <p className="rounded-[14px] border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700 dark:border-orange-500/40 dark:bg-orange-500/15 dark:text-orange-300">
                     ⚠️ Lưu ý: Lịch đặt chỗ sẽ tự động bị hủy nếu bạn không check-in tại cổng trong vòng 15 phút sau thời gian dự kiến.

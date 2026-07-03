@@ -184,6 +184,7 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
   const checkOutTime = getField(detail, 'checkOutTime', 'CheckOutTime');
   const checkInImageUrl = getField(detail, 'checkInImageUrl', 'CheckInImageUrl', 'imageUrl', 'ImageUrl');
   const checkOutImageUrl = getField(detail, 'checkOutImageUrl', 'CheckOutImageUrl');
+  const incidents = getField(detail, 'incidents', 'Incidents') || [];
 
   return (
     <Modal
@@ -246,6 +247,60 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
               <h4 className="mb-2 text-sm font-extrabold tracking-tight text-slate-700 dark:text-slate-300">{t('parkingSession.imgCheckOut')}</h4>
               <LazySessionImage src={checkOutImageUrl} alt={t('parkingSession.imgCheckOut')} emptyText={t('parkingSession.noImgOut')} />
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <h4 className="mb-4 text-sm font-extrabold tracking-tight text-slate-800 dark:text-slate-200">Báo cáo sự cố</h4>
+            {incidents.length > 0 ? (
+              <div className="space-y-4">
+                {incidents.map((incident, index) => {
+                  const incidentId = getField(incident, 'incidentId', 'IncidentId', 'id', 'Id') || index + 1;
+                  const issueType = getField(incident, 'issueType', 'IssueType');
+                  const description = getField(incident, 'description', 'Description');
+                  const status = getField(incident, 'status', 'Status');
+                  const createdAt = getField(incident, 'createdAt', 'CreatedAt');
+                  const imageProofUrl = getField(incident, 'imageProofUrl', 'ImageProofUrl');
+                  const reportedUsername = getField(incident, 'reportedUsername', 'ReportedUsername', 'reporterUsername', 'ReporterUsername');
+                  const resolutionNotes = getField(incident, 'resolutionNotes', 'ResolutionNotes');
+                  const resolvedUsername = getField(incident, 'resolvedUsername', 'ResolvedUsername');
+                  const resolvedAt = getField(incident, 'resolvedAt', 'ResolvedAt');
+
+                  return (
+                    <div key={incidentId} className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-mono text-xs font-extrabold text-slate-700 dark:text-slate-200">#{incidentId}</span>
+                        <Tag color={status === 'Resolved' ? 'success' : 'warning'}>{status || 'Pending'}</Tag>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <DetailRow label="Loại sự cố">{issueType || t('parkingSession.none')}</DetailRow>
+                        <DetailRow label="Người báo cáo">{reportedUsername || t('parkingSession.none')}</DetailRow>
+                        <DetailRow label="Thời gian tạo">{formatDateTime(createdAt, t)}</DetailRow>
+                        <DetailRow label="Thời gian xử lý">{formatDateTime(resolvedAt, t)}</DetailRow>
+                        <DetailRow label="Người xử lý">{resolvedUsername || t('parkingSession.none')}</DetailRow>
+                        <DetailRow label="Ghi chú xử lý">{resolutionNotes || t('parkingSession.none')}</DetailRow>
+                      </div>
+                      <div className="mt-3">
+                        <DetailRow label="Mô tả">{description || t('parkingSession.none')}</DetailRow>
+                      </div>
+                      {imageProofUrl ? (
+                        <a
+                          href={imageProofUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-300"
+                        >
+                          Xem ảnh bằng chứng
+                        </a>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                Không có báo cáo sự cố cho lượt đỗ này.
+              </div>
+            )}
           </div>
         </div>
       ) : null}
