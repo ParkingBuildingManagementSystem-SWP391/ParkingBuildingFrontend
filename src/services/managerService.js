@@ -116,10 +116,12 @@ export const managerService = {
 
   getMemberships: async (params = {}) => {
     try {
-      const response = await api.get('/Manager/membership-cards', { params });
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '')
+      );
+      const response = await api.get('/Manager/membership-cards', { params: cleanParams });
       return response.data;
     } catch (error) {
-      console.error('getMemberships error:', error);
       throw error;
     }
   },

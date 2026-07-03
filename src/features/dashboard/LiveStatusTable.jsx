@@ -23,6 +23,12 @@ import { formatVietnamDateTime } from '../../utils/dateTime';
 
 const { Option } = Select;
 
+const DEFAULT_FLOORS = [
+  { id: 3, name: 'Floor G' },
+  { id: 1, name: 'Floor B1' },
+  { id: 2, name: 'Floor B2' },
+];
+
 const getVehicleTypeLabel = (type, t) => {
   if (type === 'Car') return t('dashboard.liveStatus.car', { defaultValue: 'Ô tô' });
   if (type === 'Motorcycle' || type === 'Motorbike') return t('dashboard.liveStatus.motorbike', { defaultValue: 'Xe máy' });
@@ -54,7 +60,7 @@ const getStatusPillClass = (status) => {
 const LiveStatusTable = () => {
   const { role } = useAuth();
   const { t } = useTranslation();
-  const [floors, setFloors] = useState([]);
+  const [floors] = useState(DEFAULT_FLOORS);
   const [selectedFloor, setSelectedFloor] = useState(3); // Default Floor G
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -67,24 +73,6 @@ const LiveStatusTable = () => {
   const [slotDetail, setSlotDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-
-  // Fetch Floors
-  useEffect(() => {
-    const fetchFloors = async () => {
-      try {
-        const data = await parkingService.getFloors();
-        const mappedFloors = Array.isArray(data) ? data.map(f => ({ id: f.floorId || f.id, name: f.floorName || f.name })) : [];
-        setFloors(mappedFloors);
-        if (mappedFloors.length > 0 && !mappedFloors.some((floor) => floor.id === selectedFloor)) {
-          setSelectedFloor(mappedFloors[0].id);
-        }
-      } catch (err) {
-        console.warn("Failed to fetch floors", err);
-        setFloors([]);
-      }
-    };
-    fetchFloors();
-  }, []);
 
   // Fetch Slots
   const fetchSlots = async () => {

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
@@ -113,10 +113,8 @@ const Sidebar = ({
           <SectionTitle isCollapsed={isCollapsed}>{t('sidebar.management')}</SectionTitle>
           <NavButton path="/dashboard" icon={LayoutDashboard} label={t('sidebar.dashboard')} isCollapsed={isCollapsed} />
           <NavButton path="/parking-map" icon={Map} label={t('sidebar.parkingMap')} isCollapsed={isCollapsed} />
-          <NavButton path="/live-status" icon={Activity} label={t('sidebar.liveStatus')} isCollapsed={isCollapsed} />
           <NavButton path="/incidents" icon={AlertTriangle} label={t('sidebar.incidents')} isCollapsed={isCollapsed} />
           <NavButton path="/analytics" icon={BarChart3} label={t('sidebar.analytics')} isCollapsed={isCollapsed} />
-          <NavButton path="/slot-management" icon={Grid3X3} label={t('sidebar.slotManagement')} isCollapsed={isCollapsed} />
           <NavButton path="/dashboard/memberships" icon={CreditCard} label={t('sidebar.memberships', { defaultValue: 'Quản lý Membership' })} isCollapsed={isCollapsed} />
           <NavButton path="/pricing" icon={DollarSign} label={t('sidebar.pricing')} isCollapsed={isCollapsed} />
           <NavButton path="/staff-logs" icon={ClipboardList} label={t('sidebar.staffLogs')} isCollapsed={isCollapsed} />

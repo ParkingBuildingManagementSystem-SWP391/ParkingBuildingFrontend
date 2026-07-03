@@ -10,7 +10,6 @@ import {
   RefreshCw,
   ShieldCheck,
   Ticket,
-  Truck,
   Wallet,
   X,
 } from 'lucide-react';
@@ -21,9 +20,30 @@ import { membershipService } from '../services/membershipService';
 import { formatDateTimeVN } from '../utils/dateTime';
 import { getVehicleTypeLabel } from '../utils/i18nLabels';
 
+const Motorcycle = ({ size = 18, className = '' }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <circle cx="5" cy="18" r="3" />
+    <circle cx="19" cy="18" r="3" />
+    <path d="M12 18V12H17L19 9" />
+    <path d="M7.5 14H16.5" />
+    <path d="M12 12L9 6H5" />
+  </svg>
+);
+
 const PLANS = [
   { id: 1, key: 'Bicycle', Icon: Bike, price: 120000, accent: 'emerald' },
-  { id: 2, key: 'Motorbike', Icon: Truck, price: 250000, accent: 'indigo' },
+  { id: 2, key: 'Motorbike', Icon: Motorcycle, price: 250000, accent: 'indigo' },
   { id: 3, key: 'Car', Icon: Car, price: 1500000, accent: 'rose' },
 ];
 
