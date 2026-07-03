@@ -896,7 +896,36 @@
   },
   "wallet": {
     "title": "My Wallet",
-    "subtitle": "Manage wallet balance and transaction history"
+    "subtitle": "Manage wallet balance and transaction history",
+    "eWallet": "E-wallet",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "depositMoney": "Deposit money",
+    "vnpayNote": "Pay through the VNPay gateway.",
+    "depositAmount": "Deposit amount",
+    "amountPlaceholder": "Enter amount",
+    "deposit": "Deposit",
+    "processing": "Processing...",
+    "transactionHistory": "Transaction history",
+    "emptyHistory": "No wallet transactions yet.",
+    "transactionTypes": {
+      "payment": "Payment",
+      "deposit": "Deposit"
+    },
+    "table": {
+      "time": "Time",
+      "type": "Type",
+      "amount": "Amount",
+      "status": "Status"
+    },
+    "messages": {
+      "depositCreated": "Wallet deposit request created successfully."
+    },
+    "errors": {
+      "load": "Could not load wallet information.",
+      "minimumDeposit": "Minimum deposit amount is 10,000đ.",
+      "createDeposit": "Could not create wallet deposit transaction."
+    }
   },
   "common": {
     "openMenu": "Open menu",
@@ -910,8 +939,9 @@
     "notUpdated": "Not updated"
   },
   "membership": {
-    "title": "My Membership",
+    "title": "Membership",
     "subtitle": "Manage and register memberships for your vehicles",
+    "label": "Membership",
     "managerTitle": "Membership Management",
     "managerSubtitle": "Track card list, fixed locations, and validity status.",
     "paymentRequestSubtitle": "Select a membership tier, license plate, and fixed slot to create a payment request",
@@ -925,7 +955,43 @@
     "qrAlt": "Membership QR code",
     "qrInstruction": "Scan this QR code at the entry/exit gate reader to park your vehicle",
     "registerTitle": "Register Membership",
+    "registerSubtitle": "Choose package, slots by duration, and pay once.",
     "registerDescription": "Select vehicle type and duration to create a VNPay payment request.",
+    "activeTitle": "Active Membership",
+    "activeSubtitle": "Each parking slot has its own QR code.",
+    "refresh": "Refresh",
+    "membershipParking": "Membership parking",
+    "selectVehicleType": "Select vehicle type",
+    "registrationDuration": "Registration duration",
+    "selectSlots": "Select slots",
+    "selectedSlots": "Selected {{selected}}/{{total}} slots",
+    "selectVehicleAndDurationFirst": "Select vehicle type and duration first.",
+    "loadingSlots": "Loading slots...",
+    "noAvailableSlots": "No suitable available slots.",
+    "licensePlate": "License plate",
+    "licensePlateLabel": "License plate",
+    "addLicensePlate": "Add license plate",
+    "licensePlatePlaceholder": "Example: 51F-123.45",
+    "maxLicensePlatesHint": "Maximum {{count}} license plates for the selected package.",
+    "registrationSummary": "Registration summary",
+    "payment": "Payment",
+    "total": "Total",
+    "choosePackageToViewTotal": "Choose package to view total",
+    "processing": "Processing...",
+    "validity": "Validity",
+    "validUntil": "until {{date}}",
+    "validityPeriod": "Validity period",
+    "daysLeft": "{{count}} days left",
+    "slotNumber": "Slot #{{number}}",
+    "slotFallback": "Slot {{id}}",
+    "slotsCount": "{{count}} slots",
+    "noCode": "No code yet",
+    "noTierConfig": "This package has no tier configuration from Backend yet.",
+    "perks": {
+      "ownQrPerSlot": "Each slot has its own QR",
+      "autoPlateRecognition": "Automatic license plate recognition",
+      "centralMembershipManagement": "Centralized Membership management"
+    },
     "vehicleType": "Vehicle Type",
     "vehicleTypePlaceholder": "Select vehicle type",
     "duration": "Duration",
@@ -944,7 +1010,13 @@
       "noRegisterPermission": "You do not have permission to register a membership.",
       "createRegistration": "Could not create membership registration.",
       "selectVehicle": "Please select a vehicle type.",
-      "selectDuration": "Please select a duration."
+      "selectDuration": "Please select a duration.",
+      "loadTiers": "Could not load membership packages.",
+      "loadAvailableSlots": "Could not load available parking slots.",
+      "maxLicensePlates": "This package only supports up to {{count}} license plates.",
+      "selectValidPackage": "Please select a valid membership package.",
+      "selectExactSlots": "Please select exactly {{count}} slots.",
+      "enterLicensePlate": "Please enter at least 1 license plate."
     },
     "durationMonth": "{{count}} month"
   },

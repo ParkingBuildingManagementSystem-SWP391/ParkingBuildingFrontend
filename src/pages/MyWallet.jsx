@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreditCard, History, Plus, RefreshCw, Wallet } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from '../components/ToastProvider';
 import walletService from '../services/walletService';
 import { formatDateTimeVN } from '../utils/dateTime';
+import { getStatusLabel } from '../utils/i18nLabels';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
 
@@ -32,7 +34,24 @@ const formatCurrency = (value) =>
 
 const PRESET_AMOUNTS = [50000, 100000, 200000, 500000];
 
+const getTransactionTypeLabel = (type, t) => {
+  const normalized = String(type || '').trim().toLowerCase();
+  const compact = normalized.replace(/[\s_-]+/g, '');
+
+  const typeKeyMap = {
+    payment: 'wallet.transactionTypes.payment',
+    deposit: 'wallet.transactionTypes.deposit',
+    topup: 'wallet.transactionTypes.deposit',
+    walletdeposit: 'wallet.transactionTypes.deposit'
+  };
+
+  return typeKeyMap[normalized] || typeKeyMap[compact]
+    ? t(typeKeyMap[normalized] || typeKeyMap[compact])
+    : (type || t('wallet.transactionTypes.deposit'));
+};
+
 const MyWallet = () => {
+  const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState([]);
   const [amount, setAmount] = useState('');
@@ -56,11 +75,11 @@ const MyWallet = () => {
       setHistory(Array.isArray(historyData) ? historyData : (historyData?.items || historyData?.transactions || []));
     } catch (error) {
       console.error('loadWallet error:', error);
-      toast.error(error.response?.data?.message || 'Không thể tải thông tin ví.');
+      toast.error(error.response?.data?.message || t('wallet.errors.load'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadWallet();
@@ -70,7 +89,7 @@ const MyWallet = () => {
     event.preventDefault();
 
     if (!Number.isFinite(normalizedAmount) || normalizedAmount < 10000) {
-      toast.warning('Số tiền nạp tối thiểu là 10.000đ.');
+      toast.warning(t('wallet.errors.minimumDeposit'));
       return;
     }
 
@@ -84,12 +103,12 @@ const MyWallet = () => {
         return;
       }
 
-      toast.success(response.data?.message || 'Tạo yêu cầu nạp ví thành công.');
+      toast.success(response.data?.message || t('wallet.messages.depositCreated'));
       await loadWallet();
       setAmount('');
     } catch (error) {
       console.error('deposit wallet error:', error);
-      toast.error(error.response?.data?.message || error.response?.data?.error || 'Không thể tạo giao dịch nạp ví.');
+      toast.error(error.response?.data?.message || error.response?.data?.error || t('wallet.errors.createDeposit'));
     } finally {
       setDepositing(false);
     }
@@ -104,9 +123,9 @@ const MyWallet = () => {
               <Wallet size={26} />
             </div>
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Ví điện tử</p>
+              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('wallet.eWallet')}</p>
               <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white">
-                {loading ? 'Đang tải...' : formatCurrency(balance)}
+                {loading ? t('wallet.loading') : formatCurrency(balance)}
               </h1>
             </div>
           </div>
@@ -117,7 +136,7 @@ const MyWallet = () => {
             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Làm mới
+            {t('wallet.refresh')}
           </button>
         </div>
       </section>
@@ -129,13 +148,13 @@ const MyWallet = () => {
               <Plus size={19} />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">Nạp tiền vào ví</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Thanh toán qua cổng VNPay.</p>
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">{t('wallet.depositMoney')}</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('wallet.vnpayNote')}</p>
             </div>
           </div>
 
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Số tiền nạp
+            {t('wallet.depositAmount')}
           </label>
           <div className="mt-2 flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 focus-within:border-indigo-400 focus-within:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus-within:bg-slate-900">
             <input
@@ -144,7 +163,7 @@ const MyWallet = () => {
               step="1000"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              placeholder="Nhập số tiền"
+              placeholder={t('wallet.amountPlaceholder')}
               className="h-12 min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 dark:text-white"
             />
             <span className="text-sm font-bold text-slate-400">đ</span>
@@ -169,51 +188,51 @@ const MyWallet = () => {
             className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 text-sm font-extrabold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
           >
             <CreditCard size={17} />
-            {depositing ? 'Đang xử lý...' : 'Nạp tiền'}
+            {depositing ? t('wallet.processing') : t('wallet.deposit')}
           </button>
         </form>
 
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
           <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-700">
             <History size={18} className="text-indigo-500" />
-            <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">Lịch sử giao dịch</h2>
+            <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">{t('wallet.transactionHistory')}</h2>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-[620px] text-left">
               <thead className="bg-slate-50 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-400">
                 <tr>
-                  <th className="px-5 py-3">Thời gian</th>
-                  <th className="px-5 py-3">Loại</th>
-                  <th className="px-5 py-3 text-right">Số tiền</th>
-                  <th className="px-5 py-3">Trạng thái</th>
+                  <th className="px-5 py-3">{t('wallet.table.time')}</th>
+                  <th className="px-5 py-3">{t('wallet.table.type')}</th>
+                  <th className="px-5 py-3 text-right">{t('wallet.table.amount')}</th>
+                  <th className="px-5 py-3">{t('wallet.table.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {history.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-5 py-10 text-center text-sm font-semibold text-slate-400">
-                      Chưa có giao dịch ví.
+                      {t('wallet.emptyHistory')}
                     </td>
                   </tr>
                 ) : (
                   history.map((item, index) => {
                     const id = getValue(item, 'transactionId', 'TransactionId', 'id', 'Id') || index;
                     const time = getValue(item, 'createdAt', 'CreatedAt', 'transactionDate', 'TransactionDate', 'date', 'Date');
-                    const type = getValue(item, 'type', 'Type', 'transactionType', 'TransactionType') || 'Nạp ví';
+                    const type = getValue(item, 'type', 'Type', 'transactionType', 'TransactionType') || 'DEPOSIT';
                     const value = getValue(item, 'amount', 'Amount', 'money', 'Money') || 0;
-                    const status = getValue(item, 'status', 'Status') || 'N/A';
+                    const status = getValue(item, 'status', 'Status');
 
                     return (
                       <tr key={id} className="text-sm text-slate-600 dark:text-slate-300">
-                        <td className="whitespace-nowrap px-5 py-4 font-semibold">{formatDateTimeVN(time, 'N/A')}</td>
-                        <td className="px-5 py-4 font-bold">{type}</td>
+                        <td className="whitespace-nowrap px-5 py-4 font-semibold">{formatDateTimeVN(time, t('common.notUpdated'))}</td>
+                        <td className="px-5 py-4 font-bold">{getTransactionTypeLabel(type, t)}</td>
                         <td className="whitespace-nowrap px-5 py-4 text-right font-black text-slate-900 dark:text-white">
                           {formatCurrency(value)}
                         </td>
                         <td className="px-5 py-4">
                           <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                            {status}
+                            {getStatusLabel(status, t)}
                           </span>
                         </td>
                       </tr>
