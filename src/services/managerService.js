@@ -98,9 +98,9 @@ export const managerService = {
   updateMembershipPricing: async (data) => {
     try {
       const response = await api.put('/Manager/update-membership-pricing', {
-        TypeId: Number(data.typeId),
-        DurationMonths: Number(data.durationMonths),
-        Price: Number(data.price),
+        typeId: Number(data.typeId),
+        durationMonths: Number(data.durationMonths),
+        price: Number(data.price),
       });
       return response.data;
     } catch (error) {
