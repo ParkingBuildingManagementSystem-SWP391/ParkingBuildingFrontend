@@ -82,12 +82,11 @@ export const managerService = {
         dayRate: Number(data.dayRate),
         nightRate: Number(data.nightRate),
         fullDayRate: Number(data.fullDayRate),
-        monthlyPrice: Number(data.monthlyPrice),
+        firstHourRate: Number(data.firstHourRate ?? 0),
+        subsequentHourRate: Number(data.subsequentHourRate ?? 0),
         maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
           ? Number(data.maxHoursPerTurn)
-          : null,
-        firstHourRate: Number(data.firstHourRate ?? 0),
-        subsequentHourRate: Number(data.subsequentHourRate ?? 0)
+          : null
       });
       return response.data;
     } catch (error) {
@@ -99,14 +98,20 @@ export const managerService = {
   updateMembershipPricing: async (data) => {
     try {
       const response = await api.put('/Manager/update-membership-pricing', {
-        tierId: Number(data.tierId),
-        monthlyPrice: Number(data.monthlyPrice),
+        TypeId: Number(data.typeId),
+        DurationMonths: Number(data.durationMonths),
+        Price: Number(data.price),
       });
       return response.data;
     } catch (error) {
       console.error('updateMembershipPricing error:', error);
       throw error;
     }
+  },
+
+  getMembershipTiers: async () => {
+    const response = await api.get('/MembershipCard/tiers');
+    return response.data;
   },
 
   getMemberships: async (params = {}) => {
