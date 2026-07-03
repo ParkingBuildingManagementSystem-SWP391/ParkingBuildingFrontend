@@ -35,6 +35,8 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
 
     Html5Qrcode.getCameras()
       .then((cameras) => {
+        if (!isOpenRef.current) return;
+
         if (cameras && cameras.length > 0) {
           setDevices(cameras);
           // Auto select environment/back camera if available, otherwise first camera
@@ -45,6 +47,8 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
         }
       })
       .catch((err) => {
+        if (!isOpenRef.current) return;
+
         console.error("Error getting cameras", err);
         message.error(t('gate.qrScanner.noPermission'));
       });
@@ -88,7 +92,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
           (decodedText) => {
             message.success(t('gate.qrScanner.scanSuccess'));
             // Dừng camera trước rồi mới đóng modal và gọi callback
-            stopScanner(false).then(() => {
+            stopScanner(false).finally(() => {
               onScanSuccess(decodedText);
               onClose();
             });
@@ -103,34 +107,21 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
           }
         }).catch((err) => {
           console.error("Failed to start QR scanner", err);
-          setIsScanning(false);
+          if (isOpenRef.current) {
+            setIsScanning(false);
+          }
         });
       } catch (err) {
         console.error("QR scanner initialization error", err);
-        setIsScanning(false);
+        if (isOpenRef.current) {
+          setIsScanning(false);
+        }
       }
     }, 100);
   };
 
   const stopScanner = (isUnmounting = false) => {
     if (qrScannerRef.current && qrScannerRef.current.isScanning) {
-      const container = document.getElementById(scannerContainerId);
-      if (!container) {
-        // DOM element already gone, manually stop tracks if available to release camera and prevent lock
-        try {
-          if (qrScannerRef.current.localMediaStream) {
-            qrScannerRef.current.localMediaStream.getTracks().forEach(track => track.stop());
-          }
-        } catch (e) {
-          // Ignore manual stop track error
-        }
-        qrScannerRef.current = null;
-        if (!isUnmounting) {
-          setIsScanning(false);
-        }
-        return Promise.resolve();
-      }
-
       try {
         return qrScannerRef.current.stop()
           .then(() => {
@@ -142,18 +133,32 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
           .catch((err) => {
             console.warn("Failed to stop QR scanner", err);
             qrScannerRef.current = null;
+            if (!isUnmounting) {
+              setIsScanning(false);
+            }
           });
       } catch (err) {
         console.warn("Synchronous error stopping QR scanner", err);
         qrScannerRef.current = null;
+        if (!isUnmounting) {
+          setIsScanning(false);
+        }
         return Promise.resolve();
       }
     }
+
+    if (qrScannerRef.current) {
+      qrScannerRef.current = null;
+      if (!isUnmounting) {
+        setIsScanning(false);
+      }
+    }
+
     return Promise.resolve();
   };
 
   const handleClose = () => {
-    stopScanner(false).then(() => {
+    stopScanner(false).finally(() => {
       onClose();
     });
   };
@@ -209,7 +214,7 @@ const QrScannerModal = ({ isOpen, onClose, onScanSuccess, title }) => {
                   <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4 border-indigo-500 rounded-tr-md"></div>
                   <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4 border-indigo-500 rounded-bl-md"></div>
                   <div className="absolute bottom-0 right-0 w-5 h-5 border-b-4 border-r-4 border-indigo-500 rounded-br-md"></div>
-                  
+
                   {/* Laser line anim */}
                   <div className="absolute left-2 right-2 h-0.5 bg-indigo-500 shadow-[0_0_8px_#6366f1] animate-qr-laser"></div>
                 </div>

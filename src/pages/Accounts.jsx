@@ -4,7 +4,7 @@ import { Select, Modal, Input, Switch, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
-import { formatDateVN } from '../utils/dateTime';
+import { formatVietnamDate } from '../utils/dateTime';
 
 const Accounts = () => {
   const { t } = useTranslation();
@@ -43,7 +43,7 @@ const Accounts = () => {
     else if (u.roleId || u.RoleId) roleId = Number(u.roleId || u.RoleId);
 
     const uid = u.id || u.Id || u.userId || u.UserId || 1;
-    const fakeDate = formatDateVN(new Date(2025, uid % 12, (uid * 3) % 28 + 1));
+    const fakeDate = formatVietnamDate(new Date(2025, uid % 12, (uid * 3) % 28 + 1));
     const joinedDate = u.createdAt || u.CreatedAt || u.joined || u.Joined;
 
     return {
@@ -53,7 +53,7 @@ const Accounts = () => {
       phoneNumber: u.phoneNumber || u.PhoneNumber || '',
       roleId: roleId,
       status: u.isDeleted || u.IsDeleted ? 'Inactive' : 'Active', // Mapping to status toggle
-      joined: formatDateVN(joinedDate, joinedDate || fakeDate)
+      joined: joinedDate ? formatVietnamDate(joinedDate) : fakeDate
     };
   };
 
@@ -62,15 +62,8 @@ const Accounts = () => {
     setLoading(true);
     setErrorBanner('');
     try {
-      let rawData = [];
-      try {
-        const response = await api.get('/Admin/users');
-        rawData = response.data;
-      } catch (err) {
-        // Fallback endpoint
-        const response = await api.get('/User');
-        rawData = response.data;
-      }
+      const response = await api.get('/Admin/users');
+      const rawData = response.data;
 
       const source = Array.isArray(rawData) ? rawData : (rawData?.data || rawData?.Data || []);
       const mapped = source
@@ -269,49 +262,9 @@ const Accounts = () => {
   };
 
   // Toggle Account status between Active/Inactive
-  const handleToggleUserStatus = async (userId, currentStatus) => {
-    const cleanUserId = parseInt(userId);
-    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    const isActive = newStatus === 'Active';
-
-    // Expected Payload:
-    const payload = {
-      userId: cleanUserId,
-      isActive: isActive,
-      status: newStatus
-    };
-
-    let success = false;
-    let errorMsg = "";
-
-    // Try recommended PUT /api/User/toggle-status
-    try {
-      await api.put('/User/toggle-status', payload);
-      success = true;
-    } catch (e) {
-      errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-    }
-
-    // Try recommended POST /api/Admin/toggle-status
-    if (!success) {
-      try {
-        await api.post('/Admin/toggle-status', payload);
-        success = true;
-      } catch (e) {
-        errorMsg = e.response?.data?.message || e.response?.data?.error || "";
-      }
-    }
-
-    // Update local state immediately so table updates visually
-    setAccounts(prev =>
-      prev.map(acc =>
-        acc.id === cleanUserId
-          ? { ...acc, status: newStatus }
-          : acc
-      )
-    );
-
-    message.success(`${t('accounts.toggleSuccess')} ${newStatus}!`);
+  const handleToggleUserStatus = async () => {
+    // TODO: Backend cần cung cấp endpoint toggle status hoặc hỗ trợ isActive trong /Admin/update-user.
+    message.info('Chức năng khóa/mở khóa tài khoản chưa được Backend hỗ trợ.');
   };
 
   const totalCount = filteredAccounts.length;

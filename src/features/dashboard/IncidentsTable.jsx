@@ -13,7 +13,7 @@ import {
   Clock
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
-import { formatDateTimeVN } from '../../utils/dateTime';
+import { formatVietnamDateTime } from '../../utils/dateTime';
 
 const IncidentsTable = () => {
   const { t } = useTranslation();
@@ -131,6 +131,7 @@ const IncidentsTable = () => {
 
     const payload = {
       resolutionNotes: resolutionNotes.trim(),
+      fineAmount: 0,
     };
 
     setResolvingId(resolveIncidentId);
@@ -229,7 +230,7 @@ const IncidentsTable = () => {
             <MapPin size={14} /> {record.location}
           </div>
           <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-            <Clock size={14} /> {formatDateTimeVN(record.timestamp, 'N/A')}
+            <Clock size={14} /> {formatVietnamDateTime(record.timestamp)}
           </div>
         </div>
       )

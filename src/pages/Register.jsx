@@ -142,11 +142,11 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 font-sans dark:bg-slate-950">
+    <div className="flex min-h-dvh w-full overflow-y-auto bg-slate-50 font-sans dark:bg-slate-950 lg:h-dvh lg:overflow-hidden">
 
       {/* Left Brand / Gradient Panel */}
       <div
-        className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12 text-white"
+        className="relative hidden overflow-hidden text-white lg:flex lg:h-dvh lg:w-1/2 lg:flex-col lg:justify-between lg:p-8 xl:p-10"
         style={{ background: 'radial-gradient(120% 120% at 0% 0%, #6366f1 0%, #4f46e5 45%, #3730a3 100%)' }}
       >
         {/* Faint decorative circles */}
@@ -164,14 +164,14 @@ const Register = () => {
 
         {/* Hero copy */}
         <div className="relative z-10 max-w-md">
-          <h2 className="text-4xl font-extrabold tracking-tight leading-tight mb-4">
+          <h2 className="mb-3 text-3xl font-extrabold leading-tight tracking-tight xl:text-4xl">
             {t('register.heroTitle')}
           </h2>
           <p className="text-white/70 text-base leading-relaxed">
             {t('register.heroSubtitle')}
           </p>
 
-          <div className="mt-10 space-y-5">
+          <div className="mt-7 space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
                 <ShieldCheck size={20} className="text-white" />
@@ -194,27 +194,27 @@ const Register = () => {
       </div>
 
       {/* Right Form Panel */}
-      <div className="flex min-w-0 flex-1 items-center justify-center p-4 sm:p-10">
-        <div className="w-full max-w-[440px] rounded-[20px] border border-slate-100 bg-white p-5 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-900 sm:p-10">
+      <div className="flex min-h-dvh min-w-0 flex-1 items-center justify-center overflow-y-auto p-4 lg:h-dvh lg:min-h-0 lg:overflow-hidden lg:p-6">
+        <div className="w-full max-w-[440px] rounded-[20px] border border-slate-100 bg-white p-5 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-900 sm:p-7 lg:max-h-[calc(100dvh-32px)] lg:overflow-y-auto">
 
           {step === 1 && (
             <>
-              <div className="mb-8">
+              <div className="mb-5">
                 <h1 className="mb-2 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">{t('register.title')}</h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t('register.subtitle')}</p>
               </div>
 
               {errorMsg && (
-                <div className="mb-6 flex min-w-0 items-center gap-2 rounded-[14px] border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+                <div className="mb-4 flex min-w-0 items-center gap-2 rounded-[14px] border border-rose-100 bg-rose-50 px-4 py-2.5 text-sm text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
                   <AlertCircle size={16} />
                   <span className="font-medium">{errorMsg}</span>
                 </div>
               )}
 
-              <form onSubmit={handleRegisterSubmit} className="space-y-5">
+              <form onSubmit={handleRegisterSubmit} className="space-y-3">
 
                 <div className="flex flex-col">
-                  <label className="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.usernamePlaceholder')}</label>
+                  <label className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.usernamePlaceholder')}</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
                       <User size={18} />
@@ -225,14 +225,14 @@ const Register = () => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       disabled={loading}
-                      className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                      className="h-[46px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                     />
                   </div>
-                  <p className="ml-1 mt-1.5 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.usernameHint')}</p>
+                  <p className="ml-1 mt-1 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.usernameHint')}</p>
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.emailPlaceholder')}</label>
+                  <label className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.emailPlaceholder')}</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
                       <Mail size={18} />
@@ -243,14 +243,14 @@ const Register = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       disabled={loading}
-                      className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                      className="h-[46px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                     />
                   </div>
-                  <p className="ml-1 mt-1.5 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.emailHint')}</p>
+                  <p className="ml-1 mt-1 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.emailHint')}</p>
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.phonePlaceholder')}</label>
+                  <label className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.phonePlaceholder')}</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
                       <Phone size={18} />
@@ -261,14 +261,14 @@ const Register = () => {
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       disabled={loading}
-                      className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                      className="h-[46px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                     />
                   </div>
-                  <p className="ml-1 mt-1.5 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.phoneHint')}</p>
+                  <p className="ml-1 mt-1 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.phoneHint')}</p>
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.passwordPlaceholder')}</label>
+                  <label className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('register.passwordPlaceholder')}</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
                       <Lock size={18} />
@@ -279,7 +279,7 @@ const Register = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={loading}
-                      className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-12 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                      className="h-[46px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-12 pr-12 text-sm text-slate-900 outline-none transition-all placeholder-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                     />
                     <button
                       type="button"
@@ -289,28 +289,28 @@ const Register = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <p className="ml-1 mt-1.5 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.passwordHint')}</p>
+                  <p className="ml-1 mt-1 text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">{t('register.passwordHint')}</p>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-[52px] mt-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-bold text-[15px] shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] hover:-translate-y-0.5 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  className="mt-1 flex h-[48px] w-full items-center justify-center rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 text-[15px] font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
                   {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : t('register.signUpButton')}
                 </button>
               </form>
 
               {/* Divider */}
-              <div className="mt-8 mb-6 flex items-center justify-center relative">
+              <div className="relative mb-4 mt-5 flex items-center justify-center">
                 <div className="absolute h-px w-full bg-slate-100 dark:bg-slate-800"></div>
                 <span className="relative bg-white px-4 text-xs font-medium text-slate-400 dark:bg-slate-900 dark:text-slate-500">{t('register.orContinueWith')}</span>
               </div>
 
               {/* Social Buttons */}
-              <div className="flex justify-center mb-6">
+              <div className="mb-4 flex justify-center">
                 {/* Custom Google Button Wrapper */}
-                <div className="relative flex h-[52px] w-full cursor-pointer items-center justify-center gap-3 rounded-[14px] border-[1.5px] border-slate-200 bg-white transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700">
+                <div className="relative flex h-[48px] w-full cursor-pointer items-center justify-center gap-3 rounded-[14px] border-[1.5px] border-slate-200 bg-white transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700">
                   <div className="absolute inset-0 z-10 opacity-[0.01] flex items-center justify-center cursor-pointer">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}

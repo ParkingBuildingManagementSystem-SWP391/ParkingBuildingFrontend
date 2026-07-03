@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Button } from 'antd';
 import { Printer, QrCode, Barcode, CheckCircle2, Ticket } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { formatDateVN, formatTimeWithSecondsVN } from '../../utils/dateTime';
+import { formatVietnamDate, formatVietnamTimeWithSeconds } from '../../utils/dateTime';
 
 const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
   const { t } = useTranslation();
@@ -74,13 +74,13 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
             <div className="flex justify-between">
               <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.entryDate')}</span>
               <span className="text-slate-700 font-medium dark:text-slate-300">
-                {formatDateVN(details.checkInTime)}
+                {formatVietnamDate(details.checkInTime)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.entryTime')}</span>
               <span className="text-slate-700 font-medium dark:text-slate-300">
-                {formatTimeWithSecondsVN(details.checkInTime)}
+                {formatVietnamTimeWithSeconds(details.checkInTime)}
               </span>
             </div>
 
@@ -89,7 +89,7 @@ const TicketModal = ({ isOpen, onClose, details, type = 'ticket' }) => {
                 <div className="flex justify-between">
                   <span className="text-slate-500 dark:text-slate-400">{t('gate.ticket.exitTime')}</span>
                   <span className="text-slate-700 font-medium dark:text-slate-300">
-                    {formatTimeWithSecondsVN(details.checkOutTime)}
+                    {formatVietnamTimeWithSeconds(details.checkOutTime)}
                   </span>
                 </div>
                 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Car, AlertTriangle, Clock, Building2, Sparkles, ArrowRight } from 'lucide-react';
-import { formatTimeVN } from '../utils/dateTime';
+import { parkingService } from '../services/parkingService';
+import { formatVietnamTime } from '../utils/dateTime';
 
 const LocateVehicle = () => {
   const [licensePlate, setLicensePlate] = useState('');
@@ -19,18 +19,19 @@ const LocateVehicle = () => {
     setError('');
     setResult(null);
 
-    // Chuẩn hóa chuỗi trước khi gọi API (tối ưu hóa UI phản hồi)
-    const formattedPlate = licensePlate.replace(/[.\-\s]/g, '').toUpperCase();
-
     try {
-      // Gọi API Endpoint ẩn danh của Backend
-      const response = await axios.get(`/api/Parking/locate?licensePlate=${formattedPlate}`);
+      const result = await parkingService.locateVehicle(licensePlate);
 
-      if (response.data.isSuccess) {
-        setResult(response.data.data);
+      if (result?.isSuccess) {
+        setResult(result.data);
+      } else {
+        setResult(result?.data || result);
       }
+
+      setError('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Không tìm thấy phương tiện đang đỗ trong bãi.');
+      setResult(null);
+      setError(typeof err === 'string' ? err : 'Không tìm thấy phương tiện đang đỗ trong bãi.');
     } finally {
       setLoading(false);
     }
@@ -186,7 +187,7 @@ const LocateVehicle = () => {
                       />
                       <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg bg-slate-900/80 px-2.5 py-1 text-[10px] font-medium text-white shadow-sm backdrop-blur-md">
                         <Clock className="h-3 w-3" strokeWidth={2.5} />
-                        Vào bãi: {formatTimeVN(result.checkInTime, 'N/A')}
+                        Vào bãi: {formatVietnamTime(result.checkInTime)}
                       </div>
                     </div>
                   </div>

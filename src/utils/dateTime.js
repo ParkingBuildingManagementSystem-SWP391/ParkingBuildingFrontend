@@ -117,3 +117,23 @@ export const vietnamDateInputToIso = (dateInput, endOfDay = false) => {
 
   return new Date(Date.UTC(year, month - 1, day, hour - 7, minute, second, millisecond)).toISOString();
 };
+
+export const formatVietnamDate = (value) => formatDateVN(value, 'N/A');
+export const formatVietnamTime = (value) => formatTimeVN(value, 'N/A');
+export const formatVietnamDateTime = (value) => formatDateTimeVN(value, 'N/A');
+export const formatVietnamDateTimeWithSeconds = (value) => {
+  const date = toDate(value);
+  if (!date) return 'N/A';
+  return new Intl.DateTimeFormat(VIETNAM_LOCALE, {
+    timeZone: VIETNAM_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour12: false,
+  }).format(date);
+};
+
+export const formatVietnamTimeWithSeconds = (value) => formatTimeWithSecondsVN(value, 'N/A');

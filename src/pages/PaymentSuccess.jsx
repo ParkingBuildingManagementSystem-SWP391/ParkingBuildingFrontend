@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, Clock, ArrowRight, CreditCard, ShieldAlert, QrCode } from 'lucide-react';
-import api from '../services/api';
+import { CheckCircle2, XCircle, Clock, ArrowRight, CreditCard, ShieldAlert, QrCode, Wallet } from 'lucide-react';
+import { parkingService } from '../services/parkingService';
 import { useTranslation } from 'react-i18next';
 
 const PaymentSuccess = () => {
@@ -11,27 +11,51 @@ const PaymentSuccess = () => {
 
   // Extract query parameters
   const vnpResponseCode = searchParams.get('vnp_ResponseCode');
-   const vnpTxnRef = searchParams.get('vnp_TxnRef') || '';
+  const vnpTxnRef = searchParams.get('vnp_TxnRef') || '';
+  const paymentType = searchParams.get('type');
   const invoiceId = searchParams.get('invoiceId') || localStorage.getItem('pending_invoice_id');
 
-  // Page States: 'polling' | 'success_deposit' | 'success_exit' | 'failed' | 'timeout'
+  // Page States: 'polling' | 'success_wallet' | 'success_membership' | 'success_deposit' | 'success_exit' | 'success_exit_bot' | 'failed' | 'timeout'
   const [paymentState, setPaymentState] = useState('polling');
   const [loadingText, setLoadingText] = useState(t('paymentSuccess.loadingText1'));
   const [sessionDetail, setSessionDetail] = useState(null);
   const [graceTime, setGraceTime] = useState(1200); // 20 minutes in seconds (1200s)
 
+  const normalizedPaymentType = String(paymentType || '').trim().toLowerCase();
+  const normalizedTxnRef = String(vnpTxnRef || '').trim().toUpperCase();
+
+  const resolveSuccessState = (status) => {
+    if (normalizedPaymentType === 'wallet') return 'success_wallet';
+    if (normalizedPaymentType === 'membership') return 'success_membership';
+    if (normalizedPaymentType === 'booking') return 'success_deposit';
+    if (normalizedPaymentType === 'parking') return 'success_exit';
+
+    if (status === 'SUCCESS_WALLET') return 'success_wallet';
+    if (status === 'SUCCESS_MEMBERSHIP' || status === 'SUCCESS_MONTHLY') return 'success_membership';
+    if (status === 'DEPOSITED' || status === 'Deposited') return 'success_deposit';
+    if (status === 'SUCCESS_EXIT') return 'success_exit_bot';
+
+    if (normalizedTxnRef.startsWith('WDEP')) return 'success_wallet';
+    if (normalizedTxnRef.startsWith('MBC') || normalizedTxnRef.startsWith('MCR')) return 'success_membership';
+    if (normalizedTxnRef.startsWith('DEP')) return 'success_deposit';
+
+    return 'success_exit';
+  };
+
   // Polling logic to confirm with C# Backend
   useEffect(() => {
+    if (vnpResponseCode === '00' && (normalizedPaymentType === 'wallet' || normalizedTxnRef.startsWith('WDEP'))) {
+      setPaymentState('success_wallet');
+      return;
+    }
+
     if (!invoiceId) {
       if (vnpResponseCode === '00') {
-        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng, MCR: Vé tháng)
-        if (vnpTxnRef.startsWith('DEP')) {
-          setPaymentState('success_deposit');
+        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng)
+        const nextState = resolveSuccessState();
+        setPaymentState(nextState);
+        if (nextState === 'success_deposit') {
           fetchBookingDetails();
-        } else if (vnpTxnRef.startsWith('MCR')) {
-          setPaymentState('success_monthly');
-        } else {
-          setPaymentState('success_exit');
         }
       } else {
         setPaymentState('failed');
@@ -59,32 +83,33 @@ const PaymentSuccess = () => {
       attempts++;
       setLoadingText(t('paymentSuccess.loadingText2', { attempts, maxAttempts }));
       try {
-        const response = await api.get(`/Payments/status/${invoiceId}`);
-        const currentStatus = response.data?.status;
+        const response = await parkingService.getPaymentStatusById(invoiceId);
+        const currentStatus = String(
+          response?.status ||
+          response?.data?.status ||
+          response?.paymentStatus ||
+          response?.data?.paymentStatus ||
+          ''
+        ).trim();
+        const currentStatusKey = currentStatus.toUpperCase();
 
-        if (currentStatus === 'Deposited') {
+        if (currentStatusKey === 'DEPOSITED') {
           // Booking Deposit Success
           setPaymentState('success_deposit');
           clearInterval(intervalId);
           fetchBookingDetails();
-        } else if (currentStatus === 'SUCCESS_MONTHLY') {
-          // Monthly Card Registration Success
-          setPaymentState('success_monthly');
+        } else if (['SUCCESS', 'SUCCESS_WALLET', 'SUCCESS_MEMBERSHIP', 'SUCCESS_MONTHLY'].includes(currentStatusKey)) {
+          const nextState = resolveSuccessState(currentStatusKey);
+          setPaymentState(nextState);
           clearInterval(intervalId);
-        } else if (currentStatus === 'SUCCESS') {
-          // Check if this is a monthly card payment by checking vnpTxnRef
-          if (vnpTxnRef.startsWith('MCR')) {
-            setPaymentState('success_monthly');
-          } else {
-            // Pre-exit / Full Payment Success
-            setPaymentState('success_exit');
+          if (nextState === 'success_deposit') {
+            fetchBookingDetails();
           }
-          clearInterval(intervalId);
-        } else if (currentStatus === 'SUCCESS_EXIT') {
+        } else if (currentStatusKey === 'SUCCESS_EXIT') {
           // MỚI: Thanh toán trực tiếp tại quầy BOT -> Ra bãi ngay
           setPaymentState('success_exit_bot');
           clearInterval(intervalId);
-        } else if (currentStatus === 'FAILED') {
+        } else if (currentStatusKey === 'FAILED') {
           setPaymentState('failed');
           clearInterval(intervalId);
         }
@@ -97,13 +122,15 @@ const PaymentSuccess = () => {
     intervalId = setInterval(pollStatus, 2000);
 
     return () => clearInterval(intervalId);
-  }, [invoiceId, vnpResponseCode, vnpTxnRef]);
+  }, [invoiceId, normalizedPaymentType, normalizedTxnRef, vnpResponseCode]);
 
   // Fetch session details from my-bookings to display QR Code if deposited
   const fetchBookingDetails = async () => {
     try {
-      const response = await api.get('/Parking/my-bookings');
-      const bookings = response.data?.bookingsList || [];
+      const response = await parkingService.getMyBookings();
+      const bookings = Array.isArray(response)
+        ? response
+        : response?.bookingsList || response?.data?.bookingsList || response?.data || [];
       // Find the booking that has deposit status or matches invoice (fallback to first active booking)
       const matched = bookings.find(b => b.paymentStatus === 'Deposited' || b.sessionStatus === 'Reserved');
       if (matched) {
@@ -293,8 +320,50 @@ const PaymentSuccess = () => {
           </div>
         )}
 
-        {/* State 3.2: Monthly Card Registration Success */}
-        {paymentState === 'success_monthly' && (
+        {/* State 3.2: Wallet Deposit Success */}
+        {paymentState === 'success_wallet' && (
+          <div className="space-y-7">
+            <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
+              <Wallet size={40} className="text-emerald-500" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+                {t('paymentSuccess.walletSuccess')}
+              </h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
+                {t('paymentSuccess.walletDesc')}
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-xs space-y-2 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10 sm:p-6">
+              <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">
+                {t('paymentSuccess.walletStatusTitle')}
+              </span>
+              <div className="text-xl font-black text-emerald-600 uppercase">
+                {t('paymentSuccess.walletStatus')}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+              <button
+                onClick={() => navigate('/')}
+                className="h-12 flex-1 cursor-pointer rounded-[14px] border border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                {t('paymentSuccess.btnHome')}
+              </button>
+              <button
+                onClick={() => navigate('/my-wallet')}
+                className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] text-sm transition-all shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              >
+                {t('paymentSuccess.btnMyWallet')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* State 3.3: Membership Registration Success */}
+        {paymentState === 'success_membership' && (
           <div className="space-y-7">
             <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 size={40} className="text-emerald-500" />
@@ -302,33 +371,32 @@ const PaymentSuccess = () => {
 
             <div className="space-y-2">
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-                {t('paymentSuccess.monthlySuccess')}
+                {t('paymentSuccess.membershipSuccess')}
               </h2>
               <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
-                {t('paymentSuccess.monthlyDesc')}
+                {t('paymentSuccess.membershipDesc')}
               </p>
             </div>
 
-            {/* Hộp thông tin thẻ VIP nổi bật */}
             <div className="mx-auto max-w-xs space-y-2 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10 sm:p-6">
               <div className="flex items-center justify-center gap-1.5 text-[10px] font-extrabold text-indigo-700 uppercase tracking-widest">
                 <CreditCard size={12} />
-                Thành viên VIP / Vé tháng
+                Membership Pass
               </div>
               <p className="text-[11px] text-indigo-800 font-medium leading-relaxed dark:text-indigo-300">
-                Hệ thống AI sẽ tự động nhận diện biển số xe của bạn khi ra vào cổng để mở barrier mà không cần quẹt thẻ hay thanh toán thêm.
+                {t('paymentSuccess.membershipPassDesc')}
               </p>
             </div>
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/')}
                 className="h-12 flex-1 cursor-pointer rounded-[14px] border border-slate-200 bg-white text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 {t('paymentSuccess.btnHome')}
               </button>
               <button
-                onClick={() => navigate('/my-monthly-card')}
+                onClick={() => navigate('/my-membership')}
                 className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] text-sm transition-all shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 {t('paymentSuccess.btnMyCard')}

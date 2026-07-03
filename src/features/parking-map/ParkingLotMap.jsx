@@ -27,7 +27,7 @@ import motorbikeIcon from '../../assets/vehicles/motorbike.png';
 import bikeIcon from '../../assets/vehicles/bike.png';
 import i18n from '../../i18n';
 import { useTranslation } from 'react-i18next';
-import { createVietnamWallTimeIso, formatDateTimeVN, getVietnamDateParts } from '../../utils/dateTime';
+import { createVietnamWallTimeIso, formatVietnamDateTime, getVietnamDateParts } from '../../utils/dateTime';
 
 
 
@@ -227,7 +227,7 @@ const ParkingLotMap = () => {
   const highlightFloorId = searchParams.get('floorId');
   const highlightSlotName = searchParams.get('slotName');
 
-  const selectForMonthlyCard = searchParams.get('selectForMonthlyCard') === 'true';
+  const selectForMembership = searchParams.get('selectForMembership') === 'true';
   const paramVehicleTypeId = searchParams.get('vehicleTypeId');
 
   const [activeFloorId, setActiveFloorId] = useState(() => {
@@ -594,7 +594,7 @@ const ParkingLotMap = () => {
 
   // Slot click handler
   const handleSlotClick = (slot) => {
-    if (selectForMonthlyCard) {
+    if (selectForMembership) {
       if (slot.status === 'Available') {
         const typeId = Number(slot.typeId);
         const reqTypeId = Number(paramVehicleTypeId);
@@ -602,7 +602,7 @@ const ParkingLotMap = () => {
           message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
           return;
         }
-        navigate(`/my-monthly-card?selectedSlotId=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
+        navigate(`/my-membership?slotIds=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
       } else {
         message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
       }
@@ -1486,13 +1486,13 @@ const ParkingLotMap = () => {
                         {slotDetail.activeSession.checkInTime && (
                           <div className="flex justify-between items-center">
                             <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian vào thực tế:</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatDateTimeVN(slotDetail.activeSession.checkInTime)}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatVietnamDateTime(slotDetail.activeSession.checkInTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.bookingTime && (
                           <div className="flex justify-between items-center">
                             <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian đặt trước:</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatDateTimeVN(slotDetail.activeSession.bookingTime)}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{formatVietnamDateTime(slotDetail.activeSession.bookingTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.customer && (
