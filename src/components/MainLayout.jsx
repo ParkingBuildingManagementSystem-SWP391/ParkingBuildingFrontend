@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { CalendarCheck, Map, ScanLine } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -93,8 +93,8 @@ const MainLayout = () => {
         subtitle: t('myBookings.pageSubtitle')
       },
       '/my-wallet': {
-        title: t('wallet.title', { defaultValue: 'Ví của tôi' }),
-        subtitle: t('wallet.subtitle', { defaultValue: 'Quản lý số dư và lịch sử giao dịch ví' })
+        title: t('wallet.title', { defaultValue: 'VÃ­ cá»§a tÃ´i' }),
+        subtitle: t('wallet.subtitle', { defaultValue: 'Quáº£n lÃ½ sá»‘ dÆ° vÃ  lá»‹ch sá»­ giao dá»‹ch vÃ­' })
       },
       '/create-account': {
         title: t('createAccount.pageTitle'),

@@ -22,6 +22,7 @@ import Settings from './pages/Settings';
 import Accounts from './pages/Accounts';
 import CreateAccount from './pages/CreateAccount';
 import ParkingSessionManager from './pages/ParkingSessionManager';
+import MembershipSuccessPage from './pages/MembershipSuccessPage';
 import MyMembership from './pages/MyMembership';
 import MembershipManager from './pages/MembershipManager';
 import MyWallet from './pages/MyWallet';
@@ -60,6 +61,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/membership/success" element={<MembershipSuccessPage />} />
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
 
