@@ -16,7 +16,7 @@ export const ROLE_MENU_ROUTES = {
   parkingMap: '/parking-map',
   checkinCheckout: '/checkin-checkout',
   myBookings: '/my-bookings',
-  monthlyCard: '/my-monthly-card',
+  monthlyCard: '/my-membership',
   managerDashboard: '/dashboard',
   adminDashboard: '/dashboard',
   adminAccounts: '/accounts',
@@ -65,7 +65,7 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
       },
       {
         key: 'monthly-card',
-        label: label(t, 'dropdown.monthlyCard', 'Vé tháng'),
+        label: label(t, 'dropdown.monthlyCard', 'Membership'),
         path: routes.monthlyCard,
         icon: CreditCard
       }

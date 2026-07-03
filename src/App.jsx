@@ -24,6 +24,7 @@ import CreateAccount from './pages/CreateAccount';
 import ParkingSessionManager from './pages/ParkingSessionManager';
 import MyMonthlyCard from './pages/MyMonthlyCard';
 import MonthlyCardManager from './pages/MonthlyCardManager';
+import MembershipSuccessPage from './pages/MembershipSuccessPage';
 
 // Feature Components (Dashboard, Parking Map, Check-in counter)
 import Dashboard, {
@@ -59,6 +60,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/membership/success" element={<MembershipSuccessPage />} />
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
 
@@ -117,6 +119,7 @@ function App() {
 
             {/* Registered driver monthly card */}
             <Route element={<RoleProtectedRoute allowedRoles={['Registered_Driver']} />}>
+              <Route path="/my-membership" element={<MyMonthlyCard />} />
               <Route path="/my-monthly-card" element={<MyMonthlyCard />} />
             </Route>
             

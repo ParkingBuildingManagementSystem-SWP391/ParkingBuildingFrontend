@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Clock, ArrowRight, CreditCard, ShieldAlert, QrCode } from 'lucide-react';
-import api from '../services/api';
+import { parkingService } from '../services/parkingService';
 import { useTranslation } from 'react-i18next';
 
 const PaymentSuccess = () => {
@@ -13,6 +13,10 @@ const PaymentSuccess = () => {
   const vnpResponseCode = searchParams.get('vnp_ResponseCode');
    const vnpTxnRef = searchParams.get('vnp_TxnRef') || '';
   const invoiceId = searchParams.get('invoiceId') || localStorage.getItem('pending_invoice_id');
+  const paymentType = (searchParams.get('type') || '').toLowerCase();
+
+  const isWalletPayment = paymentType === 'wallet' || vnpTxnRef.startsWith('WDEP_');
+  const isMembershipPayment = paymentType === 'membership' || vnpTxnRef.startsWith('MBC_') || vnpTxnRef.startsWith('MCR_');
 
   // Page States: 'polling' | 'success_deposit' | 'success_exit' | 'failed' | 'timeout'
   const [paymentState, setPaymentState] = useState('polling');
@@ -24,12 +28,14 @@ const PaymentSuccess = () => {
   useEffect(() => {
     if (!invoiceId) {
       if (vnpResponseCode === '00') {
-        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng, MCR: Vé tháng)
-        if (vnpTxnRef.startsWith('DEP')) {
+        // Phân loại màn hình dựa vào tiền tố mã giao dịch (DEP: Đặt cọc, INV: Phí đỗ xe ra cổng, MCR: Membership)
+        if (isWalletPayment) {
+          setPaymentState('success_wallet');
+        } else if (isMembershipPayment) {
+          setPaymentState('success_membership');
+        } else if (vnpTxnRef.startsWith('DEP')) {
           setPaymentState('success_deposit');
           fetchBookingDetails();
-        } else if (vnpTxnRef.startsWith('MCR')) {
-          setPaymentState('success_monthly');
         } else {
           setPaymentState('success_exit');
         }
@@ -59,22 +65,29 @@ const PaymentSuccess = () => {
       attempts++;
       setLoadingText(t('paymentSuccess.loadingText2', { attempts, maxAttempts }));
       try {
-        const response = await api.get(`/Payments/status/${invoiceId}`);
-        const currentStatus = response.data?.status;
+        const response = await parkingService.getPaymentStatusById(invoiceId);
+        const currentStatus =
+          response?.status ||
+          response?.data?.status ||
+          response?.paymentStatus ||
+          response?.data?.paymentStatus;
 
-        if (currentStatus === 'Deposited') {
+        if (isWalletPayment) {
+          setPaymentState('success_wallet');
+          clearInterval(intervalId);
+        } else if (currentStatus === 'Deposited') {
           // Booking Deposit Success
           setPaymentState('success_deposit');
           clearInterval(intervalId);
           fetchBookingDetails();
-        } else if (currentStatus === 'SUCCESS_MONTHLY') {
-          // Monthly Card Registration Success
-          setPaymentState('success_monthly');
+        } else if (currentStatus === 'SUCCESS_MONTHLY' || isMembershipPayment) {
+          // Membership registration success
+          setPaymentState('success_membership');
           clearInterval(intervalId);
         } else if (currentStatus === 'SUCCESS') {
-          // Check if this is a monthly card payment by checking vnpTxnRef
-          if (vnpTxnRef.startsWith('MCR')) {
-            setPaymentState('success_monthly');
+          // Check if this is a Membership payment by checking vnpTxnRef
+          if (isMembershipPayment) {
+            setPaymentState('success_membership');
           } else {
             // Pre-exit / Full Payment Success
             setPaymentState('success_exit');
@@ -102,8 +115,10 @@ const PaymentSuccess = () => {
   // Fetch session details from my-bookings to display QR Code if deposited
   const fetchBookingDetails = async () => {
     try {
-      const response = await api.get('/Parking/my-bookings');
-      const bookings = response.data?.bookingsList || [];
+      const response = await parkingService.getMyBookings();
+      const bookings = Array.isArray(response)
+        ? response
+        : response?.bookingsList || response?.data?.bookingsList || response?.data || [];
       // Find the booking that has deposit status or matches invoice (fallback to first active booking)
       const matched = bookings.find(b => b.paymentStatus === 'Deposited' || b.sessionStatus === 'Reserved');
       if (matched) {
@@ -293,8 +308,8 @@ const PaymentSuccess = () => {
           </div>
         )}
 
-        {/* State 3.2: Monthly Card Registration Success */}
-        {paymentState === 'success_monthly' && (
+        {/* State 3.2: Membership Registration Success */}
+        {paymentState === 'success_membership' && (
           <div className="space-y-7">
             <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 size={40} className="text-emerald-500" />
@@ -313,7 +328,7 @@ const PaymentSuccess = () => {
             <div className="mx-auto max-w-xs space-y-2 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10 sm:p-6">
               <div className="flex items-center justify-center gap-1.5 text-[10px] font-extrabold text-indigo-700 uppercase tracking-widest">
                 <CreditCard size={12} />
-                Thành viên VIP / Vé tháng
+                Membership Parking
               </div>
               <p className="text-[11px] text-indigo-800 font-medium leading-relaxed dark:text-indigo-300">
                 Hệ thống AI sẽ tự động nhận diện biển số xe của bạn khi ra vào cổng để mở barrier mà không cần quẹt thẻ hay thanh toán thêm.
@@ -328,12 +343,37 @@ const PaymentSuccess = () => {
                 {t('paymentSuccess.btnHome')}
               </button>
               <button
-                onClick={() => navigate('/my-monthly-card')}
+                onClick={() => navigate('/my-membership')}
                 className="flex-1 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] text-sm transition-all shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
               >
                 {t('paymentSuccess.btnMyCard')}
               </button>
             </div>
+          </div>
+        )}
+
+        {paymentState === 'success_wallet' && (
+          <div className="space-y-7">
+            <div className="w-20 h-20 bg-emerald-50 ring-8 ring-emerald-50/60 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 size={40} className="text-emerald-500" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+                Nạp ví thành công!
+              </h2>
+              <p className="px-2 text-sm font-medium text-slate-500 dark:text-slate-400 sm:px-4">
+                Giao dịch nạp ví của bạn đã được xác nhận.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+            >
+              {t('paymentSuccess.btnHome')}
+              <ArrowRight size={16} />
+            </button>
           </div>
         )}
 

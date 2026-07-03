@@ -96,6 +96,19 @@ export const managerService = {
     }
   },
 
+  updateMembershipPricing: async (data) => {
+    try {
+      const response = await api.put('/Manager/update-membership-pricing', {
+        tierId: Number(data.tierId),
+        monthlyPrice: Number(data.monthlyPrice),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('updateMembershipPricing error:', error);
+      throw error;
+    }
+  },
+
   getMonthlyCards: async () => {
     try {
       const response = await api.get('/Manager/monthly-cards');

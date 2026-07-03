@@ -90,6 +90,7 @@ const Sidebar = ({
           <SectionTitle isCollapsed={isCollapsed}>{t('sidebar.services')}</SectionTitle>
           <NavButton path="/parking-map" icon={Map} label={t('sidebar.parkingMap')} isCollapsed={isCollapsed} />
           <NavButton path="/my-bookings" icon={CalendarIcon} label={t('sidebar.myBookings')} isCollapsed={isCollapsed} />
+          <NavButton path="/my-membership" icon={CreditCard} label="Membership" isCollapsed={isCollapsed} />
         </div>
       );
     }
@@ -114,7 +115,7 @@ const Sidebar = ({
           <NavButton path="/incidents" icon={AlertTriangle} label={t('sidebar.incidents')} isCollapsed={isCollapsed} />
           <NavButton path="/analytics" icon={BarChart3} label={t('sidebar.analytics')} isCollapsed={isCollapsed} />
           <NavButton path="/slot-management" icon={Grid3X3} label={t('sidebar.slotManagement')} isCollapsed={isCollapsed} />
-          <NavButton path="/dashboard/monthly-cards" icon={CreditCard} label={t('sidebar.monthlyCards', { defaultValue: 'Quản lý vé tháng' })} isCollapsed={isCollapsed} />
+          <NavButton path="/dashboard/monthly-cards" icon={CreditCard} label={t('sidebar.monthlyCards', { defaultValue: 'Quản lý Membership' })} isCollapsed={isCollapsed} />
           <NavButton path="/pricing" icon={DollarSign} label={t('sidebar.pricing')} isCollapsed={isCollapsed} />
           <NavButton path="/staff-logs" icon={ClipboardList} label={t('sidebar.staffLogs')} isCollapsed={isCollapsed} />
         </div>

@@ -84,9 +84,13 @@ const MainLayout = () => {
           ? t('monthlyCard.managerSubtitle')
           : t('monthlyCard.paymentRequestSubtitle')
       },
+      '/my-membership': {
+        title: 'Membership của tôi',
+        subtitle: 'Quản lý các ô đỗ và mã QR Membership'
+      },
       '/my-monthly-card': {
-        title: t('monthlyCard.title'),
-        subtitle: t('monthlyCard.subtitle')
+        title: 'Membership của tôi',
+        subtitle: 'Quản lý các ô đỗ và mã QR Membership'
       },
       '/my-bookings': {
         title: t('myBookings.pageTitle'),
