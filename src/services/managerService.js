@@ -53,7 +53,7 @@ export const managerService = {
 
   getStaffLogs: async () => {
     try {
-      // TODO backend: implement GET /api/Manager/staff-logs returning an array of staff activity logs.
+      // TODO backend: implement GET /Manager/staff-logs returning an array of staff activity logs.
       const response = await api.get('/Manager/staff-logs');
       return response.data;
     } catch (error) {
@@ -109,9 +109,9 @@ export const managerService = {
     }
   },
 
-  getMemberships: async () => {
+  getMemberships: async (params = {}) => {
     try {
-      const response = await api.get('/MembershipCard/tiers');
+      const response = await api.get('/Manager/membership-cards', { params });
       return response.data;
     } catch (error) {
       console.error('getMemberships error:', error);
@@ -125,7 +125,7 @@ export const managerService = {
 
   cancelMembership: async (membershipCardId) => {
     try {
-      const response = await api.put(`/Manager/monthly-card/${membershipCardId}/cancel`);
+      const response = await api.delete(`/Manager/membership-cards/${membershipCardId}/cancel`);
       return response.data;
     } catch (error) {
       console.error(`cancelMembership error for card ${membershipCardId}:`, error);
