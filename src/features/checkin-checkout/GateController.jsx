@@ -415,7 +415,7 @@ const GateController = () => {
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
   // New checkout payment states
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('CASH');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('AUTO');
   const [cashReceived, setCashReceived] = useState('');
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [changeDue, setChangeDue] = useState(null);
@@ -523,7 +523,7 @@ const GateController = () => {
   };
 
   // Unified exit check-out handler (Supports matching by ticketCode + licensePlate)
-  const handleCheckOut = async (paymentMethod = 'CASH', plateToUse = null) => {
+  const handleCheckOut = async (paymentMethod = 'AUTO', plateToUse = null) => {
     const plate = plateToUse || checkOutForm.getFieldValue('plate');
     const ticketCode = checkOutForm.getFieldValue('ticketCode');
     const tempImageUrl = checkOutForm.getFieldValue('tempImageUrl') || null;
@@ -561,6 +561,14 @@ const GateController = () => {
       const isSuccess = result.isSuccess || result.IsSuccess;
       const isPaid = result.isPaid !== undefined ? result.isPaid : result.IsPaid;
       const messageText = result.message || result.Message;
+      const resultPaymentMethod = result.paymentMethod || result.PaymentMethod;
+      const paymentUrl = result.paymentUrl || result.PaymentUrl;
+
+      if (resultPaymentMethod) {
+        setSelectedPaymentMethod(String(resultPaymentMethod).toUpperCase());
+      } else if (paymentUrl) {
+        setSelectedPaymentMethod('VNPAY');
+      }
 
       if (isSuccess === false) {
         message.warning(messageText || t('gate.messages.plateMismatch'));
@@ -636,7 +644,7 @@ const GateController = () => {
     }
 
     // Mặc định gọi check-out bằng CASH để mở Modal hóa đơn
-    handleCheckOut('CASH');
+    handleCheckOut('AUTO');
   };
 
   // Cash payment confirmation handler
@@ -1421,6 +1429,11 @@ const GateController = () => {
           const invoiceId = checkoutResult.invoiceId || checkoutResult.InvoiceId;
           const isPaid = checkoutResult.isPaid !== undefined ? checkoutResult.isPaid : checkoutResult.IsPaid;
           const paymentUrl = checkoutResult.paymentUrl || checkoutResult.PaymentUrl;
+          const effectivePaymentMethod = String(
+            checkoutResult.paymentMethod || checkoutResult.PaymentMethod || selectedPaymentMethod || ''
+          ).toUpperCase();
+          const isVnPayPending = isSuccess && !isPaid && Boolean(paymentUrl);
+          const isCashPending = isSuccess && !isPaid && !paymentUrl && ['AUTO', 'CASH', ''].includes(effectivePaymentMethod);
           const extraAmount = checkoutResult.extraAmount ?? checkoutResult.ExtraAmount ?? checkoutResult.additionalAmount ?? checkoutResult.AdditionalAmount;
           const isOverGracePeriod = checkoutResult.isOverGracePeriod ?? checkoutResult.IsOverGracePeriod;
           const hasExtraFeeSignal = !isPaid && (
@@ -1666,7 +1679,7 @@ const GateController = () => {
                     )}
 
                     {/* Unpaid Flow: VNPAY */}
-                    {isSuccess && !isPaid && selectedPaymentMethod === 'VNPAY' && paymentUrl && (
+                    {isVnPayPending && (
                       <div className="space-y-5">
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center shadow-sm dark:border-amber-800/50 dark:bg-amber-950/20">
                           <span className="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-amber-700 dark:text-amber-300">{amountDueLabel}</span>
@@ -1716,7 +1729,7 @@ const GateController = () => {
                     )}
 
                     {/* Unpaid Flow: CASH */}
-                    {isSuccess && !isPaid && selectedPaymentMethod === 'CASH' && (
+                    {isCashPending && (
                       <div className="space-y-4">
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-800/50 dark:bg-amber-950/20">
                           <span className="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-amber-700 dark:text-amber-300">{amountDueLabel}</span>

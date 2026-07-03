@@ -290,7 +290,7 @@ const ParkingLotMap = () => {
   // Form states for booking
   const [bookingVehicleType, setBookingVehicleType] = useState('Motorcycle');
   const [bookingPlate, setBookingPlate] = useState('');
-  const [bookingPaymentMethod, setBookingPaymentMethod] = useState('VNPAY');
+  const [bookingPaymentMethod, setBookingPaymentMethod] = useState('AUTO');
   const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
   const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
 
@@ -749,15 +749,21 @@ const ParkingLotMap = () => {
       const paymentUrl = responseData.paymentUrl || responseData.PaymentUrl || responseData.vnpayUrl || responseData.VnPayUrl;
       const depositAmount = responseData.depositAmount ?? responseData.DepositAmount ?? responseData.amount ?? responseData.Amount;
       const paymentStatus = responseData.paymentStatus || responseData.PaymentStatus;
+      const invoiceId = responseData.invoiceId || responseData.InvoiceId;
 
       setIsBookingModalOpen(false);
-      if (requiresPayment && paymentUrl) {
+      if (paymentUrl) {
         const depositText = depositAmount ? ` Tiền cọc: ${Number(depositAmount).toLocaleString('vi-VN')} VND.` : '';
         message.success((responseData.message || responseData.Message || 'Cần thanh toán tiền cọc để hoàn tất đặt chỗ.') + depositText);
+        if (invoiceId) localStorage.setItem('pending_invoice_id', String(invoiceId));
         window.location.href = paymentUrl;
       } else if (requiresPayment) {
         message.success(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
       } else if (bookingPaymentMethod === 'WALLET') {
+        if (invoiceId && String(paymentStatus || '').toUpperCase() === 'SUCCESS') {
+          navigate(`/payment-success?type=booking&invoiceId=${invoiceId}`);
+          return;
+        }
         message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} và thanh toán cọc bằng ví thành công!`);
       } else {
         message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} thành công!`);
@@ -1362,10 +1368,9 @@ const ParkingLotMap = () => {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Phuong thuc thanh toan coc</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                     {[
-                      { value: 'VNPAY', label: 'VNPay', Icon: CreditCard },
-                      { value: 'WALLET', label: 'Vi dien tu', Icon: Wallet },
+                      { value: 'AUTO', label: 'Tu dong', Icon: Wallet },
                     ].map(({ value, label, Icon }) => {
                       const isSelected = bookingPaymentMethod === value;
                       return (

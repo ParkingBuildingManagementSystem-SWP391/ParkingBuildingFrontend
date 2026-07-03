@@ -124,6 +124,12 @@ const PaymentSuccess = () => {
     return () => clearInterval(intervalId);
   }, [invoiceId, normalizedPaymentType, normalizedTxnRef, vnpResponseCode]);
 
+  useEffect(() => {
+    if (['success_wallet', 'success_membership', 'success_deposit', 'success_exit', 'success_exit_bot', 'failed'].includes(paymentState)) {
+      localStorage.removeItem('pending_invoice_id');
+    }
+  }, [paymentState]);
+
   // Fetch session details from my-bookings to display QR Code if deposited
   const fetchBookingDetails = async () => {
     try {

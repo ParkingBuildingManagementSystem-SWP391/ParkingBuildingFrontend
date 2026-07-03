@@ -14,7 +14,8 @@ import {
   CheckCircle,
   XCircle,
   Ticket,
-  CreditCard
+  CreditCard,
+  Wallet
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
@@ -67,7 +68,8 @@ const MyBookings = () => {
     try {
       const response = await parkingService.createVnPayPayment(booking.id);
       if (response && response.success && response.paymentUrl) {
-        // Redirect to VNPay payment URL
+        const invoiceId = response.invoiceId || response.InvoiceId || response.data?.invoiceId || response.data?.InvoiceId;
+        if (invoiceId) localStorage.setItem('pending_invoice_id', String(invoiceId));
         window.location.href = response.paymentUrl;
       } else {
         message.error(response?.message || t('myBookings.errVNPayCreate'));
@@ -91,6 +93,26 @@ const MyBookings = () => {
         }
       }
       message.error(errorMsg);
+    } finally {
+      setPayingSessionId(null);
+    }
+  };
+
+  const handlePayWallet = async (booking) => {
+    if (!booking.invoiceId) {
+      message.error('Khong tim thay hoa don dang cho thanh toan.');
+      return;
+    }
+
+    setPayingSessionId(booking.id);
+    try {
+      const response = await parkingService.payPendingInvoiceWallet(booking.invoiceId);
+      message.success(response?.message || 'Thanh toan tien coc bang vi thanh cong.');
+      await fetchMyBookings();
+      navigate(`/payment-success?type=booking&invoiceId=${booking.invoiceId}`);
+    } catch (err) {
+      const errorMessage = typeof err === 'string' ? err : err?.message || 'Thanh toan bang vi that bai.';
+      message.error(errorMessage);
     } finally {
       setPayingSessionId(null);
     }
@@ -179,6 +201,7 @@ const MyBookings = () => {
           totalAmount: item.totalAmount || item.TotalAmount,
           paymentStatus: item.paymentStatus || item.PaymentStatus,
           paymentMethod: item.paymentMethod || item.PaymentMethod,
+          invoiceId: item.invoiceId || item.InvoiceId || item.invoice?.invoiceId || item.Invoice?.InvoiceId,
           expectedCheckInTime,
           depositAmount: item.depositAmount ?? item.DepositAmount,
           requiresDeposit: item.requiresDeposit ?? item.RequiresDeposit,
@@ -237,6 +260,7 @@ const MyBookings = () => {
     String(booking.paymentMethod || '').toUpperCase() === 'VNPAY' &&
     normalizePaymentStatus(booking.paymentStatus) === 'pending'
   );
+  const canPayPendingInvoiceWithWallet = (booking) => isDepositPaymentDue(booking) && Boolean(booking.invoiceId);
   const isParkingFeePaymentDue = (booking) => (
     (booking.sessionStatus === 'InProgress' || booking.sessionStatus === 'Occupied') &&
     !isPaymentCompleted(booking.paymentStatus)
@@ -608,6 +632,21 @@ const MyBookings = () => {
                          className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-rose-200 bg-white px-4 text-xs font-bold text-rose-600 shadow-sm transition-all hover:bg-rose-50 dark:border-rose-500/40 dark:bg-slate-800 dark:text-rose-300 dark:hover:bg-rose-500/15 lg:flex-none"
                       >
                         <X size={14} /> {t('myBookings.cancel')}
+                      </button>
+                    )}
+
+                    {canPayPendingInvoiceWithWallet(booking) && (
+                      <button
+                         disabled={payingSessionId === booking.id}
+                         onClick={() => handlePayWallet(booking)}
+                         className="flex-1 lg:flex-none w-full sm:w-auto h-10 px-5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-[14px] font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
+                      >
+                        {payingSessionId === booking.id ? (
+                          <span className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                          <Wallet size={14} />
+                        )}
+                        Thanh toan vi
                       </button>
                     )}
 

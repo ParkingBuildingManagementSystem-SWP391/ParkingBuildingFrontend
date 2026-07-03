@@ -284,7 +284,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
   const [selectedSlotId, setSelectedSlotId] = useState(null);
   const [selectedSlotName, setSelectedSlotName] = useState('');
   const [licenseVehicles, setLicenseVehicles] = useState(['']);
-  const [paymentMethod, setPaymentMethod] = useState('VNPAY');
+  const [paymentMethod, setPaymentMethod] = useState('AUTO');
   const [loadingTiers, setLoadingTiers] = useState(false);
 
   useEffect(() => {
@@ -394,7 +394,7 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
     onRegister({
       tierId: getTierId(selectedTier),
-      slotIds: [selectedSlotId],
+      slotId: selectedSlotId,
       licenseVehicles: plates,
       paymentMethod,
     });
@@ -595,8 +595,8 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
 
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thanh toán</p>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  {['VNPAY', 'WALLET'].map((method) => (
+                <div className="mt-2 grid grid-cols-1 gap-2">
+                  {['AUTO'].map((method) => (
                     <button
                       key={method}
                       type="button"
@@ -607,8 +607,8 @@ const RegistrationView = ({ onRegister, submitting, t }) => {
                           : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-900'
                       }`}
                     >
-                      {method === 'WALLET' ? <Wallet size={14} /> : <CreditCard size={14} />}
-                      {method}
+                      <Wallet size={14} />
+                      Tu dong
                     </button>
                   ))}
                 </div>
@@ -706,11 +706,21 @@ const MyMembership = () => {
     setSubmitting(true);
     try {
       const result = await membershipService.registerMembershipCard(payload);
+      const data = result?.data ?? result ?? {};
       const paymentUrl = getValue(result, 'paymentUrl', 'paymentURL', 'PaymentUrl', 'PaymentURL', 'vnpayUrl', 'vnPayUrl', 'url', 'Url')
         || getValue(result?.data, 'paymentUrl', 'paymentURL', 'PaymentUrl', 'PaymentURL', 'vnpayUrl', 'vnPayUrl', 'url', 'Url');
+      const invoiceId = getValue(data, 'invoiceId', 'InvoiceId');
+      const paymentStatus = String(getValue(data, 'paymentStatus', 'PaymentStatus') || '').toUpperCase();
+      const resultPaymentMethod = String(getValue(data, 'paymentMethod', 'PaymentMethod') || payload.paymentMethod || '').toUpperCase();
 
       if (paymentUrl) {
+        if (invoiceId) localStorage.setItem('pending_invoice_id', String(invoiceId));
         window.location.href = paymentUrl;
+        return;
+      }
+
+      if (invoiceId && resultPaymentMethod === 'WALLET' && paymentStatus === 'SUCCESS') {
+        navigate(`/payment-success?type=membership&invoiceId=${invoiceId}`);
         return;
       }
 

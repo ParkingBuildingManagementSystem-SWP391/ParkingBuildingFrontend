@@ -24,7 +24,7 @@ export const parkingService = {
   },
 
   // 2. Tài xế đặt chỗ trước qua Web (Book Parking Slot)
-  bookSlot: async (slotIdOrPayload, vehicleTypeId, licenseVehicle, expectedCheckInTime, paymentMethod = 'VNPAY') => {
+  bookSlot: async (slotIdOrPayload, vehicleTypeId, licenseVehicle, expectedCheckInTime, paymentMethod = 'AUTO') => {
     try {
       const payload = typeof slotIdOrPayload === 'object' && slotIdOrPayload !== null
         ? slotIdOrPayload
@@ -41,7 +41,7 @@ export const parkingService = {
         licenseVehicle: String(payload.licenseVehicle || '').trim().toUpperCase(),
         typeId: parseInt(payload.vehicleTypeId ?? payload.typeId),
         expectedCheckInTime: payload.expectedCheckInTime,
-        paymentMethod: payload.paymentMethod || 'VNPAY'
+        paymentMethod: payload.paymentMethod || 'AUTO'
       });
       return response.data;
     } catch (error) {
@@ -109,7 +109,7 @@ export const parkingService = {
   },
 
   // 5. Nhân viên quét xe cho xe ra cổng (Check-out - Tính phí & giải phóng slot)
-  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'CASH') => {
+  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'AUTO') => {
     try {
       const formData = new FormData();
       if (ticketCode) formData.append('TicketCode', ticketCode.trim());
@@ -210,6 +210,18 @@ export const parkingService = {
   },
 
   // 8. Tạo URL thanh toán VNPay cho tài xế tự thanh toán trước (Pre-Exit Payment)
+  payPendingInvoiceWallet: async (invoiceId) => {
+    try {
+      const response = await api.post('/Payments/pay-pending-invoice-wallet', {
+        invoiceId: Number(invoiceId)
+      });
+      return response.data;
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Wallet payment failed.";
+      throw serverMessage;
+    }
+  },
+
   createVnPayPayment: async (sessionId) => {
     try {
       const response = await api.post('/Payments/vnpay/create', {
