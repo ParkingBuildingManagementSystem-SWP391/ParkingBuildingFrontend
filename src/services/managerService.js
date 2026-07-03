@@ -96,9 +96,9 @@ export const managerService = {
     }
   },
 
-  getMemberships: async () => {
+  getMemberships: async (params = {}) => {
     try {
-      const response = await api.get('/MembershipCard/tiers');
+      const response = await api.get('/Manager/membership-cards', { params });
       return response.data;
     } catch (error) {
       console.error('getMemberships error:', error);
@@ -108,7 +108,7 @@ export const managerService = {
 
   cancelMembership: async (membershipCardId) => {
     try {
-      const response = await api.put(`/Manager/monthly-card/${membershipCardId}/cancel`);
+      const response = await api.delete(`/Manager/membership-cards/${membershipCardId}/cancel`);
       return response.data;
     } catch (error) {
       console.error(`cancelMembership error for card ${membershipCardId}:`, error);
