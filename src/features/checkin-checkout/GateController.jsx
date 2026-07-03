@@ -498,9 +498,15 @@ const GateController = () => {
           message.error(response?.message || t('gate.messages.checkinFailed'));
         }
       } else {
-        // Reservation mode
+        // Reservation / Membership mode
+        if (ticketCode?.startsWith('MBC_') && !licenseVehicle) {
+          message.warning('Vui lòng nhập biển số xe đang vào bãi trước khi check-in thẻ thành viên!');
+          return;
+        }
+
         const response = await parkingService.checkInVehicle(ticketCode, licenseVehicle, tempImageUrl);
         const isSuccess = response?.isSuccess || response?.IsSuccess || response?.success || (response && !response.error);
+        const requiresWalkIn = response?.requiresWalkIn || response?.RequiresWalkIn || false;
         
         if (isSuccess) {
           setBookingCheckInData(response.data || response);
@@ -513,6 +519,40 @@ const GateController = () => {
           }
           setEntryOcrResult(null);
         } else {
+          if (requiresWalkIn) {
+            Modal.confirm({
+              title: 'Thẻ thành viên đang được sử dụng',
+              content: `${response?.message || 'Thẻ đang có xe khác trong bãi.'} Bạn có muốn check-in xe này theo hình thức vãng lai không?`,
+              okText: 'Đồng ý - Check-in vãng lai',
+              cancelText: 'Hủy',
+              onOk: async () => {
+                try {
+                  const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 2;
+                  const result = await parkingService.walkInCheckIn(
+                    licenseVehicle,
+                    vehicleTypeId,
+                    tempImageUrl
+                  );
+
+                  if (result?.isSuccess || result?.IsSuccess || result?.success) {
+                    message.success('Check-in vãng lai thành công!');
+                    checkInForm.resetFields();
+                  } else {
+                    message.error(result?.message || 'Check-in vãng lai thất bại.');
+                  }
+                } catch (walkInErr) {
+                  const msg =
+                    walkInErr?.response?.data?.message ||
+                    walkInErr?.message ||
+                    'Check-in vãng lai thất bại.';
+                  message.error(msg);
+                }
+              },
+            });
+
+            return;
+          }
+
           message.error(response?.message || t('gate.messages.bookingFailed'));
         }
       }
@@ -1837,7 +1877,13 @@ const GateController = () => {
       <CreateIncidentModal 
         isOpen={isCreateIncidentOpen} 
         onClose={() => setIsCreateIncidentOpen(false)}
-        activeSessionId={checkoutResult?.sessionId || checkoutResult?.SessionId} 
+        licenseVehicle={
+          checkoutResult?.licenseVehicle ||
+          checkoutResult?.LicenseVehicle ||
+          checkoutResult?.checkOutLicensePlate ||
+          checkoutResult?.CheckOutLicensePlate ||
+          checkOutForm.getFieldValue('plate')
+        }
         onSuccess={() => {}}
       />
     </div>

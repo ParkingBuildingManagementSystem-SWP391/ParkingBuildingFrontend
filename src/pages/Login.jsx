@@ -73,11 +73,11 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 p-4 font-sans selection:bg-indigo-100 dark:bg-slate-950 sm:p-6">
-      <div className="grid w-full max-w-[1040px] grid-cols-1 overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-900 sm:rounded-[28px] lg:min-h-[620px] lg:grid-cols-[1.05fr_0.95fr]">
+    <div className="flex min-h-dvh w-full items-center justify-center overflow-y-auto bg-slate-50 p-4 font-sans selection:bg-indigo-100 dark:bg-slate-950 lg:h-dvh lg:overflow-hidden">
+      <div className="grid w-full max-w-[1040px] grid-cols-1 overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.25)] dark:border-slate-800 dark:bg-slate-900 sm:rounded-[28px] lg:h-[min(620px,calc(100dvh-32px))] lg:min-h-0 lg:grid-cols-[1.05fr_0.95fr]">
 
         {/* ============ Brand panel (trái) ============ */}
-        <div className="relative hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
+        <div className="relative hidden flex-col justify-between overflow-hidden p-8 text-white xl:p-10 lg:flex"
              style={{ background: 'radial-gradient(120% 120% at 0% 0%, #6366f1 0%, #4f46e5 45%, #3730a3 100%)' }}>
           {/* Vòng tròn trang trí */}
           <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/[0.06]" />
@@ -119,7 +119,7 @@ const Login = () => {
         </div>
 
         {/* ============ Form panel (phải) ============ */}
-        <div className="relative flex min-w-0 flex-col justify-center px-5 py-12 sm:px-14">
+        <div className="relative flex min-w-0 flex-col justify-center px-5 py-8 sm:px-12">
 
           {/* Chuyển ngôn ngữ */}
           <button
@@ -132,7 +132,7 @@ const Login = () => {
             <span className="text-indigo-600">{i18n.language.toUpperCase()}</span>
           </button>
 
-          <div className="mb-8">
+          <div className="mb-6">
             <h3 className="text-[24px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-[26px]">{t('login.welcomeTitle')}</h3>
             <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">{t('login.subtitle')}</p>
           </div>
@@ -145,7 +145,7 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleFormSubmit} className="space-y-[18px]">
+          <form onSubmit={handleFormSubmit} className="space-y-4">
             {/* Email / username */}
             <div>
               <label className="mb-2 block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -159,7 +159,7 @@ const Login = () => {
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
                   disabled={loading}
-                  className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                  className="h-[48px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                 />
               </div>
             </div>
@@ -177,7 +177,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="h-[52px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-11 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+                  className="h-[48px] w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 pl-11 pr-11 text-sm font-medium text-slate-900 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
                 />
                 <button
                   type="button"
@@ -200,7 +200,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 text-[15px] font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-10px_rgba(79,70,229,0.75)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex h-[48px] w-full items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 text-[15px] font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_30px_-10px_rgba(79,70,229,0.75)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? (
                 <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />

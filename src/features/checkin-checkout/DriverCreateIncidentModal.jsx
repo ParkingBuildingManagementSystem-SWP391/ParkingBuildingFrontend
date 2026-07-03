@@ -5,7 +5,7 @@ import incidentReportService from '../../services/incidentReportService';
 const { Option } = Select;
 const { TextArea } = Input;
 
-const DriverCreateIncidentModal = ({ isOpen, onClose, sessionId, onSuccess }) => {
+const DriverCreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
@@ -18,8 +18,14 @@ const DriverCreateIncidentModal = ({ isOpen, onClose, sessionId, onSuccess }) =>
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
+      const normalizedPlate = licenseVehicle.trim().toUpperCase();
+      if (!normalizedPlate) {
+        message.error('Vui lòng nhập biển số xe.');
+        return;
+      }
+
       const payload = {
-        sessionId: sessionId, // Gắn cứng Session ID của lượt đỗ này
+        licenseVehicle: normalizedPlate,
         issueType: values.issueType,
         description: values.description,
         imageProofUrl: "" // Hỗ trợ upload ảnh lên Cloudinary nếu cần
