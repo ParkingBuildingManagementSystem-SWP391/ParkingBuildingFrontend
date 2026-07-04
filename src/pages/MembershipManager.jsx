@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Input, InputNumber, Modal, Select, Space, Table, Tag, message } from 'antd';
+import { Button, Input, InputNumber, Select, Space, Table, Tag, message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Ban, DollarSign, RefreshCw } from 'lucide-react';
+import { DollarSign, RefreshCw } from 'lucide-react';
 import { managerService } from '../services/managerService';
 import { formatVietnamDateTime } from '../utils/dateTime';
 import { getStatusLabel } from '../utils/i18nLabels';
@@ -116,7 +116,6 @@ const MembershipManager = () => {
   const { t } = useTranslation();
   const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [cancelingIds, setCancelingIds] = useState({});
   const [statusFilter, setStatusFilter] = useState('');
   const [searchText, setSearchText] = useState('');
   const [tiers, setTiers] = useState([]);
@@ -198,36 +197,6 @@ const MembershipManager = () => {
     } finally {
       setSavingTierIds((prev) => ({ ...prev, [tierId]: false }));
     }
-  };
-
-  const handleCancel = (record) => {
-    const membershipCardId = getValue(record, 'membershipCardId', 'MembershipCardId', 'id', 'Id');
-    const licenseVehicles = getLicenseVehicles(record);
-    const licenseVehicleText = licenseVehicles.length ? licenseVehicles.join(', ') : t('membershipConfig.membershipFallback');
-
-    Modal.confirm({
-      title: t('membershipConfig.cancel.title'),
-      content: t('membershipConfig.cancel.content', { licenseVehicle: licenseVehicleText }),
-      okText: t('membershipConfig.cancel.ok'),
-      okButtonProps: { danger: true },
-      cancelText: t('membershipConfig.cancel.close'),
-      async onOk() {
-        setCancelingIds((prev) => ({ ...prev, [membershipCardId]: true }));
-        try {
-          await managerService.cancelMembership(membershipCardId);
-          message.success(t('membershipConfig.messages.cancelSuccess'));
-          fetchMemberships();
-        } catch (error) {
-          message.error(
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            t('membershipConfig.messages.cancelError')
-          );
-        } finally {
-          setCancelingIds((prev) => ({ ...prev, [membershipCardId]: false }));
-        }
-      }
-    });
   };
 
   const tierColumns = [
@@ -411,29 +380,6 @@ const MembershipManager = () => {
       render: (_, record) => {
         const status = getValue(record, 'status', 'Status') || 'Active';
         return <Tag color={statusColorMap[status] || 'default'}>{getStatusLabel(status, t)}</Tag>;
-      }
-    },
-    {
-      title: '',
-      key: 'actions',
-      align: 'right',
-      render: (_, record) => {
-        const membershipCardId = getValue(record, 'membershipCardId', 'MembershipCardId', 'id', 'Id');
-        const status = getValue(record, 'status', 'Status') || 'Active';
-        const isDeleted = Boolean(getValue(record, 'isDeleted', 'IsDeleted'));
-        const disabled = !membershipCardId || isDeleted || ['Canceled', 'Cancelled'].includes(status);
-
-        return (
-          <Button
-            danger
-            icon={<Ban size={15} />}
-            loading={Boolean(cancelingIds[membershipCardId])}
-            disabled={disabled}
-            onClick={() => handleCancel(record)}
-          >
-            {t('membershipConfig.actions.cancelMembership')}
-          </Button>
-        );
       }
     }
   ];

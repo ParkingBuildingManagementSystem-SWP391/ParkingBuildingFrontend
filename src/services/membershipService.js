@@ -22,7 +22,7 @@ export const membershipService = {
     } catch (error) {
       const status = error.response?.status;
       const msg = error.response?.data?.message;
-      if (status === 409) throw new Error(msg || 'Bạn đã có thẻ thành viên đang hoạt động. Vui lòng hủy thẻ cũ trước.');
+      if (status === 409) throw new Error(msg || 'Bạn đã có thẻ thành viên đang hoạt động.');
       if (status === 400) throw new Error(msg || 'Thông tin đăng ký không hợp lệ.');
       if (status === 404) throw new Error(msg || 'Gói cước hoặc ô đỗ không tồn tại.');
       throw new Error(msg || 'Đăng ký thẻ thất bại. Vui lòng thử lại.');
@@ -38,11 +38,6 @@ export const membershipService = {
 
   getMyMembershipCard: async () => membershipService.getMyMembershipCards(),
   getMyCard: async () => membershipService.getMyMembershipCards(),
-
-  cancelMembershipCard: async (cardId) => {
-    const response = await api.delete(`/MembershipCard/${cardId}/cancel`);
-    return response.data;
-  },
 
   updateMembershipVehicles: async (cardId, plates) => {
     const response = await api.put(`/MembershipCard/${cardId}/vehicles`, plates);
