@@ -71,15 +71,17 @@ const vehicleIconMap = {
 };
 
 const statusStyleMap = {
-  available: 'bg-gradient-to-br from-emerald-50/90 to-teal-50/30 text-emerald-900 border-emerald-200 hover:border-emerald-500 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-emerald-500/10 hover:scale-105 active:scale-95 dark:from-emerald-950/20 dark:to-teal-950/10 dark:text-emerald-200 dark:border-emerald-800/60 dark:hover:border-emerald-400 dark:hover:bg-emerald-950/45',
-  occupied: 'bg-gradient-to-br from-rose-50/90 to-pink-50/30 text-rose-900 border-rose-200 hover:border-rose-400 hover:-translate-y-1 hover:shadow-md hover:shadow-rose-500/5 hover:scale-[1.02] active:scale-95 dark:from-rose-950/20 dark:to-pink-950/10 dark:text-rose-200 dark:border-rose-800/60 dark:hover:border-rose-400 dark:hover:bg-rose-950/45',
-  reserved: 'bg-gradient-to-br from-amber-50/90 to-yellow-50/30 text-amber-900 border-amber-200 hover:border-amber-400 hover:-translate-y-1 hover:shadow-md hover:shadow-amber-500/5 hover:scale-[1.02] active:scale-95 dark:from-amber-950/20 dark:to-yellow-950/10 dark:text-amber-200 dark:border-amber-800/60 dark:hover:border-amber-400 dark:hover:bg-amber-950/45',
+  available: 'bg-gradient-to-br from-emerald-50/90 to-teal-50/30 text-emerald-900 border-emerald-200 hover:border-emerald-500 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-emerald-500/10 hover:scale-105 active:scale-95 dark:from-emerald-500/20 dark:to-teal-500/10 dark:text-emerald-100 dark:border-emerald-300/70 dark:hover:border-emerald-400 dark:hover:bg-emerald-500/30',
+  occupied: 'bg-gradient-to-br from-rose-50/90 to-pink-50/30 text-rose-900 border-rose-200 hover:border-rose-400 hover:-translate-y-1 hover:shadow-md hover:shadow-rose-500/5 hover:scale-[1.02] active:scale-95 dark:from-rose-500/20 dark:to-pink-500/10 dark:text-rose-100 dark:border-rose-300/70 dark:hover:border-rose-400 dark:hover:bg-rose-500/30',
+  reserved: 'bg-gradient-to-br from-amber-50/90 to-yellow-50/30 text-amber-900 border-amber-200 hover:border-amber-400 hover:-translate-y-1 hover:shadow-md hover:shadow-amber-500/5 hover:scale-[1.02] active:scale-95 dark:from-amber-500/20 dark:to-yellow-500/10 dark:text-amber-100 dark:border-amber-300/70 dark:hover:border-amber-400 dark:hover:bg-amber-500/30',
+  maintenance: 'bg-gradient-to-br from-slate-50/90 to-slate-100/30 text-slate-700 border-slate-200 hover:border-slate-400 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-500/5 hover:scale-[1.02] active:scale-95 dark:from-slate-500/20 dark:to-slate-600/10 dark:text-slate-100 dark:border-slate-300/60 dark:hover:border-slate-400 dark:hover:bg-slate-500/30',
 };
 
 const normalizeStatus = (status) => {
   const value = String(status ?? '').trim().toLowerCase();
   if (value === '1' || value === 'occupied') return 'occupied';
   if (value === '2' || value === 'reserved') return 'reserved';
+  if (value === '3' || value === 'maintenance') return 'maintenance';
   return 'available';
 };
 
@@ -95,6 +97,7 @@ const canonicalStatusLabel = {
   available: 'Available',
   occupied: 'Occupied',
   reserved: 'Reserved',
+  maintenance: 'Maintenance',
 };
 
 const getSlotVehicleIcon = (slot) => {
@@ -919,9 +922,11 @@ const ParkingLotMap = () => {
     const isUserCar = highlightSlotName &&
       slot.id.replace(/\s/g, '').toUpperCase() === highlightSlotName.replace(/\s/g, '').toUpperCase();
 
+    const isSelected = selectedSlot && selectedSlot.id === slot.id;
+
     const highlightClasses = isUserCar
       ? 'animate-pulse border-amber-400 ring-4 ring-amber-500/60 scale-105 z-20 bg-slate-900 shadow-2xl shadow-amber-500/40 text-amber-400 font-extrabold'
-      : statusStyleMap[normalizedStatus];
+      : `${statusStyleMap[normalizedStatus] || statusStyleMap.available} ${isSelected ? 'ring-2 ring-indigo-500 dark:ring-2 dark:ring-indigo-300 scale-[1.03] z-10 shadow-lg' : ''}`;
 
     return (
       <div key={slot.id} className="relative group">
@@ -940,7 +945,7 @@ const ParkingLotMap = () => {
               <img
                 src={vehicleIcon}
                 alt={getSlotVehicleAlt(slot)}
-                className={`${iconSizeClass} object-contain transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5`}
+                className={`${iconSizeClass} object-contain transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5 dark:brightness-125 dark:contrast-125 dark:opacity-90 dark:bg-white/10 dark:ring-1 dark:ring-white/10 rounded-lg p-0.5`}
               />
             ) : null}
           </div>

@@ -1085,7 +1085,91 @@
       "selectExactSlots": "Please select exactly {{count}} slots.",
       "enterLicensePlate": "Please enter at least 1 license plate."
     },
-    "durationMonth": "{{count}} month"
+    "durationMonth": "{{count}} month",
+    "allVehicleTypesActive": "You already have active Membership cards for all available vehicle types."
+  },
+  "membershipRegister": {
+    "title": "Register Membership",
+    "subtitle": "Choose a package, one fixed parking slot, and pay once.",
+    "activeTitle": "Active Membership",
+    "activeSubtitle": "Scan QR code at entry/exit gates.",
+    "cancelCard": "Cancel Card",
+    "confirmCancel": "Are you sure you want to cancel this membership card? This action cannot be undone and your slot will be released.",
+    "cancelSuccess": "Membership card cancelled successfully.",
+    "cancelError": "Failed to cancel card. Please try again.",
+    "slotsCount": "{{count}} slot",
+    "slotsCount_plural": "{{count}} slots",
+    "platesCount": "{{count}} license plate",
+    "platesCount_plural": "{{count}} license plates",
+    "validity": "Validity",
+    "to": "to",
+    "qrCheckIn": "Check-in QR Code",
+    "fixedSlotTitle": "Fixed parking slot",
+    "noSlot": "No slot assigned",
+    "registeredPlates": "Registered license plates",
+    "noPlate": "No license plate",
+    "vehicle": {
+      "title": "Choose vehicle type",
+      "bicycle": "Bicycle",
+      "motorbike": "Motorbike",
+      "car": "Car",
+      "description": "Member parking package",
+      "alreadyActive": "Already has active package"
+    },
+    "duration": {
+      "title": "Registration duration",
+      "month1": "1 month",
+      "month6": "6 months",
+      "month12": "12 months"
+    },
+    "slot": {
+      "fixedSlot": "1 slot",
+      "title": "Choose 1 fixed parking slot",
+      "selectedCount": "1 slot selected",
+      "noSlotSelected": "No slot selected",
+      "none": "No fixed slot selected",
+      "instruction": "Open Parking Map to choose an available green slot matching your registered vehicle type.",
+      "changeOnMap": "Change slot on Parking Map",
+      "selectOnMap": "Choose slot on Parking Map"
+    },
+    "plate": {
+      "title": "License plate",
+      "add": "Add plate",
+      "placeholder": "Example: 51F-123.45",
+      "maxHint": "Maximum {{count}} license plates for the selected package."
+    },
+    "summary": {
+      "title": "Registration summary",
+      "details": "{{duration}} months · {{slots}} slot",
+      "details_plural": "{{duration}} months · {{slots}} slots",
+      "choosePackageHint": "Choose package to view total",
+      "tierNamePattern": "{{vehicle}} Package - {{duration}}"
+    },
+    "payment": {
+      "title": "Payment",
+      "auto": "Auto",
+      "vnpay": "VNPay",
+      "wallet": "Wallet"
+    },
+    "total": "Total",
+    "actions": {
+      "submit": "Register Membership",
+      "payVNPay": "Proceed to Payment",
+      "payWallet": "Pay Now"
+    },
+    "perks": {
+      "fixedSlot": "One fixed slot throughout the membership period",
+      "autoPlate": "Automatic license plate recognition",
+      "centralizedManagement": "Centralized Membership management"
+    },
+    "errors": {
+      "alreadyActive": "You already have an active Membership for this vehicle type.",
+      "selectVehicleDurationFirst": "Please select vehicle type and duration first.",
+      "selectFixedSlot": "Please select a fixed parking slot.",
+      "duplicatePlates": "License plates in the same package must be unique.",
+      "noRegisterPermission": "Your account does not have permission to register a Membership.",
+      "createRegistrationError": "Could not create membership registration."
+    }
   },
   "roles": {
     "admin": "Administrator",
@@ -1168,8 +1252,7 @@
     },
     "actions": {
       "refresh": "Refresh",
-      "save": "Save",
-      "cancelMembership": "Cancel Membership"
+      "save": "Save"
     },
     "currency": {
       "vnd": "VND"
@@ -1200,19 +1283,11 @@
       "placeholder": "Search plate, name, email...",
       "statusPlaceholder": "Status"
     },
-    "cancel": {
-      "title": "Cancel Membership",
-      "content": "Are you sure you want to cancel the membership for {{licenseVehicle}}?",
-      "ok": "Cancel Membership",
-      "close": "Close"
-    },
     "messages": {
       "loadMembershipsError": "Could not load membership list.",
       "loadPricingError": "Could not load membership pricing configuration.",
       "updateSuccess": "Membership package price updated.",
-      "updateError": "Could not update membership package price.",
-      "cancelSuccess": "Membership cancelled.",
-      "cancelError": "Could not cancel membership."
+      "updateError": "Could not update membership package price."
     }
   }
 }

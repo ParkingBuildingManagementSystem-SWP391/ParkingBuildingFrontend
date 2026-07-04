@@ -128,19 +128,5 @@ export const managerService = {
 
   getMonthlyCards: async () => {
     return managerService.getMemberships();
-  },
-
-  cancelMembership: async (membershipCardId) => {
-    try {
-      const response = await api.delete(`/Manager/membership-cards/${membershipCardId}/cancel`);
-      return response.data;
-    } catch (error) {
-      console.error(`cancelMembership error for card ${membershipCardId}:`, error);
-      throw error;
-    }
-  },
-
-  cancelMonthlyCard: async (membershipCardId) => {
-    return managerService.cancelMembership(membershipCardId);
   }
 };

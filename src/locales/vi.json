@@ -1085,7 +1085,88 @@
       "selectExactSlots": "Vui lòng chọn đúng {{count}} ô đỗ.",
       "enterLicensePlate": "Vui lòng nhập ít nhất 1 biển số."
     },
-    "durationMonth": "{{count}} tháng"
+    "durationMonth": "{{count}} tháng",
+    "allVehicleTypesActive": "Bạn đã có Membership Active cho tất cả loại xe hiện có."
+  },
+  "membershipRegister": {
+    "title": "Đăng ký Membership",
+    "subtitle": "Chọn gói, 1 ô đỗ cố định và thanh toán một lần.",
+    "activeTitle": "Membership đang hoạt động",
+    "activeSubtitle": "Quét mã QR khi vào/ra bãi đỗ.",
+    "cancelCard": "Hủy thẻ",
+    "confirmCancel": "Bạn có chắc muốn hủy thẻ thành viên? Hành động này không thể hoàn tác và slot sẽ được giải phóng.",
+    "cancelSuccess": "Đã hủy thẻ thành viên thành công.",
+    "cancelError": "Không thể hủy thẻ. Vui lòng thử lại.",
+    "slotsCount": "{{count}} ô đỗ",
+    "platesCount": "{{count}} biển số",
+    "validity": "Hiệu lực",
+    "to": "đến",
+    "qrCheckIn": "Mã QR check-in",
+    "fixedSlotTitle": "Ô đỗ xe cố định",
+    "noSlot": "Chưa có ô đỗ",
+    "registeredPlates": "Biển số đăng ký",
+    "noPlate": "Chưa có biển số",
+    "vehicle": {
+      "title": "Chọn loại xe",
+      "bicycle": "Xe đạp",
+      "motorbike": "Xe máy",
+      "car": "Ô tô",
+      "description": "Gửi xe theo gói thành viên",
+      "alreadyActive": "Đã có gói Active"
+    },
+    "duration": {
+      "title": "Thời hạn đăng ký",
+      "month1": "1 tháng",
+      "month6": "6 tháng",
+      "month12": "12 tháng"
+    },
+    "slot": {
+      "fixedSlot": "1 ô đỗ",
+      "title": "Chọn 1 ô đỗ cố định",
+      "selectedCount": "Đã chọn 1 ô đỗ",
+      "noSlotSelected": "Chưa chọn ô đỗ",
+      "none": "Chưa có ô đỗ cố định",
+      "instruction": "Mở Parking Map để chọn một ô màu xanh còn trống đúng loại xe đã đăng ký.",
+      "changeOnMap": "Đổi ô trên Parking Map",
+      "selectOnMap": "Chọn ô trên Parking Map"
+    },
+    "plate": {
+      "title": "Biển số xe",
+      "add": "Thêm biển số",
+      "placeholder": "Ví dụ: 51F-123.45",
+      "maxHint": "Tối đa {{count}} biển số cho gói đang chọn."
+    },
+    "summary": {
+      "title": "Tóm tắt đăng ký",
+      "details": "{{duration}} tháng · {{slots}} ô đỗ",
+      "choosePackageHint": "Chọn gói để xem tổng tiền",
+      "tierNamePattern": "Gói {{vehicle}} - {{duration}}"
+    },
+    "payment": {
+      "title": "Thanh toán",
+      "auto": "Tự động",
+      "vnpay": "VNPay",
+      "wallet": "Ví"
+    },
+    "total": "Tổng cộng",
+    "actions": {
+      "submit": "Đăng ký Membership",
+      "payVNPay": "Tiếp tục thanh toán",
+      "payWallet": "Thanh toán ngay"
+    },
+    "perks": {
+      "fixedSlot": "Gói 1 ô cố định trong suốt thời hạn thẻ",
+      "autoPlate": "Tự động nhận diện biển số",
+      "centralizedManagement": "Quản lý tập trung trong Membership"
+    },
+    "errors": {
+      "alreadyActive": "Bạn đã có Membership đang Active cho loại xe này.",
+      "selectVehicleDurationFirst": "Vui lòng chọn loại xe và thời hạn trước.",
+      "selectFixedSlot": "Vui lòng chọn 1 ô đỗ cố định.",
+      "duplicatePlates": "Biển số trong cùng một gói không được trùng nhau.",
+      "noRegisterPermission": "Tài khoản chưa có quyền đăng ký Membership.",
+      "createRegistrationError": "Không thể tạo đăng ký Membership."
+    }
   },
   "roles": {
     "admin": "Quản trị viên",
@@ -1168,8 +1249,7 @@
     },
     "actions": {
       "refresh": "Làm mới",
-      "save": "Lưu",
-      "cancelMembership": "Hủy Membership"
+      "save": "Lưu"
     },
     "currency": {
       "vnd": "VND"
@@ -1200,19 +1280,11 @@
       "placeholder": "Tìm biển số, tên, email...",
       "statusPlaceholder": "Trạng thái"
     },
-    "cancel": {
-      "title": "Hủy Membership",
-      "content": "Bạn có chắc chắn muốn hủy Membership của xe {{licenseVehicle}}?",
-      "ok": "Hủy Membership",
-      "close": "Đóng"
-    },
     "messages": {
       "loadMembershipsError": "Không thể tải danh sách Membership.",
       "loadPricingError": "Không thể tải cấu hình giá Membership.",
       "updateSuccess": "Đã cập nhật giá gói Membership.",
-      "updateError": "Không thể cập nhật giá gói Membership.",
-      "cancelSuccess": "Đã hủy Membership.",
-      "cancelError": "Không thể hủy Membership."
+      "updateError": "Không thể cập nhật giá gói Membership."
     }
   }
 }

@@ -19,6 +19,45 @@ import { toast as message } from '../components/ToastProvider';
 import { membershipService } from '../services/membershipService';
 import { formatDateTimeVN, parseUtcDate } from '../utils/dateTime';
 import { getVehicleTypeLabel } from '../utils/i18nLabels';
+import bikeIcon from '../assets/vehicles/bike.png';
+import motorbikeIcon from '../assets/vehicles/motorbike.png';
+import carIcon from '../assets/vehicles/car.png';
+
+const getVehicleLabel = (vehicleType, t) => {
+  const typeStr = String(vehicleType ?? '').trim().toLowerCase();
+  if (typeStr === '1' || typeStr === 'bicycle' || typeStr === 'bike') {
+    return t('membershipRegister.vehicle.bicycle');
+  }
+  if (typeStr === '2' || typeStr === 'motorbike' || typeStr === 'motorcycle') {
+    return t('membershipRegister.vehicle.motorbike');
+  }
+  if (typeStr === '3' || typeStr === 'car') {
+    return t('membershipRegister.vehicle.car');
+  }
+  return vehicleType;
+};
+
+const getDurationLabel = (durationMonths, t) => {
+  const months = Number(durationMonths);
+  if (months === 1) return t('membershipRegister.duration.month1');
+  if (months === 6) return t('membershipRegister.duration.month6');
+  if (months === 12) return t('membershipRegister.duration.month12');
+  return t('membership.durationMonths', { count: months });
+};
+
+const getVehicleIcon = (vehicleTypeOrId) => {
+  const typeStr = String(vehicleTypeOrId ?? '').trim().toLowerCase();
+  if (typeStr === '1' || typeStr === 'bicycle' || typeStr === 'bike') {
+    return bikeIcon;
+  }
+  if (typeStr === '2' || typeStr === 'motorbike' || typeStr === 'motorcycle') {
+    return motorbikeIcon;
+  }
+  if (typeStr === '3' || typeStr === 'car') {
+    return carIcon;
+  }
+  return null;
+};
 
 const Motorcycle = ({ size = 18, className = '' }) => (
   <svg
@@ -92,17 +131,41 @@ const formatDateTime = (value) => {
 };
 
 const getTierId = (tier) => getValue(tier, 'tierId', 'id', 'membershipTierId');
-const getTierTypeId = (tier) => Number(getValue(tier, 'typeId', 'vehicleTypeId', 'tariffId'));
+const getTierTypeId = (tier) => {
+  const typeId = Number(getValue(tier, 'typeId', 'vehicleTypeId', 'tariffId'));
+  if (typeId === 1 || typeId === 2 || typeId === 3) return typeId;
+
+  const raw = String(getValue(tier, 'vehicleType', 'VehicleType', 'vehicleTypeName', 'VehicleTypeName', 'typeName', 'TypeName', 'tierName', 'TierName', 'name') || '').toLowerCase();
+  if (raw.includes('bicycle') || raw.includes('bike') || raw.includes('xe đạp') || raw.includes('xe dap')) return 1;
+  if (raw.includes('motor') || raw.includes('scooter') || raw.includes('xe máy') || raw.includes('xe may')) return 2;
+  if (raw.includes('car') || raw.includes('ô tô') || raw.includes('oto')) return 3;
+
+  return 2;
+};
 const getTierDuration = (tier) => Number(getValue(tier, 'durationMonths', 'durationInMonths', 'months'));
 const getSlotId = (slot) => Number(getValue(slot, 'slotId', 'id', 'SlotId'));
 const getSlotName = (slot, t) => getValue(slot, 'slotName', 'name', 'SlotName') || t('membership.slotFallback', { id: getSlotId(slot) });
 
 const getCardTypeId = (card) => {
   const tier = card?.tier || card?.Tier || {};
-  return Number(
+  const typeId = Number(
     getValue(card, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId') ||
     getValue(tier, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId')
   );
+  if (typeId === 1 || typeId === 2 || typeId === 3) return typeId;
+
+  const raw = String(
+    getValue(card, 'vehicleType', 'VehicleType', 'vehicleTypeName', 'VehicleTypeName', 'typeName', 'TypeName') ||
+    getValue(tier, 'vehicleType', 'VehicleType', 'vehicleTypeName', 'VehicleTypeName', 'typeName', 'TypeName', 'tierName', 'TierName') ||
+    getValue(card, 'tierName', 'TierName') ||
+    ''
+  ).toLowerCase();
+
+  if (raw.includes('bicycle') || raw.includes('bike') || raw.includes('xe đạp') || raw.includes('xe dap')) return 1;
+  if (raw.includes('motor') || raw.includes('scooter') || raw.includes('xe máy') || raw.includes('xe may')) return 2;
+  if (raw.includes('car') || raw.includes('ô tô') || raw.includes('oto')) return 3;
+
+  return 2;
 };
 
 const getCardVehicles = (card) => {
@@ -175,8 +238,8 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
             <ShieldCheck size={21} />
           </div>
           <div>
-            <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Membership đang hoạt động</h1>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Quét mã QR khi vào/ra bãi đỗ.</p>
+            <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('membershipRegister.activeTitle')}</h1>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('membershipRegister.activeSubtitle')}</p>
           </div>
         </div>
         <button
@@ -191,7 +254,6 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
       {cards.map((card, idx) => {
         const tier = card?.tier || {};
         const plan = PLANS.find((item) => item.id === Number(getValue(tier, 'typeId', 'vehicleTypeId'))) || PLANS[1];
-        const { Icon } = plan;
         const cls = accentCls[plan.accent];
         const now = new Date();
         const start = parseUtcDate(card.startTime) || now;
@@ -213,7 +275,11 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
             <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 dark:border-slate-700 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-center gap-4">
                 <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${cls.icon}`}>
-                  <Icon size={24} />
+                  <img
+                    src={getVehicleIcon(plan.key)}
+                    alt={plan.key}
+                    className="h-8 w-8 object-contain dark:brightness-125 dark:contrast-125 dark:opacity-90 dark:bg-white/10 dark:ring-1 dark:ring-white/10 rounded-lg p-0.5"
+                  />
                 </div>
                 <div>
                   <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
@@ -221,24 +287,27 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
                     {t('membership.label')}
                   </div>
                   <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-                    {getValue(tier, 'tierName', 'name') || 'Membership'}
+                    {t('membershipRegister.summary.tierNamePattern', {
+                      vehicle: getVehicleLabel(plan.key, t),
+                      duration: getDurationLabel(tier.durationMonths, t)
+                    })}
                   </h2>
                   <p className="mt-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    {getVehicleTypeLabel(plan.key, t)} · {slots.length} ô đỗ · {vehicles.length} biển số
+                    {getVehicleLabel(plan.key, t)} · {t('membershipRegister.slotsCount', { count: slots.length })} · {t('membershipRegister.platesCount', { count: vehicles.length })}
                   </p>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
                 <div className="text-right">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hiệu lực</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{t('membershipRegister.validity')}</p>
                   <p className="mt-1 text-sm font-extrabold text-slate-800 dark:text-slate-100">{formatDateTime(card.startTime)}</p>
-                  <p className="text-xs font-medium text-slate-500">đến {formatDateTime(card.endTime)}</p>
+                  <p className="text-xs font-medium text-slate-500">{t('membershipRegister.to')} {formatDateTime(card.endTime)}</p>
                 </div>
                 <button
                   onClick={() => onCancel(card.membershipCardId)}
                   className="inline-flex items-center gap-1.5 rounded-[10px] border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-500/40 dark:bg-transparent dark:hover:bg-rose-500/10"
                 >
-                  <X size={12} /> Hủy thẻ
+                  <X size={12} /> {t('membershipRegister.cancelCard')}
                 </button>
               </div>
             </div>
@@ -258,7 +327,7 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
             <div className="grid gap-4 p-5 md:grid-cols-3">
               {/* QR Code */}
               <div className="flex flex-col items-center rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Mã QR check-in</p>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membershipRegister.qrCheckIn')}</p>
                 {qrUrl ? (
                   <img src={qrUrl} alt={`QR ${ticketCode}`} className="h-40 w-40 object-contain rounded-xl" />
                 ) : (
@@ -274,7 +343,7 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
 
               {/* Slots */}
               <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Ô đỗ xe cố định</p>
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membershipRegister.fixedSlotTitle')}</p>
                 <div className="space-y-2">
                   {slots.length > 0 ? slots.map((s) => (
                     <div key={getValue(s, 'slotId', 'SlotId', 'slotName', 'SlotName')} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-900">
@@ -287,14 +356,14 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
                       </span>
                     </div>
                   )) : (
-                    <p className="text-xs text-slate-400">Chưa có ô đỗ</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">{t('membershipRegister.noSlot')}</p>
                   )}
                 </div>
               </div>
 
               {/* Vehicles */}
               <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Biển số đăng ký</p>
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membershipRegister.registeredPlates')}</p>
                 <div className="space-y-2">
                   {vehicles.length > 0 ? vehicles.map((plate) => (
                     <div key={plate} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 dark:bg-slate-900">
@@ -302,7 +371,7 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
                       <span className="font-mono text-sm font-extrabold tracking-wider text-slate-900 dark:text-slate-100">{plate}</span>
                     </div>
                   )) : (
-                    <p className="text-xs text-slate-400">Chưa có biển số</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">{t('membershipRegister.noPlate')}</p>
                   )}
                 </div>
               </div>
@@ -383,7 +452,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
 
   const handleSelectType = (typeId) => {
     if (activeTypeIdSet.has(Number(typeId))) {
-      message.info('Bạn đã có Membership đang Active cho loại xe này.');
+      message.info(t('membershipRegister.errors.alreadyActive'));
       return;
     }
 
@@ -398,7 +467,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
 
   const openParkingMapForSlot = () => {
     if (!selectedTypeId || !selectedTier) {
-      message.error('Vui lòng chọn loại xe và thời hạn trước.');
+      message.error(t('membershipRegister.errors.selectVehicleDurationFirst'));
       return;
     }
 
@@ -433,7 +502,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
     }
 
     if (!selectedSlotId) {
-      message.error('Vui lòng chọn 1 ô đỗ cố định.');
+      message.error(t('membershipRegister.errors.selectFixedSlot'));
       return;
     }
 
@@ -448,7 +517,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
     }
 
     if (uniquePlates.size !== plates.length) {
-      message.error('Biển số trong cùng một gói không được trùng nhau.');
+      message.error(t('membershipRegister.errors.duplicatePlates'));
       return;
     }
 
@@ -470,7 +539,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
     return (
       <div className="mx-auto max-w-5xl px-4 pb-8">
         <div className="rounded-2xl border border-slate-100 bg-white p-5 text-sm font-semibold text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-          Bạn đã có Membership Active cho tất cả loại xe hiện có. Hãy hủy gói cũ nếu muốn đăng ký lại cùng loại xe.
+          {t('membershipRegister.allVehicleTypesActive')}
         </div>
       </div>
     );
@@ -484,8 +553,8 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
             <CreditCard size={19} className="text-indigo-600 dark:text-indigo-300" />
           </div>
           <div>
-            <h1 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Đăng ký Membership</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Chọn gói, 1 ô đỗ cố định và thanh toán một lần.</p>
+            <h1 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('membershipRegister.title')}</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('membershipRegister.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -493,10 +562,9 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
       <div className="grid gap-4 xl:grid-cols-3">
         <div className="space-y-4 xl:col-span-2">
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.selectVehicleType')}</p>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membershipRegister.vehicle.title')}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               {PLANS.map((item) => {
-                const PIcon = item.Icon;
                 const itemCls = accentCls[item.accent];
                 const isSelected = selectedTypeId === item.id;
                 const isActiveType = activeTypeIdSet.has(Number(item.id));
@@ -513,11 +581,15 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                   >
                     {isSelected && <CheckCircle2 size={16} className="absolute right-3 top-3 text-indigo-600 dark:text-indigo-400" />}
                     <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border ${itemCls.icon}`}>
-                      <PIcon size={20} />
+                      <img
+                        src={getVehicleIcon(item.key)}
+                        alt={item.key}
+                        className="h-7 w-7 object-contain dark:brightness-125 dark:contrast-125 dark:opacity-90 dark:bg-white/10 dark:ring-1 dark:ring-white/10 rounded-lg p-0.5"
+                      />
                     </div>
-                    <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(item.key, t)}</p>
-                    <p className="mt-0.5 text-xs font-semibold text-slate-400">
-                      {isActiveType ? 'Đã có gói Active' : t('membership.membershipParking')}
+                    <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleLabel(item.key, t)}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-slate-400 dark:text-slate-500">
+                      {isActiveType ? t('membershipRegister.vehicle.alreadyActive') : t('membershipRegister.vehicle.description')}
                     </p>
                   </button>
                 );
@@ -526,7 +598,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
           </div>
 
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.registrationDuration')}</p>
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membershipRegister.duration.title')}</p>
             <div className="grid grid-cols-3 gap-3">
               {DURATIONS.map((duration) => {
                 const isSelected = selectedDuration === duration.value;
@@ -548,9 +620,9 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                       </span>
                     )}
                     <p className={`text-sm font-extrabold ${isSelected ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>
-                      {t('membership.durationMonths', { count: duration.value })}
+                      {getDurationLabel(duration.value, t)}
                     </p>
-                    <p className="mt-1 text-[10px] font-semibold text-slate-400">{1} ô đỗ</p>
+                    <p className="mt-1 text-[10px] font-semibold text-slate-400">{t('membershipRegister.slot.fixedSlot')}</p>
                   </button>
                 );
               })}
@@ -562,19 +634,19 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
 
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Chọn 1 ô đỗ cố định</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membershipRegister.slot.title')}</p>
               <span className="text-xs font-bold text-indigo-600 dark:text-indigo-300">
-                {selectedSlotId ? 'Đã chọn 1 ô đỗ' : 'Chưa chọn ô đỗ'}
+                {selectedSlotId ? t('membershipRegister.slot.selectedCount') : t('membershipRegister.slot.noSlotSelected')}
               </span>
             </div>
 
             <div className="mb-4 flex flex-col gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
               <div>
                 <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
-                  {selectedSlotId ? selectedSlotName || `Slot ${selectedSlotId}` : 'Chưa có ô đỗ cố định'}
+                  {selectedSlotId ? selectedSlotName || `Slot ${selectedSlotId}` : t('membershipRegister.slot.none')}
                 </p>
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                  Mở Parking Map để chọn một ô màu xanh còn trống đúng loại xe đã đăng ký.
+                  {t('membershipRegister.slot.instruction')}
                 </p>
               </div>
               <button
@@ -588,51 +660,15 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                 }`}
               >
                 <CalendarCheck size={16} />
-                {selectedSlotId ? 'Đổi ô trên Parking Map' : 'Chọn ô trên Parking Map'}
+                {selectedSlotId ? t('membershipRegister.slot.changeOnMap') : t('membershipRegister.slot.selectOnMap')}
               </button>
             </div>
-
-            {false && (!selectedTier ? (
-              <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">Chọn loại xe và thời hạn trước.</div>
-            ) : loadingSlots ? (
-              <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">{t('membership.loadingSlots')}</div>
-            ) : availableSlots.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center text-xs font-semibold text-slate-400 dark:border-slate-700">{t('membership.noAvailableSlots')}</div>
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {availableSlots.map((slot) => {
-                  const slotId = getSlotId(slot);
-                  const isSelected = selectedSlotId === slotId;
-                  return (
-                    <button
-                      key={slotId}
-                      type="button"
-                      onClick={() => selectSlot(slotId)}
-                      className={`flex items-center justify-between rounded-xl border px-3 py-3 text-left transition-all ${
-                        isSelected
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
-                          : 'border-slate-100 bg-slate-50 text-slate-700 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                      }`}
-                    >
-                      <span className="text-sm font-extrabold">{getSlotName(slot)}</span>
-                      <span className={`flex h-5 w-5 items-center justify-center rounded-full border ${
-                        isSelected
-                          ? 'border-indigo-500 bg-indigo-600 text-white'
-                          : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900'
-                      }`}>
-                        {isSelected && <CheckCircle2 size={13} />}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
           </div>
 
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.licensePlate')}</p>
-              <button type="button" onClick={addPlate} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">{t('membership.addLicensePlate')}</button>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membershipRegister.plate.title')}</p>
+              <button type="button" onClick={addPlate} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">{t('membershipRegister.plate.add')}</button>
             </div>
             <div className="space-y-2">
               {licenseVehicles.map((plate, index) => (
@@ -641,7 +677,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                     type="text"
                     value={plate}
                     onChange={(event) => updatePlate(index, event.target.value)}
-                    placeholder={t('membership.licensePlatePlaceholder')}
+                    placeholder={t('membershipRegister.plate.placeholder')}
                     className="h-11 flex-1 rounded-[14px] border border-slate-200 bg-slate-50 px-4 text-sm font-bold uppercase tracking-wider text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                   {licenseVehicles.length > 1 && (
@@ -656,58 +692,74 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[11px] font-medium text-slate-400">{t('membership.maxLicensePlatesHint', { count: maxVehicles })}</p>
+            <p className="mt-2 text-[11px] font-medium text-slate-400">{t('membershipRegister.plate.maxHint', { count: maxVehicles })}</p>
           </div>
         </div>
 
         <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <p className="mb-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membership.registrationSummary')}</p>
+          <p className="mb-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membershipRegister.summary.title')}</p>
 
           {plan && cls ? (
             <div className="flex-1 space-y-4">
               <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
                 <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${cls.icon}`}>
-                  <plan.Icon size={16} />
+                  <img
+                    src={getVehicleIcon(plan.key)}
+                    alt={plan.key}
+                    className="h-6 w-6 object-contain dark:brightness-125 dark:contrast-125 dark:opacity-90 dark:bg-white/10 dark:ring-1 dark:ring-white/10 rounded-lg p-0.5"
+                  />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{getVehicleTypeLabel(plan.key, t)}</p>
-                  <p className="text-[10px] text-slate-400">{selectedDuration} tháng · 1 ô đỗ</p>
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{getVehicleLabel(plan.key, t)}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">{t('membershipRegister.summary.details', { duration: selectedDuration, slots: 1 })}</p>
                 </div>
               </div>
 
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membership.payment')}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membershipRegister.payment.title')}</p>
                 <div className="mt-2 grid grid-cols-1 gap-2">
-                  {['AUTO', 'VNPAY', 'WALLET'].map((method) => (
-                    <button
-                      key={method}
-                      type="button"
-                      onClick={() => setPaymentMethod(method)}
-                      className={`flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-extrabold transition ${
-                        paymentMethod === method
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
-                          : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-900'
-                      }`}
-                    >
-                      {method === 'VNPAY' ? <CreditCard size={14} /> : <Wallet size={14} />}
-                      {method}
-                    </button>
-                  ))}
+                  {['AUTO', 'VNPAY', 'WALLET'].map((method) => {
+                    const getPaymentMethodLabel = (m) => {
+                      if (m === 'AUTO') return t('membershipRegister.payment.auto');
+                      if (m === 'VNPAY') return t('membershipRegister.payment.vnpay');
+                      if (m === 'WALLET') return t('membershipRegister.payment.wallet');
+                      return m;
+                    };
+                    return (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setPaymentMethod(method)}
+                        className={`flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-extrabold transition ${
+                          paymentMethod === method
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
+                            : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
+                        }`}
+                      >
+                        {method === 'VNPAY' ? <CreditCard size={14} /> : <Wallet size={14} />}
+                        {getPaymentMethodLabel(method)}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <div className="border-t border-slate-100 pt-3 dark:border-slate-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{t('membership.total')}</span>
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{t('membershipRegister.total')}</span>
                   <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">{totalPrice.toLocaleString('vi-VN')} đ</span>
                 </div>
               </div>
 
               <ul className="space-y-1.5 pt-1">
-                {['Giữ 1 ô cố định trong suốt thời hạn thẻ', 'Tự động nhận diện biển số', 'Quản lý tập trung trong Membership'].map((perk) => (
-                  <li key={perk} className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                {[
+                  { key: 'fixedSlot', translateKey: 'membershipRegister.perks.fixedSlot' },
+                  { key: 'autoPlate', translateKey: 'membershipRegister.perks.autoPlate' },
+                  { key: 'centralizedManagement', translateKey: 'membershipRegister.perks.centralizedManagement' }
+                ].map((perk) => (
+                  <li key={perk.key} className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                     <CheckCircle2 size={11} className="shrink-0 text-emerald-500" />
-                    {t(`membership.perks.${perk}`)}
+                    {t(perk.translateKey)}
                   </li>
                 ))}
               </ul>
@@ -715,7 +767,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-10 dark:border-slate-700">
               <Wallet size={26} className="mb-2 text-slate-300 dark:text-slate-600" />
-              <p className="text-xs text-slate-400 dark:text-slate-500">{t('membership.choosePackageToViewTotal')}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">{t('membershipRegister.summary.choosePackageHint')}</p>
             </div>
           )}
 
@@ -739,7 +791,11 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
             ) : (
               <>
                 <CreditCard size={15} />
-                {t('membership.registerTitle')}
+                {paymentMethod === 'VNPAY'
+                  ? t('membershipRegister.actions.payVNPay')
+                  : paymentMethod === 'WALLET'
+                  ? t('membershipRegister.actions.payWallet')
+                  : t('membershipRegister.actions.submit')}
               </>
             )}
           </button>
@@ -780,13 +836,13 @@ const MyMembership = () => {
   );
 
   const handleCancel = async (cardId) => {
-    if (!window.confirm('Bạn có chắc muốn hủy thẻ thành viên? Hành động này không thể hoàn tác và slot sẽ được giải phóng.')) return;
+    if (!window.confirm(t('membershipRegister.confirmCancel'))) return;
     try {
       await membershipService.cancelMembershipCard(cardId);
-      message.success('Đã hủy thẻ thành viên thành công.');
+      message.success(t('membershipRegister.cancelSuccess'));
       fetchCardInfo();
     } catch {
-      message.error('Không thể hủy thẻ. Vui lòng thử lại.');
+      message.error(t('membershipRegister.cancelError'));
     }
   };
 
@@ -815,7 +871,7 @@ const MyMembership = () => {
       navigate('/membership/success', { state: { result } });
     } catch (error) {
       const status = error.response?.status;
-      message.error(error.message || (status === 403 ? 'Tài khoản chưa có quyền đăng ký Membership.' : 'Không thể tạo đăng ký Membership.'));
+      message.error(error.message || (status === 403 ? t('membershipRegister.errors.noRegisterPermission') : t('membershipRegister.errors.createRegistrationError')));
     } finally {
       setSubmitting(false);
     }
