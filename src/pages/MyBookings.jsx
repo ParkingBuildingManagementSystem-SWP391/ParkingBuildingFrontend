@@ -20,7 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
-import { formatVietnamDate, formatVietnamTime } from '../utils/dateTime';
+import { formatVietnamDate, formatVietnamTime, parseUtcDate } from '../utils/dateTime';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -163,17 +163,13 @@ const MyBookings = () => {
         const deadlineBaseTime = expectedCheckInTime || item.bookingTime;
 
         if (item.bookingTime) {
-          // BE sends UTC time. Ensure we append 'Z' if missing so JS parses it as UTC, converting to local VN time.
-          const raw = String(item.bookingTime);
-          const bookingDate = raw.endsWith('Z') ? raw : raw + 'Z';
-          bookedDate = formatVietnamDate(bookingDate);
-          bookedTime = formatVietnamTime(bookingDate);
+          bookedDate = formatVietnamDate(item.bookingTime);
+          bookedTime = formatVietnamTime(item.bookingTime);
         }
 
         if (deadlineBaseTime) {
-          const rawBase = String(deadlineBaseTime);
-          const base = new Date(rawBase.endsWith('Z') ? rawBase : rawBase + 'Z');
-          if (!isNaN(base.getTime())) {
+          const base = parseUtcDate(deadlineBaseTime);
+          if (base) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
             deadlineTime = formatVietnamTime(deadline);
           }
@@ -241,8 +237,8 @@ const MyBookings = () => {
   const getRemainingMinutesText = (deadlineBaseTime) => {
     if (!deadlineBaseTime) return '0m remaining';
     const now = new Date();
-    const baseTime = new Date(deadlineBaseTime);
-    if (isNaN(baseTime.getTime())) return '0m remaining';
+    const baseTime = parseUtcDate(deadlineBaseTime);
+    if (!baseTime) return '0m remaining';
 
     // 15 minutes limit
     const target = new Date(baseTime.getTime() + 15 * 60 * 1000);

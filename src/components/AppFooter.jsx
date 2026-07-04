@@ -14,6 +14,7 @@ const AppFooter = () => {
         <div className="flex min-w-0 flex-col leading-relaxed sm:items-end sm:text-right">
           <span>{t('footer.copyright')}</span>
           <span className="text-[10px] tracking-wider mt-0.5 text-slate-400">{t('footer.version')}</span>
+          <span className="text-[10px] tracking-wider text-slate-400">{t('footer.developedBy')}</span>
         </div>
       </div>
     </footer>

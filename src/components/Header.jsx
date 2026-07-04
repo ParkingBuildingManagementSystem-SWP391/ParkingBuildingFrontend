@@ -144,11 +144,11 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true, pageTitle, 
         )}
         {!showLogo && pageTitle && (
           <div className="min-w-0 pr-4">
-            <h1 className="truncate text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
+            <h1 className="max-w-full break-words text-lg font-extrabold leading-[1.25] tracking-normal text-slate-900 dark:text-slate-100 sm:text-2xl">
               {pageTitle}
             </h1>
             {pageSubtitle && (
-              <p className="mt-0.5 sm:mt-1 truncate text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+              <p className="mt-0.5 max-w-full break-words text-xs font-medium leading-[1.3] text-slate-500 dark:text-slate-400 sm:mt-1 sm:text-sm">
                 {pageSubtitle}
               </p>
             )}

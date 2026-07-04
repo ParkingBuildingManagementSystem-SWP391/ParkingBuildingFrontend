@@ -17,7 +17,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import { membershipService } from '../services/membershipService';
-import { formatDateTimeVN } from '../utils/dateTime';
+import { formatDateTimeVN, parseUtcDate } from '../utils/dateTime';
 import { getVehicleTypeLabel } from '../utils/i18nLabels';
 
 const Motorcycle = ({ size = 18, className = '' }) => (
@@ -88,9 +88,7 @@ const unwrapArray = (payload) => {
 
 const formatDateTime = (value) => {
   if (!value) return 'Chưa cập nhật';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return formatDateTimeVN(date);
+  return formatDateTimeVN(value, value);
 };
 
 const getTierId = (tier) => getValue(tier, 'tierId', 'id', 'membershipTierId');
@@ -196,8 +194,8 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
         const { Icon } = plan;
         const cls = accentCls[plan.accent];
         const now = new Date();
-        const start = card.startTime ? new Date(card.startTime) : now;
-        const end = card.endTime ? new Date(card.endTime) : now;
+        const start = parseUtcDate(card.startTime) || now;
+        const end = parseUtcDate(card.endTime) || now;
         const totalMs = end - start;
         const usedMs = now - start;
         const daysLeft = Math.max(0, Math.ceil((end - now) / 86400000));

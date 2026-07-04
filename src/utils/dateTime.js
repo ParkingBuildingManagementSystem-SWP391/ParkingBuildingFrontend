@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 
 export const VIETNAM_TIME_ZONE = 'Asia/Ho_Chi_Minh';
+export const VIETNAM_TIMEZONE = VIETNAM_TIME_ZONE;
 export const VIETNAM_LOCALE = 'vi-VN';
 
 export const getActiveLocale = () => {
@@ -40,38 +41,65 @@ const dateTimeFormatters = {
   },
 };
 
-export const toDate = (value) => {
+export const parseUtcDate = (value) => {
   if (!value) return null;
-  const date = value instanceof Date ? value : new Date(value);
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (typeof value === 'number') {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const text = String(value).trim();
+  if (!text) return null;
+
+  const hasTimezone = /Z$|[+-]\d{2}:\d{2}$/.test(text);
+  const normalized = hasTimezone ? text : `${text}Z`;
+  const date = new Date(normalized);
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const formatWith = (value, options, fallback = '') => {
-  const date = toDate(value);
-  if (!date) return fallback;
+export const toDate = parseUtcDate;
+
+const normalizeFormatArgs = (options = {}, fallback = '--') => {
+  if (typeof options === 'string') {
+    return { options: {}, fallback: options };
+  }
+
+  return { options: options || {}, fallback };
+};
+
+const formatWith = (value, baseOptions, options = {}, fallback = '--') => {
+  const { options: normalizedOptions, fallback: normalizedFallback } = normalizeFormatArgs(options, fallback);
+  const date = parseUtcDate(value);
+  if (!date) return normalizedFallback;
   const locale = getActiveLocale();
   return new Intl.DateTimeFormat(locale, {
     timeZone: VIETNAM_TIME_ZONE,
-    ...options,
+    ...baseOptions,
+    ...normalizedOptions,
   }).format(date);
 };
 
-export const formatDateTimeVN = (value, fallback = '') =>
-  formatWith(value, dateTimeFormatters.dateTime, fallback);
+export const formatDateTimeVN = (value, options = {}, fallback = '--') =>
+  formatWith(value, dateTimeFormatters.dateTime, options, fallback);
 
-export const formatDateVN = (value, fallback = '') =>
-  formatWith(value, dateTimeFormatters.date, fallback);
+export const formatDateVN = (value, options = {}, fallback = '--') =>
+  formatWith(value, dateTimeFormatters.date, options, fallback);
 
-export const formatTimeVN = (value, fallback = '') =>
-  formatWith(value, dateTimeFormatters.time, fallback);
+export const formatTimeVN = (value, options = {}, fallback = '--') =>
+  formatWith(value, dateTimeFormatters.time, options, fallback);
 
-export const formatTimeWithSecondsVN = (value, fallback = '') =>
-  formatWith(value, dateTimeFormatters.timeWithSeconds, fallback);
+export const formatTimeWithSecondsVN = (value, options = {}, fallback = '--') =>
+  formatWith(value, dateTimeFormatters.timeWithSeconds, options, fallback);
 
 export const formatLongDateVN = (value = new Date()) =>
-  formatWith(value, dateTimeFormatters.longDate, '');
+  formatWith(value, dateTimeFormatters.longDate, {}, '');
 
 export const getVietnamDateParts = (value = new Date()) => {
+  const date = parseUtcDate(value) || new Date();
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: VIETNAM_TIME_ZONE,
     year: 'numeric',
@@ -80,7 +108,7 @@ export const getVietnamDateParts = (value = new Date()) => {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).formatToParts(value);
+  }).formatToParts(date);
 
   return Object.fromEntries(parts.map((part) => [part.type, part.value]));
 };
@@ -128,7 +156,7 @@ export const formatVietnamDate = (value) => formatDateVN(value, 'N/A');
 export const formatVietnamTime = (value) => formatTimeVN(value, 'N/A');
 export const formatVietnamDateTime = (value) => formatDateTimeVN(value, 'N/A');
 export const formatVietnamDateTimeWithSeconds = (value) => {
-  const date = toDate(value);
+  const date = parseUtcDate(value);
   if (!date) return 'N/A';
   return new Intl.DateTimeFormat(VIETNAM_LOCALE, {
     timeZone: VIETNAM_TIME_ZONE,

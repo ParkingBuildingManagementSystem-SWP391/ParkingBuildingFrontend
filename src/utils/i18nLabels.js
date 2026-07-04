@@ -22,6 +22,7 @@ export const getStatusLabel = (status, t) => {
     monthlycardactive: 'status.active',
     inactive: 'status.inactive',
     pending: 'status.pending',
+    pendingpayment: 'status.pendingPayment',
     expired: 'status.expired',
     available: 'status.available',
     occupied: 'status.occupied',

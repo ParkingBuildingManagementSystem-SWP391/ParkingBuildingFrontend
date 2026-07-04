@@ -8,7 +8,7 @@ const PageHeader = ({ title, subtitle, actions, contentClassName = 'max-w-[1600p
       <div className={`${contentClassName} mx-auto flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between`}>
         <div className="min-w-0">
           {title && (
-            <h1 className="max-w-full break-words text-2xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+            <h1 className="max-w-full break-words text-2xl font-extrabold leading-[1.25] tracking-normal text-slate-900 dark:text-white sm:text-3xl">
               {title}
             </h1>
           )}
