@@ -484,14 +484,14 @@ const Home = () => {
                 to="/register"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] bg-white px-8 py-4 text-sm font-bold text-indigo-600 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
               >
-                {t('home.ctaBtn')}
+                {t('home.cta.getStarted')}
                 <ArrowRight size={16} />
               </Link>
               <Link
                 to="/login"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-white/30 px-6 py-4 text-sm font-bold text-white transition-all hover:bg-white/10 sm:w-auto"
               >
-                {t('home.ctaLogin')}
+                {t('home.cta.alreadyHaveAccount')}
               </Link>
             </div>
           </div>

@@ -82,8 +82,9 @@
   },
   "footer": {
     "systemName": "PARKING BUILDING MANAGEMENT SYSTEM",
-    "copyright": "© 2026 Parking Building Management System. All rights reserved.",
-    "version": "Version 1.0.0 - Developed by Team 5"
+    "copyright": "Copyright 2026 Parking Building Management System. All rights reserved.",
+    "version": "Version 1.0.0",
+    "developedBy": "Developed by Team 5"
   },
   "parkingMap": {
     "available": "Available:",
@@ -241,7 +242,47 @@
     "ctaDesc": "Join thousands of drivers who have already upgraded their parking experience. Sign up today and get instant access.",
     "ctaBtn": "Get Started Free",
     "ctaLogin": "Already have an account?",
-    "supportMsg": "Need help booking? Contact our operations team for fast and accurate advice."
+    "supportMsg": "Need help booking? Contact our operations team for fast and accurate advice.",
+    "cta": {
+      "getStarted": "Get Started Free",
+      "alreadyHaveAccount": "Already have an account?"
+    },
+    "lookup": {
+      "badge": "Quick lookup",
+      "title": "Forgot where you parked?",
+      "description": "Just enter your license plate and the system will locate the exact floor and parking slot in the building for both members and walk-in drivers.",
+      "realtime": "Data updates in real time",
+      "cardTitle": "Find parked vehicle",
+      "cardSubtitle": "Enter a license plate to locate it now",
+      "inputLabel": "Enter your license plate",
+      "placeholder": "Example: 30A-123.45",
+      "searchButton": "Find Vehicle Now",
+      "loading": "Checking...",
+      "notFound": "No parked vehicle was found for this license plate.",
+      "steps": {
+        "enterPlate": {
+          "title": "Enter license plate",
+          "desc": "Type the correct plate number of the vehicle you parked."
+        },
+        "locate": {
+          "title": "Location system",
+          "desc": "The system scans the building to find the matching floor and slot."
+        },
+        "navigate": {
+          "title": "Navigate directly",
+          "desc": "View the exact location on the live parking map."
+        }
+      },
+      "result": {
+        "parked": "Currently parked",
+        "floor": "Parking floor",
+        "slot": "Parking slot",
+        "checkInImage": "Check-in gate reference image",
+        "checkInImageAlt": "Vehicle check-in gate image",
+        "entryTime": "Entry: {{time}}",
+        "viewMap": "Navigate on parking map"
+      }
+    }
   },
   "intro": {
     "featMapTitle": "Real-time Live Map",
@@ -1068,7 +1109,8 @@
     "completed": "Completed",
     "success": "Success",
     "paid": "Paid",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "pendingPayment": "Pending payment"
   },
   "dropdown": {
     "navigation": "Navigation",
@@ -1088,5 +1130,89 @@
     "motorbike": "Motorbike",
     "bicycle": "Bicycle",
     "unknown": "Unknown"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "parkingMap": "Parking Map",
+    "incidents": "Incidents",
+    "analytics": "Analytics",
+    "memberships": "Memberships",
+    "pricing": "Pricing",
+    "staffLogs": "Staff Logs",
+    "checkInOut": "Check-in/Check-out",
+    "myBookings": "My Bookings",
+    "profile": "Profile",
+    "home": "Home",
+    "userAccounts": "User Accounts",
+    "logout": "Logout"
+  },
+  "membershipConfig": {
+    "title": "Membership Package Pricing Configuration",
+    "subtitle": "Membership prices are stored by MembershipTier.",
+    "membershipFallback": "This membership",
+    "noPhone": "No phone number",
+    "validUntil": "until {{date}}",
+    "columns": {
+      "packageName": "Package name",
+      "vehicleType": "Vehicle type",
+      "duration": "Duration",
+      "maxVehicles": "Max vehicles",
+      "price": "Price",
+      "owner": "Card owner",
+      "membershipPackage": "Membership package",
+      "ticketCode": "Card code",
+      "licensePlates": "License plates",
+      "fixedSlot": "Fixed slot",
+      "validity": "Validity",
+      "status": "Status"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "save": "Save",
+      "cancelMembership": "Cancel Membership"
+    },
+    "currency": {
+      "vnd": "VND"
+    },
+    "vehicle": {
+      "bicycle": "Bicycle",
+      "motorbike": "Motorbike",
+      "car": "Car"
+    },
+    "duration": {
+      "month1": "1 month",
+      "month6": "6 months",
+      "month12": "12 months",
+      "monthCount": "{{count}} months"
+    },
+    "packages": {
+      "bicycle1": "Bicycle Package - 1 Month",
+      "bicycle6": "Bicycle Package - 6 Months",
+      "bicycle12": "Bicycle Package - 12 Months",
+      "motorbike1": "Motorbike Package - 1 Month",
+      "motorbike6": "Motorbike Package - 6 Months",
+      "motorbike12": "Motorbike Package - 12 Months",
+      "car1": "Car Package - 1 Month",
+      "car6": "Car Package - 6 Months",
+      "car12": "Car Package - 12 Months"
+    },
+    "search": {
+      "placeholder": "Search plate, name, email...",
+      "statusPlaceholder": "Status"
+    },
+    "cancel": {
+      "title": "Cancel Membership",
+      "content": "Are you sure you want to cancel the membership for {{licenseVehicle}}?",
+      "ok": "Cancel Membership",
+      "close": "Close"
+    },
+    "messages": {
+      "loadMembershipsError": "Could not load membership list.",
+      "loadPricingError": "Could not load membership pricing configuration.",
+      "updateSuccess": "Membership package price updated.",
+      "updateError": "Could not update membership package price.",
+      "cancelSuccess": "Membership cancelled.",
+      "cancelError": "Could not cancel membership."
+    }
   }
 }

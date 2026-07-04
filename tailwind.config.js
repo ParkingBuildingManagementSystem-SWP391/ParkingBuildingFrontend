@@ -39,7 +39,7 @@ export default {
         ring: 'hsl(var(--ring) / <alpha-value>)',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'Be Vietnam Pro', 'Roboto', 'Arial', 'sans-serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',

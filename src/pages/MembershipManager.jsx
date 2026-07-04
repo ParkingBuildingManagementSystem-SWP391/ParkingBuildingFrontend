@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Input, InputNumber, Modal, Select, Space, Table, Tag, Typography, message } from 'antd';
+import { Button, Input, InputNumber, Modal, Select, Space, Table, Tag, message } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { Ban, DollarSign, RefreshCw } from 'lucide-react';
 import { managerService } from '../services/managerService';
 import { formatVietnamDateTime } from '../utils/dateTime';
-
-const { Text } = Typography;
+import { getStatusLabel } from '../utils/i18nLabels';
 
 const unwrapMembershipCards = (payload) => {
   const data = payload?.data ?? payload;
@@ -48,12 +48,49 @@ const getSlots = (record) => {
   return Array.isArray(slots) ? slots : [];
 };
 
-const formatDateTime = (value) => {
-  if (!value) return 'Chưa cập nhật';
-  return formatVietnamDateTime(value);
+const getVehicleTypeKey = (record) => {
+  const typeId = Number(getValue(record, 'typeId', 'TypeId', 'vehicleTypeId', 'VehicleTypeId'));
+  if (typeId === 1) return 'bicycle';
+  if (typeId === 2) return 'motorbike';
+  if (typeId === 3) return 'car';
+
+  const raw = String(getValue(record, 'vehicleType', 'VehicleType', 'vehicleTypeName', 'VehicleTypeName', 'typeName', 'TypeName') || '').toLowerCase();
+  if (raw.includes('bicycle') || raw.includes('bike') || raw.includes('xe dap') || raw.includes('xe đạp')) return 'bicycle';
+  if (raw.includes('motor') || raw.includes('moto') || raw.includes('xe may') || raw.includes('xe máy')) return 'motorbike';
+  if (raw.includes('car') || raw.includes('auto') || raw.includes('oto') || raw.includes('ô tô') || raw.includes('xe hoi') || raw.includes('xe hơi')) return 'car';
+
+  return 'unknown';
 };
 
-const formatCurrency = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`;
+const getVehicleTypeLabel = (record, t) => {
+  const key = getVehicleTypeKey(record);
+  if (key === 'unknown') return getValue(record, 'vehicleType', 'VehicleType', 'vehicleTypeName', 'VehicleTypeName') || t('vehicleTypes.unknown');
+  return t(`membershipConfig.vehicle.${key}`);
+};
+
+const getDurationMonths = (record) => Number(getValue(record, 'durationMonths', 'DurationMonths', 'durationInMonths', 'months')) || 0;
+
+const getDurationLabel = (record, t) => {
+  const duration = getDurationMonths(record);
+  if ([1, 6, 12].includes(duration)) {
+    return t(`membershipConfig.duration.month${duration}`);
+  }
+  return t('membershipConfig.duration.monthCount', { count: duration });
+};
+
+const getMembershipPackageLabel = (tier, t) => {
+  const vehicleKey = getVehicleTypeKey(tier);
+  const duration = getDurationMonths(tier);
+  const packageKey = `membershipConfig.packages.${vehicleKey}${duration}`;
+
+  if (vehicleKey !== 'unknown' && [1, 6, 12].includes(duration)) {
+    return t(packageKey);
+  }
+
+  return getValue(tier, 'tierName', 'TierName', 'name', 'Name') || t('common.notUpdated');
+};
+
+const formatCurrency = (value) => `${Number(value || 0).toLocaleString('vi-VN')} VND`;
 
 const statusColorMap = {
   Active: 'green',
@@ -63,7 +100,20 @@ const statusColorMap = {
   Cancelled: 'red'
 };
 
+const tableThemeClass = [
+  'rounded-2xl bg-white shadow-sm dark:bg-slate-900',
+  '[&_.ant-table]:!bg-white dark:[&_.ant-table]:!bg-slate-900',
+  '[&_.ant-table-container]:!bg-white dark:[&_.ant-table-container]:!bg-slate-900',
+  '[&_.ant-table-thead>tr>th]:!bg-slate-50 dark:[&_.ant-table-thead>tr>th]:!bg-slate-800',
+  '[&_.ant-table-thead>tr>th]:!text-slate-600 dark:[&_.ant-table-thead>tr>th]:!text-slate-300',
+  '[&_.ant-table-tbody>tr>td]:!bg-white dark:[&_.ant-table-tbody>tr>td]:!bg-slate-900',
+  '[&_.ant-table-tbody>tr>td]:!text-slate-700 dark:[&_.ant-table-tbody>tr>td]:!text-slate-200',
+  'dark:[&_.ant-table-tbody>tr:hover>td]:!bg-slate-800',
+  '[&_.ant-table-cell]:!border-slate-100 dark:[&_.ant-table-cell]:!border-slate-700'
+].join(' ');
+
 const MembershipManager = () => {
+  const { t } = useTranslation();
   const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cancelingIds, setCancelingIds] = useState({});
@@ -74,6 +124,11 @@ const MembershipManager = () => {
   const [savingTierIds, setSavingTierIds] = useState({});
   const [tierPrices, setTierPrices] = useState({});
 
+  const formatDateTime = (value) => {
+    if (!value) return t('common.notUpdated');
+    return formatVietnamDateTime(value);
+  };
+
   const fetchMemberships = useCallback(async () => {
     setLoading(true);
     try {
@@ -83,11 +138,11 @@ const MembershipManager = () => {
       });
       setMemberships(unwrapMembershipCards(response));
     } catch (error) {
-      message.error(error.response?.data?.message || 'Không thể tải danh sách Membership.');
+      message.error(error.response?.data?.message || t('membershipConfig.messages.loadMembershipsError'));
     } finally {
       setLoading(false);
     }
-  }, [searchText, statusFilter]);
+  }, [searchText, statusFilter, t]);
 
   const fetchTiers = useCallback(async () => {
     setLoadingTiers(true);
@@ -105,11 +160,11 @@ const MembershipManager = () => {
         }, {})
       );
     } catch (error) {
-      message.error(error.response?.data?.message || 'Không thể tải cấu hình giá Membership.');
+      message.error(error.response?.data?.message || t('membershipConfig.messages.loadPricingError'));
     } finally {
       setLoadingTiers(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchMemberships();
@@ -132,13 +187,13 @@ const MembershipManager = () => {
         durationMonths,
         price,
       });
-      message.success('Đã cập nhật giá gói Membership.');
+      message.success(t('membershipConfig.messages.updateSuccess'));
       fetchTiers();
     } catch (error) {
       message.error(
         error.response?.data?.message ||
         error.response?.data?.error ||
-        'Không thể cập nhật giá gói Membership.'
+        t('membershipConfig.messages.updateError')
       );
     } finally {
       setSavingTierIds((prev) => ({ ...prev, [tierId]: false }));
@@ -148,25 +203,25 @@ const MembershipManager = () => {
   const handleCancel = (record) => {
     const membershipCardId = getValue(record, 'membershipCardId', 'MembershipCardId', 'id', 'Id');
     const licenseVehicles = getLicenseVehicles(record);
-    const licenseVehicleText = licenseVehicles.length ? licenseVehicles.join(', ') : 'Membership này';
+    const licenseVehicleText = licenseVehicles.length ? licenseVehicles.join(', ') : t('membershipConfig.membershipFallback');
 
     Modal.confirm({
-      title: 'Hủy Membership',
-      content: `Bạn có chắc chắn muốn hủy Membership của xe ${licenseVehicleText}?`,
-      okText: 'Hủy Membership',
+      title: t('membershipConfig.cancel.title'),
+      content: t('membershipConfig.cancel.content', { licenseVehicle: licenseVehicleText }),
+      okText: t('membershipConfig.cancel.ok'),
       okButtonProps: { danger: true },
-      cancelText: 'Đóng',
+      cancelText: t('membershipConfig.cancel.close'),
       async onOk() {
         setCancelingIds((prev) => ({ ...prev, [membershipCardId]: true }));
         try {
           await managerService.cancelMembership(membershipCardId);
-          message.success('Đã hủy Membership.');
+          message.success(t('membershipConfig.messages.cancelSuccess'));
           fetchMemberships();
         } catch (error) {
           message.error(
             error.response?.data?.message ||
             error.response?.data?.error ||
-            'Không thể hủy Membership.'
+            t('membershipConfig.messages.cancelError')
           );
         } finally {
           setCancelingIds((prev) => ({ ...prev, [membershipCardId]: false }));
@@ -177,33 +232,43 @@ const MembershipManager = () => {
 
   const tierColumns = [
     {
-      title: 'Tên gói',
+      title: t('membershipConfig.columns.packageName'),
       key: 'tierName',
       render: (_, record) => (
-        <Text strong>{getValue(record, 'tierName', 'TierName') || 'Chưa cập nhật'}</Text>
+        <span className="font-semibold text-slate-900 dark:text-slate-100">
+          {getMembershipPackageLabel(record, t)}
+        </span>
       )
     },
     {
-      title: 'Loại xe',
+      title: t('membershipConfig.columns.vehicleType'),
       key: 'vehicleType',
       render: (_, record) => (
-        <Tag color="blue">
-          {getValue(record, 'vehicleType', 'VehicleType', 'vehicleTypeName', 'VehicleTypeName') || 'N/A'}
+        <Tag color="blue" className="font-semibold">
+          {getVehicleTypeLabel(record, t)}
         </Tag>
       )
     },
     {
-      title: 'Thời hạn',
+      title: t('membershipConfig.columns.duration'),
       key: 'durationMonths',
-      render: (_, record) => `${getValue(record, 'durationMonths', 'DurationMonths') || 0} tháng`
+      render: (_, record) => (
+        <span className="font-medium text-slate-700 dark:text-slate-300">
+          {getDurationLabel(record, t)}
+        </span>
+      )
     },
     {
-      title: 'Xe tối đa',
+      title: t('membershipConfig.columns.maxVehicles'),
       key: 'maxVehicles',
-      render: (_, record) => getValue(record, 'maxVehicles', 'MaxVehicles') || 0
+      render: (_, record) => (
+        <span className="font-medium text-slate-700 dark:text-slate-300">
+          {getValue(record, 'maxVehicles', 'MaxVehicles') || 0}
+        </span>
+      )
     },
     {
-      title: 'Giá',
+      title: t('membershipConfig.columns.price'),
       key: 'price',
       render: (_, record) => {
         const tierId = getValue(record, 'tierId', 'TierId');
@@ -215,7 +280,7 @@ const MembershipManager = () => {
             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
             parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
             onChange={(value) => setTierPrices((prev) => ({ ...prev, [tierId]: value ?? 0 }))}
-            addonAfter="VND"
+            addonAfter={t('membershipConfig.currency.vnd')}
             className="w-full max-w-[220px]"
           />
         );
@@ -235,7 +300,7 @@ const MembershipManager = () => {
             loading={Boolean(savingTierIds[tierId])}
             onClick={() => handleSaveTierPrice(record)}
           >
-            Lưu
+            {t('membershipConfig.actions.save')}
           </Button>
         );
       }
@@ -244,43 +309,43 @@ const MembershipManager = () => {
 
   const columns = [
     {
-      title: 'Chủ thẻ',
+      title: t('membershipConfig.columns.owner'),
       key: 'owner',
       render: (_, record) => {
         const name =
           getValue(record, 'username', 'userName', 'driverName', 'ownerName', 'fullName') ||
-          'Chưa cập nhật';
+          t('common.notUpdated');
         const email = getValue(record, 'email', 'Email') || '';
         const phone =
           getValue(record, 'phoneNumber', 'phone', 'driverPhone') ||
-          'Chưa có SĐT';
+          t('membershipConfig.noPhone');
 
         return (
           <div className="flex flex-col">
-            <Text strong>{name}</Text>
-            {email && <Text type="secondary" className="text-xs">{email}</Text>}
-            <Text type="secondary" className="text-xs">{phone}</Text>
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{name}</span>
+            {email && <span className="text-xs text-slate-500 dark:text-slate-400">{email}</span>}
+            <span className="text-xs text-slate-500 dark:text-slate-400">{phone}</span>
           </div>
         );
       }
     },
     {
-      title: 'Gói Membership',
+      title: t('membershipConfig.columns.membershipPackage'),
       key: 'tier',
       render: (_, record) => (
         <div className="flex flex-col">
-          <Text strong>{getValue(record, 'tierName', 'TierName') || 'Chưa cập nhật'}</Text>
-          <Text type="secondary" className="text-xs">
-            {(getValue(record, 'vehicleTypeName', 'VehicleTypeName') || 'N/A')} - {(getValue(record, 'durationMonths', 'DurationMonths') || 0)} tháng
-          </Text>
-          <Text type="secondary" className="text-xs">
+          <span className="font-semibold text-slate-900 dark:text-slate-100">{getMembershipPackageLabel(record, t)}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {getVehicleTypeLabel(record, t)} - {getDurationLabel(record, t)}
+          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             {formatCurrency(getValue(record, 'price', 'Price'))}
-          </Text>
+          </span>
         </div>
       )
     },
     {
-      title: 'Mã thẻ',
+      title: t('membershipConfig.columns.ticketCode'),
       key: 'ticketCode',
       render: (_, record) => (
         <Tag color="purple" className="font-mono font-bold">
@@ -289,7 +354,7 @@ const MembershipManager = () => {
       )
     },
     {
-      title: 'Biển số',
+      title: t('membershipConfig.columns.licensePlates'),
       key: 'licenseVehicles',
       render: (_, record) => {
         const vehicles = getLicenseVehicles(record);
@@ -303,12 +368,12 @@ const MembershipManager = () => {
             ))}
           </Space>
         ) : (
-          'N/A'
+          <span className="text-slate-500 dark:text-slate-400">N/A</span>
         );
       }
     },
     {
-      title: 'Slot cố định',
+      title: t('membershipConfig.columns.fixedSlot'),
       key: 'slots',
       render: (_, record) => {
         const slots = getSlots(record);
@@ -316,34 +381,36 @@ const MembershipManager = () => {
         return slots.length ? (
           <Space direction="vertical" size={2}>
             {slots.map((slot) => (
-              <span key={slot.slotId || slot.SlotId || slot.slotName || slot.SlotName}>
+              <span key={slot.slotId || slot.SlotId || slot.slotName || slot.SlotName} className="text-slate-700 dark:text-slate-300">
                 {slot.slotName || slot.SlotName || 'N/A'}{' '}
                 <Tag>{slot.slotStatus || slot.SlotStatus || 'N/A'}</Tag>
               </span>
             ))}
           </Space>
         ) : (
-          'Chưa cập nhật'
+          <span className="text-slate-500 dark:text-slate-400">{t('common.notUpdated')}</span>
         );
       }
     },
     {
-      title: 'Hiệu lực',
+      title: t('membershipConfig.columns.validity'),
       key: 'validity',
       render: (_, record) => (
         <div className="flex flex-col text-sm">
-          <span>{formatDateTime(getValue(record, 'startTime', 'StartTime'))}</span>
-          <span className="text-slate-400">đến {formatDateTime(getValue(record, 'endTime', 'EndTime'))}</span>
+          <span className="font-medium text-slate-700 dark:text-slate-300">{formatDateTime(getValue(record, 'startTime', 'StartTime'))}</span>
+          <span className="text-slate-500 dark:text-slate-400">
+            {t('membershipConfig.validUntil', { date: formatDateTime(getValue(record, 'endTime', 'EndTime')) })}
+          </span>
         </div>
       )
     },
     {
-      title: 'Trạng thái',
+      title: t('membershipConfig.columns.status'),
       dataIndex: 'status',
       key: 'status',
       render: (_, record) => {
         const status = getValue(record, 'status', 'Status') || 'Active';
-        return <Tag color={statusColorMap[status] || 'default'}>{status}</Tag>;
+        return <Tag color={statusColorMap[status] || 'default'}>{getStatusLabel(status, t)}</Tag>;
       }
     },
     {
@@ -364,7 +431,7 @@ const MembershipManager = () => {
             disabled={disabled}
             onClick={() => handleCancel(record)}
           >
-            Hủy Membership
+            {t('membershipConfig.actions.cancelMembership')}
           </Button>
         );
       }
@@ -372,17 +439,17 @@ const MembershipManager = () => {
   ];
 
   return (
-    <div className="px-4 py-6">
-      <div className="mb-6 rounded-2xl bg-white p-5 shadow-sm">
+    <div className="px-4 py-6 text-slate-900 dark:text-slate-100">
+      <div className="mb-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <Typography.Title level={4} className="!mb-1">
-              Cấu hình giá gói Membership
-            </Typography.Title>
-            <Text type="secondary">Giá Membership được lưu theo MembershipTier.</Text>
+            <h2 className="mb-1 text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+              {t('membershipConfig.title')}
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('membershipConfig.subtitle')}</p>
           </div>
           <Button icon={<RefreshCw size={15} />} onClick={fetchTiers} loading={loadingTiers}>
-            Làm mới
+            {t('membershipConfig.actions.refresh')}
           </Button>
         </div>
 
@@ -393,6 +460,7 @@ const MembershipManager = () => {
           loading={loadingTiers}
           pagination={false}
           scroll={{ x: 900 }}
+          className={tableThemeClass}
         />
       </div>
 
@@ -400,27 +468,27 @@ const MembershipManager = () => {
         <Space wrap>
           <Input.Search
             allowClear
-            placeholder="Tìm biển số, tên, email..."
+            placeholder={t('membershipConfig.search.placeholder')}
             onSearch={(value) => setSearchText(value)}
             style={{ width: 260 }}
           />
 
           <Select
             allowClear
-            placeholder="Trạng thái"
+            placeholder={t('membershipConfig.search.statusPlaceholder')}
             style={{ width: 180 }}
             value={statusFilter || undefined}
             onChange={(value) => setStatusFilter(value || '')}
             options={[
-              { value: 'Active', label: 'Active' },
-              { value: 'PendingPayment', label: 'PendingPayment' },
-              { value: 'Expired', label: 'Expired' },
-              { value: 'Cancelled', label: 'Cancelled' },
+              { value: 'Active', label: getStatusLabel('Active', t) },
+              { value: 'PendingPayment', label: getStatusLabel('PendingPayment', t) },
+              { value: 'Expired', label: getStatusLabel('Expired', t) },
+              { value: 'Cancelled', label: getStatusLabel('Cancelled', t) },
             ]}
           />
 
           <Button icon={<RefreshCw size={15} />} onClick={fetchMemberships}>
-            Làm mới
+            {t('membershipConfig.actions.refresh')}
           </Button>
         </Space>
       </div>
@@ -435,7 +503,7 @@ const MembershipManager = () => {
         loading={loading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
         scroll={{ x: 1100 }}
-        className="rounded-2xl bg-white shadow-sm"
+        className={tableThemeClass}
       />
     </div>
   );

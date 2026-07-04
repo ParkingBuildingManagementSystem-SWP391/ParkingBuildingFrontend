@@ -82,8 +82,9 @@
   },
   "footer": {
     "systemName": "HỆ THỐNG QUẢN LÝ TÒA NHÀ ĐỖ XE",
-    "copyright": "© 2026 Hệ thống Quản lý Tòa nhà Đỗ xe. Đã đăng ký bản quyền.",
-    "version": "Phiên bản 1.0.0 - Phát triển bởi Nhóm 5"
+    "copyright": "Copyright 2026 Hệ thống Quản lý Tòa nhà Đỗ xe. Đã đăng ký bản quyền.",
+    "version": "Phiên bản 1.0.0",
+    "developedBy": "Phát triển bởi Nhóm 5"
   },
   "parkingMap": {
     "available": "Còn trống:",
@@ -241,7 +242,47 @@
     "ctaDesc": "Hàng ngàn tài xế đã nâng cấp trải nghiệm đỗ xe. Đăng ký ngay hôm nay để truy cập ngay lập tức.",
     "ctaBtn": "Bắt đầu miễn phí",
     "ctaLogin": "Đã có tài khoản?",
-    "supportMsg": "Cần hỗ trợ đặt chỗ? Liên hệ đội ngũ vận hành để được tư vấn nhanh và chính xác."
+    "supportMsg": "Cần hỗ trợ đặt chỗ? Liên hệ đội ngũ vận hành để được tư vấn nhanh và chính xác.",
+    "cta": {
+      "getStarted": "Bắt đầu miễn phí",
+      "alreadyHaveAccount": "Đã có tài khoản?"
+    },
+    "lookup": {
+      "badge": "Tra cứu nhanh",
+      "title": "Quên mất bạn đỗ xe ở đâu?",
+      "description": "Chỉ cần biển số xe, hệ thống sẽ định vị chính xác tầng và ô đỗ trong tòa nhà, dành cho cả tài xế thành viên lẫn khách vãng lai.",
+      "realtime": "Dữ liệu cập nhật theo thời gian thực",
+      "cardTitle": "Tìm vị trí xe đỗ",
+      "cardSubtitle": "Nhập biển số để định vị ngay",
+      "inputLabel": "Nhập biển số xe của bạn",
+      "placeholder": "Ví dụ: 30A-123.45",
+      "searchButton": "Tìm Vị Trí Ngay",
+      "loading": "Đang kiểm tra...",
+      "notFound": "Không tìm thấy phương tiện đang đỗ trong bãi.",
+      "steps": {
+        "enterPlate": {
+          "title": "Nhập biển số xe",
+          "desc": "Gõ đúng biển số phương tiện bạn đang gửi."
+        },
+        "locate": {
+          "title": "Hệ thống định vị",
+          "desc": "Quét toàn bộ tòa nhà để tìm tầng và ô đỗ."
+        },
+        "navigate": {
+          "title": "Chỉ đường tận nơi",
+          "desc": "Xem vị trí trực tiếp trên sơ đồ bãi xe."
+        }
+      },
+      "result": {
+        "parked": "Đang đỗ trong bãi",
+        "floor": "Tầng đỗ xe",
+        "slot": "Vị trí ô đỗ",
+        "checkInImage": "Ảnh cổng check-in đối chứng",
+        "checkInImageAlt": "Ảnh cổng check-in xe",
+        "entryTime": "Vào bãi: {{time}}",
+        "viewMap": "Chỉ đường trên sơ đồ đỗ xe"
+      }
+    }
   },
   "intro": {
     "featMapTitle": "Sơ đồ trực tiếp theo thời gian thực",
@@ -1068,7 +1109,8 @@
     "completed": "Hoàn tất",
     "success": "Thành công",
     "paid": "Đã thanh toán",
-    "unknown": "Không xác định"
+    "unknown": "Không xác định",
+    "pendingPayment": "Chờ thanh toán"
   },
   "dropdown": {
     "navigation": "Điều hướng",
@@ -1088,5 +1130,89 @@
     "motorbike": "Xe máy",
     "bicycle": "Xe đạp",
     "unknown": "Không xác định"
+  },
+  "menu": {
+    "dashboard": "Bảng điều khiển",
+    "parkingMap": "Sơ đồ & Quản lý bãi xe",
+    "incidents": "Sự cố",
+    "analytics": "Phân tích",
+    "memberships": "Quản lý Membership",
+    "pricing": "Bảng giá",
+    "staffLogs": "Nhật ký nhân viên",
+    "checkInOut": "Check-in/Check-out",
+    "myBookings": "Đặt chỗ của tôi",
+    "profile": "Hồ sơ cá nhân",
+    "home": "Trang chủ",
+    "userAccounts": "Quản lý người dùng",
+    "logout": "Đăng xuất"
+  },
+  "membershipConfig": {
+    "title": "Cấu hình giá gói Membership",
+    "subtitle": "Giá Membership được lưu theo MembershipTier.",
+    "membershipFallback": "Membership này",
+    "noPhone": "Chưa có SĐT",
+    "validUntil": "đến {{date}}",
+    "columns": {
+      "packageName": "Tên gói",
+      "vehicleType": "Loại xe",
+      "duration": "Thời hạn",
+      "maxVehicles": "Xe tối đa",
+      "price": "Giá",
+      "owner": "Chủ thẻ",
+      "membershipPackage": "Gói Membership",
+      "ticketCode": "Mã thẻ",
+      "licensePlates": "Biển số",
+      "fixedSlot": "Slot cố định",
+      "validity": "Hiệu lực",
+      "status": "Trạng thái"
+    },
+    "actions": {
+      "refresh": "Làm mới",
+      "save": "Lưu",
+      "cancelMembership": "Hủy Membership"
+    },
+    "currency": {
+      "vnd": "VND"
+    },
+    "vehicle": {
+      "bicycle": "Xe đạp",
+      "motorbike": "Xe máy",
+      "car": "Xe hơi"
+    },
+    "duration": {
+      "month1": "1 tháng",
+      "month6": "6 tháng",
+      "month12": "12 tháng",
+      "monthCount": "{{count}} tháng"
+    },
+    "packages": {
+      "bicycle1": "Gói Xe Đạp - 1 Tháng",
+      "bicycle6": "Gói Xe Đạp - 6 Tháng",
+      "bicycle12": "Gói Xe Đạp - 12 Tháng",
+      "motorbike1": "Gói Xe Máy - 1 Tháng",
+      "motorbike6": "Gói Xe Máy - 6 Tháng",
+      "motorbike12": "Gói Xe Máy - 12 Tháng",
+      "car1": "Gói Xe Hơi - 1 Tháng",
+      "car6": "Gói Xe Hơi - 6 Tháng",
+      "car12": "Gói Xe Hơi - 12 Tháng"
+    },
+    "search": {
+      "placeholder": "Tìm biển số, tên, email...",
+      "statusPlaceholder": "Trạng thái"
+    },
+    "cancel": {
+      "title": "Hủy Membership",
+      "content": "Bạn có chắc chắn muốn hủy Membership của xe {{licenseVehicle}}?",
+      "ok": "Hủy Membership",
+      "close": "Đóng"
+    },
+    "messages": {
+      "loadMembershipsError": "Không thể tải danh sách Membership.",
+      "loadPricingError": "Không thể tải cấu hình giá Membership.",
+      "updateSuccess": "Đã cập nhật giá gói Membership.",
+      "updateError": "Không thể cập nhật giá gói Membership.",
+      "cancelSuccess": "Đã hủy Membership.",
+      "cancelError": "Không thể hủy Membership."
+    }
   }
 }
