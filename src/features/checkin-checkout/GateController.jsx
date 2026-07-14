@@ -421,11 +421,22 @@ const GateController = () => {
 
           if (isSuccess) {
             const plateFromDb = res.data?.licenseVehicle || res.data?.LicenseVehicle || res.licenseVehicle || res.LicenseVehicle;
+            const vehicleTypeName = res.data?.vehicleTypeName || res.data?.VehicleTypeName || res.vehicleTypeName || res.VehicleTypeName;
+            
+            const isBicycle = (vehicleTypeName && (vehicleTypeName.includes('Xe đạp') || vehicleTypeName.includes('Bicycle'))) || 
+                              (plateFromDb && plateFromDb.toUpperCase().startsWith('BIKE_'));
+            
+            if (isBicycle) {
+              checkInForm.setFieldsValue({ type: 'Bicycle' });
+            } else if (vehicleTypeName) {
+              if (vehicleTypeName.includes('Xe máy') || vehicleTypeName.includes('Motorbike') || vehicleTypeName.includes('Motorcycle')) {
+                checkInForm.setFieldsValue({ type: 'Motorbike' });
+              } else {
+                checkInForm.setFieldsValue({ type: 'Car' });
+              }
+            }
             if (plateFromDb) {
               checkInForm.setFieldsValue({ plate: plateFromDb });
-              if (plateFromDb.toUpperCase().startsWith('BIKE_')) {
-                checkInForm.setFieldsValue({ type: 'Bicycle' });
-              }
             }
           }
         } catch (err) {
@@ -573,7 +584,8 @@ const GateController = () => {
         }
       } else {
         // Reservation / Membership mode
-        if (ticketCode?.startsWith('MBC_') && !licenseVehicle) {
+        const vehicleType = values.type || checkInForm.getFieldValue('type') || 'Car';
+        if (ticketCode?.startsWith('MBC_') && !licenseVehicle && vehicleType !== 'Bicycle') {
           message.warning('Vui lòng nhập biển số xe đang vào bãi trước khi check-in thẻ thành viên!');
           return;
         }
@@ -1426,13 +1438,20 @@ const GateController = () => {
                 />
               </Form.Item>
 
-              <Form.Item
-                name="plate"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.plate')}</span>}
-                rules={[{ required: true, message: t('gate.form.requirePlate') }]}
-                className="mb-2"
-              >
-                <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" suffix={exitScanning ? <RefreshCw className="animate-spin text-indigo-500" size={16} /> : null} className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] uppercase font-bold focus:bg-white focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" />
+              <Form.Item noStyle shouldUpdate={(prev, curr) => prev.ticketCode !== curr.ticketCode}>
+                {({ getFieldValue }) => {
+                  const ticketCode = getFieldValue('ticketCode');
+                  return (
+                    <Form.Item
+                      name="plate"
+                      label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{t('gate.form.plate')}</span>}
+                      rules={[{ required: !ticketCode, message: t('gate.form.requirePlate') }]}
+                      className="mb-2"
+                    >
+                      <Input onChange={handleCheckOutPlateChange} placeholder="e.g. 29A-888.88" suffix={exitScanning ? <RefreshCw className="animate-spin text-indigo-500" size={16} /> : null} className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] uppercase font-bold focus:bg-white focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" />
+                    </Form.Item>
+                  );
+                }}
               </Form.Item>
 
 
