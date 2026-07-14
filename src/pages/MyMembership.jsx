@@ -6,6 +6,7 @@ import {
   Car,
   CheckCircle2,
   CreditCard,
+  Info,
   QrCode,
   RefreshCw,
   ShieldCheck,
@@ -303,12 +304,6 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
                   <p className="mt-1 text-sm font-extrabold text-slate-800 dark:text-slate-100">{formatDateTime(card.startTime)}</p>
                   <p className="text-xs font-medium text-slate-500">{t('membershipRegister.to')} {formatDateTime(card.endTime)}</p>
                 </div>
-                <button
-                  onClick={() => onCancel(card.membershipCardId)}
-                  className="inline-flex items-center gap-1.5 rounded-[10px] border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-500/40 dark:bg-transparent dark:hover:bg-rose-500/10"
-                >
-                  <X size={12} /> {t('membershipRegister.cancelCard')}
-                </button>
               </div>
             </div>
 

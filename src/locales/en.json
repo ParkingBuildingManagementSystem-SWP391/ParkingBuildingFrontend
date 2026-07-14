@@ -128,11 +128,14 @@
     "forceCheckoutBtn": "Force Checkout & Release",
     "forceCheckoutLoading": "Releasing...",
     "lockSlot": "Lock Slot",
+    "unlockSlot": "Unlock Slot",
     "maintenanceBtn": "Maintenance",
     "editSlot": "Edit Slot",
     "deleteSlot": "Delete Slot",
     "addNewSlot": "Add New Slot",
     "managerAvailableDesc": "🔔 This slot is currently vacant. As a Manager, you have permission to manage this slot configuration.",
+    "managerLockedDesc": "This slot is currently locked. Would you like to unlock it and put it back in service?",
+    "lockedStatusDesc": "This slot is currently locked or under maintenance by management. Operations are unavailable.",
     "noUserData": "Unable to retrieve details of the slot user."
   },
   "login": {
