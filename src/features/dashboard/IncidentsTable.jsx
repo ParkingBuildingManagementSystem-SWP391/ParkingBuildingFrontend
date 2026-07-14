@@ -38,7 +38,7 @@ const IncidentsTable = () => {
       id: realId,
       severity: item.severity || item.Severity || 'Info',
       timestamp: item.incidentTime || item.IncidentTime || item.timestamp || item.Timestamp || item.createdAt || item.CreatedAt || item.reportedAt || item.ReportedAt,
-      type: item.type || item.Type || item.title || item.Title || 'Sự cố',
+      type: item.issueType || item.IssueType || item.type || item.Type || item.title || item.Title || 'Sự cố',
       description: item.description || item.Description || item.message || item.Message || '',
       location: item.location || item.Location || item.slotName || item.SlotName || item.licenseVehicle || item.LicenseVehicle || '',
       status: item.status || item.Status || 'Pending',
@@ -70,15 +70,8 @@ const IncidentsTable = () => {
       const data = Array.isArray(response) ? response : (response?.data || response?.Data || []);
       setIncidents(data.map((item, index) => {
         const normalized = normalizeIncident(item, index);
-        const issueType = item.issueType || item.IssueType;
-        const severity = item.severity || item.Severity ||
-          (issueType === 'Lost Ticket' || issueType === 'Vehicle Damage' ? 'Critical' :
-            issueType === 'Equipment Malfunction' ? 'Warning' : normalized.severity);
-
         return {
           ...normalized,
-          type: issueType || normalized.type,
-          severity,
           status: item.status === 'Open' || item.Status === 'Open' ? 'Pending' : normalized.status
         };
       }));

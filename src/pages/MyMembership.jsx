@@ -506,24 +506,33 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
       return;
     }
 
-    const plates = licenseVehicles
-      .map((plate) => plate.trim().toUpperCase())
-      .filter(Boolean);
-    const uniquePlates = new Set(plates);
+    let plates = [];
+    if (selectedTypeId === 1) {
+      // Xe đạp: backend tự sinh BIKE_... dựa trên maxVehicles.
+      // Chúng ta truyền biển ảo tạm thời để qua validation.
+      for (let i = 0; i < maxVehicles; i++) {
+        plates.push(`BIKE_TEMP_${i}`);
+      }
+    } else {
+      plates = licenseVehicles
+        .map((plate) => plate.trim().toUpperCase())
+        .filter(Boolean);
+      const uniquePlates = new Set(plates);
 
-    if (!plates.length) {
-      message.error(t('membership.errors.enterLicensePlate'));
-      return;
-    }
+      if (!plates.length) {
+        message.error(t('membership.errors.enterLicensePlate'));
+        return;
+      }
 
-    if (uniquePlates.size !== plates.length) {
-      message.error(t('membershipRegister.errors.duplicatePlates'));
-      return;
-    }
+      if (uniquePlates.size !== plates.length) {
+        message.error(t('membershipRegister.errors.duplicatePlates'));
+        return;
+      }
 
-    if (plates.length > maxVehicles) {
-      message.error(t('membership.errors.maxLicensePlates', { count: maxVehicles }));
-      return;
+      if (plates.length > maxVehicles) {
+        message.error(t('membership.errors.maxLicensePlates', { count: maxVehicles }));
+        return;
+      }
     }
 
     onRegister({
@@ -573,11 +582,10 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                     key={item.id}
                     disabled={isActiveType}
                     onClick={() => handleSelectType(item.id)}
-                    className={`relative rounded-xl border-2 p-4 text-left transition-all duration-150 ${
-                      isSelected
+                    className={`relative rounded-xl border-2 p-4 text-left transition-all duration-150 ${isSelected
                         ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10 shadow-sm'
                         : 'border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500/30'
-                    } ${isActiveType ? 'cursor-not-allowed opacity-50' : ''}`}
+                      } ${isActiveType ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
                     {isSelected && <CheckCircle2 size={16} className="absolute right-3 top-3 text-indigo-600 dark:text-indigo-400" />}
                     <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border ${itemCls.icon}`}>
@@ -608,11 +616,10 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                     key={duration.value}
                     disabled={!tierExists}
                     onClick={() => handleSelectDuration(duration.value)}
-                    className={`relative rounded-xl border-2 py-3 text-center transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
-                      isSelected
+                    className={`relative rounded-xl border-2 py-3 text-center transition-all disabled:cursor-not-allowed disabled:opacity-40 ${isSelected
                         ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
                         : 'border-slate-100 dark:border-slate-700 hover:border-indigo-200'
-                    }`}
+                      }`}
                   >
                     {duration.discount && (
                       <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-bold text-white">
@@ -653,11 +660,10 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                 type="button"
                 disabled={!selectedTier}
                 onClick={openParkingMapForSlot}
-                className={`inline-flex h-11 items-center justify-center gap-2 rounded-[14px] px-4 text-sm font-extrabold transition ${
-                  selectedTier
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-[14px] px-4 text-sm font-extrabold transition ${selectedTier
                     ? 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700'
                     : 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-900 dark:text-slate-600'
-                }`}
+                  }`}
               >
                 <CalendarCheck size={16} />
                 {selectedSlotId ? t('membershipRegister.slot.changeOnMap') : t('membershipRegister.slot.selectOnMap')}
@@ -665,35 +671,49 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membershipRegister.plate.title')}</p>
-              <button type="button" onClick={addPlate} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">{t('membershipRegister.plate.add')}</button>
+          {selectedTypeId !== 1 ? (
+            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t('membershipRegister.plate.title')}</p>
+                <button type="button" onClick={addPlate} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">{t('membershipRegister.plate.add')}</button>
+              </div>
+              <div className="space-y-2">
+                {licenseVehicles.map((plate, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={plate}
+                      onChange={(event) => updatePlate(index, event.target.value)}
+                      placeholder={t('membershipRegister.plate.placeholder')}
+                      className="h-11 flex-1 rounded-[14px] border border-slate-200 bg-slate-50 px-4 text-sm font-bold uppercase tracking-wider text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                    {licenseVehicles.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePlate(index)}
+                        className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-rose-200 text-rose-500 hover:bg-rose-50 dark:border-rose-500/40 dark:hover:bg-rose-500/10"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] font-medium text-slate-400">{t('membershipRegister.plate.maxHint', { count: maxVehicles })}</p>
             </div>
-            <div className="space-y-2">
-              {licenseVehicles.map((plate, index) => (
-                <div key={index} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={plate}
-                    onChange={(event) => updatePlate(index, event.target.value)}
-                    placeholder={t('membershipRegister.plate.placeholder')}
-                    className="h-11 flex-1 rounded-[14px] border border-slate-200 bg-slate-50 px-4 text-sm font-bold uppercase tracking-wider text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                  />
-                  {licenseVehicles.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removePlate(index)}
-                      className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-rose-200 text-rose-500 hover:bg-rose-50 dark:border-rose-500/40 dark:hover:bg-rose-500/10"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
+          ) : (
+            <div className="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/30 p-5 shadow-sm dark:border-indigo-500/20 dark:bg-indigo-950/20">
+              <div className="flex items-start gap-3">
+                <Info className="mt-0.5 shrink-0 text-indigo-600 dark:text-indigo-400" size={18} />
+                <div>
+                  <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Định danh xe đạp tự động</p>
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500 dark:text-slate-400">
+                    Xe đạp không có biển số truyền thống. Khi đăng ký thành công, hệ thống sẽ tự động sinh mã định danh cố định dạng <code className="font-mono text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20">BIKE_XXXXXXXX</code> cho tài khoản của bạn để vào/ra bãi xe.
+                  </p>
                 </div>
-              ))}
+              </div>
             </div>
-            <p className="mt-2 text-[11px] font-medium text-slate-400">{t('membershipRegister.plate.maxHint', { count: maxVehicles })}</p>
-          </div>
+          )}
         </div>
 
         <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -730,11 +750,10 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                         key={method}
                         type="button"
                         onClick={() => setPaymentMethod(method)}
-                        className={`flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-extrabold transition ${
-                          paymentMethod === method
+                        className={`flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-extrabold transition ${paymentMethod === method
                             ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
                             : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
-                        }`}
+                          }`}
                       >
                         {method === 'VNPAY' ? <CreditCard size={14} /> : <Wallet size={14} />}
                         {getPaymentMethodLabel(method)}
@@ -774,11 +793,10 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
           <button
             disabled={!selectedTier || submitting}
             onClick={handleSubmit}
-            className={`mt-4 flex w-full items-center justify-center gap-2 rounded-[14px] py-3 text-sm font-extrabold transition-all ${
-              selectedTier && !submitting
+            className={`mt-4 flex w-full items-center justify-center gap-2 rounded-[14px] py-3 text-sm font-extrabold transition-all ${selectedTier && !submitting
                 ? 'bg-indigo-600 text-white shadow-sm hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md'
                 : 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600'
-            }`}
+              }`}
           >
             {submitting ? (
               <>
@@ -794,8 +812,8 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                 {paymentMethod === 'VNPAY'
                   ? t('membershipRegister.actions.payVNPay')
                   : paymentMethod === 'WALLET'
-                  ? t('membershipRegister.actions.payWallet')
-                  : t('membershipRegister.actions.submit')}
+                    ? t('membershipRegister.actions.payWallet')
+                    : t('membershipRegister.actions.submit')}
               </>
             )}
           </button>
