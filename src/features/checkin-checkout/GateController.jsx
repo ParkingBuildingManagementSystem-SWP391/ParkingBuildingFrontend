@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Form, Input, Button, Alert, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { parkingService } from '../../services/parkingService';
+import { staffService } from '../../services/staffService';
+import { useAuth } from '../../context/AuthContext';
 import { toast as message } from '../../components/ToastProvider';
 import Webcam from 'react-webcam';
 import {
@@ -323,8 +325,79 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
 
 const GateController = () => {
   const { t } = useTranslation();
+  const { logout } = useAuth();
   const [checkInForm] = Form.useForm();
   const [checkOutForm] = Form.useForm();
+  const [endShiftForm] = Form.useForm();
+
+  // Shift States
+  const [activeShift, setActiveShift] = useState(null);
+  const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+  const [isEndShiftModalOpen, setIsEndShiftModalOpen] = useState(false);
+  const [loadingShift, setLoadingShift] = useState(false);
+
+  const checkActiveShift = async () => {
+    try {
+      const res = await staffService.getActiveShift();
+      if (res && res.hasActiveShift) {
+        setActiveShift(res.data);
+        setIsShiftModalOpen(false);
+      } else {
+        setActiveShift(null);
+        setIsShiftModalOpen(true);
+      }
+    } catch (err) {
+      console.error("Lỗi kiểm tra ca trực:", err);
+      setIsShiftModalOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    checkActiveShift();
+  }, []);
+
+  const handleStartShift = async () => {
+    setLoadingShift(true);
+    try {
+      const res = await staffService.startShift();
+      if (res && res.isSuccess) {
+        message.success("Mở ca trực thành công!");
+        setActiveShift(res.data);
+        setIsShiftModalOpen(false);
+      } else {
+        message.error(res?.message || "Không thể mở ca trực.");
+      }
+    } catch (err) {
+      message.error(err.response?.data?.message || err.message || "Lỗi mở ca trực.");
+    } finally {
+      setLoadingShift(false);
+    }
+  };
+
+  const handleEndShiftSubmit = async (values) => {
+    setLoadingShift(true);
+    try {
+      const res = await staffService.endShift({
+        actualCash: Number(values.actualCash || 0),
+        notes: values.notes || ""
+      });
+      if (res && res.isSuccess) {
+        message.success("Đóng ca trực thành công! Hệ thống tự động đăng xuất.");
+        setIsEndShiftModalOpen(false);
+        endShiftForm.resetFields();
+        setActiveShift(null);
+        setTimeout(() => {
+          logout();
+        }, 1500);
+      } else {
+        message.error(res?.message || "Không thể đóng ca trực.");
+      }
+    } catch (err) {
+      message.error(err.response?.data?.message || err.message || "Lỗi đóng ca trực.");
+    } finally {
+      setLoadingShift(false);
+    }
+  };
 
   const [isLocalQrScannerOpen, setIsLocalQrScannerOpen] = useState(false);
   const [qrScannerTarget, setQrScannerTarget] = useState('entry'); // 'entry' or 'exit'
@@ -828,6 +901,31 @@ const GateController = () => {
   return (
     <div className="space-y-6 pb-12 font-sans select-none bg-slate-50 dark:bg-slate-950">
 
+      {/* Shift Control Banner */}
+      {activeShift && (
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center dark:bg-indigo-950 dark:text-indigo-400">
+              <Clock size={20} />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{t('staffShifts.shiftId')} #{activeShift.shiftId}</span>
+                <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-bold text-indigo-700 ring-1 ring-inset ring-indigo-200">{t('staffShifts.shiftBannerActive')}</span>
+              </div>
+              <span className="text-xs text-slate-500 mt-0.5">{t('staffShifts.shiftBannerStart')} {formatVietnamDateTime(activeShift.startTime)} • {t('staffShifts.shiftBannerSystem')} <span className="font-bold text-indigo-600">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeShift.systemCash || 0)}</span></span>
+            </div>
+          </div>
+          <Button
+            type="primary"
+            danger
+            onClick={() => setIsEndShiftModalOpen(true)}
+            className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700 border-none h-10 px-5 flex items-center gap-1.5"
+          >
+            {t('staffShifts.shiftBannerBtn')}
+          </Button>
+        </div>
+      )}
 
       {/* TOP ROW - TWO COLUMN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1886,6 +1984,109 @@ const GateController = () => {
         }
         onSuccess={() => {}}
       />
+
+      {/* Start Shift Overlay Modal */}
+      <Modal
+        title={<span className="text-lg font-bold text-slate-800">{t('staffShifts.requireShiftTitle')}</span>}
+        open={isShiftModalOpen}
+        footer={null}
+        closable={false}
+        maskClosable={false}
+        centered
+        width={400}
+      >
+        <div className="text-center py-6 space-y-4">
+          <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto dark:bg-indigo-950 dark:text-indigo-400">
+            <Clock size={32} />
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-bold text-base text-slate-900 dark:text-slate-100">{t('staffShifts.requireShiftTitleDesc')}</h4>
+            <p className="text-xs text-slate-500 max-w-xs mx-auto">
+              {t('staffShifts.requireShiftBody')}
+            </p>
+          </div>
+          <Button
+            type="primary"
+            size="large"
+            loading={loadingShift}
+            onClick={handleStartShift}
+            className="w-full rounded-xl bg-indigo-600 font-bold h-11"
+          >
+            {t('staffShifts.btnStartShift')}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* End Shift / Handover Modal */}
+      <Modal
+        title={<span className="text-lg font-bold text-slate-800">{t('staffShifts.endShiftTitle')}</span>}
+        open={isEndShiftModalOpen}
+        onCancel={() => setIsEndShiftModalOpen(false)}
+        footer={null}
+        centered
+        width={450}
+        destroyOnClose
+      >
+        <Form
+          form={endShiftForm}
+          layout="vertical"
+          onFinish={handleEndShiftSubmit}
+          className="pt-4 space-y-4"
+        >
+          {activeShift && (
+            <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100 dark:bg-slate-800/50 dark:border-slate-800 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-500">{t('staffShifts.shiftId')}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">#{activeShift.shiftId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">{t('staffShifts.startTimeLabel')}</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{formatVietnamDateTime(activeShift.startTime)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">{t('staffShifts.systemCashLabel')}</span>
+                <span className="font-extrabold text-indigo-600 text-sm">
+                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(activeShift.systemCash || 0)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <Form.Item
+            name="actualCash"
+            label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('staffShifts.actualCashLabel')}</span>}
+            rules={[{ required: true, message: t('staffShifts.actualCashRequired') }]}
+          >
+            <Input
+              type="number"
+              placeholder="Ví dụ: 500000"
+              className="h-11 rounded-xl text-lg font-bold"
+              suffix={<span className="font-bold text-slate-400">VND</span>}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="notes"
+            label={<span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('staffShifts.notesLabel')}</span>}
+          >
+            <Input.TextArea
+              rows={3}
+              placeholder={t('staffShifts.notesPlaceholder')}
+              className="rounded-xl"
+            />
+          </Form.Item>
+
+          <Button
+            type="primary"
+            htmlType="submit"
+            size="large"
+            loading={loadingShift}
+            className="w-full rounded-xl bg-rose-600 hover:bg-rose-700 border-none font-bold h-11"
+          >
+            {t('staffShifts.btnEndShift')}
+          </Button>
+        </Form>
+      </Modal>
     </div>
   );
 };

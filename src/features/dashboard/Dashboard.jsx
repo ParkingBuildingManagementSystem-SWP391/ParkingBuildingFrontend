@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { managerService } from '../../services/managerService';
 import IncidentsTable from './IncidentsTable';
+import StaffLogsTable from './StaffLogsTable';
 import {
   ShieldAlert,
   Car,
@@ -682,6 +683,8 @@ const Dashboard = ({ section = 'overview' }) => {
           </div>
         ) : section === 'incidents' ? (
           <IncidentsTable />
+        ) : section === 'staff-logs' ? (
+          <StaffLogsTable />
         ) : section === 'analytics' ? (
           <div className="space-y-6">
             {/* Filter Card */}
