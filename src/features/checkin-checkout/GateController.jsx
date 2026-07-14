@@ -8,6 +8,7 @@ import { toast as message } from '../../components/ToastProvider';
 import Webcam from 'react-webcam';
 import {
   CheckCircle,
+  Clock,
   CreditCard,
   Sparkles,
   MonitorPlay,

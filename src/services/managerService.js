@@ -148,5 +148,25 @@ export const managerService = {
       console.error('getStaffActivities error:', error);
       throw error;
     }
+  },
+
+  lockSlot: async (slotId) => {
+    try {
+      const response = await api.put(`/Manager/slots/${slotId}/lock`);
+      return response.data;
+    } catch (error) {
+      console.error(`lockSlot error for slot ${slotId}:`, error);
+      throw error;
+    }
+  },
+
+  unlockSlot: async (slotId) => {
+    try {
+      const response = await api.put(`/Manager/slots/${slotId}/unlock`);
+      return response.data;
+    } catch (error) {
+      console.error(`unlockSlot error for slot ${slotId}:`, error);
+      throw error;
+    }
   }
 };

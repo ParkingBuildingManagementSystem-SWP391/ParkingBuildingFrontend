@@ -128,11 +128,14 @@
     "forceCheckoutBtn": "Cho xe ra & giải phóng chỗ",
     "forceCheckoutLoading": "Đang giải phóng...",
     "lockSlot": "Khóa ô đỗ",
+    "unlockSlot": "Mở khóa ô đỗ",
     "maintenanceBtn": "Bảo trì",
     "editSlot": "Chỉnh sửa",
     "deleteSlot": "Xóa ô đỗ",
     "addNewSlot": "Thêm ô đỗ mới",
     "managerAvailableDesc": "🔔 Ô đỗ này đang trống. Với tư cách là Manager, bạn có quyền quản lý cấu hình chỗ đỗ này.",
+    "managerLockedDesc": "Ô đỗ xe này hiện đang bị khóa hoặc bảo trì. Bạn có muốn mở khóa để đưa ô đỗ hoạt động trở lại không?",
+    "lockedStatusDesc": "Ô đỗ xe này đang bị khóa hoặc bảo trì bởi ban quản lý. Không thể thao tác.",
     "noUserData": "Chưa lấy được thông tin người sử dụng chỗ."
   },
   "login": {

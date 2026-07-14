@@ -81,7 +81,7 @@ const normalizeStatus = (status) => {
   const value = String(status ?? '').trim().toLowerCase();
   if (value === '1' || value === 'occupied') return 'occupied';
   if (value === '2' || value === 'reserved') return 'reserved';
-  if (value === '3' || value === 'maintenance') return 'maintenance';
+  if (value === '3' || value === 'maintenance' || value === 'locked') return 'maintenance';
   return 'available';
 };
 
@@ -904,6 +904,42 @@ const ParkingLotMap = () => {
     }
   };
 
+  const handleLockSlot = async () => {
+    if (!selectedSlot) return;
+    setSubmitting(true);
+    try {
+      const slotId = selectedSlot.slotId || selectedSlot.dbSlotId;
+      await managerService.lockSlot(slotId);
+      message.success(`Đã khóa ô đỗ ${selectedSlot.id} thành công.`);
+      setIsDetailsModalOpen(false);
+      onFloorChange(activeFloorId);
+    } catch (err) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Không thể khóa ô đỗ.";
+      message.error(errMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUnlockSlot = async () => {
+    if (!selectedSlot) return;
+    setSubmitting(true);
+    try {
+      const slotId = selectedSlot.slotId || selectedSlot.dbSlotId;
+      await managerService.unlockSlot(slotId);
+      message.success(`Đã mở khóa ô đỗ ${selectedSlot.id} thành công.`);
+      setIsDetailsModalOpen(false);
+      onFloorChange(activeFloorId);
+    } catch (err) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Không thể mở khóa ô đỗ.";
+      message.error(errMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Hourly Rate display helper
   const hourlyRateLabel = (type) => {
     if (type === 'Bicycle') return '2.000 đ';
@@ -1596,6 +1632,33 @@ const ParkingLotMap = () => {
                 </div>
               )}
 
+              {/* STATUS: MAINTENANCE / LOCKED */}
+              {selectedSlot.status === 'Maintenance' && (
+                <div className="space-y-4">
+                  {role?.toLowerCase() === 'manager' ? (
+                    <div className="space-y-4">
+                      <div className="rounded-[14px] border border-amber-100 bg-amber-50/50 p-4 text-xs font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                        {t('parkingMap.managerLockedDesc')}
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={handleUnlockSlot}
+                        disabled={submitting}
+                        className="w-full h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <Lock size={15} />
+                        {t('parkingMap.unlockSlot')}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-4 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      {t('parkingMap.lockedStatusDesc')}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* STATUS: AVAILABLE */}
               {selectedSlot.status === 'Available' && (
                 <div className="space-y-4">
@@ -1605,51 +1668,14 @@ const ParkingLotMap = () => {
                         {t('parkingMap.managerAvailableDesc')}
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
-                          type="button"
-                          onClick={() => message.info('Tính năng "Khóa ô đỗ" đang được phát triển (Chưa có API).')}
-                          className="flex h-11 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition duration-200"
-                        >
-                          <Lock size={15} />
-                          {t('parkingMap.lockSlot')}
-                        </button>
-                        
-                        <button
-                          type="button"
-                          onClick={() => message.info('Tính năng "Bảo trì ô đỗ" đang được phát triển (Chưa có API).')}
-                          className="flex h-11 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition duration-200"
-                        >
-                          <Wrench size={15} />
-                          {t('parkingMap.maintenanceBtn')}
-                        </button>
-                        
-                        <button
-                          type="button"
-                          onClick={() => message.info('Tính năng "Chỉnh sửa ô đỗ" đang được phát triển (Chưa có API).')}
-                          className="flex h-11 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition duration-200"
-                        >
-                          <Settings size={15} />
-                          {t('parkingMap.editSlot')}
-                        </button>
-                        
-                        <button
-                          type="button"
-                          onClick={() => message.info('Tính năng "Xóa ô đỗ" đang được phát triển (Chưa có API).')}
-                          className="flex h-11 items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-rose-50/50 text-xs font-bold text-rose-700 hover:bg-rose-50 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 dark:border-rose-900/50 dark:bg-rose-950/20 dark:text-rose-400 dark:hover:bg-rose-900/30 transition duration-200"
-                        >
-                          <Trash2 size={15} />
-                          {t('parkingMap.deleteSlot')}
-                        </button>
-                      </div>
-                      
                       <button
                         type="button"
-                        onClick={() => message.info('Tính năng "Thêm ô đỗ mới" đang được phát triển (Chưa có API).')}
-                        className="w-full h-11 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 text-sm flex items-center justify-center gap-2"
+                        onClick={handleLockSlot}
+                        disabled={submitting}
+                        className="w-full h-11 bg-gradient-to-br from-slate-700 to-slate-800 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-500/20 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                       >
-                        <Plus size={16} />
-                        {t('parkingMap.addNewSlot')}
+                        <Lock size={15} />
+                        {t('parkingMap.lockSlot')}
                       </button>
                     </div>
                   ) : (
