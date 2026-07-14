@@ -128,5 +128,25 @@ export const managerService = {
 
   getMonthlyCards: async () => {
     return managerService.getMemberships();
+  },
+
+  getStaffShifts: async (params) => {
+    try {
+      const response = await api.get('/Manager/shifts', { params });
+      return response.data;
+    } catch (error) {
+      console.error('getStaffShifts error:', error);
+      throw error;
+    }
+  },
+
+  getStaffActivities: async (params) => {
+    try {
+      const response = await api.get('/Manager/staff-activities', { params });
+      return response.data;
+    } catch (error) {
+      console.error('getStaffActivities error:', error);
+      throw error;
+    }
   }
 };
