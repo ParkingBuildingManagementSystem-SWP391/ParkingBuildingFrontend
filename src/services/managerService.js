@@ -82,12 +82,11 @@ export const managerService = {
         dayRate: Number(data.dayRate),
         nightRate: Number(data.nightRate),
         fullDayRate: Number(data.fullDayRate),
-        monthlyPrice: Number(data.monthlyPrice),
+        firstHourRate: Number(data.firstHourRate ?? 0),
+        subsequentHourRate: Number(data.subsequentHourRate ?? 0),
         maxHoursPerTurn: data.maxHoursPerTurn !== undefined && data.maxHoursPerTurn !== null && data.maxHoursPerTurn !== ''
           ? Number(data.maxHoursPerTurn)
-          : null,
-        firstHourRate: Number(data.firstHourRate ?? 0),
-        subsequentHourRate: Number(data.subsequentHourRate ?? 0)
+          : null
       });
       return response.data;
     } catch (error) {
@@ -99,8 +98,9 @@ export const managerService = {
   updateMembershipPricing: async (data) => {
     try {
       const response = await api.put('/Manager/update-membership-pricing', {
-        tierId: Number(data.tierId),
-        monthlyPrice: Number(data.monthlyPrice),
+        typeId: Number(data.typeId),
+        durationMonths: Number(data.durationMonths),
+        price: Number(data.price),
       });
       return response.data;
     } catch (error) {
@@ -109,12 +109,19 @@ export const managerService = {
     }
   },
 
+  getMembershipTiers: async () => {
+    const response = await api.get('/MembershipCard/tiers');
+    return response.data;
+  },
+
   getMemberships: async (params = {}) => {
     try {
-      const response = await api.get('/Manager/membership-cards', { params });
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '')
+      );
+      const response = await api.get('/Manager/membership-cards', { params: cleanParams });
       return response.data;
     } catch (error) {
-      console.error('getMemberships error:', error);
       throw error;
     }
   },
@@ -123,17 +130,43 @@ export const managerService = {
     return managerService.getMemberships();
   },
 
-  cancelMembership: async (membershipCardId) => {
+  getStaffShifts: async (params) => {
     try {
-      const response = await api.delete(`/Manager/membership-cards/${membershipCardId}/cancel`);
+      const response = await api.get('/Manager/shifts', { params });
       return response.data;
     } catch (error) {
-      console.error(`cancelMembership error for card ${membershipCardId}:`, error);
+      console.error('getStaffShifts error:', error);
       throw error;
     }
   },
 
-  cancelMonthlyCard: async (membershipCardId) => {
-    return managerService.cancelMembership(membershipCardId);
+  getStaffActivities: async (params) => {
+    try {
+      const response = await api.get('/Manager/staff-activities', { params });
+      return response.data;
+    } catch (error) {
+      console.error('getStaffActivities error:', error);
+      throw error;
+    }
+  },
+
+  lockSlot: async (slotId) => {
+    try {
+      const response = await api.put(`/Manager/slots/${slotId}/lock`);
+      return response.data;
+    } catch (error) {
+      console.error(`lockSlot error for slot ${slotId}:`, error);
+      throw error;
+    }
+  },
+
+  unlockSlot: async (slotId) => {
+    try {
+      const response = await api.put(`/Manager/slots/${slotId}/unlock`);
+      return response.data;
+    } catch (error) {
+      console.error(`unlockSlot error for slot ${slotId}:`, error);
+      throw error;
+    }
   }
 };

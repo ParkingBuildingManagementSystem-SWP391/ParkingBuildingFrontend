@@ -43,7 +43,7 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
   const commonNavigation = [
     {
       key: 'home',
-      label: label(t, 'dropdown.home', 'Trang chá»§'),
+      label: label(t, 'menu.home', 'Home'),
       path: routes.home,
       icon: Home
     }
@@ -55,13 +55,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
     roleNavigation = [
       {
         key: 'parking-map',
-        label: label(t, 'dropdown.parkingMap', 'Báº£n Ä‘á»“ bÃ£i Ä‘á»—'),
+        label: label(t, 'menu.parkingMap', 'Parking Map'),
         path: routes.parkingMap,
         icon: Map
       },
       {
         key: 'my-bookings',
-        label: label(t, 'dropdown.myBookings', 'Lá»‹ch Ä‘áº·t chá»— cá»§a tÃ´i'),
+        label: label(t, 'menu.myBookings', 'My Bookings'),
         path: routes.myBookings,
         icon: CalendarCheck
       },
@@ -73,7 +73,7 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
       },
       {
         key: 'my-membership',
-        label: label(t, 'dropdown.membership', 'Membership'),
+        label: label(t, 'menu.memberships', 'Memberships'),
         path: routes.myMembership,
         icon: CreditCard
       }
@@ -84,13 +84,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
     roleNavigation = [
       {
         key: 'checkin-checkout',
-        label: label(t, 'dropdown.checkinCheckout', 'Check-in / Check-out'),
+        label: label(t, 'menu.checkInOut', 'Check-in / Check-out'),
         path: routes.checkinCheckout,
         icon: ScanLine
       },
       {
         key: 'parking-map',
-        label: label(t, 'dropdown.parkingMap', 'Báº£n Ä‘á»“ bÃ£i Ä‘á»—'),
+        label: label(t, 'menu.parkingMap', 'Parking Map'),
         path: routes.parkingMap,
         icon: Map
       }
@@ -102,13 +102,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
       isHomePage
         ? {
             key: 'manager-dashboard',
-            label: label(t, 'dropdown.dashboard', 'Báº£ng Ä‘iá»u khiá»ƒn'),
+            label: label(t, 'menu.dashboard', 'Dashboard'),
             path: routes.managerDashboard,
             icon: LayoutDashboard
           }
         : {
             key: 'home',
-            label: label(t, 'dropdown.home', 'Trang chá»§'),
+            label: label(t, 'menu.home', 'Home'),
             path: routes.home,
             icon: Home
           }
@@ -120,13 +120,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
       isHomePage
         ? {
             key: 'admin-accounts',
-            label: label(t, 'sidebar.userAccounts', 'Quáº£n lÃ½ ngÆ°á»i dÃ¹ng'),
+            label: label(t, 'menu.userAccounts', 'User Accounts'),
             path: routes.adminAccounts,
             icon: Users
           }
         : {
             key: 'home',
-            label: label(t, 'dropdown.home', 'Trang chá»§'),
+            label: label(t, 'menu.home', 'Home'),
             path: routes.home,
             icon: Home
           }
@@ -141,13 +141,13 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
     accountItems: [
       {
         key: 'profile',
-        label: label(t, 'dropdown.profile', 'Trang cÃ¡ nhÃ¢n'),
+        label: label(t, 'menu.profile', 'Profile'),
         path: routes.profile,
         icon: Settings
       },
       {
         key: 'logout',
-        label: label(t, 'dropdown.logout', 'ÄÄƒng xuáº¥t'),
+        label: label(t, 'menu.logout', 'Logout'),
         danger: true,
         icon: LogOut
       }

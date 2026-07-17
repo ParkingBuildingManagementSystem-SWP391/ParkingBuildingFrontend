@@ -249,22 +249,22 @@ The project is configured for Vercel deployment.
 
 ## Screenshots
 
-> Screenshots are stored under `src/assets/readme_pic/`.
+> Screenshots are stored under `src/assets/readme-images/`.
 
 ### Homepage
-![Homepage](src/assets/readme_pic/homepage.png)
+![Homepage](src/assets/readme-images/homepage.png)
 
 ### Parking Map
-![Parking Map](src/assets/readme_pic/parking%20map.png)
+![Parking Map](src/assets/readme-images/parking-map.png)
 
 ### Booking Modal
-![Booking Modal](src/assets/readme_pic/booking%20demo.png)
+![Booking Modal](src/assets/readme-images/booking-demo.png)
 
 ### Gate Control
-![Gate Control](src/assets/readme_pic/gate%20controller.png)
+![Gate Control](src/assets/readme-images/gate-controller.png)
 
 ### Manager Analytics
-![Manager Analytics](src/assets/readme_pic/manager%20analy.png)
+![Manager Analytics](src/assets/readme-images/manager-analytics.png)
 
 ## Known Notes
 

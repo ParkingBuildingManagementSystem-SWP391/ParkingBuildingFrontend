@@ -60,12 +60,10 @@ const getVehicleTypeName = (typeId, vehicleTypeName, t) => {
 
 const getStatusLabel = (status, t) => {
   switch (status) {
-    case 'Active':
     case 'InProgress':
       return t('parkingSession.statusActive');
     case 'Completed':
       return t('parkingSession.statusCompleted');
-    case 'Cancelled':
     case 'Canceled':
       return t('parkingSession.statusCancelled');
     case 'Reserved':
@@ -77,14 +75,12 @@ const getStatusLabel = (status, t) => {
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'Active':
     case 'InProgress':
       return 'processing';
     case 'Completed':
       return 'success';
     case 'Reserved':
       return 'warning';
-    case 'Cancelled':
     case 'Canceled':
       return 'default';
     default:
@@ -182,6 +178,7 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
   const checkOutTime = getField(detail, 'checkOutTime', 'CheckOutTime');
   const checkInImageUrl = getField(detail, 'checkInImageUrl', 'CheckInImageUrl', 'imageUrl', 'ImageUrl');
   const checkOutImageUrl = getField(detail, 'checkOutImageUrl', 'CheckOutImageUrl');
+  const incidents = getField(detail, 'incidents', 'Incidents') || [];
 
   return (
     <Modal
@@ -244,6 +241,60 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
               <h4 className="mb-2 text-sm font-extrabold tracking-tight text-slate-700 dark:text-slate-300">{t('parkingSession.imgCheckOut')}</h4>
               <LazySessionImage src={checkOutImageUrl} alt={t('parkingSession.imgCheckOut')} emptyText={t('parkingSession.noImgOut')} />
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <h4 className="mb-4 text-sm font-extrabold tracking-tight text-slate-800 dark:text-slate-200">Báo cáo sự cố</h4>
+            {incidents.length > 0 ? (
+              <div className="space-y-4">
+                {incidents.map((incident, index) => {
+                  const incidentId = getField(incident, 'incidentId', 'IncidentId', 'id', 'Id') || index + 1;
+                  const issueType = getField(incident, 'issueType', 'IssueType');
+                  const description = getField(incident, 'description', 'Description');
+                  const status = getField(incident, 'status', 'Status');
+                  const createdAt = getField(incident, 'createdAt', 'CreatedAt');
+                  const imageProofUrl = getField(incident, 'imageProofUrl', 'ImageProofUrl');
+                  const reportedUsername = getField(incident, 'reportedUsername', 'ReportedUsername', 'reporterUsername', 'ReporterUsername');
+                  const resolutionNotes = getField(incident, 'resolutionNotes', 'ResolutionNotes');
+                  const resolvedUsername = getField(incident, 'resolvedUsername', 'ResolvedUsername');
+                  const resolvedAt = getField(incident, 'resolvedAt', 'ResolvedAt');
+
+                  return (
+                    <div key={incidentId} className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-mono text-xs font-extrabold text-slate-700 dark:text-slate-200">#{incidentId}</span>
+                        <Tag color={status === 'Resolved' ? 'success' : 'warning'}>{status || 'Pending'}</Tag>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <DetailRow label="Loại sự cố">{issueType || t('parkingSession.none')}</DetailRow>
+                        <DetailRow label="Người báo cáo">{reportedUsername || t('parkingSession.none')}</DetailRow>
+                        <DetailRow label="Thời gian tạo">{formatDateTime(createdAt, t)}</DetailRow>
+                        <DetailRow label="Thời gian xử lý">{formatDateTime(resolvedAt, t)}</DetailRow>
+                        <DetailRow label="Người xử lý">{resolvedUsername || t('parkingSession.none')}</DetailRow>
+                        <DetailRow label="Ghi chú xử lý">{resolutionNotes || t('parkingSession.none')}</DetailRow>
+                      </div>
+                      <div className="mt-3">
+                        <DetailRow label="Mô tả">{description || t('parkingSession.none')}</DetailRow>
+                      </div>
+                      {imageProofUrl ? (
+                        <a
+                          href={imageProofUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-300"
+                        >
+                          Xem ảnh bằng chứng
+                        </a>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                Không có báo cáo sự cố cho lượt đỗ này.
+              </div>
+            )}
           </div>
         </div>
       ) : null}
@@ -340,104 +391,105 @@ const ParkingSessionManager = () => {
   return (
     <div className="min-h-full space-y-6 bg-slate-50 dark:bg-slate-900">
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Input
-            size="large"
-            allowClear
-            prefix={<Search size={15} className="text-slate-400" />}
-            placeholder={t('parkingSession.phPlate')}
-            value={filters.licenseVehicle}
-            onChange={(event) => updateFilter('licenseVehicle', event.target.value)}
-            className={fieldClassName}
-          />
-          <Input
-            size="large"
-            allowClear
-            placeholder={t('parkingSession.phSlot')}
-            value={filters.slotName}
-            onChange={(event) => updateFilter('slotName', event.target.value)}
-            className={fieldClassName}
-          />
-          <Select
-            size="large"
-            placeholder={t('parkingSession.phCustomerType')}
-            allowClear
-            value={filters.isRegistered || undefined}
-            onChange={(value) => updateFilter('isRegistered', value !== undefined ? value : '')}
-            className="ps-select-field w-full"
-            options={[
-              { value: '1', label: t('parkingSession.custRegistered') },
-              { value: '0', label: t('parkingSession.custWalkIn') },
-            ]}
-          />
-          <Select
-            size="large"
-            placeholder={t('parkingSession.phVehType')}
-            allowClear
-            value={filters.typeId || undefined}
-            onChange={(value) => updateFilter('typeId', value || '')}
-            className="ps-select-field w-full"
-            options={[
-              { value: '1', label: t('parkingSession.vehBike') },
-              { value: '2', label: t('parkingSession.vehMoto') },
-              { value: '3', label: t('parkingSession.vehCar') },
-            ]}
-          />
-          <Select
-            size="large"
-            placeholder={t('parkingSession.phStatus')}
-            allowClear
-            value={filters.sessionStatus || undefined}
-            onChange={(value) => updateFilter('sessionStatus', value || '')}
-            className="ps-select-field w-full"
-            options={[
-              { value: 'Reserved', label: t('parkingSession.statusReserved') },
-              { value: 'InProgress', label: t('parkingSession.statusActive') },
-              { value: 'Active', label: t('parkingSession.statusActive') },
-              { value: 'Completed', label: t('parkingSession.statusCompleted') },
-              { value: 'Cancelled', label: t('parkingSession.statusCancelled') },
-              { value: 'Canceled', label: t('parkingSession.statusCancelled') },
-            ]}
-          />
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.fromDate')}</span>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
             <Input
               size="large"
-              type="date"
-              value={filters.fromDate}
-              onChange={(event) => updateFilter('fromDate', event.target.value)}
+              allowClear
+              prefix={<Search size={15} className="text-slate-400" />}
+              placeholder={t('parkingSession.phPlate')}
+              value={filters.licenseVehicle}
+              onChange={(event) => updateFilter('licenseVehicle', event.target.value)}
               className={fieldClassName}
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.toDate')}</span>
             <Input
               size="large"
-              type="date"
-              value={filters.toDate}
-              onChange={(event) => updateFilter('toDate', event.target.value)}
+              allowClear
+              placeholder={t('parkingSession.phSlot')}
+              value={filters.slotName}
+              onChange={(event) => updateFilter('slotName', event.target.value)}
               className={fieldClassName}
             />
-          </div>
-          <div className="flex items-end gap-2">
-            <Button
-              htmlType="submit"
-              type="primary"
+            <Select
               size="large"
-              icon={<Search size={15} />}
-              className="flex-1 rounded-[14px] border-none bg-indigo-600 font-bold shadow-sm hover:!bg-indigo-700"
-            >
-              {t('parkingSession.btnSearch')}
-            </Button>
-            <Button
-              type="default"
+              placeholder={t('parkingSession.phCustomerType')}
+              allowClear
+              value={filters.isRegistered || undefined}
+              onChange={(value) => updateFilter('isRegistered', value !== undefined ? value : '')}
+              className="ps-select-field w-full"
+              options={[
+                { value: '1', label: t('parkingSession.custRegistered') },
+                { value: '0', label: t('parkingSession.custWalkIn') },
+              ]}
+            />
+            <Select
               size="large"
-              icon={<RotateCcw size={15} />}
-              onClick={handleReset}
-              className="rounded-[14px] border-slate-200 bg-white font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!border-slate-600 dark:hover:!text-slate-100"
-            >
-              {t('parkingSession.btnReset')}
-            </Button>
+              placeholder={t('parkingSession.phVehType')}
+              allowClear
+              value={filters.typeId || undefined}
+              onChange={(value) => updateFilter('typeId', value || '')}
+              className="ps-select-field w-full"
+              options={[
+                { value: '1', label: t('parkingSession.vehBike') },
+                { value: '2', label: t('parkingSession.vehMoto') },
+                { value: '3', label: t('parkingSession.vehCar') },
+              ]}
+            />
+
+            <Select
+              size="large"
+              placeholder={t('parkingSession.phStatus')}
+              allowClear
+              value={filters.sessionStatus || undefined}
+              onChange={(value) => updateFilter('sessionStatus', value || '')}
+              className="ps-select-field w-full"
+              options={[
+                { value: 'Reserved', label: t('parkingSession.statusReserved') },
+                { value: 'InProgress', label: t('parkingSession.statusActive') },
+                { value: 'Completed', label: t('parkingSession.statusCompleted') },
+                { value: 'Canceled', label: t('parkingSession.statusCancelled') },
+              ]}
+            />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.fromDate')}</span>
+              <Input
+                size="large"
+                type="date"
+                value={filters.fromDate}
+                onChange={(event) => updateFilter('fromDate', event.target.value)}
+                className={`${fieldClassName} w-full`}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.toDate')}</span>
+              <Input
+                size="large"
+                type="date"
+                value={filters.toDate}
+                onChange={(event) => updateFilter('toDate', event.target.value)}
+                className={`${fieldClassName} w-full`}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                htmlType="submit"
+                type="primary"
+                size="large"
+                icon={<Search size={15} />}
+                className="rounded-[14px] border-none bg-indigo-600 font-bold shadow-sm hover:!bg-indigo-700"
+              >
+                {t('parkingSession.btnSearch')}
+              </Button>
+              <Button
+                type="default"
+                size="large"
+                icon={<RotateCcw size={15} />}
+                onClick={handleReset}
+                className="rounded-[14px] border-slate-200 bg-white font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!border-slate-600 dark:hover:!text-slate-100"
+              >
+                {t('parkingSession.btnReset')}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

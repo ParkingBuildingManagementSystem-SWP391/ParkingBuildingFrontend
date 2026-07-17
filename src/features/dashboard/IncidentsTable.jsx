@@ -13,7 +13,7 @@ import {
   Clock
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
-import { formatVietnamDateTime } from '../../utils/dateTime';
+import { formatVietnamDateTime, parseUtcDate } from '../../utils/dateTime';
 
 const IncidentsTable = () => {
   const { t } = useTranslation();
@@ -37,8 +37,8 @@ const IncidentsTable = () => {
     return {
       id: realId,
       severity: item.severity || item.Severity || 'Info',
-      timestamp: item.timestamp || item.createdAt || item.CreatedAt || item.reportedAt || item.ReportedAt,
-      type: item.type || item.Type || item.title || item.Title || 'Sự cố',
+      timestamp: item.incidentTime || item.IncidentTime || item.timestamp || item.Timestamp || item.createdAt || item.CreatedAt || item.reportedAt || item.ReportedAt,
+      type: item.issueType || item.IssueType || item.type || item.Type || item.title || item.Title || 'Sự cố',
       description: item.description || item.Description || item.message || item.Message || '',
       location: item.location || item.Location || item.slotName || item.SlotName || item.licenseVehicle || item.LicenseVehicle || '',
       status: item.status || item.Status || 'Pending',
@@ -70,15 +70,8 @@ const IncidentsTable = () => {
       const data = Array.isArray(response) ? response : (response?.data || response?.Data || []);
       setIncidents(data.map((item, index) => {
         const normalized = normalizeIncident(item, index);
-        const issueType = item.issueType || item.IssueType;
-        const severity = item.severity || item.Severity ||
-          (issueType === 'Lost Ticket' || issueType === 'Vehicle Damage' ? 'Critical' :
-            issueType === 'Equipment Malfunction' ? 'Warning' : normalized.severity);
-
         return {
           ...normalized,
-          type: issueType || normalized.type,
-          severity,
           status: item.status === 'Open' || item.Status === 'Open' ? 'Pending' : normalized.status
         };
       }));
@@ -113,7 +106,7 @@ const IncidentsTable = () => {
     }).sort((a, b) => {
       if (isPending(a.status) && isResolved(b.status)) return -1;
       if (isResolved(a.status) && isPending(b.status)) return 1;
-      return new Date(b.timestamp) - new Date(a.timestamp);
+      return (parseUtcDate(b.timestamp)?.getTime() || 0) - (parseUtcDate(a.timestamp)?.getTime() || 0);
     });
   }, [incidents, searchText, filterSeverity]);
 
@@ -390,7 +383,6 @@ const IncidentsTable = () => {
               className="rounded-lg"
             />
           </div>
-
         </div>
       </Modal>
     </div>

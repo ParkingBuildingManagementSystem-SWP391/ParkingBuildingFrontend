@@ -52,7 +52,7 @@
     "operations": "Vận hành",
     "management": "Quản lý",
     "administration": "Quản trị",
-    "parkingMap": "Sơ đồ bãi xe",
+    "parkingMap": "Sơ đồ & Quản lý bãi xe",
     "myBookings": "Lịch đặt chỗ của tôi",
     "myWallet": "Ví của tôi",
     "gateControl": "Điều khiển cổng",
@@ -82,8 +82,9 @@
   },
   "footer": {
     "systemName": "HỆ THỐNG QUẢN LÝ TÒA NHÀ ĐỖ XE",
-    "copyright": "© 2026 Hệ thống Quản lý Tòa nhà Đỗ xe. Đã đăng ký bản quyền.",
-    "version": "Phiên bản 1.0.0 - Phát triển bởi Nhóm 5"
+    "copyright": "Copyright 2026 Hệ thống Quản lý Tòa nhà Đỗ xe. Đã đăng ký bản quyền.",
+    "version": "Phiên bản 1.0.0",
+    "developedBy": "Phát triển bởi Nhóm 5"
   },
   "parkingMap": {
     "available": "Còn trống:",
@@ -104,9 +105,38 @@
     "zone": "Khu",
     "vehicleTypeLabel": "Loại xe",
     "fixedVehicleTypeNote": "Loại xe được cố định theo tầng/khu đã chọn",
-    "carOpt": "Ô tô",
+    "carOpt": "Xe ô tô",
     "motorcycleOpt": "Xe máy",
-    "bicycleOpt": "Xe đạp"
+    "bicycleOpt": "Xe đạp",
+    "slotControl": "Điều khiển chỗ: {{id}}",
+    "controlDesc": "Bảng điều khiển vận hành cho nhân viên quản lý",
+    "floorLabel": "Tầng",
+    "categoryLabel": "Phân loại",
+    "slotTypePrefix": "Chỗ {{type}}",
+    "currentStatusLabel": "Trạng thái hiện tại",
+    "usageStatusLabel": "Trạng thái sử dụng",
+    "loadingDetail": "Đang tải chi tiết từ cơ sở dữ liệu...",
+    "plateLabel": "Biển số xe:",
+    "vehicleTypeLabelColon": "Loại xe:",
+    "entryTimeActual": "Thời gian vào thực tế:",
+    "bookingTimeActual": "Thời gian đặt trước:",
+    "customerProfile": "Hồ sơ khách hàng",
+    "customerNameLabel": "Họ tên:",
+    "customerEmailLabel": "Email:",
+    "customerPhoneLabel": "Số điện thoại:",
+    "customerTypeLabel": "Hạng thành viên:",
+    "forceCheckoutBtn": "Cho xe ra & giải phóng chỗ",
+    "forceCheckoutLoading": "Đang giải phóng...",
+    "lockSlot": "Khóa ô đỗ",
+    "unlockSlot": "Mở khóa ô đỗ",
+    "maintenanceBtn": "Bảo trì",
+    "editSlot": "Chỉnh sửa",
+    "deleteSlot": "Xóa ô đỗ",
+    "addNewSlot": "Thêm ô đỗ mới",
+    "managerAvailableDesc": "🔔 Ô đỗ này đang trống. Với tư cách là Manager, bạn có quyền quản lý cấu hình chỗ đỗ này.",
+    "managerLockedDesc": "Ô đỗ xe này hiện đang bị khóa hoặc bảo trì. Bạn có muốn mở khóa để đưa ô đỗ hoạt động trở lại không?",
+    "lockedStatusDesc": "Ô đỗ xe này đang bị khóa hoặc bảo trì bởi ban quản lý. Không thể thao tác.",
+    "noUserData": "Chưa lấy được thông tin người sử dụng chỗ."
   },
   "login": {
     "errorEmptyFields": "Vui lòng nhập email và mật khẩu.",
@@ -167,16 +197,16 @@
   },
   "home": {
     "system": "HỆ THỐNG",
-    "parkingManagement": "Quản lí bãi đỗ xe",
+    "parkingManagement": "Quản lí bãi gửi xe",
     "navHome": "Trang chủ",
     "navBook": "Đặt chỗ",
     "navLocate": "Tìm xe",
     "navPricing": "Bảng giá",
     "navContact": "Liên hệ",
     "badge": "Được 5.000+ tài xế tin dùng",
-    "hero1": "Đỗ xe thông minh",
+    "hero1": "Gửi xe thông minh",
     "hero2": "Đơn giản hơn bao giờ hết",
-    "heroDesc": "Trải nghiệm tương lai của việc đỗ xe đô thị. Kiểm tra chỗ trống theo thời gian thực, đặt chỗ tức thì và check-in tự động — tất cả từ điện thoại của bạn.",
+    "heroDesc": "Trải nghiệm tương lai của việc gửi xe đô thị. Kiểm tra chỗ trống theo thời gian thực, đặt chỗ tức thì và check-in tự động — tất cả từ điện thoại của bạn.",
     "btnBook": "Đặt chỗ ngay",
     "btnViewMap": "Khám phá sơ đồ",
     "btnLogin": "Đăng nhập",
@@ -184,9 +214,9 @@
     "toggleLanguage": "Đổi ngôn ngữ",
     "defaultAccount": "Tài khoản",
     "online": "Online",
-    "altHeroImg": "Hệ thống bãi đỗ xe thông minh",
+    "altHeroImg": "Hệ thống bãi gửi xe thông minh",
     "statSlots": "1.500+",
-    "statSlotsLabel": "Chỗ đỗ xe",
+    "statSlotsLabel": "Chỗ gửi xe",
     "statUptime": "99,9%",
     "statUptimeLabel": "Thời gian hoạt động",
     "statUsers": "5.000+",
@@ -194,9 +224,9 @@
     "statSupport": "24/7",
     "statSupportLabel": "Hỗ trợ",
     "featTitle": "Tại sao chọn hệ thống của chúng tôi?",
-    "featDesc": "Được xây dựng với công nghệ tiên tiến để mang đến trải nghiệm đỗ xe hoàn hảo",
+    "featDesc": "Được xây dựng với công nghệ tiên tiến để mang đến trải nghiệm gửi xe hoàn hảo",
     "feat1Title": "Sơ đồ trực tiếp",
-    "feat1Desc": "Bản đồ tương tác hiển thị chính xác tình trạng chỗ đỗ trên tất cả các tầng và khu vực, cập nhật mỗi giây.",
+    "feat1Desc": "Bản đồ tương tác hiển thị chính xác tình trạng chỗ gửi xe trên tất cả các tầng và khu vực, cập nhật mỗi giây.",
     "feat2Title": "Đặt chỗ tức thì",
     "feat2Desc": "Đặt chỗ trong vài giây từ bất cứ đâu. Bỏ qua xếp hàng và đảm bảo chỗ trước khi đến.",
     "feat3Title": "Nhận diện biển số AI",
@@ -204,18 +234,58 @@
     "feat4Title": "Thanh toán thông minh",
     "feat4Desc": "Đa dạng phương thức thanh toán: VNPay QR, tiền mặt và ví điện tử với giá minh bạch.",
     "howTitle": "Cách thức hoạt động",
-    "howDesc": "Đỗ xe chỉ trong 3 bước đơn giản",
-    "step1Title": "Tìm chỗ đỗ",
+    "howDesc": "Gửi xe chỉ trong 3 bước đơn giản",
+    "step1Title": "Tìm chỗ gửi xe",
     "step1Desc": "Duyệt sơ đồ bãi xe thời gian thực để tìm chỗ trống trên bất kỳ tầng nào.",
     "step2Title": "Đặt chỗ ngay",
     "step2Desc": "Chọn chỗ, chọn khung giờ và xác nhận đặt chỗ chỉ trong vài giây.",
     "step3Title": "Gửi xe & Đi",
     "step3Desc": "Hệ thống kết hợp camera tự động nhận diện biển số, tích hợp QR không cần vé.",
-    "ctaTitle": "Sẵn sàng đỗ xe thông minh hơn?",
-    "ctaDesc": "Hàng ngàn tài xế đã nâng cấp trải nghiệm đỗ xe. Đăng ký ngay hôm nay để truy cập ngay lập tức.",
+    "ctaTitle": "Sẵn sàng gửi xe thông minh hơn?",
+    "ctaDesc": "Hàng ngàn tài xế đã nâng cấp trải nghiệm gửi xe. Đăng ký ngay hôm nay để truy cập ngay lập tức.",
     "ctaBtn": "Bắt đầu miễn phí",
     "ctaLogin": "Đã có tài khoản?",
-    "supportMsg": "Cần hỗ trợ đặt chỗ? Liên hệ đội ngũ vận hành để được tư vấn nhanh và chính xác."
+    "supportMsg": "Cần hỗ trợ đặt chỗ? Liên hệ đội ngũ vận hành để được tư vấn nhanh và chính xác.",
+    "cta": {
+      "getStarted": "Bắt đầu miễn phí",
+      "alreadyHaveAccount": "Đã có tài khoản?"
+    },
+    "lookup": {
+      "badge": "Tra cứu nhanh",
+      "title": "Quên mất bạn gửi xe ở đâu?",
+      "description": "Chỉ cần biển số xe, hệ thống sẽ định vị chính xác tầng và ô gửi xe trong tòa nhà, dành cho cả tài xế thành viên lẫn khách vãng lai.",
+      "realtime": "Dữ liệu cập nhật theo thời gian thực",
+      "cardTitle": "Tìm vị trí xe đang gửi",
+      "cardSubtitle": "Nhập biển số để định vị ngay",
+      "inputLabel": "Nhập biển số xe của bạn",
+      "placeholder": "Ví dụ: 30A-123.45",
+      "searchButton": "Tìm Vị Trí Ngay",
+      "loading": "Đang kiểm tra...",
+      "notFound": "Không tìm thấy phương tiện đang gửi trong bãi.",
+      "steps": {
+        "enterPlate": {
+          "title": "Nhập biển số xe",
+          "desc": "Gõ đúng biển số phương tiện bạn đang gửi."
+        },
+        "locate": {
+          "title": "Hệ thống định vị",
+          "desc": "Quét toàn bộ tòa nhà để tìm tầng và ô gửi xe."
+        },
+        "navigate": {
+          "title": "Chỉ đường tận nơi",
+          "desc": "Xem vị trí trực tiếp trên sơ đồ bãi xe."
+        }
+      },
+      "result": {
+        "parked": "Đang gửi trong bãi",
+        "floor": "Tầng gửi xe",
+        "slot": "Vị trí ô gửi xe",
+        "checkInImage": "Ảnh cổng check-in đối chứng",
+        "checkInImageAlt": "Ảnh cổng check-in xe",
+        "entryTime": "Vào bãi: {{time}}",
+        "viewMap": "Chỉ đường trên sơ đồ gửi xe"
+      }
+    }
   },
   "intro": {
     "featMapTitle": "Sơ đồ trực tiếp theo thời gian thực",
@@ -285,7 +355,6 @@
     "modFail": "Cập nhật quyền thất bại.",
     "updSuccess": "Đã cập nhật thông tin thành công cho",
     "updFail": "Cập nhật thông tin thất bại.",
-    "toggleSuccess": "Đã chuyển đổi trạng thái tài khoản thành",
     "totalUsers": "Tổng Người Dùng",
     "active": "Hoạt động",
     "locked": "Đã khóa",
@@ -293,6 +362,8 @@
     "accountsFound": "tài khoản được tìm thấy",
     "searchPlaceholder": "Tìm kiếm tên hoặc email...",
     "loadingAccounts": "Đang tải danh sách...",
+    "filterAllRoles": "Tất cả vai trò",
+    "filterAllStatuses": "Tất cả trạng thái",
     "colUser": "Người dùng",
     "colEmail": "Email",
     "colRole": "Vai trò",
@@ -301,8 +372,6 @@
     "colActions": "Thao tác",
     "noAccountsFound": "Không tìm thấy tài khoản nào khớp với tìm kiếm.",
     "editInfo": "Sửa thông tin",
-    "lockUser": "Khóa",
-    "unlockUser": "Mở khóa",
     "modPermissionsTitle": "Thay đổi quyền người dùng",
     "livePreview": "Xem Trước",
     "selectRole": "Chọn Vai Trò Mới",
@@ -616,8 +685,8 @@
       "dayRate": "Giá ban ngày",
       "nightRate": "Giá ban đêm",
       "fullDayRate": "Giá cả ngày",
-      "firstHourPrice": "Giá giờ đầu",
-      "nextHourPrice": "Giá giờ sau",
+      "firstHourRate": "Giá giờ đầu",
+      "subsequentHourRate": "Giá giờ sau",
       "monthlyPrice": "Phí Membership",
       "maxHours": "Giờ tối đa mỗi lượt",
       "action": "Thao tác",
@@ -896,7 +965,36 @@
   },
   "wallet": {
     "title": "Ví của tôi",
-    "subtitle": "Quản lý số dư và lịch sử giao dịch ví"
+    "subtitle": "Quản lý số dư ví và lịch sử giao dịch",
+    "eWallet": "Ví điện tử",
+    "refresh": "Làm mới",
+    "loading": "Đang tải...",
+    "depositMoney": "Nạp tiền vào ví",
+    "vnpayNote": "Thanh toán qua cổng VNPay.",
+    "depositAmount": "Số tiền nạp",
+    "amountPlaceholder": "Nhập số tiền",
+    "deposit": "Nạp tiền",
+    "processing": "Đang xử lý...",
+    "transactionHistory": "Lịch sử giao dịch",
+    "emptyHistory": "Chưa có giao dịch ví.",
+    "transactionTypes": {
+      "payment": "Thanh toán",
+      "deposit": "Nạp tiền"
+    },
+    "table": {
+      "time": "Thời gian",
+      "type": "Loại",
+      "amount": "Số tiền",
+      "status": "Trạng thái"
+    },
+    "messages": {
+      "depositCreated": "Tạo yêu cầu nạp ví thành công."
+    },
+    "errors": {
+      "load": "Không thể tải thông tin ví.",
+      "minimumDeposit": "Số tiền nạp tối thiểu là 10.000đ.",
+      "createDeposit": "Không thể tạo giao dịch nạp ví."
+    }
   },
   "common": {
     "openMenu": "Mở menu",
@@ -910,8 +1008,9 @@
     "notUpdated": "Chưa cập nhật"
   },
   "membership": {
-    "title": "Membership của tôi",
+    "title": "Gói thành viên",
     "subtitle": "Quản lý và đăng ký Membership cho phương tiện của bạn",
+    "label": "Gói thành viên",
     "managerTitle": "Quản lý Membership",
     "managerSubtitle": "Theo dõi danh sách thẻ thành viên, vị trí cố định và trạng thái hiệu lực.",
     "paymentRequestSubtitle": "Chọn gói, nhập biển số và vị trí ô đỗ cố định để tạo yêu cầu thanh toán",
@@ -924,8 +1023,44 @@
     "qrTitle": "Mã QR Membership của bạn",
     "qrAlt": "Mã QR Membership",
     "qrInstruction": "Sử dụng mã QR này quét tại đầu đọc ở cổng vào/ra để đỗ xe",
-    "registerTitle": "Đăng ký Membership",
+    "registerTitle": "Đăng ký gói thành viên",
+    "registerSubtitle": "Chọn gói, số ô đỗ theo thời hạn và thanh toán một lần.",
     "registerDescription": "Chọn loại xe và thời hạn để tạo yêu cầu thanh toán VNPay.",
+    "activeTitle": "Gói thành viên đang hoạt động",
+    "activeSubtitle": "Mỗi ô đỗ có một mã QR riêng.",
+    "refresh": "Làm mới",
+    "membershipParking": "Gửi xe theo gói thành viên",
+    "selectVehicleType": "Chọn loại xe",
+    "registrationDuration": "Thời hạn đăng ký",
+    "selectSlots": "Chọn ô đỗ",
+    "selectedSlots": "Đã chọn {{selected}}/{{total}} ô đỗ",
+    "selectVehicleAndDurationFirst": "Chọn loại xe và thời hạn trước.",
+    "loadingSlots": "Đang tải ô đỗ...",
+    "noAvailableSlots": "Không có ô đỗ trống phù hợp.",
+    "licensePlate": "Biển số xe",
+    "licensePlateLabel": "Biển số xe",
+    "addLicensePlate": "Thêm biển số",
+    "licensePlatePlaceholder": "Ví dụ: 51F-123.45",
+    "maxLicensePlatesHint": "Tối đa {{count}} biển số cho gói đang chọn.",
+    "registrationSummary": "Tóm tắt đăng ký",
+    "payment": "Thanh toán",
+    "total": "Tổng cộng",
+    "choosePackageToViewTotal": "Chọn gói để xem tổng tiền",
+    "processing": "Đang xử lý...",
+    "validity": "Hiệu lực",
+    "validUntil": "đến {{date}}",
+    "validityPeriod": "Thời hạn hiệu lực",
+    "daysLeft": "Còn {{count}} ngày",
+    "slotNumber": "Ô đỗ #{{number}}",
+    "slotFallback": "Ô đỗ {{id}}",
+    "slotsCount": "{{count}} ô đỗ",
+    "noCode": "Chưa có mã",
+    "noTierConfig": "Gói này chưa có cấu hình tier từ Backend.",
+    "perks": {
+      "ownQrPerSlot": "Mỗi ô đỗ có QR riêng",
+      "autoPlateRecognition": "Tự động nhận diện biển số",
+      "centralMembershipManagement": "Quản lý tập trung trong gói thành viên"
+    },
     "vehicleType": "Loại xe",
     "vehicleTypePlaceholder": "Chọn loại xe",
     "duration": "Thời hạn",
@@ -944,9 +1079,96 @@
       "noRegisterPermission": "Bạn không có quyền đăng ký Membership.",
       "createRegistration": "Không thể tạo đăng ký Membership.",
       "selectVehicle": "Vui lòng chọn loại xe.",
-      "selectDuration": "Vui lòng chọn thời hạn."
+      "selectDuration": "Vui lòng chọn thời hạn.",
+      "loadTiers": "Không thể tải danh sách gói thành viên.",
+      "loadAvailableSlots": "Không thể tải danh sách ô đỗ còn trống.",
+      "maxLicensePlates": "Gói này chỉ hỗ trợ tối đa {{count}} biển số.",
+      "selectValidPackage": "Vui lòng chọn gói thành viên hợp lệ.",
+      "selectExactSlots": "Vui lòng chọn đúng {{count}} ô đỗ.",
+      "enterLicensePlate": "Vui lòng nhập ít nhất 1 biển số."
     },
-    "durationMonth": "{{count}} tháng"
+    "durationMonth": "{{count}} tháng",
+    "allVehicleTypesActive": "Bạn đã có Membership Active cho tất cả loại xe hiện có."
+  },
+  "membershipRegister": {
+    "title": "Đăng ký Membership",
+    "subtitle": "Chọn gói, 1 ô đỗ cố định và thanh toán một lần.",
+    "activeTitle": "Membership đang hoạt động",
+    "activeSubtitle": "Quét mã QR khi vào/ra bãi đỗ.",
+    "cancelCard": "Hủy thẻ",
+    "confirmCancel": "Bạn có chắc muốn hủy thẻ thành viên? Hành động này không thể hoàn tác và slot sẽ được giải phóng.",
+    "cancelSuccess": "Đã hủy thẻ thành viên thành công.",
+    "cancelError": "Không thể hủy thẻ. Vui lòng thử lại.",
+    "slotsCount": "{{count}} ô đỗ",
+    "platesCount": "{{count}} biển số",
+    "validity": "Hiệu lực",
+    "to": "đến",
+    "qrCheckIn": "Mã QR check-in",
+    "fixedSlotTitle": "Ô đỗ xe cố định",
+    "noSlot": "Chưa có ô đỗ",
+    "registeredPlates": "Biển số đăng ký",
+    "noPlate": "Chưa có biển số",
+    "vehicle": {
+      "title": "Chọn loại xe",
+      "bicycle": "Xe đạp",
+      "motorbike": "Xe máy",
+      "car": "Ô tô",
+      "description": "Gửi xe theo gói thành viên",
+      "alreadyActive": "Đã có gói Active"
+    },
+    "duration": {
+      "title": "Thời hạn đăng ký",
+      "month1": "1 tháng",
+      "month6": "6 tháng",
+      "month12": "12 tháng"
+    },
+    "slot": {
+      "fixedSlot": "1 ô đỗ",
+      "title": "Chọn 1 ô đỗ cố định",
+      "selectedCount": "Đã chọn 1 ô đỗ",
+      "noSlotSelected": "Chưa chọn ô đỗ",
+      "none": "Chưa có ô đỗ cố định",
+      "instruction": "Mở Parking Map để chọn một ô màu xanh còn trống đúng loại xe đã đăng ký.",
+      "changeOnMap": "Đổi ô trên Parking Map",
+      "selectOnMap": "Chọn ô trên Parking Map"
+    },
+    "plate": {
+      "title": "Biển số xe",
+      "add": "Thêm biển số",
+      "placeholder": "Ví dụ: 51F-123.45",
+      "maxHint": "Tối đa {{count}} biển số cho gói đang chọn."
+    },
+    "summary": {
+      "title": "Tóm tắt đăng ký",
+      "details": "{{duration}} tháng · {{slots}} ô đỗ",
+      "choosePackageHint": "Chọn gói để xem tổng tiền",
+      "tierNamePattern": "Gói {{vehicle}} - {{duration}}"
+    },
+    "payment": {
+      "title": "Thanh toán",
+      "auto": "Tự động",
+      "vnpay": "VNPay",
+      "wallet": "Ví"
+    },
+    "total": "Tổng cộng",
+    "actions": {
+      "submit": "Đăng ký Membership",
+      "payVNPay": "Tiếp tục thanh toán",
+      "payWallet": "Thanh toán ngay"
+    },
+    "perks": {
+      "fixedSlot": "Gói 1 ô cố định trong suốt thời hạn thẻ",
+      "autoPlate": "Tự động nhận diện biển số",
+      "centralizedManagement": "Quản lý tập trung trong Membership"
+    },
+    "errors": {
+      "alreadyActive": "Bạn đã có Membership đang Active cho loại xe này.",
+      "selectVehicleDurationFirst": "Vui lòng chọn loại xe và thời hạn trước.",
+      "selectFixedSlot": "Vui lòng chọn 1 ô đỗ cố định.",
+      "duplicatePlates": "Biển số trong cùng một gói không được trùng nhau.",
+      "noRegisterPermission": "Tài khoản chưa có quyền đăng ký Membership.",
+      "createRegistrationError": "Không thể tạo đăng ký Membership."
+    }
   },
   "roles": {
     "admin": "Quản trị viên",
@@ -970,7 +1192,8 @@
     "completed": "Hoàn tất",
     "success": "Thành công",
     "paid": "Đã thanh toán",
-    "unknown": "Không xác định"
+    "unknown": "Không xác định",
+    "pendingPayment": "Chờ thanh toán"
   },
   "dropdown": {
     "navigation": "Điều hướng",
@@ -990,5 +1213,132 @@
     "motorbike": "Xe máy",
     "bicycle": "Xe đạp",
     "unknown": "Không xác định"
+  },
+  "menu": {
+    "dashboard": "Bảng điều khiển",
+    "parkingMap": "Sơ đồ & Quản lý bãi xe",
+    "incidents": "Sự cố",
+    "analytics": "Phân tích",
+    "memberships": "Quản lý Membership",
+    "pricing": "Bảng giá",
+    "staffLogs": "Nhật ký nhân viên",
+    "checkInOut": "Check-in/Check-out",
+    "myBookings": "Đặt chỗ của tôi",
+    "profile": "Hồ sơ cá nhân",
+    "home": "Trang chủ",
+    "userAccounts": "Quản lý người dùng",
+    "logout": "Đăng xuất"
+  },
+  "membershipConfig": {
+    "title": "Cấu hình giá gói Membership",
+    "subtitle": "Giá Membership được lưu theo MembershipTier.",
+    "membershipFallback": "Membership này",
+    "noPhone": "Chưa có SĐT",
+    "validUntil": "đến {{date}}",
+    "columns": {
+      "packageName": "Tên gói",
+      "vehicleType": "Loại xe",
+      "duration": "Thời hạn",
+      "maxVehicles": "Xe tối đa",
+      "price": "Giá",
+      "owner": "Chủ thẻ",
+      "membershipPackage": "Gói Membership",
+      "ticketCode": "Mã thẻ",
+      "licensePlates": "Biển số",
+      "fixedSlot": "Slot cố định",
+      "validity": "Hiệu lực",
+      "status": "Trạng thái"
+    },
+    "actions": {
+      "refresh": "Làm mới",
+      "save": "Lưu"
+    },
+    "currency": {
+      "vnd": "VND"
+    },
+    "vehicle": {
+      "bicycle": "Xe đạp",
+      "motorbike": "Xe máy",
+      "car": "Xe hơi"
+    },
+    "duration": {
+      "month1": "1 tháng",
+      "month6": "6 tháng",
+      "month12": "12 tháng",
+      "monthCount": "{{count}} tháng"
+    },
+    "packages": {
+      "bicycle1": "Gói Xe Đạp - 1 Tháng",
+      "bicycle6": "Gói Xe Đạp - 6 Tháng",
+      "bicycle12": "Gói Xe Đạp - 12 Tháng",
+      "motorbike1": "Gói Xe Máy - 1 Tháng",
+      "motorbike6": "Gói Xe Máy - 6 Tháng",
+      "motorbike12": "Gói Xe Máy - 12 Tháng",
+      "car1": "Gói Xe Hơi - 1 Tháng",
+      "car6": "Gói Xe Hơi - 6 Tháng",
+      "car12": "Gói Xe Hơi - 12 Tháng"
+    },
+    "search": {
+      "placeholder": "Tìm biển số, tên, email...",
+      "statusPlaceholder": "Trạng thái"
+    },
+    "messages": {
+      "loadMembershipsError": "Không thể tải danh sách Membership.",
+      "loadPricingError": "Không thể tải cấu hình giá Membership.",
+      "updateSuccess": "Đã cập nhật giá gói Membership.",
+      "updateError": "Không thể cập nhật giá gói Membership."
+    }
+  },
+  "staffShifts": {
+    "title": "Quản lý Ca trực & Nhật ký Hoạt động",
+    "subtitle": "Theo dõi đối soát doanh thu ca trực của nhân viên và lịch sử thao tác cổng xe vào/ra.",
+    "searchPlaceholder": "Tìm theo nhân viên, biển số...",
+    "tabShifts": "Đối soát Ca trực",
+    "tabActivities": "Nhật ký Hoạt động nhân viên",
+    "filterStatus": "Trạng thái ca",
+    "filterTime": "Khoảng thời gian",
+    "allStatus": "Tất cả trạng thái",
+    "statusActive": "Đang mở",
+    "statusClosed": "Đã đóng",
+    "allActions": "Tất cả loại thao tác",
+    "colShiftId": "Mã Ca",
+    "colStaff": "Nhân viên",
+    "colTime": "Thời gian trực",
+    "startTime": "Bắt đầu:",
+    "endTime": "Kết thúc:",
+    "working": "Đang làm việc...",
+    "colSystemCash": "Tiền hệ thống",
+    "colActualCash": "Tiền bàn giao",
+    "colDifference": "Chênh lệch",
+    "colTransactions": "Số Giao dịch",
+    "colStatus": "Trạng thái",
+    "colNotes": "Ghi chú",
+    "notClosed": "Chưa đóng ca",
+    "sufficient": "Đủ tiền",
+    "colActionType": "Loại hoạt động",
+    "colPlate": "Biển số",
+    "colDetails": "Mô tả chi tiết",
+    "actionStartShift": "Mở ca",
+    "actionEndShift": "Đóng ca",
+    "actionCheckIn": "Xe Vào",
+    "actionCheckOut": "Xe Ra",
+    "actionPlateOverride": "Sửa biển số xe",
+    "requireShiftTitle": "Bắt đầu Ca làm việc",
+    "requireShiftTitleDesc": "Yêu cầu mở ca trực",
+    "requireShiftBody": "Bạn chưa bắt đầu ca làm việc của mình. Vui lòng xác nhận bắt đầu ca làm việc để thực hiện các thao tác soát vé và ghi nhận log hoạt động.",
+    "btnStartShift": "Bắt đầu Ca Trực",
+    "endShiftTitle": "Kết thúc Ca làm việc (Bàn giao ca)",
+    "shiftId": "Mã ca trực:",
+    "startTimeLabel": "Giờ bắt đầu:",
+    "systemCashLabel": "Doanh thu vé mặt (Hệ thống tính):",
+    "actualCashLabel": "Số tiền mặt thực tế bàn giao (VND)",
+    "actualCashRequired": "Vui lòng nhập số tiền bàn giao!",
+    "notesLabel": "Ghi chú bàn giao",
+    "notesPlaceholder": "Nhập ghi chú chênh lệch tiền mặt, các sự cố phát sinh (nếu có)...",
+    "btnEndShift": "Xác nhận Đóng Ca & Đăng xuất",
+    "shiftBannerActive": "Đang hoạt động",
+    "shiftBannerStart": "Bắt đầu lúc:",
+    "shiftBannerSystem": "Doanh thu mặt (Hệ thống tính):",
+    "shiftBannerBtn": "Bàn giao & Đóng ca trực"
   }
 }

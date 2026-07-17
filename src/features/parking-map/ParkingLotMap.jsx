@@ -14,7 +14,13 @@ import {
   UserCheck,
   AlertTriangle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  CreditCard,
+  Wallet,
+  Lock,
+  Wrench,
+  Settings,
+  Trash2
 } from 'lucide-react';
 import { parkingService } from '../../services/parkingService';
 import { managerService } from '../../services/managerService';
@@ -65,15 +71,17 @@ const vehicleIconMap = {
 };
 
 const statusStyleMap = {
-  available: 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:border-emerald-500 hover:-translate-y-1 hover:shadow-md hover:shadow-emerald-500/10 hover:scale-105',
-  occupied: 'bg-rose-50 text-rose-900 border-rose-200 hover:border-rose-400 hover:-translate-y-0.5 hover:shadow-sm',
-  reserved: 'bg-amber-50 text-amber-900 border-amber-200 hover:border-amber-400 hover:-translate-y-0.5 hover:shadow-sm',
+  available: 'bg-gradient-to-br from-emerald-50/90 to-teal-50/30 text-emerald-900 border-emerald-200 hover:border-emerald-500 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-emerald-500/10 hover:scale-105 active:scale-95 dark:from-emerald-500/20 dark:to-teal-500/10 dark:text-emerald-100 dark:border-emerald-300/70 dark:hover:border-emerald-400 dark:hover:bg-emerald-500/30',
+  occupied: 'bg-gradient-to-br from-rose-50/90 to-pink-50/30 text-rose-900 border-rose-200 hover:border-rose-400 hover:-translate-y-1 hover:shadow-md hover:shadow-rose-500/5 hover:scale-[1.02] active:scale-95 dark:from-rose-500/20 dark:to-pink-500/10 dark:text-rose-100 dark:border-rose-300/70 dark:hover:border-rose-400 dark:hover:bg-rose-500/30',
+  reserved: 'bg-gradient-to-br from-amber-50/90 to-yellow-50/30 text-amber-900 border-amber-200 hover:border-amber-400 hover:-translate-y-1 hover:shadow-md hover:shadow-amber-500/5 hover:scale-[1.02] active:scale-95 dark:from-amber-500/20 dark:to-yellow-500/10 dark:text-amber-100 dark:border-amber-300/70 dark:hover:border-amber-400 dark:hover:bg-amber-500/30',
+  maintenance: 'bg-gradient-to-br from-slate-50/90 to-slate-100/30 text-slate-700 border-slate-200 hover:border-slate-400 hover:-translate-y-1 hover:shadow-md hover:shadow-slate-500/5 hover:scale-[1.02] active:scale-95 dark:from-slate-500/20 dark:to-slate-600/10 dark:text-slate-100 dark:border-slate-300/60 dark:hover:border-slate-400 dark:hover:bg-slate-500/30',
 };
 
 const normalizeStatus = (status) => {
   const value = String(status ?? '').trim().toLowerCase();
   if (value === '1' || value === 'occupied') return 'occupied';
   if (value === '2' || value === 'reserved') return 'reserved';
+  if (value === '3' || value === 'maintenance' || value === 'locked') return 'maintenance';
   return 'available';
 };
 
@@ -89,6 +97,7 @@ const canonicalStatusLabel = {
   available: 'Available',
   occupied: 'Occupied',
   reserved: 'Reserved',
+  maintenance: 'Maintenance',
 };
 
 const getSlotVehicleIcon = (slot) => {
@@ -227,6 +236,7 @@ const ParkingLotMap = () => {
 
   const selectForMembership = searchParams.get('selectForMembership') === 'true';
   const paramVehicleTypeId = searchParams.get('vehicleTypeId');
+  const membershipDuration = searchParams.get('durationMonths');
 
   const [activeFloorId, setActiveFloorId] = useState(() => {
     if (paramVehicleTypeId) {
@@ -287,6 +297,7 @@ const ParkingLotMap = () => {
   // Form states for booking
   const [bookingVehicleType, setBookingVehicleType] = useState('Motorcycle');
   const [bookingPlate, setBookingPlate] = useState('');
+  const [bookingPaymentMethod, setBookingPaymentMethod] = useState('AUTO');
   const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
   const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
 
@@ -468,6 +479,7 @@ const ParkingLotMap = () => {
     const defaultVehicleType = allowedBookingVehicleTypes[0]?.value || (activeFloorId === 3 ? 'Motorcycle' : 'Car');
     setBookingVehicleType(defaultVehicleType);
     setBookingPlate('');
+    setBookingPaymentMethod('VNPAY');
     const defaultExpectedTime = getDefaultExpectedCheckInTimeParts();
     setExpectedHour(defaultExpectedTime.hour);
     setExpectedMinute(defaultExpectedTime.minute);
@@ -598,7 +610,13 @@ const ParkingLotMap = () => {
           message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
           return;
         }
-        navigate(`/my-membership?slotIds=${slot.slotId || slot.dbSlotId || slot.id}&selectedSlotName=${slot.id}&vehicleTypeId=${typeId}`);
+        const returnParams = new URLSearchParams({
+          slotIds: String(slot.slotId || slot.dbSlotId || slot.id),
+          selectedSlotName: String(slot.id),
+          vehicleTypeId: String(typeId),
+        });
+        if (membershipDuration) returnParams.set('durationMonths', membershipDuration);
+        navigate(`/my-membership?${returnParams.toString()}`);
       } else {
         message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
       }
@@ -726,7 +744,7 @@ const ParkingLotMap = () => {
         vehicleTypeId: finalVehicleTypeId,
         licenseVehicle: cleanPlate,
         expectedCheckInTime,
-        paymentMethod: 'VNPAY'
+        paymentMethod: bookingPaymentMethod
       });
 
       const responseData = response?.data || response || {};
@@ -739,16 +757,31 @@ const ParkingLotMap = () => {
       const paymentUrl = responseData.paymentUrl || responseData.PaymentUrl || responseData.vnpayUrl || responseData.VnPayUrl;
       const depositAmount = responseData.depositAmount ?? responseData.DepositAmount ?? responseData.amount ?? responseData.Amount;
       const paymentStatus = responseData.paymentStatus || responseData.PaymentStatus;
+      const invoiceId = responseData.invoiceId || responseData.InvoiceId;
+      const walletPaid = String(paymentStatus || '').toUpperCase() === 'SUCCESS';
 
       setIsBookingModalOpen(false);
-      if (requiresPayment && paymentUrl) {
+      if (paymentUrl) {
         const depositText = depositAmount ? ` Tiền cọc: ${Number(depositAmount).toLocaleString('vi-VN')} VND.` : '';
         message.success((responseData.message || responseData.Message || 'Cần thanh toán tiền cọc để hoàn tất đặt chỗ.') + depositText);
+        if (invoiceId) localStorage.setItem('pending_invoice_id', String(invoiceId));
         window.location.href = paymentUrl;
       } else if (requiresPayment) {
         message.success(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
+      } else if (bookingPaymentMethod === 'WALLET') {
+        if (invoiceId && String(paymentStatus || '').toUpperCase() === 'SUCCESS') {
+          navigate(`/payment-success?type=booking&invoiceId=${invoiceId}`);
+          return;
+        }
+        message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} và thanh toán cọc bằng ví thành công!`);
       } else {
-        message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} thành công!`);
+        message.success(
+          responseData.message ||
+          responseData.Message ||
+          (walletPaid
+            ? `Đặt chỗ ${selectedSlot.id} thành công. Tiền cọc đã được trừ từ ví.`
+            : `Đặt chỗ ${selectedSlot.id} thành công!`)
+        );
       }
       if (paymentStatus) {
         console.info('Booking payment status:', paymentStatus);
@@ -871,6 +904,42 @@ const ParkingLotMap = () => {
     }
   };
 
+  const handleLockSlot = async () => {
+    if (!selectedSlot) return;
+    setSubmitting(true);
+    try {
+      const slotId = selectedSlot.slotId || selectedSlot.dbSlotId;
+      await managerService.lockSlot(slotId);
+      message.success(`Đã khóa ô đỗ ${selectedSlot.id} thành công.`);
+      setIsDetailsModalOpen(false);
+      onFloorChange(activeFloorId);
+    } catch (err) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Không thể khóa ô đỗ.";
+      message.error(errMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUnlockSlot = async () => {
+    if (!selectedSlot) return;
+    setSubmitting(true);
+    try {
+      const slotId = selectedSlot.slotId || selectedSlot.dbSlotId;
+      await managerService.unlockSlot(slotId);
+      message.success(`Đã mở khóa ô đỗ ${selectedSlot.id} thành công.`);
+      setIsDetailsModalOpen(false);
+      onFloorChange(activeFloorId);
+    } catch (err) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || "Không thể mở khóa ô đỗ.";
+      message.error(errMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Hourly Rate display helper
   const hourlyRateLabel = (type) => {
     if (type === 'Bicycle') return '2.000 đ';
@@ -889,15 +958,17 @@ const ParkingLotMap = () => {
     const isUserCar = highlightSlotName &&
       slot.id.replace(/\s/g, '').toUpperCase() === highlightSlotName.replace(/\s/g, '').toUpperCase();
 
+    const isSelected = selectedSlot && selectedSlot.id === slot.id;
+
     const highlightClasses = isUserCar
       ? 'animate-pulse border-amber-400 ring-4 ring-amber-500/60 scale-105 z-20 bg-slate-900 shadow-2xl shadow-amber-500/40 text-amber-400 font-extrabold'
-      : statusStyleMap[normalizedStatus];
+      : `${statusStyleMap[normalizedStatus] || statusStyleMap.available} ${isSelected ? 'ring-2 ring-indigo-500 dark:ring-2 dark:ring-indigo-300 scale-[1.03] z-10 shadow-lg' : ''}`;
 
     return (
       <div key={slot.id} className="relative group">
         <div
           onClick={() => handleSlotClick(slot)}
-          className={`${slotSizeClass} rounded-2xl flex flex-col items-center justify-center gap-2 px-3 py-2 border-[1.5px] transition-all duration-200 cursor-pointer font-bold ${highlightClasses}`}
+          className={`${slotSizeClass} rounded-2xl flex flex-col items-center justify-center gap-2 px-3 py-2 border-[1.5px] transition-all duration-300 ease-out cursor-pointer font-bold ${highlightClasses}`}
         >
           {isUserCar && (
             <span className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-black text-[9px] px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap animate-bounce border border-slate-900 tracking-wider z-30">
@@ -905,16 +976,16 @@ const ParkingLotMap = () => {
             </span>
           )}
 
-          <div className={`${isCar ? 'h-14' : 'h-10'} w-full flex items-center justify-center`}>
+          <div className={`${isCar ? 'h-14' : 'h-10'} w-full flex items-center justify-center overflow-hidden`}>
             {vehicleIcon ? (
               <img
                 src={vehicleIcon}
                 alt={getSlotVehicleAlt(slot)}
-                className={`${iconSizeClass} object-contain`}
+                className={`${iconSizeClass} object-contain transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-0.5 dark:brightness-125 dark:contrast-125 dark:opacity-90 dark:bg-white/10 dark:ring-1 dark:ring-white/10 rounded-lg p-0.5`}
               />
             ) : null}
           </div>
-          <span className="max-w-full truncate text-xs font-mono font-extrabold tracking-wide text-center leading-tight">
+          <span className="max-w-full truncate text-xs font-mono font-extrabold tracking-wide text-center leading-tight transition-colors duration-300">
             {slot.id}
           </span>
         </div>
@@ -1073,9 +1144,9 @@ const ParkingLotMap = () => {
                   <button
                     key={f.id}
                     onClick={() => onFloorChange(f.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-[14px] border-[1.5px] text-sm transition-all duration-200 whitespace-nowrap ${isSelected
+                    className={`flex items-center gap-2 px-4 py-2 rounded-[14px] border-[1.5px] text-sm transition-all duration-200 active:scale-95 whitespace-nowrap ${isSelected
                       ? 'bg-indigo-50 border-indigo-600 text-indigo-700 font-bold shadow-sm dark:bg-indigo-500/15 dark:text-indigo-300'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-slate-300 font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-slate-300 hover:-translate-y-0.5 font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                       }`}
                   >
                     <span>{getFloorDisplayName(f.name)}</span>
@@ -1222,7 +1293,7 @@ const ParkingLotMap = () => {
       {/* 3. CREATE BOOKING MODAL (Drivers Only) */}
       {isBookingModalOpen && selectedSlot && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in" />
           <div className="relative z-10 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-100 bg-white font-sans shadow-2xl animate-scale-in dark:border-slate-700 dark:bg-slate-900">
 
             <button
@@ -1343,8 +1414,61 @@ const ParkingLotMap = () => {
                     </div>
                   )}
 
+                  <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800">
+                    <label className="mb-2 block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Phương thức thanh toán cọc
+                    </label>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {['VNPAY', 'WALLET'].map((method) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setBookingPaymentMethod(method)}
+                          className={`flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-extrabold transition duration-200 active:scale-95 ${
+                            bookingPaymentMethod === method
+                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 shadow-sm'
+                              : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                          }`}
+                        >
+                          {method === 'WALLET' ? <Wallet size={14} /> : <CreditCard size={14} />}
+                          {method}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <p className="rounded-[14px] border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700 dark:border-orange-500/40 dark:bg-orange-500/15 dark:text-orange-300">
                     ⚠️ Lưu ý: Lịch đặt chỗ sẽ tự động bị hủy nếu bạn không check-in tại cổng trong vòng 15 phút sau thời gian dự kiến.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Phuong thuc thanh toan coc</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { value: 'AUTO', label: 'Tu dong', Icon: Wallet },
+                    ].map(({ value, label, Icon }) => {
+                      const isSelected = bookingPaymentMethod === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setBookingPaymentMethod(value)}
+                          className={`flex h-11 items-center justify-center gap-2 rounded-[14px] border text-xs font-extrabold transition duration-200 active:scale-95 ${
+                            isSelected
+                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 shadow-sm'
+                              : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                          }`}
+                        >
+                          <Icon size={15} />
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                    Neu booking khong can coc, he thong se giu cho ngay va bo qua buoc thanh toan.
                   </p>
                 </div>
 
@@ -1352,7 +1476,7 @@ const ParkingLotMap = () => {
                   <button
                     type="button"
                     onClick={() => setIsBookingModalOpen(false)}
-                    className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-bold rounded-[14px] transition-all text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                    className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-800 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 text-slate-600 font-bold rounded-[14px] transition-all duration-200 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                   >
                     Hủy
                   </button>
@@ -1360,7 +1484,7 @@ const ParkingLotMap = () => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 h-11 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-0.5 text-white font-bold rounded-[14px] transition-all shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5 text-sm disabled:opacity-60 disabled:hover:translate-y-0"
+                    className="flex-1 h-11 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 flex items-center justify-center gap-1.5 text-sm disabled:opacity-60 disabled:hover:translate-y-0"
                   >
                     {submitting ? 'Đang xử lý...' : 'Xác nhận đặt chỗ'}
                   </button>
@@ -1376,8 +1500,9 @@ const ParkingLotMap = () => {
 
       {/* 4. SPACE OPERATIONAL DETAILS MODAL (Staff, Managers, Admins) */}
       {isDetailsModalOpen && selectedSlot && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans dark:border-slate-700 dark:bg-slate-900">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in" />
+          <div className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans dark:border-slate-700 dark:bg-slate-900">
 
             <button
               onClick={() => setIsDetailsModalOpen(false)}
@@ -1393,24 +1518,24 @@ const ParkingLotMap = () => {
                   {selectedSlot.type === 'Bicycle' && <Bike className="text-indigo-600" size={20} />}
                   {selectedSlot.type === 'Motorcycle' && <Motorcycle className="text-indigo-600" size={20} />}
                   {selectedSlot.type === 'Car' && <Car className="text-indigo-600" size={20} />}
-                  <span>Điều khiển chỗ: {selectedSlot.id}</span>
+                  <span>{t('parkingMap.slotControl', { id: selectedSlot.id })}</span>
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Bảng điều khiển vận hành cho nhân viên quản lý</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t('parkingMap.controlDesc')}</p>
               </div>
 
               {/* General Metadata Panel */}
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-2 text-xs dark:border-slate-700 dark:bg-slate-800/70">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-semibold dark:text-slate-400">Tầng</span>
+                  <span className="text-slate-500 font-semibold dark:text-slate-400">{t('parkingMap.floorLabel')}</span>
                   <span className="font-extrabold text-slate-900 dark:text-slate-100">{getFloorDisplayName(selectedSlot.floor)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-semibold dark:text-slate-400">Phân loại</span>
-                  <span className="font-extrabold text-slate-900 capitalize dark:text-slate-100">Chỗ {getVehicleTypeLabel(selectedSlot.type)}</span>
+                  <span className="text-slate-500 font-semibold dark:text-slate-400">{t('parkingMap.categoryLabel')}</span>
+                  <span className="font-extrabold text-slate-900 capitalize dark:text-slate-100">{t('parkingMap.slotTypePrefix', { type: getVehicleTypeLabel(selectedSlot.type) })}</span>
                 </div>
 
                 <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700">
-                  <span className="text-slate-500 font-semibold dark:text-slate-400">Trạng thái hiện tại</span>
+                  <span className="text-slate-500 font-semibold dark:text-slate-400">{t('parkingMap.currentStatusLabel')}</span>
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${selectedSlot.status === 'Available'
                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                     : selectedSlot.status === 'Occupied'
@@ -1429,58 +1554,58 @@ const ParkingLotMap = () => {
                 <div className="space-y-4">
                   <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3 dark:border-slate-700 dark:bg-slate-800/70">
                     <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
-                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">Trạng thái sử dụng</span>
+                      <span className="text-xs text-slate-500 font-bold uppercase tracking-wider dark:text-slate-400">{t('parkingMap.usageStatusLabel')}</span>
                       <span className="font-mono text-xs text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 font-extrabold shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">{getStatusLabel(selectedSlot.status)}</span>
                     </div>
 
                     {fetchingDetail ? (
                       <div className="flex items-center justify-center py-4 gap-2">
                         <div className="w-5 h-5 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></div>
-                        <span className="text-xs text-slate-500 font-medium dark:text-slate-400">Đang tải chi tiết từ cơ sở dữ liệu...</span>
+                        <span className="text-xs text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.loadingDetail')}</span>
                       </div>
                     ) : slotDetail?.activeSession ? (
                       <div className="space-y-2.5 pt-1 text-xs">
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium dark:text-slate-400">Biển số xe:</span>
+                          <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.plateLabel')}</span>
                           <span className="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 text-sm dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-300">{slotDetail.activeSession.licenseVehicle}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium dark:text-slate-400">Loại xe:</span>
+                          <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.vehicleTypeLabelColon')}</span>
                           <span className="font-semibold text-slate-700 capitalize dark:text-slate-300">{getVehicleTypeLabel(slotDetail.activeSession.vehicleTypeName)}</span>
                         </div>
                         {slotDetail.activeSession.checkInTime && (
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian vào thực tế:</span>
+                            <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.entryTimeActual')}</span>
                             <span className="font-semibold text-slate-700 dark:text-slate-300">{formatVietnamDateTime(slotDetail.activeSession.checkInTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.bookingTime && (
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium dark:text-slate-400">Thời gian đặt trước:</span>
+                            <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.bookingTimeActual')}</span>
                             <span className="font-semibold text-slate-700 dark:text-slate-300">{formatVietnamDateTime(slotDetail.activeSession.bookingTime)}</span>
                           </div>
                         )}
                         {slotDetail.activeSession.customer && (
                           <div className="pt-2 border-t border-dashed border-slate-200 space-y-2 dark:border-slate-700">
-                            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Hồ sơ khách hàng</div>
+                            <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{t('parkingMap.customerProfile')}</div>
                             <div className="flex justify-between items-center">
-                              <span className="text-slate-500 font-medium dark:text-slate-400">Họ tên:</span>
+                              <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.customerNameLabel')}</span>
                               <span className="font-bold text-slate-900 dark:text-slate-100">{slotDetail.activeSession.customer.username}</span>
                             </div>
                             {slotDetail.activeSession.customer.email && (
                               <div className="flex justify-between items-center">
-                                <span className="text-slate-500 font-medium dark:text-slate-400">Email:</span>
+                                <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.customerEmailLabel')}</span>
                                 <span className="font-semibold text-slate-700 dark:text-slate-300">{slotDetail.activeSession.customer.email}</span>
                               </div>
                             )}
                             {slotDetail.activeSession.customer.phoneNumber && (
                               <div className="flex justify-between items-center">
-                                <span className="text-slate-500 font-medium dark:text-slate-400">Số điện thoại:</span>
+                                <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.customerPhoneLabel')}</span>
                                 <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{slotDetail.activeSession.customer.phoneNumber}</span>
                               </div>
                             )}
                             <div className="flex justify-between items-center">
-                              <span className="text-slate-500 font-medium dark:text-slate-400">Hạng thành viên:</span>
+                              <span className="text-slate-500 font-medium dark:text-slate-400">{t('parkingMap.customerTypeLabel')}</span>
                               <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">{slotDetail.activeSession.customer.customerType || "Registered Driver"}</span>
                             </div>
                           </div>
@@ -1488,7 +1613,7 @@ const ParkingLotMap = () => {
                       </div>
                     ) : (
                       <div className="text-center text-slate-400 py-3 text-xs font-medium dark:text-slate-500">
-                        Chưa lấy được thông tin người sử dụng chỗ.
+                        {t('parkingMap.noUserData')}
                       </div>
                     )}
                   </div>
@@ -1498,11 +1623,38 @@ const ParkingLotMap = () => {
                     <button
                       onClick={handleForceCheckout}
                       disabled={submitting}
-                      className="w-full h-11 bg-gradient-to-br from-rose-500 to-rose-600 hover:-translate-y-0.5 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-md shadow-rose-500/20 text-sm transition-all disabled:opacity-60 disabled:hover:translate-y-0"
+                      className="w-full h-11 bg-gradient-to-br from-rose-500 to-rose-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-rose-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-md shadow-rose-500/20 text-sm transition-all duration-200 disabled:opacity-60 disabled:hover:translate-y-0"
                     >
                       <UserCheck size={16} />
-                      {submitting ? 'Đang giải phóng...' : 'Cho xe ra & giải phóng chỗ'}
+                      {submitting ? t('parkingMap.forceCheckoutLoading') : t('parkingMap.forceCheckoutBtn')}
                     </button>
+                  )}
+                </div>
+              )}
+
+              {/* STATUS: MAINTENANCE / LOCKED */}
+              {selectedSlot.status === 'Maintenance' && (
+                <div className="space-y-4">
+                  {role?.toLowerCase() === 'manager' ? (
+                    <div className="space-y-4">
+                      <div className="rounded-[14px] border border-amber-100 bg-amber-50/50 p-4 text-xs font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                        {t('parkingMap.managerLockedDesc')}
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={handleUnlockSlot}
+                        disabled={submitting}
+                        className="w-full h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <Lock size={15} />
+                        {t('parkingMap.unlockSlot')}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-4 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      {t('parkingMap.lockedStatusDesc')}
+                    </div>
                   )}
                 </div>
               )}
@@ -1510,7 +1662,24 @@ const ParkingLotMap = () => {
               {/* STATUS: AVAILABLE */}
               {selectedSlot.status === 'Available' && (
                 <div className="space-y-4">
-                  <form onSubmit={handleAdminReserveSubmit} className="space-y-4">
+                  {role?.toLowerCase() === 'manager' ? (
+                    <div className="space-y-4">
+                      <div className="rounded-[14px] border border-amber-100 bg-amber-50/50 p-4 text-xs font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                        {t('parkingMap.managerAvailableDesc')}
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={handleLockSlot}
+                        disabled={submitting}
+                        className="w-full h-11 bg-gradient-to-br from-slate-700 to-slate-800 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-500/20 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <Lock size={15} />
+                        {t('parkingMap.lockSlot')}
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleAdminReserveSubmit} className="space-y-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">
                         {selectedSlot.type === 'Bicycle'
@@ -1533,12 +1702,13 @@ const ParkingLotMap = () => {
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="flex-1 h-11 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-0.5 text-white font-bold rounded-[14px] transition-all shadow-md shadow-indigo-500/20 text-sm disabled:opacity-60 disabled:hover:translate-y-0"
+                        className="flex-1 h-11 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 text-sm disabled:opacity-60 disabled:hover:translate-y-0"
                       >
                         {submitting ? 'Đang xử lý...' : 'Cho xe vào'}
                       </button>
                     </div>
                   </form>
+                  )}
                 </div>
               )}
 

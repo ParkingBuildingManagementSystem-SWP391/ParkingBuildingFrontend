@@ -66,8 +66,11 @@
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Be Vietnam Pro', 'Roboto', Arial, sans-serif;
     margin: 0;
+  }
+  button:not(:disabled) {
+    @apply transition-all duration-200 active:scale-95 cursor-pointer;
   }
   img,
   video,
@@ -255,4 +258,46 @@
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
+}
+
+/* ── Decorative motion utilities (landing/marketing pages) ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(18px, -20px); }
+  66% { transform: translate(-14px, 14px); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 12px 24px -10px rgba(79, 70, 229, 0.55); }
+  50% { box-shadow: 0 18px 36px -8px rgba(79, 70, 229, 0.9); }
+}
+@keyframes fade-up-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim-float { animation: float 6s ease-in-out infinite; }
+.anim-drift { animation: drift 16s ease-in-out infinite; }
+.anim-drift-slow { animation: drift 22s ease-in-out infinite reverse; }
+.anim-pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
+.anim-glow { animation: glow-pulse 2.6s ease-in-out infinite; }
+.anim-fade-up-in { animation: fade-up-in 0.5s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-float,
+  .anim-drift,
+  .anim-drift-slow,
+  .anim-pulse-ring,
+  .anim-glow,
+  .anim-fade-up-in {
+    animation: none !important;
+  }
 }

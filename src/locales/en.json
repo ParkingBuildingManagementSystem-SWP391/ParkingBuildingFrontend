@@ -82,8 +82,9 @@
   },
   "footer": {
     "systemName": "PARKING BUILDING MANAGEMENT SYSTEM",
-    "copyright": "© 2026 Parking Building Management System. All rights reserved.",
-    "version": "Version 1.0.0 - Developed by Team 5"
+    "copyright": "Copyright 2026 Parking Building Management System. All rights reserved.",
+    "version": "Version 1.0.0",
+    "developedBy": "Developed by Team 5"
   },
   "parkingMap": {
     "available": "Available:",
@@ -106,7 +107,36 @@
     "fixedVehicleTypeNote": "Vehicle type is fixed by the selected floor or zone",
     "carOpt": "Car",
     "motorcycleOpt": "Motorcycle",
-    "bicycleOpt": "Bicycle"
+    "bicycleOpt": "Bicycle",
+    "slotControl": "Slot Control: {{id}}",
+    "controlDesc": "Operations control panel for management staff",
+    "floorLabel": "Floor",
+    "categoryLabel": "Category",
+    "slotTypePrefix": "Slot: {{type}}",
+    "currentStatusLabel": "Current Status",
+    "usageStatusLabel": "Usage Status",
+    "loadingDetail": "Loading details from database...",
+    "plateLabel": "License Plate:",
+    "vehicleTypeLabelColon": "Vehicle Type:",
+    "entryTimeActual": "Actual Entry Time:",
+    "bookingTimeActual": "Pre-booked Time:",
+    "customerProfile": "Customer Profile",
+    "customerNameLabel": "Full Name:",
+    "customerEmailLabel": "Email Address:",
+    "customerPhoneLabel": "Phone Number:",
+    "customerTypeLabel": "Member Tier:",
+    "forceCheckoutBtn": "Force Checkout & Release",
+    "forceCheckoutLoading": "Releasing...",
+    "lockSlot": "Lock Slot",
+    "unlockSlot": "Unlock Slot",
+    "maintenanceBtn": "Maintenance",
+    "editSlot": "Edit Slot",
+    "deleteSlot": "Delete Slot",
+    "addNewSlot": "Add New Slot",
+    "managerAvailableDesc": "🔔 This slot is currently vacant. As a Manager, you have permission to manage this slot configuration.",
+    "managerLockedDesc": "This slot is currently locked. Would you like to unlock it and put it back in service?",
+    "lockedStatusDesc": "This slot is currently locked or under maintenance by management. Operations are unavailable.",
+    "noUserData": "Unable to retrieve details of the slot user."
   },
   "login": {
     "errorEmptyFields": "Please enter your email and password.",
@@ -215,7 +245,47 @@
     "ctaDesc": "Join thousands of drivers who have already upgraded their parking experience. Sign up today and get instant access.",
     "ctaBtn": "Get Started Free",
     "ctaLogin": "Already have an account?",
-    "supportMsg": "Need help booking? Contact our operations team for fast and accurate advice."
+    "supportMsg": "Need help booking? Contact our operations team for fast and accurate advice.",
+    "cta": {
+      "getStarted": "Get Started Free",
+      "alreadyHaveAccount": "Already have an account?"
+    },
+    "lookup": {
+      "badge": "Quick lookup",
+      "title": "Forgot where you parked?",
+      "description": "Just enter your license plate and the system will locate the exact floor and parking slot in the building for both members and walk-in drivers.",
+      "realtime": "Data updates in real time",
+      "cardTitle": "Find parked vehicle",
+      "cardSubtitle": "Enter a license plate to locate it now",
+      "inputLabel": "Enter your license plate",
+      "placeholder": "Example: 30A-123.45",
+      "searchButton": "Find Vehicle Now",
+      "loading": "Checking...",
+      "notFound": "No parked vehicle was found for this license plate.",
+      "steps": {
+        "enterPlate": {
+          "title": "Enter license plate",
+          "desc": "Type the correct plate number of the vehicle you parked."
+        },
+        "locate": {
+          "title": "Location system",
+          "desc": "The system scans the building to find the matching floor and slot."
+        },
+        "navigate": {
+          "title": "Navigate directly",
+          "desc": "View the exact location on the live parking map."
+        }
+      },
+      "result": {
+        "parked": "Currently parked",
+        "floor": "Parking floor",
+        "slot": "Parking slot",
+        "checkInImage": "Check-in gate reference image",
+        "checkInImageAlt": "Vehicle check-in gate image",
+        "entryTime": "Entry: {{time}}",
+        "viewMap": "Navigate on parking map"
+      }
+    }
   },
   "intro": {
     "featMapTitle": "Real-time Live Map",
@@ -285,7 +355,6 @@
     "modFail": "Failed to update user role.",
     "updSuccess": "Successfully updated profile info for",
     "updFail": "Failed to update profile info.",
-    "toggleSuccess": "Successfully toggled account status to",
     "totalUsers": "Total Users",
     "active": "Active",
     "locked": "Locked",
@@ -293,6 +362,8 @@
     "accountsFound": "accounts found",
     "searchPlaceholder": "Search name or email...",
     "loadingAccounts": "Loading accounts...",
+    "filterAllRoles": "All Roles",
+    "filterAllStatuses": "All Statuses",
     "colUser": "User",
     "colEmail": "Email",
     "colRole": "Role",
@@ -301,8 +372,6 @@
     "colActions": "Actions",
     "noAccountsFound": "No accounts found matching the search criteria.",
     "editInfo": "Edit Info",
-    "lockUser": "Lock User",
-    "unlockUser": "Unlock User",
     "modPermissionsTitle": "Modify User Permissions",
     "livePreview": "Live Mutation Preview",
     "selectRole": "Select New Role",
@@ -616,8 +685,8 @@
       "dayRate": "Daytime Rate",
       "nightRate": "Nighttime Rate",
       "fullDayRate": "Full Day Rate",
-      "firstHourPrice": "First Hour Rate",
-      "nextHourPrice": "Next Hour Rate",
+      "firstHourRate": "First Hour Rate",
+      "subsequentHourRate": "Next Hour Rate",
       "monthlyPrice": "Membership Rate",
       "maxHours": "Max Hours Per Turn",
       "action": "Action",
@@ -896,7 +965,36 @@
   },
   "wallet": {
     "title": "My Wallet",
-    "subtitle": "Manage wallet balance and transaction history"
+    "subtitle": "Manage wallet balance and transaction history",
+    "eWallet": "E-wallet",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "depositMoney": "Deposit money",
+    "vnpayNote": "Pay through the VNPay gateway.",
+    "depositAmount": "Deposit amount",
+    "amountPlaceholder": "Enter amount",
+    "deposit": "Deposit",
+    "processing": "Processing...",
+    "transactionHistory": "Transaction history",
+    "emptyHistory": "No wallet transactions yet.",
+    "transactionTypes": {
+      "payment": "Payment",
+      "deposit": "Deposit"
+    },
+    "table": {
+      "time": "Time",
+      "type": "Type",
+      "amount": "Amount",
+      "status": "Status"
+    },
+    "messages": {
+      "depositCreated": "Wallet deposit request created successfully."
+    },
+    "errors": {
+      "load": "Could not load wallet information.",
+      "minimumDeposit": "Minimum deposit amount is 10,000đ.",
+      "createDeposit": "Could not create wallet deposit transaction."
+    }
   },
   "common": {
     "openMenu": "Open menu",
@@ -910,8 +1008,9 @@
     "notUpdated": "Not updated"
   },
   "membership": {
-    "title": "My Membership",
+    "title": "Membership",
     "subtitle": "Manage and register memberships for your vehicles",
+    "label": "Membership",
     "managerTitle": "Membership Management",
     "managerSubtitle": "Track card list, fixed locations, and validity status.",
     "paymentRequestSubtitle": "Select a membership tier, license plate, and fixed slot to create a payment request",
@@ -925,7 +1024,43 @@
     "qrAlt": "Membership QR code",
     "qrInstruction": "Scan this QR code at the entry/exit gate reader to park your vehicle",
     "registerTitle": "Register Membership",
+    "registerSubtitle": "Choose package, slots by duration, and pay once.",
     "registerDescription": "Select vehicle type and duration to create a VNPay payment request.",
+    "activeTitle": "Active Membership",
+    "activeSubtitle": "Each parking slot has its own QR code.",
+    "refresh": "Refresh",
+    "membershipParking": "Membership parking",
+    "selectVehicleType": "Select vehicle type",
+    "registrationDuration": "Registration duration",
+    "selectSlots": "Select slots",
+    "selectedSlots": "Selected {{selected}}/{{total}} slots",
+    "selectVehicleAndDurationFirst": "Select vehicle type and duration first.",
+    "loadingSlots": "Loading slots...",
+    "noAvailableSlots": "No suitable available slots.",
+    "licensePlate": "License plate",
+    "licensePlateLabel": "License plate",
+    "addLicensePlate": "Add license plate",
+    "licensePlatePlaceholder": "Example: 51F-123.45",
+    "maxLicensePlatesHint": "Maximum {{count}} license plates for the selected package.",
+    "registrationSummary": "Registration summary",
+    "payment": "Payment",
+    "total": "Total",
+    "choosePackageToViewTotal": "Choose package to view total",
+    "processing": "Processing...",
+    "validity": "Validity",
+    "validUntil": "until {{date}}",
+    "validityPeriod": "Validity period",
+    "daysLeft": "{{count}} days left",
+    "slotNumber": "Slot #{{number}}",
+    "slotFallback": "Slot {{id}}",
+    "slotsCount": "{{count}} slots",
+    "noCode": "No code yet",
+    "noTierConfig": "This package has no tier configuration from Backend yet.",
+    "perks": {
+      "ownQrPerSlot": "Each slot has its own QR",
+      "autoPlateRecognition": "Automatic license plate recognition",
+      "centralMembershipManagement": "Centralized Membership management"
+    },
     "vehicleType": "Vehicle Type",
     "vehicleTypePlaceholder": "Select vehicle type",
     "duration": "Duration",
@@ -944,9 +1079,99 @@
       "noRegisterPermission": "You do not have permission to register a membership.",
       "createRegistration": "Could not create membership registration.",
       "selectVehicle": "Please select a vehicle type.",
-      "selectDuration": "Please select a duration."
+      "selectDuration": "Please select a duration.",
+      "loadTiers": "Could not load membership packages.",
+      "loadAvailableSlots": "Could not load available parking slots.",
+      "maxLicensePlates": "This package only supports up to {{count}} license plates.",
+      "selectValidPackage": "Please select a valid membership package.",
+      "selectExactSlots": "Please select exactly {{count}} slots.",
+      "enterLicensePlate": "Please enter at least 1 license plate."
     },
-    "durationMonth": "{{count}} month"
+    "durationMonth": "{{count}} month",
+    "allVehicleTypesActive": "You already have active Membership cards for all available vehicle types."
+  },
+  "membershipRegister": {
+    "title": "Register Membership",
+    "subtitle": "Choose a package, one fixed parking slot, and pay once.",
+    "activeTitle": "Active Membership",
+    "activeSubtitle": "Scan QR code at entry/exit gates.",
+    "cancelCard": "Cancel Card",
+    "confirmCancel": "Are you sure you want to cancel this membership card? This action cannot be undone and your slot will be released.",
+    "cancelSuccess": "Membership card cancelled successfully.",
+    "cancelError": "Failed to cancel card. Please try again.",
+    "slotsCount": "{{count}} slot",
+    "slotsCount_plural": "{{count}} slots",
+    "platesCount": "{{count}} license plate",
+    "platesCount_plural": "{{count}} license plates",
+    "validity": "Validity",
+    "to": "to",
+    "qrCheckIn": "Check-in QR Code",
+    "fixedSlotTitle": "Fixed parking slot",
+    "noSlot": "No slot assigned",
+    "registeredPlates": "Registered license plates",
+    "noPlate": "No license plate",
+    "vehicle": {
+      "title": "Choose vehicle type",
+      "bicycle": "Bicycle",
+      "motorbike": "Motorbike",
+      "car": "Car",
+      "description": "Member parking package",
+      "alreadyActive": "Already has active package"
+    },
+    "duration": {
+      "title": "Registration duration",
+      "month1": "1 month",
+      "month6": "6 months",
+      "month12": "12 months"
+    },
+    "slot": {
+      "fixedSlot": "1 slot",
+      "title": "Choose 1 fixed parking slot",
+      "selectedCount": "1 slot selected",
+      "noSlotSelected": "No slot selected",
+      "none": "No fixed slot selected",
+      "instruction": "Open Parking Map to choose an available green slot matching your registered vehicle type.",
+      "changeOnMap": "Change slot on Parking Map",
+      "selectOnMap": "Choose slot on Parking Map"
+    },
+    "plate": {
+      "title": "License plate",
+      "add": "Add plate",
+      "placeholder": "Example: 51F-123.45",
+      "maxHint": "Maximum {{count}} license plates for the selected package."
+    },
+    "summary": {
+      "title": "Registration summary",
+      "details": "{{duration}} months · {{slots}} slot",
+      "details_plural": "{{duration}} months · {{slots}} slots",
+      "choosePackageHint": "Choose package to view total",
+      "tierNamePattern": "{{vehicle}} Package - {{duration}}"
+    },
+    "payment": {
+      "title": "Payment",
+      "auto": "Auto",
+      "vnpay": "VNPay",
+      "wallet": "Wallet"
+    },
+    "total": "Total",
+    "actions": {
+      "submit": "Register Membership",
+      "payVNPay": "Proceed to Payment",
+      "payWallet": "Pay Now"
+    },
+    "perks": {
+      "fixedSlot": "One fixed slot throughout the membership period",
+      "autoPlate": "Automatic license plate recognition",
+      "centralizedManagement": "Centralized Membership management"
+    },
+    "errors": {
+      "alreadyActive": "You already have an active Membership for this vehicle type.",
+      "selectVehicleDurationFirst": "Please select vehicle type and duration first.",
+      "selectFixedSlot": "Please select a fixed parking slot.",
+      "duplicatePlates": "License plates in the same package must be unique.",
+      "noRegisterPermission": "Your account does not have permission to register a Membership.",
+      "createRegistrationError": "Could not create membership registration."
+    }
   },
   "roles": {
     "admin": "Administrator",
@@ -970,7 +1195,8 @@
     "completed": "Completed",
     "success": "Success",
     "paid": "Paid",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "pendingPayment": "Pending payment"
   },
   "dropdown": {
     "navigation": "Navigation",
@@ -990,5 +1216,132 @@
     "motorbike": "Motorbike",
     "bicycle": "Bicycle",
     "unknown": "Unknown"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "parkingMap": "Parking Map",
+    "incidents": "Incidents",
+    "analytics": "Analytics",
+    "memberships": "Memberships",
+    "pricing": "Pricing",
+    "staffLogs": "Staff Logs",
+    "checkInOut": "Check-in/Check-out",
+    "myBookings": "My Bookings",
+    "profile": "Profile",
+    "home": "Home",
+    "userAccounts": "User Accounts",
+    "logout": "Logout"
+  },
+  "membershipConfig": {
+    "title": "Membership Package Pricing Configuration",
+    "subtitle": "Membership prices are stored by MembershipTier.",
+    "membershipFallback": "This membership",
+    "noPhone": "No phone number",
+    "validUntil": "until {{date}}",
+    "columns": {
+      "packageName": "Package name",
+      "vehicleType": "Vehicle type",
+      "duration": "Duration",
+      "maxVehicles": "Max vehicles",
+      "price": "Price",
+      "owner": "Card owner",
+      "membershipPackage": "Membership package",
+      "ticketCode": "Card code",
+      "licensePlates": "License plates",
+      "fixedSlot": "Fixed slot",
+      "validity": "Validity",
+      "status": "Status"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "save": "Save"
+    },
+    "currency": {
+      "vnd": "VND"
+    },
+    "vehicle": {
+      "bicycle": "Bicycle",
+      "motorbike": "Motorbike",
+      "car": "Car"
+    },
+    "duration": {
+      "month1": "1 month",
+      "month6": "6 months",
+      "month12": "12 months",
+      "monthCount": "{{count}} months"
+    },
+    "packages": {
+      "bicycle1": "Bicycle Package - 1 Month",
+      "bicycle6": "Bicycle Package - 6 Months",
+      "bicycle12": "Bicycle Package - 12 Months",
+      "motorbike1": "Motorbike Package - 1 Month",
+      "motorbike6": "Motorbike Package - 6 Months",
+      "motorbike12": "Motorbike Package - 12 Months",
+      "car1": "Car Package - 1 Month",
+      "car6": "Car Package - 6 Months",
+      "car12": "Car Package - 12 Months"
+    },
+    "search": {
+      "placeholder": "Search plate, name, email...",
+      "statusPlaceholder": "Status"
+    },
+    "messages": {
+      "loadMembershipsError": "Could not load membership list.",
+      "loadPricingError": "Could not load membership pricing configuration.",
+      "updateSuccess": "Membership package price updated.",
+      "updateError": "Could not update membership package price."
+    }
+  },
+  "staffShifts": {
+    "title": "Shift Management & Activity Logs",
+    "subtitle": "Monitor staff shifts reconciliation and gate check-in/out activity logs.",
+    "searchPlaceholder": "Search by staff, plate...",
+    "tabShifts": "Shifts Reconciliation",
+    "tabActivities": "Staff Activity Logs",
+    "filterStatus": "Shift Status",
+    "filterTime": "Time Range",
+    "allStatus": "All Statuses",
+    "statusActive": "Active",
+    "statusClosed": "Closed",
+    "allActions": "All Action Types",
+    "colShiftId": "Shift ID",
+    "colStaff": "Staff",
+    "colTime": "Shift Time",
+    "startTime": "Start:",
+    "endTime": "End:",
+    "working": "Working...",
+    "colSystemCash": "System Cash",
+    "colActualCash": "Handover Cash",
+    "colDifference": "Difference",
+    "colTransactions": "Transactions",
+    "colStatus": "Status",
+    "colNotes": "Notes",
+    "notClosed": "Not closed",
+    "sufficient": "Sufficient",
+    "colActionType": "Action Type",
+    "colPlate": "License Plate",
+    "colDetails": "Detailed Description",
+    "actionStartShift": "Start Shift",
+    "actionEndShift": "End Shift",
+    "actionCheckIn": "Check-In",
+    "actionCheckOut": "Check-Out",
+    "actionPlateOverride": "Plate Override",
+    "requireShiftTitle": "Start Shift",
+    "requireShiftTitleDesc": "Start Shift Required",
+    "requireShiftBody": "You have not started your shift. Please confirm starting the shift to perform gate operations and record activity logs.",
+    "btnStartShift": "Start Shift",
+    "endShiftTitle": "End Shift (Shift Handover)",
+    "shiftId": "Shift ID:",
+    "startTimeLabel": "Start Time:",
+    "systemCashLabel": "Cash Revenue (System calculated):",
+    "actualCashLabel": "Actual Handover Cash (VND)",
+    "actualCashRequired": "Please enter handover cash amount!",
+    "notesLabel": "Handover Notes",
+    "notesPlaceholder": "Enter cash difference notes, incidents (if any)...",
+    "btnEndShift": "Confirm Close Shift & Logout",
+    "shiftBannerActive": "Active",
+    "shiftBannerStart": "Started at:",
+    "shiftBannerSystem": "Cash (System calculated):",
+    "shiftBannerBtn": "Handover & Close Shift"
   }
 }
