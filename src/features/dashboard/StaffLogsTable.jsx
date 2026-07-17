@@ -240,12 +240,6 @@ const StaffLogsTable = () => {
           </span>
         );
       }
-    },
-    {
-      title: t('staffShifts.colIp'),
-      dataIndex: 'ipAddress',
-      key: 'ipAddress',
-      render: (ip) => <span className="font-mono text-slate-400 text-xs">{ip || '-'}</span>
     }
   ];
 
@@ -305,8 +299,8 @@ const StaffLogsTable = () => {
                       className="w-44 [&_.ant-select-selector]:!rounded-xl [&_.ant-select-selector]:!h-10 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:items-center"
                     >
                       <Option value="All">{t('staffShifts.allStatus')}</Option>
-                      <Option value="Active">{t('staffShifts.statusActive')} (Active)</Option>
-                      <Option value="Closed">{t('staffShifts.statusClosed')} (Closed)</Option>
+                      <Option value="Active">{t('staffShifts.statusActive')}</Option>
+                      <Option value="Closed">{t('staffShifts.statusClosed')}</Option>
                     </Select>
                   </div>
 
@@ -352,11 +346,11 @@ const StaffLogsTable = () => {
                       className="w-56 [&_.ant-select-selector]:!rounded-xl [&_.ant-select-selector]:!h-10 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:items-center"
                     >
                       <Option value="All">{t('staffShifts.allActions')}</Option>
-                      <Option value="START_SHIFT">{t('staffShifts.actionStartShift')} (START_SHIFT)</Option>
-                      <Option value="END_SHIFT">{t('staffShifts.actionEndShift')} (END_SHIFT)</Option>
-                      <Option value="CHECK_IN">{t('staffShifts.actionCheckIn')} (CHECK_IN)</Option>
-                      <Option value="CHECK_OUT">{t('staffShifts.actionCheckOut')} (CHECK_OUT)</Option>
-                      <Option value="PLATE_OVERRIDE">{t('staffShifts.actionPlateOverride')} (PLATE_OVERRIDE)</Option>
+                      <Option value="START_SHIFT">{t('staffShifts.actionStartShift')}</Option>
+                      <Option value="END_SHIFT">{t('staffShifts.actionEndShift')}</Option>
+                      <Option value="CHECK_IN">{t('staffShifts.actionCheckIn')}</Option>
+                      <Option value="CHECK_OUT">{t('staffShifts.actionCheckOut')}</Option>
+                      <Option value="PLATE_OVERRIDE">{t('staffShifts.actionPlateOverride')}</Option>
                     </Select>
                   </div>
 
@@ -379,7 +373,7 @@ const StaffLogsTable = () => {
                   rowKey="logId"
                   pagination={{ pageSize: 10 }}
                   rowClassName={(record) => record.actionType === 'PLATE_OVERRIDE' ? 'bg-amber-50/20 hover:bg-amber-50/40 dark:bg-amber-500/5' : ''}
-                  className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm dark:border-slate-800"
+                  className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm dark:border-slate-800 [&_.ant-table-thead>tr>th]:!px-6 [&_.ant-table-tbody>tr>td]:!px-6"
                 />
               </div>
             )

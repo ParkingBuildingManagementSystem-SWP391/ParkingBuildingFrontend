@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CreditCard, History, Plus, RefreshCw, Wallet } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, CreditCard, History, Plus, RefreshCw, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '../components/ToastProvider';
 import walletService from '../services/walletService';
-import { formatDateTimeVN } from '../utils/dateTime';
+import { formatDateVN, formatTimeVN } from '../utils/dateTime';
 import { getStatusLabel } from '../utils/i18nLabels';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
@@ -199,11 +199,11 @@ const MyWallet = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[620px] text-left">
+            <table className="w-full min-w-[520px] text-left">
               <thead className="bg-slate-50 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-400">
                 <tr>
                   <th className="px-5 py-3">{t('wallet.table.time')}</th>
-                  <th className="px-5 py-3">{t('wallet.table.type')}</th>
+                  <th className="w-24 whitespace-nowrap px-3 py-3">{t('wallet.table.type')}</th>
                   <th className="px-5 py-3 text-right">{t('wallet.table.amount')}</th>
                   <th className="px-5 py-3">{t('wallet.table.status')}</th>
                 </tr>
@@ -225,10 +225,18 @@ const MyWallet = () => {
 
                     return (
                       <tr key={id} className="text-sm text-slate-600 dark:text-slate-300">
-                        <td className="whitespace-nowrap px-5 py-4 font-semibold">{formatDateTimeVN(time, t('common.notUpdated'))}</td>
-                        <td className="px-5 py-4 font-bold">{getTransactionTypeLabel(type, t)}</td>
-                        <td className="whitespace-nowrap px-5 py-4 text-right font-black text-slate-900 dark:text-white">
-                          {formatCurrency(value)}
+                        <td className="px-5 py-4">
+                          <div className="flex flex-col leading-tight">
+                            <span className="font-bold text-slate-900 dark:text-slate-100">{formatTimeVN(time, t('common.notUpdated'))}</span>
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{formatDateVN(time, '')}</span>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 font-bold">{getTransactionTypeLabel(type, t)}</td>
+                        <td className="whitespace-nowrap px-5 py-4 text-right font-black">
+                          <span className={`inline-flex items-center justify-end gap-1 ${Number(value) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                            {Number(value) < 0 ? <ArrowUpRight size={14} /> : <ArrowDownLeft size={14} />}
+                            {formatCurrency(Math.abs(value))}
+                          </span>
                         </td>
                         <td className="px-5 py-4">
                           <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
