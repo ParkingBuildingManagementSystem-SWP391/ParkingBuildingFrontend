@@ -14,6 +14,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path // Giữ nguyên tiền tố /api để khớp với [Route("api/[controller]")] ở Backend
+      },
+      '/hubs': {
+        target: 'https://mindy.huydevops.id.vn',
+        changeOrigin: true,
+        secure: false,
+        ws: true
       }
     }
   },

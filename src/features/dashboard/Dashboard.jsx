@@ -80,7 +80,17 @@ const Dashboard = ({ section = 'overview' }) => {
   const [loadingStats, setLoadingStats] = useState(false);
   const [errorStats, setErrorStats] = useState('');
   const [exporting, setExporting] = useState(false);
-  const [pricingRows, setPricingRows] = useState(defaultPricingData);
+  const [pricingRows, setPricingRows] = useState(() => {
+    const saved = localStorage.getItem('parking_prices');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Lỗi phân tích cú pháp parking_prices từ localStorage', e);
+      }
+    }
+    return defaultPricingData;
+  });
   const [savingPricingIds, setSavingPricingIds] = useState({});
 
   // Fetch dashboard summary
@@ -172,6 +182,12 @@ const Dashboard = ({ section = 'overview' }) => {
         subsequentHourRate: isCarPricing ? row.subsequentHourRate : 0
       });
       message.success(t('dashboard.pricingUpdateSuccess', { vehicleType: getVehicleTypeLabel(row.vehicleType) }));
+      
+      // Đồng bộ lưu lại mảng pricingRows mới vào localStorage sau khi cập nhật thành công
+      const updatedRows = pricingRows.map((r) => 
+        getPricingRowKey(r) === rowKey ? row : r
+      );
+      localStorage.setItem('parking_prices', JSON.stringify(updatedRows));
     } catch (err) {
       console.error('handleUpdatePricing error:', err);
       const status = err.response?.status;
