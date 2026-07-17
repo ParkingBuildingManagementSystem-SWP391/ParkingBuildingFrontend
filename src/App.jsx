@@ -5,6 +5,7 @@ import { useAuth } from './context/AuthContext';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import MainLayout from './components/MainLayout';
 import { ToastProvider } from './components/ToastProvider';
+import { NotificationProvider } from './context/NotificationContext';
 
 // Public Pages
 import Login from './pages/Login';
@@ -53,8 +54,9 @@ const MembershipRoute = () => {
 function App() {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <Routes>
+      <NotificationProvider>
+        <ToastProvider>
+          <Routes>
           {/* Public auth pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -132,7 +134,8 @@ function App() {
         {/* Unmatched URL redirects */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </ToastProvider>
+        </ToastProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

@@ -3,6 +3,7 @@ import { CreditCard, History, Plus, RefreshCw, Wallet } from 'lucide-react';
 import { toast } from '../components/ToastProvider';
 import walletService from '../services/walletService';
 import { formatDateTimeVN } from '../utils/dateTime';
+import { useNotification } from '../context/NotificationContext';
 
 const unwrapData = (payload) => payload?.data?.data ?? payload?.data ?? payload ?? null;
 
@@ -33,6 +34,7 @@ const formatCurrency = (value) =>
 const PRESET_AMOUNTS = [50000, 100000, 200000, 500000];
 
 const MyWallet = () => {
+  const { latestNotification } = useNotification();
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState([]);
   const [amount, setAmount] = useState('');
@@ -65,6 +67,13 @@ const MyWallet = () => {
   useEffect(() => {
     loadWallet();
   }, [loadWallet]);
+
+  useEffect(() => {
+    if (latestNotification && (latestNotification.notificationType === 'WalletTransaction' || latestNotification.NotificationType === 'WalletTransaction')) {
+      console.log('Wallet transaction notification received, reloading wallet data...');
+      loadWallet();
+    }
+  }, [latestNotification, loadWallet]);
 
   const handleDeposit = async (event) => {
     event.preventDefault();

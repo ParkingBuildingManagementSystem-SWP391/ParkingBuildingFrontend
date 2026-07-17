@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import Logo from './Logo';
+import NotificationBell from './NotificationBell';
 import {
   Bell,
   ChevronDown,
@@ -157,16 +158,9 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true, pageTitle, 
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-        <button
-          type="button"
-          className="hidden sm:flex w-10 h-10 rounded-full items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-          aria-label={t('common.notifications')}
-        >
-          <Bell size={18} strokeWidth={2} />
-          <span className="absolute -top-1 -right-1 w-[18px] h-[18px] bg-[#FF3B30] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-            2
-          </span>
-        </button>
+        <div className="hidden sm:block">
+          <NotificationBell />
+        </div>
 
         <button
           type="button"
