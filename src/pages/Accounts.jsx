@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock, Unlock } from 'lucide-react';
-import { Select, Modal, Input, Switch, Button } from 'antd';
+import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock } from 'lucide-react';
+import { Select, Modal, Input, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import { formatVietnamDate } from '../utils/dateTime';
+
+// Bảng màu theo vai trò — dùng chung cho badge trong bảng và avatar trong modal,
+// tách biệt hoàn toàn với xanh lá/đỏ (đang dùng cho trạng thái active/locked) để tránh trùng ý nghĩa.
+const ROLE_STYLES = {
+  1: { badge: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300', avatar: 'bg-indigo-500', label: 'admin' },
+  5: { badge: 'bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300', avatar: 'bg-purple-500', label: 'manager' },
+  2: { badge: 'bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300', avatar: 'bg-sky-500', label: 'staff' },
+  4: { badge: 'bg-slate-200 text-slate-600 dark:bg-slate-700/50 dark:text-slate-300', avatar: 'bg-slate-400', label: 'user' },
+};
+const getRoleStyle = (roleId) => ROLE_STYLES[roleId] || ROLE_STYLES[4];
 
 const Accounts = () => {
   const { t } = useTranslation();
@@ -103,25 +113,6 @@ const Accounts = () => {
       .toUpperCase();
   };
 
-  // Assign background color to avatar based on Role ID
-  const getAvatarBg = (roleId) => {
-    switch (roleId) {
-      case 1:
-        return 'bg-blue-100 text-blue-600';
-      case 5:
-        return 'bg-orange-100 text-orange-600';
-      case 2:
-        return 'bg-teal-100 text-teal-600';
-      default:
-        return 'bg-slate-100 text-slate-600';
-    }
-  };
-
-  // Dynamic Role summary counters
-  const adminCount = useMemo(() => accounts.filter((u) => u.roleId === 1).length, [accounts]);
-  const managerCount = useMemo(() => accounts.filter((u) => u.roleId === 5).length, [accounts]);
-  const staffCount = useMemo(() => accounts.filter((u) => u.roleId === 2).length, [accounts]);
-  const userCount = useMemo(() => accounts.filter((u) => u.roleId === 4).length, [accounts]);
 
   // Multi-conditional memoized filtration logic
   const filteredAccounts = useMemo(() => {
@@ -261,12 +252,6 @@ const Accounts = () => {
     }
   };
 
-  // Toggle Account status between Active/Inactive
-  const handleToggleUserStatus = async () => {
-    // TODO: Backend cần cung cấp endpoint toggle status hoặc hỗ trợ isActive trong /Admin/update-user.
-    message.info('Chức năng khóa/mở khóa tài khoản chưa được Backend hỗ trợ.');
-  };
-
   const totalCount = filteredAccounts.length;
   const activeCount = filteredAccounts.filter(a => a.status === 'Active').length;
   const lockedCount = filteredAccounts.filter(a => a.status !== 'Active').length;
@@ -282,10 +267,16 @@ const Accounts = () => {
           </div>
         )}
 
-        {/* A. Top Stats Cards Row */}
+        {/* A. Top Stats Cards Row — bấm để lọc nhanh theo trạng thái */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Total Users */}
-          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <button
+            type="button"
+            onClick={() => { setStatusFilter('All Statuses'); setRoleFilter('All Roles'); }}
+            className={`flex items-center gap-5 rounded-2xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 dark:bg-slate-900 ${
+              statusFilter === 'All Statuses' ? 'border-indigo-300 ring-2 ring-indigo-100 dark:border-indigo-400/60 dark:ring-indigo-500/10' : 'border-slate-100 dark:border-slate-700'
+            }`}
+          >
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
               <Users size={24} strokeWidth={2.5} />
             </div>
@@ -293,10 +284,16 @@ const Accounts = () => {
               <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{totalCount}</h3>
               <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.totalUsers')}</p>
             </div>
-          </div>
+          </button>
 
           {/* Active Users */}
-          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('Active')}
+            className={`flex items-center gap-5 rounded-2xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 dark:bg-slate-900 ${
+              statusFilter === 'Active' ? 'border-emerald-300 ring-2 ring-emerald-100 dark:border-emerald-400/60 dark:ring-emerald-500/10' : 'border-slate-100 dark:border-slate-700'
+            }`}
+          >
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/15 dark:text-emerald-300">
               <CheckCircle size={24} strokeWidth={2.5} />
             </div>
@@ -304,10 +301,16 @@ const Accounts = () => {
               <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{activeCount}</h3>
               <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.active')}</p>
             </div>
-          </div>
+          </button>
 
           {/* Locked Users */}
-          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('Inactive')}
+            className={`flex items-center gap-5 rounded-2xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 dark:bg-slate-900 ${
+              statusFilter === 'Inactive' ? 'border-rose-300 ring-2 ring-rose-100 dark:border-rose-400/60 dark:ring-rose-500/10' : 'border-slate-100 dark:border-slate-700'
+            }`}
+          >
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 dark:bg-rose-500/15 dark:text-rose-300">
               <Lock size={24} strokeWidth={2.5} />
             </div>
@@ -315,7 +318,7 @@ const Accounts = () => {
               <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{lockedCount}</h3>
               <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.locked')}</p>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* B. Table Section */}
@@ -329,6 +332,32 @@ const Accounts = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
+              {/* Role Filter */}
+              <Select
+                value={roleFilter}
+                onChange={setRoleFilter}
+                className="w-[140px] [&_.ant-select-selector]:!h-[42px] [&_.ant-select-selector]:!rounded-[14px] [&_.ant-select-selector]:!items-center"
+                popupClassName="rounded-xl"
+              >
+                <Select.Option value="All Roles">{t('accounts.filterAllRoles')}</Select.Option>
+                <Select.Option value="Admin">Admin</Select.Option>
+                <Select.Option value="Manager">Manager</Select.Option>
+                <Select.Option value="Staff">Staff</Select.Option>
+                <Select.Option value="User">User</Select.Option>
+              </Select>
+
+              {/* Status Filter */}
+              <Select
+                value={statusFilter}
+                onChange={setStatusFilter}
+                className="w-[150px] [&_.ant-select-selector]:!h-[42px] [&_.ant-select-selector]:!rounded-[14px] [&_.ant-select-selector]:!items-center"
+                popupClassName="rounded-xl"
+              >
+                <Select.Option value="All Statuses">{t('accounts.filterAllStatuses')}</Select.Option>
+                <Select.Option value="Active">{t('accounts.active')}</Select.Option>
+                <Select.Option value="Inactive">{t('accounts.locked')}</Select.Option>
+              </Select>
+
               {/* Search Input */}
               <div className="relative">
                 <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -337,7 +366,7 @@ const Accounts = () => {
                   placeholder={t('accounts.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 py-2.5 pl-11 pr-9 text-[13px] font-medium text-slate-700 placeholder-slate-400 transition-all focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800 sm:w-[280px]"
+                  className="w-full rounded-[14px] border-[1.5px] border-slate-200 bg-slate-50 py-2.5 pl-11 pr-9 text-[13px] font-medium text-slate-700 placeholder-slate-400 transition-all focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-600/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800 sm:w-[240px]"
                 />
                 {searchQuery && (
                   <button
@@ -380,18 +409,8 @@ const Accounts = () => {
                   ) : (
                     filteredAccounts.map((item, index) => {
                       const initials = getInitials(item.name);
-
-                      // Determine Role Badges
-                      let roleBadge = null;
-                      if (item.roleId === 1) {
-                        roleBadge = <span className="rounded-full bg-rose-100 px-3 py-1 text-[11px] font-bold text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">admin</span>;
-                      } else if (item.roleId === 5) {
-                        roleBadge = <span className="rounded-full bg-purple-100 px-3 py-1 text-[11px] font-bold text-purple-600 dark:bg-purple-500/15 dark:text-purple-300">manager</span>;
-                      } else if (item.roleId === 2) {
-                        roleBadge = <span className="rounded-full bg-blue-100 px-3 py-1 text-[11px] font-bold text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">staff</span>;
-                      } else {
-                        roleBadge = <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">user</span>;
-                      }
+                      const roleStyle = getRoleStyle(item.roleId);
+                      const roleBadge = <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${roleStyle.badge}`}>{roleStyle.label}</span>;
 
                       // Determine Status Badges
                       const isActive = item.status === 'Active';
@@ -399,9 +418,8 @@ const Accounts = () => {
                         ? <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">active</span>
                         : <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-600 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">locked</span>;
 
-                      // Avatar Background Color (Using predefined distinct colors)
-                      const avatarColors = ['bg-rose-500', 'bg-violet-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500'];
-                      const avatarBg = avatarColors[item.id % avatarColors.length];
+                      // Avatar background follows the same role color as the badge
+                      const avatarBg = roleStyle.avatar;
 
                       return (
                         <tr key={item.id} className="border-b border-slate-50 transition-colors last:border-0 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/70 group">
@@ -438,26 +456,13 @@ const Accounts = () => {
 
                           {/* Actions Column */}
                           <td className="py-4 px-6 md:px-8 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-end">
                               <button
                                 onClick={() => openEditModal(item)}
                                 className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-400 dark:hover:text-indigo-300"
                                 title={t('accounts.editInfo')}
                               >
                                 <Edit size={14} />
-                              </button>
-
-                              {/* Toggle Lock / Unlock */}
-                              <button
-                                onClick={() => handleToggleUserStatus(item.id, item.status)}
-                                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all shadow-sm ${
-                                  isActive
-                                    ? 'bg-white border-rose-200 text-rose-400 hover:text-rose-600 hover:border-rose-400 dark:bg-slate-800 dark:border-rose-500/40 dark:text-rose-300'
-                                    : 'bg-white border-emerald-200 text-emerald-400 hover:text-emerald-600 hover:border-emerald-400 dark:bg-slate-800 dark:border-emerald-500/40 dark:text-emerald-300'
-                                }`}
-                                title={isActive ? t('accounts.lockUser') : t('accounts.unlockUser')}
-                              >
-                                {isActive ? <Lock size={14} /> : <Unlock size={14} />}
                               </button>
                             </div>
                           </td>
@@ -496,7 +501,7 @@ const Accounts = () => {
 
                 {/* Account Info Nudge */}
                 <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${getAvatarBg(selectedUser.roleId)}`}>
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white ${getRoleStyle(selectedUser.roleId).avatar}`}>
                     {getInitials(selectedUser.name)}
                   </div>
                   <div className="flex flex-col">

@@ -60,12 +60,10 @@ const getVehicleTypeName = (typeId, vehicleTypeName, t) => {
 
 const getStatusLabel = (status, t) => {
   switch (status) {
-    case 'Active':
     case 'InProgress':
       return t('parkingSession.statusActive');
     case 'Completed':
       return t('parkingSession.statusCompleted');
-    case 'Cancelled':
     case 'Canceled':
       return t('parkingSession.statusCancelled');
     case 'Reserved':
@@ -77,14 +75,12 @@ const getStatusLabel = (status, t) => {
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'Active':
     case 'InProgress':
       return 'processing';
     case 'Completed':
       return 'success';
     case 'Reserved':
       return 'warning';
-    case 'Cancelled':
     case 'Canceled':
       return 'default';
     default:
@@ -395,104 +391,105 @@ const ParkingSessionManager = () => {
   return (
     <div className="min-h-full space-y-6 bg-slate-50 dark:bg-slate-900">
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Input
-            size="large"
-            allowClear
-            prefix={<Search size={15} className="text-slate-400" />}
-            placeholder={t('parkingSession.phPlate')}
-            value={filters.licenseVehicle}
-            onChange={(event) => updateFilter('licenseVehicle', event.target.value)}
-            className={fieldClassName}
-          />
-          <Input
-            size="large"
-            allowClear
-            placeholder={t('parkingSession.phSlot')}
-            value={filters.slotName}
-            onChange={(event) => updateFilter('slotName', event.target.value)}
-            className={fieldClassName}
-          />
-          <Select
-            size="large"
-            placeholder={t('parkingSession.phCustomerType')}
-            allowClear
-            value={filters.isRegistered || undefined}
-            onChange={(value) => updateFilter('isRegistered', value !== undefined ? value : '')}
-            className="ps-select-field w-full"
-            options={[
-              { value: '1', label: t('parkingSession.custRegistered') },
-              { value: '0', label: t('parkingSession.custWalkIn') },
-            ]}
-          />
-          <Select
-            size="large"
-            placeholder={t('parkingSession.phVehType')}
-            allowClear
-            value={filters.typeId || undefined}
-            onChange={(value) => updateFilter('typeId', value || '')}
-            className="ps-select-field w-full"
-            options={[
-              { value: '1', label: t('parkingSession.vehBike') },
-              { value: '2', label: t('parkingSession.vehMoto') },
-              { value: '3', label: t('parkingSession.vehCar') },
-            ]}
-          />
-          <Select
-            size="large"
-            placeholder={t('parkingSession.phStatus')}
-            allowClear
-            value={filters.sessionStatus || undefined}
-            onChange={(value) => updateFilter('sessionStatus', value || '')}
-            className="ps-select-field w-full"
-            options={[
-              { value: 'Reserved', label: t('parkingSession.statusReserved') },
-              { value: 'InProgress', label: t('parkingSession.statusActive') },
-              { value: 'Active', label: t('parkingSession.statusActive') },
-              { value: 'Completed', label: t('parkingSession.statusCompleted') },
-              { value: 'Cancelled', label: t('parkingSession.statusCancelled') },
-              { value: 'Canceled', label: t('parkingSession.statusCancelled') },
-            ]}
-          />
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.fromDate')}</span>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
             <Input
               size="large"
-              type="date"
-              value={filters.fromDate}
-              onChange={(event) => updateFilter('fromDate', event.target.value)}
+              allowClear
+              prefix={<Search size={15} className="text-slate-400" />}
+              placeholder={t('parkingSession.phPlate')}
+              value={filters.licenseVehicle}
+              onChange={(event) => updateFilter('licenseVehicle', event.target.value)}
               className={fieldClassName}
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.toDate')}</span>
             <Input
               size="large"
-              type="date"
-              value={filters.toDate}
-              onChange={(event) => updateFilter('toDate', event.target.value)}
+              allowClear
+              placeholder={t('parkingSession.phSlot')}
+              value={filters.slotName}
+              onChange={(event) => updateFilter('slotName', event.target.value)}
               className={fieldClassName}
             />
-          </div>
-          <div className="flex items-end gap-2">
-            <Button
-              htmlType="submit"
-              type="primary"
+            <Select
               size="large"
-              icon={<Search size={15} />}
-              className="flex-1 rounded-[14px] border-none bg-indigo-600 font-bold shadow-sm hover:!bg-indigo-700"
-            >
-              {t('parkingSession.btnSearch')}
-            </Button>
-            <Button
-              type="default"
+              placeholder={t('parkingSession.phCustomerType')}
+              allowClear
+              value={filters.isRegistered || undefined}
+              onChange={(value) => updateFilter('isRegistered', value !== undefined ? value : '')}
+              className="ps-select-field w-full"
+              options={[
+                { value: '1', label: t('parkingSession.custRegistered') },
+                { value: '0', label: t('parkingSession.custWalkIn') },
+              ]}
+            />
+            <Select
               size="large"
-              icon={<RotateCcw size={15} />}
-              onClick={handleReset}
-              className="rounded-[14px] border-slate-200 bg-white font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!border-slate-600 dark:hover:!text-slate-100"
-            >
-              {t('parkingSession.btnReset')}
-            </Button>
+              placeholder={t('parkingSession.phVehType')}
+              allowClear
+              value={filters.typeId || undefined}
+              onChange={(value) => updateFilter('typeId', value || '')}
+              className="ps-select-field w-full"
+              options={[
+                { value: '1', label: t('parkingSession.vehBike') },
+                { value: '2', label: t('parkingSession.vehMoto') },
+                { value: '3', label: t('parkingSession.vehCar') },
+              ]}
+            />
+
+            <Select
+              size="large"
+              placeholder={t('parkingSession.phStatus')}
+              allowClear
+              value={filters.sessionStatus || undefined}
+              onChange={(value) => updateFilter('sessionStatus', value || '')}
+              className="ps-select-field w-full"
+              options={[
+                { value: 'Reserved', label: t('parkingSession.statusReserved') },
+                { value: 'InProgress', label: t('parkingSession.statusActive') },
+                { value: 'Completed', label: t('parkingSession.statusCompleted') },
+                { value: 'Canceled', label: t('parkingSession.statusCancelled') },
+              ]}
+            />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.fromDate')}</span>
+              <Input
+                size="large"
+                type="date"
+                value={filters.fromDate}
+                onChange={(event) => updateFilter('fromDate', event.target.value)}
+                className={`${fieldClassName} w-full`}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('parkingSession.toDate')}</span>
+              <Input
+                size="large"
+                type="date"
+                value={filters.toDate}
+                onChange={(event) => updateFilter('toDate', event.target.value)}
+                className={`${fieldClassName} w-full`}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                htmlType="submit"
+                type="primary"
+                size="large"
+                icon={<Search size={15} />}
+                className="rounded-[14px] border-none bg-indigo-600 font-bold shadow-sm hover:!bg-indigo-700"
+              >
+                {t('parkingSession.btnSearch')}
+              </Button>
+              <Button
+                type="default"
+                size="large"
+                icon={<RotateCcw size={15} />}
+                onClick={handleReset}
+                className="rounded-[14px] border-slate-200 bg-white font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:!border-slate-600 dark:hover:!text-slate-100"
+              >
+                {t('parkingSession.btnReset')}
+              </Button>
+            </div>
           </div>
         </form>
       </div>
