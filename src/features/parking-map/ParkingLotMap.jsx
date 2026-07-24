@@ -687,7 +687,7 @@ const ParkingLotMap = () => {
     const isNightShift = expectedHour >= 18 || expectedHour < 6;
 
     const estimatedAmount = isNightShift ? currentVehicleRates.night : currentVehicleRates.day;
-    const shiftText = isNightShift ? "Ca Đêm (18:00 - 06:00)" : "Ca Ngày (06:00 - 18:00)";
+    const shiftText = isNightShift ? t('parkingMap.nightShift') : t('parkingMap.dayShift');
 
     return { estimatedAmount, shiftText };
   };
@@ -1306,19 +1306,19 @@ const ParkingLotMap = () => {
             <div className="p-5 sm:p-6 space-y-4">
 
               <div className="space-y-1">
-                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight dark:text-slate-100">Đặt chỗ đỗ xe</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Cấu hình phiên đặt chỗ trong cơ sở dữ liệu thực</p>
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight dark:text-slate-100">{t('parkingMap.bookSlotTitle')}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{t('parkingMap.bookSlotDesc')}</p>
               </div>
 
               <div className="bg-indigo-50 border border-indigo-100 rounded-[14px] p-3.5 text-slate-600 text-xs font-semibold flex items-start gap-2.5 dark:border-indigo-500/40 dark:bg-indigo-500/15 dark:text-slate-300">
                 <Info size={16} className="text-indigo-600 shrink-0 mt-0.5" />
                 <div>
-                  <span>Bạn đang đặt chỗ: </span>
+                  <span>{t('parkingMap.bookingSlotInfo')} </span>
                   <span className="font-mono font-extrabold text-indigo-600">{selectedSlot.id}</span>
-                  <span> tại </span>
+                  <span> {t('parkingMap.at')} </span>
                   <span className="font-bold text-slate-900 dark:text-slate-100">{getFloorDisplayName(activeFloor.name)}</span>
                   <span className="text-slate-500 font-medium block mt-0.5 dark:text-slate-400">
-                    Phân loại chỗ đã chọn: {getVehicleTypeLabel(selectedSlot.type)} (Mã chỗ DB: {selectedSlot.slotId || selectedSlot.dbSlotId})
+                    {t('parkingMap.slotTypeSelected')} {getVehicleTypeLabel(selectedSlot.type)} ({t('parkingMap.dbSlotCode')} {selectedSlot.slotId || selectedSlot.dbSlotId})
                   </span>
                 </div>
               </div>
@@ -1354,13 +1354,13 @@ const ParkingLotMap = () => {
 
                 {bookingVehicleType !== 'Bicycle' && (
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Biển số xe</label>
+                    <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.plateLabel')}</label>
                     <div className="relative">
                       <Car size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
                         required
-                        placeholder="e.g., 29A-12345"
+                        placeholder={t('parkingMap.platePlaceholder')}
                         value={bookingPlate}
                         onChange={(e) => setBookingPlate(e.target.value)}
                         className="w-full h-11 pl-10 pr-4 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all uppercase font-mono font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
@@ -1370,7 +1370,7 @@ const ParkingLotMap = () => {
                 )}
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Thời gian dự kiến vào bãi</label>
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.expectedCheckinLabel')}</label>
                   <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-3 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                     <div className="flex flex-col items-center gap-1.5">
                       <input
@@ -1382,7 +1382,7 @@ const ParkingLotMap = () => {
                         onBlur={(e) => setExpectedHour(clampTimePart(e.target.value, 0, 23))}
                         className="h-12 w-16 rounded-[14px] border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 dark:border-indigo-500/50 dark:bg-slate-800 dark:text-indigo-300"
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Giờ</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('parkingMap.hourLabel')}</span>
                     </div>
 
                     <span className="pt-2 text-2xl font-extrabold text-indigo-500">:</span>
@@ -1397,7 +1397,7 @@ const ParkingLotMap = () => {
                         onBlur={(e) => setExpectedMinute(clampTimePart(e.target.value, 0, 59))}
                         className="h-12 w-16 rounded-[14px] border-2 border-indigo-200 bg-white text-center text-xl font-extrabold text-indigo-700 shadow-sm outline-none transition-all focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 dark:border-indigo-500/50 dark:bg-slate-800 dark:text-indigo-300"
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Phút</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('parkingMap.minuteLabel')}</span>
                     </div>
                   </div>
 
@@ -1405,7 +1405,7 @@ const ParkingLotMap = () => {
                   {bookingVehicleType !== 'Bicycle' && (
                     <div className="mt-2 p-2.5 bg-amber-50 border border-amber-100 rounded-[14px] flex items-center justify-between text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">
                       <div>
-                        <span className="font-semibold block">Tiền cọc giữ chỗ ước tính:</span>
+                        <span className="font-semibold block">{t('parkingMap.estimatedDepositLabel')}</span>
                         <span className="text-[10px] text-amber-600 font-medium dark:text-amber-300">({getEstimatedDeposit().shiftText})</span>
                       </div>
                       <span className="text-sm font-extrabold text-amber-700">
@@ -1416,7 +1416,7 @@ const ParkingLotMap = () => {
 
                   <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800">
                     <label className="mb-2 block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Phương thức thanh toán cọc
+                      {t('parkingMap.depositPaymentMethod')}
                     </label>
 
                     <div className="grid grid-cols-2 gap-2">
@@ -1439,15 +1439,15 @@ const ParkingLotMap = () => {
                   </div>
 
                   <p className="rounded-[14px] border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700 dark:border-orange-500/40 dark:bg-orange-500/15 dark:text-orange-300">
-                    ⚠️ Lưu ý: Lịch đặt chỗ sẽ tự động bị hủy nếu bạn không check-in tại cổng trong vòng 15 phút sau thời gian dự kiến.
+                    {t('parkingMap.cancellationWarning')}
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Phuong thuc thanh toan coc</label>
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.depositPaymentMethod')}</label>
                   <div className="grid grid-cols-1 gap-2">
                     {[
-                      { value: 'AUTO', label: 'Tu dong', Icon: Wallet },
+                      { value: 'AUTO', label: t('parkingMap.autoPayment'), Icon: Wallet },
                     ].map(({ value, label, Icon }) => {
                       const isSelected = bookingPaymentMethod === value;
                       return (
@@ -1468,7 +1468,7 @@ const ParkingLotMap = () => {
                     })}
                   </div>
                   <p className="text-[11px] font-medium leading-relaxed text-slate-500 dark:text-slate-400">
-                    Neu booking khong can coc, he thong se giu cho ngay va bo qua buoc thanh toan.
+                    {t('parkingMap.noDepositRequiredNote')}
                   </p>
                 </div>
 
@@ -1478,7 +1478,7 @@ const ParkingLotMap = () => {
                     onClick={() => setIsBookingModalOpen(false)}
                     className="flex-1 h-11 border-[1.5px] border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-800 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 text-slate-600 font-bold rounded-[14px] transition-all duration-200 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                   >
-                    Hủy
+                    {t('parkingMap.cancelBtn')}
                   </button>
 
                   <button
@@ -1486,7 +1486,7 @@ const ParkingLotMap = () => {
                     disabled={submitting}
                     className="flex-1 h-11 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 flex items-center justify-center gap-1.5 text-sm disabled:opacity-60 disabled:hover:translate-y-0"
                   >
-                    {submitting ? 'Đang xử lý...' : 'Xác nhận đặt chỗ'}
+                    {submitting ? t('parkingMap.processingBtn') : t('parkingMap.confirmBookingBtn')}
                   </button>
                 </div>
 

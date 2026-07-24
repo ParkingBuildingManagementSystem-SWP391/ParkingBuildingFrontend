@@ -953,7 +953,10 @@
       "walkinPlate": "Enter Walk-in License Plate",
       "bikePlatePlaceholder": "Leave blank → Auto-generate BIKE_XXXXXXXX",
       "carPlatePlaceholder": "e.g. 29A-888.88",
-      "walkinBtn": "Check In Vehicle"
+      "walkinBtn": "Check In Vehicle",
+      "depositPaymentMethod": "Deposit Payment Method",
+      "autoPayment": "Automatic",
+      "noDepositRequiredNote": "If the booking does not require a deposit, the system will hold the slot immediately and bypass the payment step."
     },
     "footer": {
       "systemName": "Parking Management System",

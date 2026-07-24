@@ -953,7 +953,10 @@
       "walkinPlate": "Nhập biển số xe vãng lai",
       "bikePlatePlaceholder": "Để trống → Tự tạo biển số ảo BIKE_XXXXXXXX",
       "carPlatePlaceholder": "VD: 29A-888.88",
-      "walkinBtn": "Cho xe vào"
+      "walkinBtn": "Cho xe vào",
+      "depositPaymentMethod": "Phương thức thanh toán cọc",
+      "autoPayment": "Tự động",
+      "noDepositRequiredNote": "Nếu đặt chỗ không cần cọc, hệ thống sẽ giữ chỗ ngay và bỏ qua bước thanh toán."
     },
     "footer": {
       "systemName": "Hệ thống quản lí bãi đỗ xe",
