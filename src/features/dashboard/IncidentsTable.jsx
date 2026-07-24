@@ -8,7 +8,9 @@ import {
   CheckCircle2,
   Camera,
   MapPin,
-  Clock
+  Clock,
+  Activity,
+  Search
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
 import { formatVietnamDateTime, parseUtcDate } from '../../utils/dateTime';
@@ -29,21 +31,22 @@ const IncidentsTable = () => {
   const [resolutionNotes, setResolutionNotes] = useState('');
 
   const normalizeIncident = (item, index) => {
+    const safeItem = item || {};
     let realId = `incident-${index}`;
-    if (item.id !== undefined && item.id !== null) realId = item.id;
-    else if (item.incidentId !== undefined && item.incidentId !== null) realId = item.incidentId;
-    else if (item.IncidentId !== undefined && item.IncidentId !== null) realId = item.IncidentId;
-    else if (item.code !== undefined && item.code !== null) realId = item.code;
+    if (safeItem.id !== undefined && safeItem.id !== null) realId = safeItem.id;
+    else if (safeItem.incidentId !== undefined && safeItem.incidentId !== null) realId = safeItem.incidentId;
+    else if (safeItem.IncidentId !== undefined && safeItem.IncidentId !== null) realId = safeItem.IncidentId;
+    else if (safeItem.code !== undefined && safeItem.code !== null) realId = safeItem.code;
 
     return {
       id: realId,
-      severity: item.severity || item.Severity || 'Info',
-      timestamp: item.incidentTime || item.IncidentTime || item.timestamp || item.Timestamp || item.createdAt || item.CreatedAt || item.reportedAt || item.ReportedAt,
-      type: item.issueType || item.IssueType || item.type || item.Type || item.title || item.Title || 'Sự cố',
-      description: item.description || item.Description || item.message || item.Message || '',
-      location: item.location || item.Location || item.slotName || item.SlotName || item.licenseVehicle || item.LicenseVehicle || '',
-      status: item.status || item.Status || 'Pending',
-      imageProofUrl: item.imageProofUrl || item.ImageProofUrl || ''
+      severity: safeItem.severity || safeItem.Severity || 'Info',
+      timestamp: safeItem.incidentTime || safeItem.IncidentTime || safeItem.timestamp || safeItem.Timestamp || safeItem.createdAt || safeItem.CreatedAt || safeItem.reportedAt || safeItem.ReportedAt,
+      type: safeItem.issueType || safeItem.IssueType || safeItem.type || safeItem.Type || safeItem.title || safeItem.Title || 'Sự cố',
+      description: safeItem.description || safeItem.Description || safeItem.message || safeItem.Message || '',
+      location: safeItem.location || safeItem.Location || safeItem.slotName || safeItem.SlotName || safeItem.licenseVehicle || safeItem.LicenseVehicle || '',
+      status: safeItem.status || safeItem.Status || 'Pending',
+      imageProofUrl: safeItem.imageProofUrl || safeItem.ImageProofUrl || ''
     };
   };
 
@@ -69,11 +72,12 @@ const IncidentsTable = () => {
 
       const response = await managerService.getIncidents(params);
       const data = Array.isArray(response) ? response : (response?.data || response?.Data || []);
-      setIncidents(data.map((item, index) => {
-        const normalized = normalizeIncident(item, index);
+      setIncidents((data || []).map((item, index) => {
+        const safeItem = item || {};
+        const normalized = normalizeIncident(safeItem, index);
         return {
           ...normalized,
-          status: item.status === 'Open' || item.Status === 'Open' ? 'Pending' : normalized.status
+          status: safeItem.status === 'Open' || safeItem.Status === 'Open' ? 'Pending' : normalized.status
         };
       }));
     } catch (err) {

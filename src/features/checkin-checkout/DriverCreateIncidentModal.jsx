@@ -18,7 +18,7 @@ const DriverCreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuc
   const handleSubmit = async (values) => {
     setSubmitting(true);
     try {
-      const normalizedPlate = licenseVehicle.trim().toUpperCase();
+      const normalizedPlate = (licenseVehicle || '').trim().toUpperCase();
       if (!normalizedPlate) {
         message.error('Vui lòng nhập biển số xe.');
         return;

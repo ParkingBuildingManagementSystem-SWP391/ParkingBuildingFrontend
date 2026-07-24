@@ -75,8 +75,16 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
       ) : (
         <div style={{ maxHeight: '450px', overflowY: 'auto', paddingRight: '8px', marginTop: '16px' }}>
           <Timeline
-            items={incidents.map((item) => {
-              const isResolved = item.status === 'Resolved';
+            items={(incidents || []).map((item) => {
+              const safeItem = item || {};
+              const isResolved = safeItem.status === 'Resolved';
+              
+              const formatSafeDate = (dateStr) => {
+                if (!dateStr) return '---';
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? '---' : d.toLocaleString('vi-VN');
+              };
+
               return {
                 color: isResolved ? 'green' : 'gold',
                 dot: isResolved ? <CheckCircleOutlined style={{ fontSize: '16px' }} /> : <ClockCircleOutlined style={{ fontSize: '16px' }} />,
@@ -92,23 +100,23 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#1e293b' }}>
-                        #{item.incidentId} - {item.issueType}
+                        #{safeItem.incidentId || '---'} - {safeItem.issueType || 'Sự cố'}
                       </span>
-                      {renderStatusTag(item.status)}
+                      {renderStatusTag(safeItem.status)}
                     </div>
 
-                    {item.licenseVehicle && (
+                    {safeItem.licenseVehicle && (
                       <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
-                        🚗 Biển số: <strong style={{ color: '#0f172a' }}>{item.licenseVehicle}</strong>
+                        Biển số: <strong style={{ color: '#0f172a' }}>{safeItem.licenseVehicle}</strong>
                       </div>
                     )}
 
                     <div style={{ fontSize: '13px', color: '#334155', marginBottom: '8px' }}>
-                      📝 Mô tả: {item.description || 'Không có mô tả'}
+                      Mô tả: {safeItem.description || 'Không có mô tả'}
                     </div>
 
                     <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                      ⏱️ Thời gian gửi: {new Date(item.createdAt).toLocaleString('vi-VN')}
+                      Thời gian gửi: {formatSafeDate(safeItem.createdAt)}
                     </div>
 
                     {isResolved && (
@@ -123,14 +131,14 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
                         }}
                       >
                         <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#166534', marginBottom: '4px' }}>
-                          ✅ Kết quả giải quyết từ Quản lý ({item.resolvedUsername || 'Manager'}):
+                          Kết quả giải quyết từ Quản lý ({safeItem.resolvedUsername || 'Manager'}):
                         </div>
                         <div style={{ fontSize: '12px', color: '#15803d' }}>
-                          👉 {item.resolutionNotes || 'Đã được kiểm tra và xử lý xong.'}
+                          {safeItem.resolutionNotes || 'Đã được kiểm tra và xử lý xong.'}
                         </div>
-                        {item.resolvedAt && (
+                        {safeItem.resolvedAt && (
                           <div style={{ fontSize: '11px', color: '#16a34a', marginTop: '4px' }}>
-                            ⏰ Xử lý lúc: {new Date(item.resolvedAt).toLocaleString('vi-VN')}
+                            Xử lý lúc: {formatSafeDate(safeItem.resolvedAt)}
                           </div>
                         )}
                       </div>
