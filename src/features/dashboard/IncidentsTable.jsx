@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Input, Tooltip, Space, Modal, Image, message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Camera } from 'lucide-react';
+import {
+  AlertTriangle,
+  AlertCircle,
+  Info,
+  CheckCircle2,
+  Camera,
+  MapPin,
+  Clock
+} from 'lucide-react';
 import { managerService } from '../../services/managerService';
 import { formatVietnamDateTime, parseUtcDate } from '../../utils/dateTime';
 import { useAuth } from '../../context/AuthContext';
