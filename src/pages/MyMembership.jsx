@@ -392,7 +392,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
   const [selectedSlotId, setSelectedSlotId] = useState(null);
   const [selectedSlotName, setSelectedSlotName] = useState('');
   const [licenseVehicles, setLicenseVehicles] = useState(['']);
-  const [paymentMethod, setPaymentMethod] = useState('AUTO');
+  const [paymentMethod, setPaymentMethod] = useState('WALLET');
   const [loadingTiers, setLoadingTiers] = useState(false);
   const activeTypeIdSet = useMemo(() => new Set(activeTypeIds.map(Number)), [activeTypeIds]);
   const availablePlans = useMemo(() => PLANS.filter((planItem) => !activeTypeIdSet.has(Number(planItem.id))), [activeTypeIdSet]);
@@ -733,9 +733,8 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membershipRegister.payment.title')}</p>
                 <div className="mt-2 grid grid-cols-1 gap-2">
-                  {['AUTO', 'VNPAY', 'WALLET'].map((method) => {
+                  {['WALLET', 'VNPAY'].map((method) => {
                     const getPaymentMethodLabel = (m) => {
-                      if (m === 'AUTO') return t('membershipRegister.payment.auto');
                       if (m === 'VNPAY') return t('membershipRegister.payment.vnpay');
                       if (m === 'WALLET') return t('membershipRegister.payment.wallet');
                       return m;
