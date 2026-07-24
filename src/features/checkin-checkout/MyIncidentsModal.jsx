@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Tag, Spin, Empty, Button, Timeline } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, AlertOutlined, RefreshOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, RefreshOutlined } from '@ant-design/icons';
 import incidentReportService from '../../services/incidentReportService';
 
 const MyIncidentsModal = ({ isOpen, onClose }) => {
@@ -49,7 +49,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: '24px' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertOutlined style={{ color: '#ef4444' }} /> Lịch sử Báo cáo Sự cố của tôi
+            <WarningOutlined style={{ color: '#ef4444' }} /> Lịch sử Báo cáo Sự cố của tôi
           </span>
           <Button icon={<RefreshOutlined />} size="small" onClick={fetchMyIncidents} loading={loading}>
             Làm mới
