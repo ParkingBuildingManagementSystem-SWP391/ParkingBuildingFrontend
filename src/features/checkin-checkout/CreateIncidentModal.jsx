@@ -8,7 +8,6 @@ const { TextArea } = Input;
 
 const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }) => {
   const [form] = Form.useForm();
-  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [fileList, setFileList] = useState([]);
 
@@ -59,9 +58,7 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
     try {
       let imageProofUrl = '';
       if (fileList.length > 0) {
-        setUploading(true);
         imageProofUrl = await uploadImageToCloud(fileList[0].originFileObj);
-        setUploading(false);
       }
 
       const normalizedPlate = (licenseVehicle || values.licenseVehicle || '')
@@ -90,7 +87,6 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
       message.error(err.message || 'Gửi báo cáo thất bại.');
     } finally {
       setSubmitting(false);
-      setUploading(false);
     }
   };
 

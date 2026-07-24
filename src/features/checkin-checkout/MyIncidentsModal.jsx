@@ -7,7 +7,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchMyIncidents = async () => {
+  const loadIncidents = async () => {
     setLoading(true);
     try {
       const data = await incidentReportService.getMyIncidents();
@@ -25,7 +25,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      fetchMyIncidents();
+      loadIncidents();
     }
   }, [isOpen]);
 
@@ -51,7 +51,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <WarningOutlined style={{ color: '#ef4444' }} /> Lịch sử Báo cáo Sự cố của tôi
           </span>
-          <Button icon={<RefreshOutlined />} size="small" onClick={fetchMyIncidents} loading={loading}>
+          <Button icon={<RefreshOutlined />} size="small" onClick={loadIncidents} loading={loading}>
             Làm mới
           </Button>
         </div>
