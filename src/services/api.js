@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-// src/services/api.js
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://mindy.huydevops.id.vn/api');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   timeout: 40000,
   headers: {
     'Content-Type': 'application/json',

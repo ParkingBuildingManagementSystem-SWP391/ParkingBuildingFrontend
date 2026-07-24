@@ -47,8 +47,9 @@ export const NotificationProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     
     // Cấu hình kết nối SignalR Hub
+    const hubUrl = import.meta.env.VITE_HUB_URL || (import.meta.env.DEV ? '/hubs/driver-notifications' : 'https://mindy.huydevops.id.vn/hubs/driver-notifications');
     const newConnection = new HubConnectionBuilder()
-      .withUrl('/hubs/driver-notifications', {
+      .withUrl(hubUrl, {
         accessTokenFactory: () => token || ''
       })
       .withAutomaticReconnect()
