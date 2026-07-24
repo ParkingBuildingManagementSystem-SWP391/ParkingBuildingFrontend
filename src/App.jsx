@@ -96,10 +96,14 @@ function App() {
               <Route path="/admin/parking-sessions" element={<ParkingSessionManager />} />
             </Route>
 
+            {/* Incident viewing for Manager & Staff */}
+            <Route element={<RoleProtectedRoute allowedRoles={['Manager', 'Staff']} />}>
+              <Route path="/incidents" element={<IncidentsPage />} />
+            </Route>
+
             {/* Manager dashboard feature pages */}
             <Route element={<RoleProtectedRoute allowedRoles={['Manager']} />}>
               <Route path="/live-status" element={<LiveStatusPage />} />
-              <Route path="/incidents" element={<IncidentsPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/slot-management" element={<SlotManagementPage />} />
               <Route path="/staff-logs" element={<StaffLogsPage />} />

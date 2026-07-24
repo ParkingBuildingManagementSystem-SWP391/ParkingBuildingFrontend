@@ -8,7 +8,6 @@ const { TextArea } = Input;
 
 const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }) => {
   const [form] = Form.useForm();
-  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [fileList, setFileList] = useState([]);
 
@@ -21,11 +20,12 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
     }
   }, [form, isOpen, licenseVehicle]);
 
+  const selectedIssueType = Form.useWatch('issueType', form);
+
   const issueTypes = [
     { value: 'Lost Ticket', label: 'Mất thẻ giữ xe' },
     { value: 'Vehicle Damage', label: 'Xe bị va chạm / Hư hỏng' },
     { value: 'Equipment Malfunction', label: 'Lỗi thiết bị (Barrier/Camera/Hệ thống)' },
-    { value: 'Staff Complaint', label: 'Khiếu nại nhân viên' },
     { value: 'Other', label: 'Khác' },
   ];
 
@@ -58,22 +58,20 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
     try {
       let imageProofUrl = '';
       if (fileList.length > 0) {
-        setUploading(true);
         imageProofUrl = await uploadImageToCloud(fileList[0].originFileObj);
-        setUploading(false);
       }
 
       const normalizedPlate = (licenseVehicle || values.licenseVehicle || '')
         .trim()
         .toUpperCase();
 
-      if (!normalizedPlate) {
+      if (values.issueType !== 'EquipmentMalfunction' && !normalizedPlate) {
         message.error('Vui lòng nhập biển số xe.');
         return;
       }
 
       const payload = {
-        licenseVehicle: normalizedPlate,
+        licenseVehicle: normalizedPlate || null,
         issueType: values.issueType,
         description: values.description,
         imageProofUrl,
@@ -89,7 +87,6 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
       message.error(err.message || 'Gửi báo cáo thất bại.');
     } finally {
       setSubmitting(false);
-      setUploading(false);
     }
   };
 
@@ -127,11 +124,16 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
         <Form.Item
           name="licenseVehicle"
           label="Biển số xe:"
-          rules={[{ required: true, message: 'Vui lòng nhập biển số xe!' }]}
+          rules={[
+            {
+              required: selectedIssueType !== 'EquipmentMalfunction',
+              message: 'Vui lòng nhập biển số xe!',
+            },
+          ]}
         >
           <Input
             disabled={!!licenseVehicle}
-            placeholder="VD: 51A12345"
+            placeholder={selectedIssueType === 'EquipmentMalfunction' ? 'Không bắt buộc với sự cố thiết bị' : 'VD: 51A12345'}
           />
         </Form.Item>
 

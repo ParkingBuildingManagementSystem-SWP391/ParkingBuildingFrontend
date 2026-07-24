@@ -77,6 +77,21 @@ const incidentReportService = {
       throw handledError;
     }
   },
+
+  /**
+   * 5. Lấy danh sách sự cố cá nhân của tài khoản đang đăng nhập
+   * Vai trò: Staff, Registered_Driver
+   */
+  getMyIncidents: async (signal) => {
+    try {
+      const response = await api.get('/incident-reports/my-incidents', { signal });
+      return response.data;
+    } catch (error) {
+      const handledError = unwrapError(error, 'Không thể tải danh sách sự cố cá nhân.');
+      if (handledError === null) return null;
+      throw handledError;
+    }
+  },
 };
 
 export default incidentReportService;
