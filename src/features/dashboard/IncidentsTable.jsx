@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Table, Button, Input, Tooltip, Space, Modal, Image, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
@@ -60,7 +60,7 @@ const IncidentsTable = () => {
         params.status = 'Resolved';
       } else if (filterSeverity !== 'All') {
         params.severity = filterSeverity;
-        params.status = 'Open';
+        params.status = 'Pending';
       }
       
       if (searchText.trim() !== '') {
