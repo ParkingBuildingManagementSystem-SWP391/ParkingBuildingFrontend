@@ -73,7 +73,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
       ) : incidents.length === 0 ? (
         <Empty description="Bạn chưa gửi báo cáo sự cố nào." style={{ margin: '30px 0' }} />
       ) : (
-        <div style={{ maxHeight: '450px', overflowY: 'auto', paddingRight: '8px', marginTop: '16px' }}>
+        <div style={{ maxHeight: '450px', overflowY: 'auto', paddingLeft: '24px', paddingRight: '8px', paddingTop: '8px', marginTop: '16px' }}>
           <Timeline
             items={(incidents || []).map((item) => {
               const safeItem = item || {};
