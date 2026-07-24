@@ -297,7 +297,7 @@ const ParkingLotMap = () => {
   // Form states for booking
   const [bookingVehicleType, setBookingVehicleType] = useState('Motorcycle');
   const [bookingPlate, setBookingPlate] = useState('');
-  const [bookingPaymentMethod, setBookingPaymentMethod] = useState('AUTO');
+  const [bookingPaymentMethod, setBookingPaymentMethod] = useState('WALLET');
   const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
   const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
 
@@ -1447,7 +1447,7 @@ const ParkingLotMap = () => {
                   <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">Phuong thuc thanh toan coc</label>
                   <div className="grid grid-cols-1 gap-2">
                     {[
-                      { value: 'AUTO', label: 'Tu dong', Icon: Wallet },
+                      { value: 'WALLET', label: 'Ví điện tử', Icon: Wallet },
                     ].map(({ value, label, Icon }) => {
                       const isSelected = bookingPaymentMethod === value;
                       return (

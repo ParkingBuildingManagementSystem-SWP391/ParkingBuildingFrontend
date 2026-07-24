@@ -3,7 +3,6 @@ import api from './api';
 export const parkingService = {
   getFloors: async () => {
     try {
-      // TODO backend: implement GET /api/Parking/floors returning floor metadata.
       const response = await api.get('/Parking/floors');
       return response.data;
     } catch (error) {
@@ -24,7 +23,7 @@ export const parkingService = {
   },
 
   // 2. Tài xế đặt chỗ trước qua Web (Book Parking Slot)
-  bookSlot: async (slotIdOrPayload, vehicleTypeId, licenseVehicle, expectedCheckInTime, paymentMethod = 'AUTO') => {
+  bookSlot: async (slotIdOrPayload, vehicleTypeId, licenseVehicle, expectedCheckInTime, paymentMethod = 'WALLET') => {
     try {
       const payload = typeof slotIdOrPayload === 'object' && slotIdOrPayload !== null
         ? slotIdOrPayload
@@ -41,7 +40,7 @@ export const parkingService = {
         licenseVehicle: String(payload.licenseVehicle || '').trim().toUpperCase(),
         typeId: parseInt(payload.vehicleTypeId ?? payload.typeId),
         expectedCheckInTime: payload.expectedCheckInTime,
-        paymentMethod: payload.paymentMethod || 'AUTO'
+        paymentMethod: payload.paymentMethod || 'WALLET'
       });
       return response.data;
     } catch (error) {
@@ -56,13 +55,11 @@ export const parkingService = {
       formData.append('imageFile', imageFile);
       formData.append('vehicleTypeId', vehicleTypeId);
 
-      // GHI ĐÈ HEADER MULTIPART/FORM-DATA ĐỂ TRÁNH LỖI 400
       const response = await api.post('/Parking/recognize', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
     } catch (error) {
-      // IN CHI TIẾT LỖI RA CONSOLE ĐỂ BẤM F12 XEM ĐƯỢC NGAY (LỖI CLOUDINARY, DB, HỆ THỐNG...)
       console.warn("RECOGNIZE API ERROR DETAIL:", error.response?.data || error);
       const serverMessage = error.response?.data?.message || 
                             error.response?.data?.Message || 
@@ -109,7 +106,7 @@ export const parkingService = {
   },
 
   // 5. Nhân viên quét xe cho xe ra cổng (Check-out - Tính phí & giải phóng slot)
-  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'AUTO') => {
+  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'CASH') => {
     try {
       const formData = new FormData();
       if (ticketCode) formData.append('TicketCode', ticketCode.trim());
@@ -142,7 +139,7 @@ export const parkingService = {
     }
   },
 
-  // 7. Lấy trạng thái thanh toán của hóa đơn
+  // 7. Lấy danh sách đặt chỗ của tôi
   getMyBookings: async () => {
     try {
       const timestamp = new Date().getTime();
@@ -209,7 +206,7 @@ export const parkingService = {
     }
   },
 
-  // 8. Tạo URL thanh toán VNPay cho tài xế tự thanh toán trước (Pre-Exit Payment)
+  // 8. Thanh toán hóa đơn bằng Ví
   payPendingInvoiceWallet: async (invoiceId) => {
     try {
       const response = await api.post('/Payments/pay-pending-invoice-wallet', {
@@ -254,7 +251,7 @@ export const parkingService = {
   cancelBooking: async (sessionId) => {
     try {
       const response = await api.post(`/Parking/cancel-booking/${sessionId}`);
-      return response.data; // Trả về { isSuccess: true, message: "..." }
+      return response.data;
     } catch (error) {
       const serverMessage = error.response?.data?.message || error.response?.data?.error || "Hủy đặt chỗ thất bại.";
       throw serverMessage;

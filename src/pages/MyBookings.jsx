@@ -20,6 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { toast as message } from '../components/ToastProvider';
 import CreateIncidentModal from '../features/checkin-checkout/CreateIncidentModal';
+import MyIncidentsModal from '../features/checkin-checkout/MyIncidentsModal';
 import { formatVietnamDate, formatVietnamTime, parseUtcDate } from '../utils/dateTime';
 
 const MyBookings = () => {
@@ -61,6 +62,7 @@ const MyBookings = () => {
   const [targetBooking, setTargetBooking] = useState(null);
   const [payingSessionId, setPayingSessionId] = useState(null);
   const [isIncidentOpen, setIsIncidentOpen] = useState(false);
+  const [isMyIncidentsOpen, setIsMyIncidentsOpen] = useState(false);
   const [selectedLicenseVehicleForIncident, setSelectedLicenseVehicleForIncident] = useState('');
 
   const handlePayVNPay = async (booking) => {
@@ -399,37 +401,46 @@ const MyBookings = () => {
 
       </div>
 
-      {/* 3. STATUS FILTER TABS (Segmented Control Design) */}
-      <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-800">
+      {/* 3. STATUS FILTER TABS & INCIDENT HISTORY BUTTON */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-800">
+          <button
+            onClick={() => setActiveTab('All')}
+            className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
+              activeTab === 'All'
+                ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            {t('myBookings.all')}
+          </button>
+          <button
+            onClick={() => setActiveTab('Active')}
+            className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
+              activeTab === 'Active'
+                ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            {t('myBookings.active')}
+          </button>
+          <button
+            onClick={() => setActiveTab('Expired')}
+            className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
+              activeTab === 'Expired'
+                ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            {t('myBookings.expired')}
+          </button>
+        </div>
+
         <button
-          onClick={() => setActiveTab('All')}
-          className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
-            activeTab === 'All'
-              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
-              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-          }`}
+          onClick={() => setIsMyIncidentsOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 text-xs font-extrabold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all shadow-sm active:scale-95 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400"
         >
-          {t('myBookings.all')}
-        </button>
-        <button
-          onClick={() => setActiveTab('Active')}
-          className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
-            activeTab === 'Active'
-              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
-              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-          }`}
-        >
-          {t('myBookings.active')}
-        </button>
-        <button
-          onClick={() => setActiveTab('Expired')}
-          className={`px-6 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
-            activeTab === 'Expired'
-              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
-              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-          }`}
-        >
-          {t('myBookings.expired')}
+          <AlertCircle size={16} /> Lịch sử Báo cáo Sự cố
         </button>
       </div>
 
@@ -773,6 +784,12 @@ const MyBookings = () => {
           message.success(t('myBookings.reportIncidentSuccess') || 'Đã gửi báo cáo sự cố!');
           fetchMyBookings();
         }}
+      />
+
+      {/* 8. MODAL XEM LỊCH SỬ SỰ CỐ CỦA TÀI XẾ */}
+      <MyIncidentsModal
+        isOpen={isMyIncidentsOpen}
+        onClose={() => setIsMyIncidentsOpen(false)}
       />
     </div>
   );

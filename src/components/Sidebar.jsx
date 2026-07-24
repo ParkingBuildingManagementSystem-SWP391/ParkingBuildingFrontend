@@ -103,6 +103,7 @@ const Sidebar = ({
           <SectionTitle isCollapsed={isCollapsed}>{t('sidebar.operations')}</SectionTitle>
           <NavButton path="/checkin-checkout" icon={ScanLine} label={t('sidebar.gateControl')} isCollapsed={isCollapsed} />
           <NavButton path="/parking-map" icon={Map} label={t('sidebar.parkingMap')} isCollapsed={isCollapsed} />
+          <NavButton path="/incidents" icon={AlertTriangle} label={t('sidebar.incidents')} isCollapsed={isCollapsed} />
         </div>
       );
     }
