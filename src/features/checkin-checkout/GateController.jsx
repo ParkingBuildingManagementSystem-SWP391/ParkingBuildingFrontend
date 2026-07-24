@@ -500,7 +500,7 @@ const GateController = () => {
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
   // New checkout payment states
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('AUTO');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('CASH');
   const [cashReceived, setCashReceived] = useState('');
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [changeDue, setChangeDue] = useState(null);
@@ -649,7 +649,7 @@ const GateController = () => {
   };
 
   // Unified exit check-out handler (Supports matching by ticketCode + licensePlate)
-  const handleCheckOut = async (paymentMethod = 'AUTO', plateToUse = null) => {
+  const handleCheckOut = async (paymentMethod = 'CASH', plateToUse = null) => {
     const plate = plateToUse || checkOutForm.getFieldValue('plate');
     const ticketCode = checkOutForm.getFieldValue('ticketCode');
     const tempImageUrl = checkOutForm.getFieldValue('tempImageUrl') || null;
@@ -770,7 +770,7 @@ const GateController = () => {
     }
 
     // Mặc định gọi check-out bằng CASH để mở Modal hóa đơn
-    handleCheckOut('AUTO');
+    handleCheckOut('CASH');
   };
 
   // Cash payment confirmation handler
@@ -1591,7 +1591,7 @@ const GateController = () => {
             checkoutResult.paymentMethod || checkoutResult.PaymentMethod || selectedPaymentMethod || ''
           ).toUpperCase();
           const isVnPayPending = isSuccess && !isPaid && Boolean(paymentUrl);
-          const isCashPending = isSuccess && !isPaid && !paymentUrl && ['AUTO', 'CASH', ''].includes(effectivePaymentMethod);
+          const isCashPending = isSuccess && !isPaid && !paymentUrl && ['CASH', ''].includes(effectivePaymentMethod);
           const extraAmount = checkoutResult.extraAmount ?? checkoutResult.ExtraAmount ?? checkoutResult.additionalAmount ?? checkoutResult.AdditionalAmount;
           const isOverGracePeriod = checkoutResult.isOverGracePeriod ?? checkoutResult.IsOverGracePeriod;
           const hasExtraFeeSignal = !isPaid && (

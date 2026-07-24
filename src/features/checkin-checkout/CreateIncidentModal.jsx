@@ -21,11 +21,12 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
     }
   }, [form, isOpen, licenseVehicle]);
 
+  const selectedIssueType = Form.useWatch('issueType', form);
+
   const issueTypes = [
     { value: 'Lost Ticket', label: 'Mất thẻ giữ xe' },
     { value: 'Vehicle Damage', label: 'Xe bị va chạm / Hư hỏng' },
     { value: 'Equipment Malfunction', label: 'Lỗi thiết bị (Barrier/Camera/Hệ thống)' },
-    { value: 'Staff Complaint', label: 'Khiếu nại nhân viên' },
     { value: 'Other', label: 'Khác' },
   ];
 
@@ -67,13 +68,13 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
         .trim()
         .toUpperCase();
 
-      if (!normalizedPlate) {
+      if (values.issueType !== 'EquipmentMalfunction' && !normalizedPlate) {
         message.error('Vui lòng nhập biển số xe.');
         return;
       }
 
       const payload = {
-        licenseVehicle: normalizedPlate,
+        licenseVehicle: normalizedPlate || null,
         issueType: values.issueType,
         description: values.description,
         imageProofUrl,
@@ -127,11 +128,16 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
         <Form.Item
           name="licenseVehicle"
           label="Biển số xe:"
-          rules={[{ required: true, message: 'Vui lòng nhập biển số xe!' }]}
+          rules={[
+            {
+              required: selectedIssueType !== 'EquipmentMalfunction',
+              message: 'Vui lòng nhập biển số xe!',
+            },
+          ]}
         >
           <Input
             disabled={!!licenseVehicle}
-            placeholder="VD: 51A12345"
+            placeholder={selectedIssueType === 'EquipmentMalfunction' ? 'Không bắt buộc với sự cố thiết bị' : 'VD: 51A12345'}
           />
         </Form.Item>
 

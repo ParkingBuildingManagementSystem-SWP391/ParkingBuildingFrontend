@@ -14,9 +14,12 @@ import {
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
 import { formatVietnamDateTime, parseUtcDate } from '../../utils/dateTime';
+import { useAuth } from '../../context/AuthContext';
 
 const IncidentsTable = () => {
   const { t } = useTranslation();
+  const { role } = useAuth();
+  const isManager = String(role || '').toLowerCase() === 'manager';
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -252,14 +255,16 @@ const IncidentsTable = () => {
                 onClick={() => record.imageProofUrl ? setEvidenceIncident(record) : message.info(t('dashboard.incidents.noCameraEvidence'))}
               />
             </Tooltip>
-            <Button
-              type="primary"
-              size="small"
-              className="rounded-[12px] border-0 bg-emerald-600 font-bold shadow-sm hover:bg-emerald-700"
-              onClick={() => handleResolve(record.id)}
-            >
-              {t('dashboard.incidents.resolve')}
-            </Button>
+            {isManager && (
+              <Button
+                type="primary"
+                size="small"
+                className="rounded-[12px] border-0 bg-emerald-600 font-bold shadow-sm hover:bg-emerald-700"
+                onClick={() => handleResolve(record.id)}
+              >
+                {t('dashboard.incidents.resolve')}
+              </Button>
+            )}
           </Space>
         );
       }
