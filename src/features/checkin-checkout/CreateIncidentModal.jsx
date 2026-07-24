@@ -159,7 +159,7 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
           <Button onClick={onClose} disabled={submitting}>Hủy</Button>
-          <Button type="primary" htmlType="submit" loading={submitting || uploading} danger>
+          <Button type="primary" htmlType="submit" loading={submitting} danger>
             Gửi báo cáo
           </Button>
         </div>
