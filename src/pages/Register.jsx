@@ -97,7 +97,7 @@ const Register = () => {
     setErrorMsg('');
 
     try {
-      const verifyRes = await authService.verifyEmail(email, otpString);
+      const verifyRes = await authService.verifyOtp(email, otpString);
 
       if (verifyRes) {
         const loginRes = await authService.login(email, password);
