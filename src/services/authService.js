@@ -51,12 +51,26 @@ export const authService = {
     }
   },
 
-  // 2. Hàm Đăng ký tài khoản mới
-  register: async (username, email, password) => {
+  // 2. Hàm Đăng ký tài khoản mới (Hỗ trợ cả tham số Object và tham số vị trí)
+  register: async (arg1, arg2, arg3) => {
     try {
+      let username = '';
+      let email = '';
+      let password = '';
+
+      if (typeof arg1 === 'object' && arg1 !== null) {
+        username = arg1.username || '';
+        email = arg1.email || '';
+        password = arg1.password || '';
+      } else {
+        username = arg1 || '';
+        email = arg2 || '';
+        password = arg3 || '';
+      }
+
       const payload = {
-        username: username.trim(),
-        email: email.trim(),
+        username: username.toString().trim(),
+        email: email.toString().trim(),
         password: password
       };
       const response = await api.post('/Auth/register', payload);
