@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -1291,7 +1292,7 @@ const ParkingLotMap = () => {
       </div>
 
       {/* 3. CREATE BOOKING MODAL (Drivers Only) */}
-      {isBookingModalOpen && selectedSlot && (
+      {isBookingModalOpen && selectedSlot && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in" />
           <div className="relative z-10 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-100 bg-white font-sans shadow-2xl animate-scale-in dark:border-slate-700 dark:bg-slate-900">
@@ -1470,14 +1471,15 @@ const ParkingLotMap = () => {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 4. SPACE OPERATIONAL DETAILS MODAL (Staff, Managers, Admins) */}
-      {isDetailsModalOpen && selectedSlot && (
+      {isDetailsModalOpen && selectedSlot && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in" />
-          <div className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-scale-in relative font-sans dark:border-slate-700 dark:bg-slate-900">
+          <div className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-slate-100 animate-scale-in font-sans dark:border-slate-700 dark:bg-slate-900">
 
             <button
               onClick={() => setIsDetailsModalOpen(false)}
@@ -1690,7 +1692,8 @@ const ParkingLotMap = () => {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
