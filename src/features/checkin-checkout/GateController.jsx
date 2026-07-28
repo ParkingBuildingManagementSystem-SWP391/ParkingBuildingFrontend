@@ -363,8 +363,7 @@ const GateController = () => {
       const res = await staffService.startShift();
       if (res && res.isSuccess) {
         message.success("Mở ca trực thành công!");
-        setActiveShift(res.data);
-        setIsShiftModalOpen(false);
+        await checkActiveShift();
       } else {
         message.error(res?.message || "Không thể mở ca trực.");
       }
@@ -703,6 +702,7 @@ const GateController = () => {
         setCashReceived(totalAmt.toString());
         if (isPaid) {
           message.success(messageText || t('gate.messages.prePaidCheckout'));
+          checkActiveShift();
           setTimeout(() => {
             handleCloseCheckoutResultModal();
           }, 3000);
@@ -800,6 +800,7 @@ const GateController = () => {
           IsPaid: true,
           message: t('gate.messages.cashComplete')
         }));
+        checkActiveShift();
         setTimeout(() => {
           handleCloseCheckoutResultModal();
         }, 3000);
@@ -831,6 +832,7 @@ const GateController = () => {
           IsPaid: true,
           message: t('gate.messages.vnpayComplete')
         }));
+        checkActiveShift();
         setTimeout(() => {
           handleCloseCheckoutResultModal();
         }, 2000);
@@ -863,6 +865,7 @@ const GateController = () => {
               IsPaid: true,
               message: t('gate.messages.vnpayComplete')
             }));
+            checkActiveShift();
             clearInterval(intervalId);
             setTimeout(() => {
               handleCloseCheckoutResultModal();
@@ -932,7 +935,10 @@ const GateController = () => {
           <Button
             type="primary"
             danger
-            onClick={() => setIsEndShiftModalOpen(true)}
+            onClick={async () => {
+              await checkActiveShift();
+              setIsEndShiftModalOpen(true);
+            }}
             className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700 border-none h-10 px-5 flex items-center gap-1.5"
           >
             {t('staffShifts.shiftBannerBtn')}
