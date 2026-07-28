@@ -620,14 +620,21 @@ const MyBookings = () => {
                       <QrCode size={14} /> {t('myBookings.viewQR')}
                     </button>
 
-                    {/* Nút báo cáo sự cố (Chỉ hiển thị cho các lượt đỗ đang diễn ra hoặc đã kết thúc) */}
+                    {/* Nút báo cáo sự cố (Chỉ cho phép khi xe đã qua cổng Check-In hoặc phiên đỗ đã hoàn thành) */}
                     {booking.sessionStatus !== 'Canceled' && (
                       <button
+                        disabled={booking.sessionStatus === 'Reserved'}
+                        title={booking.sessionStatus === 'Reserved' ? "Chỉ có thể báo cáo sự cố khi xe đã qua cổng (Check-In)" : ""}
                         onClick={() => {
+                          if (booking.sessionStatus === 'Reserved') return;
                           setSelectedLicenseVehicleForIncident(booking.contact);
                           setIsIncidentOpen(true);
                         }}
-                        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-orange-200 bg-white px-4 text-xs font-bold text-orange-600 shadow-sm transition-all hover:bg-orange-50 dark:border-orange-500/40 dark:bg-slate-800 dark:text-orange-300 dark:hover:bg-orange-500/15 lg:flex-none"
+                        className={`flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[14px] border px-4 text-xs font-bold shadow-sm transition-all lg:flex-none ${
+                          booking.sessionStatus === 'Reserved'
+                            ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-500'
+                            : 'border-orange-200 bg-white text-orange-600 hover:bg-orange-50 dark:border-orange-500/40 dark:bg-slate-800 dark:text-orange-300 dark:hover:bg-orange-500/15'
+                        }`}
                       >
                         <AlertCircle size={14} /> {t('myBookings.reportIncident') || 'Báo cáo sự cố'}
                       </button>

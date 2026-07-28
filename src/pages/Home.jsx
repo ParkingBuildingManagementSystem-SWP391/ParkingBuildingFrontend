@@ -59,6 +59,7 @@ const Home = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
   const lastScrollY = useRef(0);
 
   const scrollToTop = () => {
@@ -97,6 +98,57 @@ const Home = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === '#locate-vehicle' || hash === '/#locate-vehicle') {
+        setActiveSection('locate');
+      } else if (hash === '#contact' || hash === '/#contact') {
+        setActiveSection('contact');
+      } else {
+        setActiveSection('home');
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+
+    const sections = [
+      { id: 'home-hero', key: 'home' },
+      { id: 'locate-vehicle', key: 'locate' },
+      { id: 'contact', key: 'contact' }
+    ];
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-40% 0px -40% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const matched = sections.find((s) => s.id === entry.target.id);
+          if (matched) {
+            setActiveSection(matched.key);
+          }
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach((sec) => {
+      const el = document.getElementById(sec.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
+      observer.disconnect();
+    };
+  }, [location.pathname, location.hash]);
 
   const displayName = user?.fullName || user?.name || user?.username || user?.email || t('home.defaultAccount');
   const rawDisplayRole = user?.role || user?.roleName || user?.userRole || user?.roles?.[0] || role;
@@ -198,12 +250,37 @@ const Home = () => {
           </Link>
         </div>
 
-        <nav className="hidden shrink-0 items-center gap-2 text-[13px] font-bold text-indigo-600 dark:text-white md:flex">
-          <Link className="inline-block w-28 text-center transition-colors hover:text-indigo-700 dark:hover:text-indigo-200" to="/">{t('home.navHome')}</Link>
-          <a className="inline-block w-28 text-center transition-colors hover:text-indigo-700 dark:hover:text-indigo-200" href="/#locate-vehicle">
+        <nav className="hidden shrink-0 items-center gap-2 text-[13px] font-bold md:flex">
+          <Link
+            className={`inline-block w-28 text-center transition-colors ${
+              activeSection === 'home'
+                ? 'text-indigo-600 dark:text-indigo-400 font-extrabold'
+                : 'text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300'
+            }`}
+            to="/"
+          >
+            {t('home.navHome')}
+          </Link>
+          <a
+            className={`inline-block w-28 text-center transition-colors ${
+              activeSection === 'locate'
+                ? 'text-indigo-600 dark:text-indigo-400 font-extrabold'
+                : 'text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300'
+            }`}
+            href="/#locate-vehicle"
+          >
             {t('home.navLocate')}
           </a>
-          <a className="inline-block w-28 text-center transition-colors hover:text-indigo-700 dark:hover:text-indigo-200" href="#contact">{t('home.navContact')}</a>
+          <a
+            className={`inline-block w-28 text-center transition-colors ${
+              activeSection === 'contact'
+                ? 'text-indigo-600 dark:text-indigo-400 font-extrabold'
+                : 'text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300'
+            }`}
+            href="#contact"
+          >
+            {t('home.navContact')}
+          </a>
         </nav>
 
         <div className="flex min-w-0 flex-1 justify-end">
@@ -364,7 +441,7 @@ const Home = () => {
       </header>
 
       {/* ══════════════════ HERO ══════════════════ */}
-      <section className="relative w-full max-w-full overflow-hidden">
+      <section id="home-hero" className="relative w-full max-w-full overflow-hidden">
         {/* decorative blobs */}
         <div className="anim-drift pointer-events-none absolute left-1/2 top-[-8rem] h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/15 sm:-left-32 sm:top-[-8rem] sm:h-[500px] sm:w-[500px] sm:translate-x-0" />
         <div className="anim-drift-slow pointer-events-none absolute bottom-[-4rem] right-[-6rem] h-80 w-80 rounded-full bg-indigo-400/10 blur-3xl dark:bottom-[-2rem] dark:bg-violet-500/10 sm:-bottom-24 sm:-right-40 sm:h-[600px] sm:w-[600px] dark:sm:-bottom-12" />
