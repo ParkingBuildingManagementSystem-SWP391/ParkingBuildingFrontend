@@ -1441,35 +1441,8 @@ const ParkingLotMap = () => {
                   <p className="rounded-[14px] border border-orange-100 bg-orange-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-orange-700 dark:border-orange-500/40 dark:bg-orange-500/15 dark:text-orange-300">
                     {t('parkingMap.cancellationWarning')}
                   </p>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.depositPaymentMethod')}</label>
-                  <div className="grid grid-cols-1 gap-2">
-                    {[
-
-                      { value: 'AUTO', label: t('parkingMap.autoPayment'), Icon: Wallet },
-                      { value: 'WALLET', label: 'Ví điện tử', Icon: Wallet },
-                    ].map(({ value, label, Icon }) => {
-                      const isSelected = bookingPaymentMethod === value;
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setBookingPaymentMethod(value)}
-                          className={`flex h-11 items-center justify-center gap-2 rounded-[14px] border text-xs font-extrabold transition duration-200 active:scale-95 ${
-                            isSelected
-                              ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 shadow-sm'
-                              : 'border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                          }`}
-                        >
-                          <Icon size={15} />
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-[11px] font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] font-medium leading-relaxed text-slate-500 dark:text-slate-400 mt-2">
                     {t('parkingMap.noDepositRequiredNote')}
                   </p>
                 </div>
