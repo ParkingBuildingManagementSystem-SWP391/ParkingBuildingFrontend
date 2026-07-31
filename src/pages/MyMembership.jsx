@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  AlertTriangle,
   Bike,
   CalendarCheck,
   CalendarX2,
@@ -401,6 +402,7 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
   const [selectedSlotName, setSelectedSlotName] = useState('');
   const [licenseVehicles, setLicenseVehicles] = useState(['']);
   const [paymentMethod, setPaymentMethod] = useState('WALLET');
+  const [agreeNoRefund, setAgreeNoRefund] = useState(false);
   const [loadingTiers, setLoadingTiers] = useState(false);
   const activeTypeIdSet = useMemo(() => new Set(activeTypeIds.map(Number)), [activeTypeIds]);
   const availablePlans = useMemo(() => PLANS.filter((planItem) => !activeTypeIdSet.has(Number(planItem.id))), [activeTypeIdSet]);
@@ -506,6 +508,11 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
 
     if (!selectedSlotId) {
       message.error(t('membershipRegister.errors.selectFixedSlot'));
+      return;
+    }
+
+    if (!agreeNoRefund) {
+      message.error(t('membershipRegister.errors.mustAgreeTerms', 'Vui lòng xác nhận đồng ý với điều kiện không hoàn tiền khi hủy thẻ.'));
       return;
     }
 
@@ -784,6 +791,33 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
                   </li>
                 ))}
               </ul>
+
+              {/* Card xác nhận thông tin & Điều khoản không hoàn tiền */}
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/80 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <div className="space-y-0.5 text-xs">
+                    <h5 className="font-extrabold text-amber-900 dark:text-amber-200">
+                      {t('membershipRegister.terms.title', 'Xác nhận điều khoản hủy thẻ')}
+                    </h5>
+                    <p className="text-[11px] leading-relaxed font-medium text-amber-800/90 dark:text-amber-300/90">
+                      {t('membershipRegister.terms.noRefundWarning', 'Thẻ Membership sau khi đăng ký thành công sẽ không được hoàn lại tiền dưới bất kỳ hình thức nào khi bạn chủ động hủy thẻ.')}
+                    </p>
+                  </div>
+                </div>
+
+                <label className="mt-2.5 flex items-center gap-2 cursor-pointer pt-2 border-t border-amber-200/60 dark:border-amber-500/20">
+                  <input
+                    type="checkbox"
+                    checked={agreeNoRefund}
+                    onChange={(e) => setAgreeNoRefund(e.target.checked)}
+                    className="h-4 w-4 rounded border-amber-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                  />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 select-none">
+                    {t('membershipRegister.terms.agreeCheckbox', 'Tôi đã đọc và đồng ý với điều kiện trên')}
+                  </span>
+                </label>
+              </div>
             </div>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-10 dark:border-slate-700">
@@ -793,11 +827,11 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
           )}
 
           <button
-            disabled={!selectedTier || submitting}
+            disabled={!selectedTier || !agreeNoRefund || submitting}
             onClick={handleSubmit}
-            className={`mt-4 flex w-full items-center justify-center gap-2 rounded-[14px] py-3 text-sm font-extrabold transition-all ${selectedTier && !submitting
+            className={`mt-4 flex w-full items-center justify-center gap-2 rounded-[14px] py-3 text-sm font-extrabold transition-all ${selectedTier && agreeNoRefund && !submitting
                 ? 'bg-indigo-600 text-white shadow-sm hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md'
-                : 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600'
+                : 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 opacity-60'
               }`}
           >
             {submitting ? (

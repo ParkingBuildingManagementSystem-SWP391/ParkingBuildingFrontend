@@ -680,7 +680,7 @@ const GateController = () => {
   };
 
   // Unified exit check-out handler (Supports matching by ticketCode + licensePlate)
-  const handleCheckOut = async (paymentMethod = 'CASH', plateToUse = null) => {
+  const handleCheckOut = async (paymentMethod = 'AUTO', plateToUse = null) => {
     const plate = plateToUse || checkOutForm.getFieldValue('plate');
     const ticketCode = checkOutForm.getFieldValue('ticketCode');
     const tempImageUrl = checkOutForm.getFieldValue('tempImageUrl') || null;
@@ -791,21 +791,8 @@ const GateController = () => {
 
   // Perform Check-out (form submit)
   const handleCheckOutSubmit = (values) => {
-    const ticketCode = values.ticketCode?.trim();
-    
-    // Định tuyến thông minh nếu quét nhầm mã đặt chỗ (booking) vào cổng ra
-    if (ticketCode && ticketCode.includes('SLOT:') && !ticketCode.includes('TICKET:WK_') && !ticketCode.startsWith('WK_')) {
-      checkOutForm.setFieldsValue({ ticketCode: '' });
-      checkInForm.setFieldsValue({ ticketCode });
-      message.info(t('gate.messages.autoRouteToCheckIn'));
-      setTimeout(() => {
-        entryQrInputRef.current?.focus();
-      }, 100);
-      return;
-    }
-
-    // Mặc định gọi check-out bằng CASH để mở Modal hóa đơn
-    handleCheckOut('CASH');
+    // Cho phép gọi thẳng Check-out, Backend sẽ tự động phân tích và bóc tách mã QR Booking
+    handleCheckOut('AUTO');
   };
 
   // Cash payment confirmation handler
