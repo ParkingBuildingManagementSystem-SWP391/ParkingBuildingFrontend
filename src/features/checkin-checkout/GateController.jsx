@@ -236,7 +236,7 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
                 return false;
               }}
               showUploadList={false}
-              className="flex-1 flex"
+              className="flex-1 flex [&_.ant-upload]:w-full [&_.ant-upload-select-holder]:w-full"
             >
               <Button className="w-full h-11 border-[1.5px] border-slate-200 hover:border-indigo-400 hover:text-indigo-600 rounded-[14px] flex items-center justify-center gap-1.5 font-bold shadow-sm">
                 <UploadIcon size={15} /> {t('gate.camera.upload')}

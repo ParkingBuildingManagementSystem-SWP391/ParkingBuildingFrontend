@@ -4,9 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import Logo from './Logo';
-import NotificationBell from './NotificationBell';
 import {
-  Bell,
   ChevronDown,
   Languages,
   LogIn,
@@ -158,9 +156,6 @@ const Header = ({ onOpenSidebar, hasSidebar = true, showLogo = true, pageTitle, 
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-        <div className="hidden sm:block">
-          <NotificationBell />
-        </div>
 
         <button
           type="button"
