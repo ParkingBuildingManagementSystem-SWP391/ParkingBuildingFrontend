@@ -171,3 +171,30 @@ export const formatVietnamDateTimeWithSeconds = (value) => {
 };
 
 export const formatVietnamTimeWithSeconds = (value) => formatTimeWithSecondsVN(value, 'N/A');
+
+export const formatIncidentTypeLabel = (rawType, t) => {
+  if (!rawType) return t ? t('createIncident.typeOther') : 'Khác';
+  const clean = String(rawType).trim();
+  const lower = clean.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  if (lower.includes('platemismatch') || lower.includes('platename') || lower.includes('bienso')) {
+    return t ? t('dashboard.incidents.typePlateMismatch') : 'Không khớp biển số';
+  }
+  if (lower.includes('ticketmismatch') || lower.includes('ticketcode') || lower.includes('mave')) {
+    return t ? t('dashboard.incidents.typeTicketMismatch') : 'Không khớp mã vé';
+  }
+  if (lower.includes('lostticket') || lower.includes('lost') || lower.includes('matthe')) {
+    return t ? t('createIncident.typeLostTicket') : 'Mất thẻ giữ xe';
+  }
+  if (lower.includes('vehicledamage') || lower.includes('damage') || lower.includes('vacham') || lower.includes('huhong')) {
+    return t ? t('createIncident.typeVehicleDamage') : 'Xe bị va chạm / Hư hỏng';
+  }
+  if (lower.includes('equipment') || lower.includes('loithietbi') || lower.includes('malfunction') || lower.includes('failure')) {
+    return t ? t('createIncident.typeEquipmentMalfunction') : 'Lỗi thiết bị (Barrier/Camera/Hệ thống)';
+  }
+  if (lower.includes('other') || lower.includes('khac')) {
+    return t ? t('createIncident.typeOther') : 'Khác';
+  }
+
+  return clean;
+};

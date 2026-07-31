@@ -814,7 +814,9 @@
       "filterResolved": "Đã xử lý",
       "search": "Tìm sự cố...",
       "emptyTextError": "Không có dữ liệu sự cố để hiển thị.",
-      "emptyText": "Chưa có dữ liệu sự cố."
+      "emptyText": "Chưa có dữ liệu sự cố.",
+      "typePlateMismatch": "Không khớp biển số",
+      "typeTicketMismatch": "Không khớp mã vé"
     },
     "filterTitle": "Bộ lọc lưu lượng và doanh thu",
     "startDate": "Ngày bắt đầu",

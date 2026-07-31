@@ -814,7 +814,9 @@
       "filterResolved": "Resolved",
       "search": "Search incidents...",
       "emptyTextError": "No incident data to display.",
-      "emptyText": "No incident data yet."
+      "emptyText": "No incident data yet.",
+      "typePlateMismatch": "License Plate Mismatch",
+      "typeTicketMismatch": "Ticket Code Mismatch"
     },
     "filterTitle": "Traffic & Revenue Filter",
     "startDate": "Start Date",

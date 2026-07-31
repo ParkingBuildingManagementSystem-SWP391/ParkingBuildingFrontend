@@ -251,6 +251,11 @@ const MyBookings = () => {
     if (diffSeconds <= 0) return '0m remaining';
 
     const minutes = Math.ceil(diffSeconds / 60);
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remMin = minutes % 60;
+      return remMin > 0 ? `${hours}h ${remMin}m remaining` : `${hours}h remaining`;
+    }
     return `${minutes}m remaining`;
   };
 

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
 import incidentReportService from '../../services/incidentReportService';
-import { formatVietnamDateTime, parseUtcDate } from '../../utils/dateTime';
+import { formatVietnamDateTime, parseUtcDate, formatIncidentTypeLabel } from '../../utils/dateTime';
 import { useAuth } from '../../context/AuthContext';
 
 const IncidentsTable = () => {
@@ -234,7 +234,7 @@ const IncidentsTable = () => {
       key: 'details',
       render: (_, record) => (
         <div className="flex flex-col gap-1 max-w-md">
-          <span className="font-bold text-slate-900 text-sm dark:text-slate-100">{record.type}</span>
+          <span className="font-bold text-slate-900 text-sm dark:text-slate-100">{formatIncidentTypeLabel(record.type, t)}</span>
           <span className="text-xs text-slate-500 leading-relaxed dark:text-slate-400">{record.description}</span>
         </div>
       )
@@ -325,7 +325,7 @@ const IncidentsTable = () => {
           </div>
           <div className="rounded-2xl border-l-4 border-purple-500 bg-white p-5 shadow-sm dark:border-purple-400 dark:bg-slate-900">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('dashboard.incidents.statsTopIssue')}</p>
-            <h3 className="mt-1 truncate text-lg font-extrabold text-purple-600 dark:text-purple-300">{stats.topIssueType || t('incidentHistory.notApplicable')}</h3>
+            <h3 className="mt-1 text-xs sm:text-sm font-extrabold leading-snug text-purple-600 dark:text-purple-300">{formatIncidentTypeLabel(stats.topIssueType, t) || t('incidentHistory.notApplicable')}</h3>
           </div>
         </div>
       )}
