@@ -791,8 +791,8 @@ const GateController = () => {
 
   // Perform Check-out (form submit)
   const handleCheckOutSubmit = (values) => {
-    // Cho phép gọi thẳng Check-out, Backend sẽ tự động phân tích và bóc tách mã QR Booking
-    handleCheckOut('AUTO');
+    // Mặc định gọi check-out bằng CASH để ưu tiên mở Modal Tiền mặt
+    handleCheckOut('CASH');
   };
 
   // Cash payment confirmation handler
@@ -1842,7 +1842,8 @@ const GateController = () => {
                         </h3>
                       </div>
 
-                      <div className="grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800/70">
+                      <div className="grid grid-cols-3 gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800/70">
+                        {/* Nút 1: Tiền mặt (CASH) - Mặc định */}
                         <button
                           type="button"
                           disabled={isSwitchingPayment}
@@ -1855,6 +1856,22 @@ const GateController = () => {
                         >
                           {t('gate.form.cash')}
                         </button>
+
+                        {/* Nút 2: Ví điện tử (WALLET) */}
+                        <button
+                          type="button"
+                          disabled={isSwitchingPayment}
+                          onClick={() => handleSwitchPaymentMethodInModal('WALLET')}
+                          className={`h-10 rounded-lg text-sm font-extrabold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-800 ${
+                            ['WALLET', 'AUTO'].includes(selectedPaymentMethod)
+                              ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-900/20'
+                              : 'text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                          } disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
+                          Ví điện tử
+                        </button>
+
+                        {/* Nút 3: VNPay (VNPAY) */}
                         <button
                           type="button"
                           disabled={isSwitchingPayment}
