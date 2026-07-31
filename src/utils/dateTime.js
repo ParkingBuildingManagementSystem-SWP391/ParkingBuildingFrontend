@@ -55,8 +55,11 @@ export const parseUtcDate = (value) => {
   const text = String(value).trim();
   if (!text) return null;
 
+  // Backend stores timestamps as DateTime.UtcNow, but EF Core drops the Kind=Utc flag on
+  // read-back, so the JSON we receive has no trailing "Z"/offset even though it IS UTC.
+  // Treat any timezone-less string as UTC (not Vietnam local) to match that reality.
   const hasTimezone = /Z$|[+-]\d{2}:\d{2}$/.test(text);
-  const normalized = hasTimezone ? text : `${text}+07:00`;
+  const normalized = hasTimezone ? text : `${text}Z`;
   const date = new Date(normalized);
   return Number.isNaN(date.getTime()) ? null : date;
 };
