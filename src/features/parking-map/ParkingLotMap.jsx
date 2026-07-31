@@ -147,8 +147,9 @@ const getFloorDescriptionLabel = (description) => {
 const getVehicleTypeLabel = (type) => {
   switch (type) {
     case 'Bicycle':
+      return i18n.t('parkingMap.bicycleOpt');
     case 'Motorcycle':
-      return i18n.t('parkingMap.bikes').split(' & ')[0];
+      return i18n.t('parkingMap.motorcycleOpt');
     case 'Car':
       return i18n.t('parkingMap.cars');
     default:

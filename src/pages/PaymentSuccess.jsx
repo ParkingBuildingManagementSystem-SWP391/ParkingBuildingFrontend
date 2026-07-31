@@ -69,19 +69,25 @@ const PaymentSuccess = () => {
       return;
     }
 
+    // Same-app navigation after an already-confirmed payment (e.g. Wallet — no VNPay redirect involved).
+    // The caller only navigates here once its own API call already returned success, so polling the
+    // backend again just adds a few seconds of redundant "checking result" spinner for no reason.
+    if (!vnpResponseCode && normalizedPaymentType) {
+      const nextState = resolveSuccessState();
+      setPaymentState(nextState);
+      if (nextState === 'success_deposit') {
+        fetchBookingDetails();
+      }
+      return;
+    }
+
     let intervalId;
     let attempts = 0;
     const maxAttempts = 15; // Max 30 seconds
 
     const pollStatus = async () => {
       if (attempts >= maxAttempts) {
-        if (!vnpResponseCode && normalizedPaymentType) {
-          const nextState = resolveSuccessState();
-          setPaymentState(nextState);
-          if (nextState === 'success_deposit') fetchBookingDetails();
-        } else {
-          setPaymentState('timeout');
-        }
+        setPaymentState('timeout');
         clearInterval(intervalId);
         return;
       }
@@ -118,25 +124,9 @@ const PaymentSuccess = () => {
         } else if (currentStatusKey === 'FAILED' || currentStatusKey === 'CANCEL') {
           setPaymentState('failed');
           clearInterval(intervalId);
-        } else if (!vnpResponseCode && normalizedPaymentType && attempts >= 2) {
-          // Nếu thanh toán qua Ví (không qua VNPay redirect), tự động chuyển sang trang thành công sau 2 lần thử
-          const nextState = resolveSuccessState(currentStatusKey);
-          setPaymentState(nextState);
-          clearInterval(intervalId);
-          if (nextState === 'success_deposit') {
-            fetchBookingDetails();
-          }
         }
       } catch (err) {
         console.error('Error polling invoice status:', err);
-        if (!vnpResponseCode && normalizedPaymentType) {
-          const nextState = resolveSuccessState();
-          setPaymentState(nextState);
-          clearInterval(intervalId);
-          if (nextState === 'success_deposit') {
-            fetchBookingDetails();
-          }
-        }
       }
     };
 
