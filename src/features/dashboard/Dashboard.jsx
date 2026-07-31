@@ -882,7 +882,6 @@ const Dashboard = ({ section = 'overview' }) => {
                 </div>
               </div>
 
-
               <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
                 <table className="w-full min-w-[750px] border-collapse text-left">
                   <thead>
@@ -908,74 +907,6 @@ const Dashboard = ({ section = 'overview' }) => {
                           </div>
                         </td>
                         <td className="px-4 py-4 align-middle">
-
-            <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
-              <table className="w-full min-w-[1050px] border-collapse text-left">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 dark:bg-slate-800 dark:border-slate-700">
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.vehicleType')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.dayRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.nightRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.fullDayRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.firstHourRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.subsequentHourRate')}</th>
-                    {canEditPricing && (
-                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
-                  {pricingRows.map((row, index) => {
-                    const rowKey = getPricingRowKey(row) ?? index;
-                    const isCarPricing = Number(row.vehicleTypeId) === 3 || String(row.vehicleType).toLowerCase() === 'car';
-
-                    return (
-                    <tr key={rowKey} className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/70">
-                      <td className="px-4 py-4 align-middle">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(row.vehicleType)}</span>
-                          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{row.descKey ? t(`dashboard.${row.descKey}`) : row.description}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <InputNumber
-                          min={0}
-                          value={row.dayRate}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'dayRate', value ?? 0) : undefined}
-                          disabled={!canEditPricing}
-                          addonAfter="VND"
-                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                        />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <InputNumber
-                          min={0}
-                          value={row.nightRate}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'nightRate', value ?? 0) : undefined}
-                          disabled={!canEditPricing}
-                          addonAfter="VND"
-                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                        />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <InputNumber
-                          min={0}
-                          value={row.fullDayRate}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'fullDayRate', value ?? 0) : undefined}
-                          disabled={!canEditPricing}
-                          addonAfter="VND"
-                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                        />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        {isCarPricing ? (
-
                           <InputNumber
                             min={0}
                             value={row.dayRate}
