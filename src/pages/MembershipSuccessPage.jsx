@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, CheckCircle2, CreditCard, QrCode } from 'lucide-react';
 import { formatDateTimeVN } from '../utils/dateTime';
 
@@ -13,6 +14,7 @@ const buildCards = (result) => {
 };
 
 const MembershipSuccessPage = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const result = location.state?.result;
@@ -27,15 +29,15 @@ const MembershipSuccessPage = () => {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 ring-8 ring-emerald-50/60">
             <CheckCircle2 size={34} />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Đăng ký Membership thành công</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('membershipSuccess.title')}</h1>
           <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-slate-500 dark:text-slate-400">
             {cards.length > 0
-              ? 'Mỗi ô đỗ đã được cấp một mã QR riêng. Vui lòng dùng đúng QR tương ứng với ô đỗ.'
-              : 'Không tìm thấy dữ liệu ticket trong kết quả trả về. Bạn có thể quay lại trang Membership để tải lại danh sách.'}
+              ? t('membershipSuccess.subtitleWithCards')
+              : t('membershipSuccess.subtitleNoCards')}
           </p>
           {startTime && (
             <p className="mt-3 text-xs font-bold text-slate-500 dark:text-slate-400">
-              Bắt đầu: <span className="text-slate-800 dark:text-slate-100">{formatDateTimeVN(startTime)}</span>
+              {t('membershipSuccess.startTimeLabel')} <span className="text-slate-800 dark:text-slate-100">{formatDateTimeVN(startTime)}</span>
             </p>
           )}
         </div>
@@ -48,8 +50,8 @@ const MembershipSuccessPage = () => {
                 <div key={card.ticketCode} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thẻ #{index + 1}</p>
-                      <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">Ô đỗ {card.slotName || card.slotId || 'N/A'}</h2>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t('membershipSuccess.cardLabel', { index: index + 1 })}</p>
+                      <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">{t('membershipSuccess.slotLabel', { slot: card.slotName || card.slotId || 'N/A' })}</h2>
                     </div>
                     <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
                       <CreditCard size={18} />
@@ -77,14 +79,14 @@ const MembershipSuccessPage = () => {
             onClick={() => navigate('/my-membership')}
             className="inline-flex h-12 items-center justify-center gap-2 rounded-[14px] bg-indigo-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"
           >
-            Xem Membership của tôi
+            {t('membershipSuccess.viewMyMembership')}
             <ArrowRight size={16} />
           </button>
           <button
             onClick={() => navigate('/dashboard')}
             className="inline-flex h-12 items-center justify-center rounded-[14px] border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
           >
-            Về trang chủ
+            {t('common.backHome')}
           </button>
         </div>
       </div>

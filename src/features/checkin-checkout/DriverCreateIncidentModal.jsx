@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Modal, Form, Select, Input, Button, message } from 'antd';
+import { useTranslation } from 'react-i18next';
 import incidentReportService from '../../services/incidentReportService';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const DriverCreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
   const issueTypes = [
-    { value: 'Lost Ticket', label: 'Mất thẻ giữ xe vật lý' },
-    { value: 'Vehicle Damage', label: 'Xe bị va chạm / Trầy xước' },
-    { value: 'Other', label: 'Sự cố khác' }
+    { value: 'Lost Ticket', label: t('driverCreateIncident.typeLostTicket') },
+    { value: 'Vehicle Damage', label: t('driverCreateIncident.typeVehicleDamage') },
+    { value: 'Other', label: t('driverCreateIncident.typeOther') }
   ];
 
   const handleSubmit = async (values) => {
@@ -20,7 +22,7 @@ const DriverCreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuc
     try {
       const normalizedPlate = (licenseVehicle || '').trim().toUpperCase();
       if (!normalizedPlate) {
-        message.error('Vui lòng nhập biển số xe.');
+        message.error(t('driverCreateIncident.plateRequiredToast'));
         return;
       }
 
@@ -28,16 +30,16 @@ const DriverCreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuc
         licenseVehicle: normalizedPlate,
         issueType: values.issueType,
         description: values.description,
-        imageProofUrl: "" // Hỗ trợ upload ảnh lên Cloudinary nếu cần
+        imageProofUrl: ""
       };
 
       await incidentReportService.createIncident(payload);
-      message.success('Gửi báo cáo sự cố thành công. Ban quản lý sẽ liên hệ hỗ trợ bạn.');
+      message.success(t('driverCreateIncident.submitSuccess'));
       form.resetFields();
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
-      message.error(err.message || 'Gửi báo cáo thất bại.');
+      message.error(err.message || t('driverCreateIncident.submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -45,7 +47,7 @@ const DriverCreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuc
 
   return (
     <Modal
-      title="Báo Cáo Sự Cố Lượt Đỗ"
+      title={t('driverCreateIncident.modalTitle')}
       open={isOpen}
       onCancel={onClose}
       footer={null}
@@ -54,28 +56,28 @@ const DriverCreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuc
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           name="issueType"
-          label="Loại sự cố:"
-          rules={[{ required: true, message: 'Vui lòng chọn loại sự cố!' }]}
+          label={t('driverCreateIncident.issueTypeLabel')}
+          rules={[{ required: true, message: t('driverCreateIncident.issueTypeRequired') }]}
         >
-          <Select placeholder="Chọn loại sự cố gặp phải">
-            {issueTypes.map(t => (
-              <Option key={t.value} value={t.value}>{t.label}</Option>
+          <Select placeholder={t('driverCreateIncident.issueTypePlaceholder')}>
+            {issueTypes.map(type => (
+              <Option key={type.value} value={type.value}>{type.label}</Option>
             ))}
           </Select>
         </Form.Item>
 
         <Form.Item
           name="description"
-          label="Chi tiết sự việc:"
-          rules={[{ required: true, message: 'Vui lòng mô tả chi tiết sự cố!' }]}
+          label={t('driverCreateIncident.descriptionLabel')}
+          rules={[{ required: true, message: t('driverCreateIncident.descriptionRequired') }]}
         >
-          <TextArea rows={4} placeholder="Vui lòng cung cấp chi tiết vị trí hoặc tình trạng xe..." />
+          <TextArea rows={4} placeholder={t('driverCreateIncident.descriptionPlaceholder')} />
         </Form.Item>
 
         <div className="flex justify-end gap-2 mt-4">
-          <Button onClick={onClose} disabled={submitting}>Hủy</Button>
+          <Button onClick={onClose} disabled={submitting}>{t('driverCreateIncident.cancelBtn')}</Button>
           <Button type="primary" htmlType="submit" loading={submitting} danger>
-            Gửi Báo Cáo
+            {t('driverCreateIncident.submitBtn')}
           </Button>
         </div>
       </Form>

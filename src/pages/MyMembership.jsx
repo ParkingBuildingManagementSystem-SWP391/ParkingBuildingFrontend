@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { toast as message } from '../components/ToastProvider';
 import { membershipService } from '../services/membershipService';
 import { formatDateTimeVN, parseUtcDate } from '../utils/dateTime';
@@ -127,7 +128,7 @@ const unwrapArray = (payload) => {
 };
 
 const formatDateTime = (value) => {
-  if (!value) return 'Chưa cập nhật';
+  if (!value) return i18n.t('common.notUpdated');
   return formatDateTimeVN(value, value);
 };
 
@@ -708,9 +709,9 @@ const RegistrationView = ({ onRegister, submitting, activeTypeIds = [], t }) => 
               <div className="flex items-start gap-3">
                 <Info className="mt-0.5 shrink-0 text-indigo-600 dark:text-indigo-400" size={18} />
                 <div>
-                  <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Định danh xe đạp tự động</p>
+                  <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{t('membershipRegister.bicycleAutoIdTitle')}</p>
                   <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500 dark:text-slate-400">
-                    Xe đạp không có biển số truyền thống. Khi đăng ký thành công, hệ thống sẽ tự động sinh mã định danh cố định dạng <code className="font-mono text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20">BIKE_XXXXXXXX</code> cho tài khoản của bạn để vào/ra bãi xe.
+                    {t('membershipRegister.bicycleAutoIdDescBefore')} <code className="font-mono text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20">BIKE_XXXXXXXX</code> {t('membershipRegister.bicycleAutoIdDescAfter')}
                   </p>
                 </div>
               </div>

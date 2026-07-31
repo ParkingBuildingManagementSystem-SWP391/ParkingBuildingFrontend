@@ -42,7 +42,7 @@ const IncidentsTable = () => {
       id: realId,
       severity: safeItem.severity || safeItem.Severity || 'Info',
       timestamp: safeItem.incidentTime || safeItem.IncidentTime || safeItem.timestamp || safeItem.Timestamp || safeItem.createdAt || safeItem.CreatedAt || safeItem.reportedAt || safeItem.ReportedAt,
-      type: safeItem.issueType || safeItem.IssueType || safeItem.type || safeItem.Type || safeItem.title || safeItem.Title || 'Sự cố',
+      type: safeItem.issueType || safeItem.IssueType || safeItem.type || safeItem.Type || safeItem.title || safeItem.Title || t('dashboard.incidents.defaultType'),
       description: safeItem.description || safeItem.Description || safeItem.message || safeItem.Message || '',
       location: safeItem.location || safeItem.Location || safeItem.slotName || safeItem.SlotName || safeItem.licenseVehicle || safeItem.LicenseVehicle || '',
       status: safeItem.status || safeItem.Status || 'Pending',
@@ -118,12 +118,12 @@ const IncidentsTable = () => {
   // Handle Resolve Action
   const handleResolve = (id) => {
     setResolveIncidentId(id);
-    setResolutionNotes('Đã xử lý nộp phạt mất thẻ xe');
+    setResolutionNotes(t('dashboard.incidents.defaultResolutionNotes'));
   };
 
   const handleResolveSubmit = () => {
     if (!resolutionNotes.trim()) {
-      message.error(t('dashboard.incidents.promptNotesRequired', 'Vui lòng nhập ghi chú giải quyết.'));
+      message.error(t('dashboard.incidents.promptNotesRequired'));
       return;
     }
 
@@ -378,7 +378,7 @@ const IncidentsTable = () => {
         <div className="space-y-4 py-3">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-slate-600 dark:text-slate-400">
-              {t('dashboard.incidents.promptNotes', 'Ghi chú giải quyết / Đền bù')}{' '}
+              {t('dashboard.incidents.promptNotes')}{' '}
               <span className="text-rose-500">*</span>
             </label>
 
@@ -386,7 +386,7 @@ const IncidentsTable = () => {
               rows={3}
               value={resolutionNotes}
               onChange={(e) => setResolutionNotes(e.target.value)}
-              placeholder="Nhập ghi chú xử lý, ví dụ: Đã tìm thấy chìa khóa / Khách nộp phạt mất thẻ xe..."
+              placeholder={t('dashboard.incidents.notesPlaceholder')}
               className="rounded-lg"
             />
           </div>

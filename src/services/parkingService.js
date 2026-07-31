@@ -1,4 +1,5 @@
 import api from './api';
+import i18n from '../i18n';
 
 export const parkingService = {
   getFloors: async () => {
@@ -182,7 +183,7 @@ export const parkingService = {
       const serverMessage =
         error.response?.data?.message ||
         error.response?.data?.error ||
-        'Không tìm thấy phương tiện đang đỗ trong bãi.';
+        i18n.t('parkingService.errVehicleNotFound');
       throw serverMessage;
     }
   },
@@ -253,7 +254,7 @@ export const parkingService = {
       const response = await api.post(`/Parking/cancel-booking/${sessionId}`);
       return response.data;
     } catch (error) {
-      const serverMessage = error.response?.data?.message || error.response?.data?.error || "Hủy đặt chỗ thất bại.";
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || i18n.t('parkingService.errCancelBookingFailed');
       throw serverMessage;
     }
   },

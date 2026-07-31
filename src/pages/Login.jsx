@@ -83,7 +83,7 @@ const Login = () => {
           <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/[0.06]" />
           <div className="pointer-events-none absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-white/[0.08]" />
 
-          <Link to="/" aria-label="Về trang chủ" className="relative z-10 flex items-center gap-3 rounded-xl transition-opacity hover:opacity-80">
+          <Link to="/" aria-label={t('common.backHome')} className="relative z-10 flex items-center gap-3 rounded-xl transition-opacity hover:opacity-80">
             <div className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-white/25 bg-white/[0.16] backdrop-blur-sm">
               <Building2 size={22} strokeWidth={2.2} />
             </div>

@@ -24,7 +24,7 @@ const defaultPricingData = [
   {
     vehicleTypeId: 1,
     vehicleType: 'Bicycle',
-    description: 'Xe đạp, xe đạp điện',
+    descKey: 'bicycleDesc',
     dayRate: 2000,
     nightRate: 3000,
     fullDayRate: 5000,
@@ -35,7 +35,7 @@ const defaultPricingData = [
   {
     vehicleTypeId: 2,
     vehicleType: 'Motorbike',
-    description: 'Xe máy, xe mô tô',
+    descKey: 'motorbikeDesc',
     dayRate: 4000,
     nightRate: 6000,
     fullDayRate: 10000,
@@ -46,7 +46,7 @@ const defaultPricingData = [
   {
     vehicleTypeId: 3,
     vehicleType: 'Car',
-    description: 'Xe hơi dưới 7 chỗ',
+    descKey: 'carDesc',
     dayRate: 20000,
     nightRate: 30000,
     fullDayRate: 50000,
@@ -123,7 +123,7 @@ const Dashboard = ({ section = 'overview' }) => {
       setTrafficStats(data);
     } catch (err) {
       console.error("fetchTrafficStats error:", err);
-      setErrorStats(t('dashboard.errorStats', { defaultValue: 'Không thể tải thống kê lượt xe.' }));
+      setErrorStats(t('dashboard.errorStats'));
     } finally {
       setLoadingStats(false);
     }
@@ -193,15 +193,15 @@ const Dashboard = ({ section = 'overview' }) => {
       const status = err.response?.status;
       const backendMessage = err.response?.data?.message || err.response?.data?.error || err.response?.data;
       if (status === 400) {
-        message.error(backendMessage || 'Giá cấu hình không hợp lệ.');
+        message.error(backendMessage || t('dashboard.pricingInvalid'));
       } else if (status === 401 || status === 403) {
-        message.error(backendMessage || 'Bạn cần đăng nhập bằng tài khoản có quyền Manager/Admin.');
+        message.error(backendMessage || t('dashboard.pricingUnauthorized'));
       } else if (status === 404) {
-        message.error(backendMessage || 'Không tìm thấy loại xe yêu cầu.');
+        message.error(backendMessage || t('dashboard.pricingVehicleTypeNotFound'));
       } else if (status === 500) {
-        message.error(backendMessage || 'Lỗi máy chủ khi cập nhật bảng giá.');
+        message.error(backendMessage || t('dashboard.pricingServerError'));
       } else {
-        message.error(backendMessage || 'Không thể cập nhật cấu hình giá.');
+        message.error(backendMessage || t('dashboard.pricingUpdateFailed'));
       }
     } finally {
       setSavingPricingIds((prev) => ({ ...prev, [rowKey]: false }));
@@ -239,7 +239,7 @@ const Dashboard = ({ section = 'overview' }) => {
     if (normalized === 'car') return t('dashboard.car');
     if (normalized === 'motorbike' || normalized === 'motorcycle') return t('dashboard.motorbike');
     if (normalized === 'bicycle' || normalized === 'bike') return t('dashboard.bicycle');
-    return type || 'Không xác định';
+    return type || t('dashboard.unknownType');
   };
 
   // ----------------------------------------------------
@@ -273,10 +273,10 @@ const Dashboard = ({ section = 'overview' }) => {
     }
 
     const sectionLabels = {
-      'parking-map': t('dashboard.parkingMap', { defaultValue: 'Sơ đồ bãi xe' }),
-      'live-status': t('dashboard.liveStatus', { defaultValue: 'Trạng thái trực tiếp' }),
-      'slot-management': t('dashboard.slotManagement', { defaultValue: 'Quản lý chỗ đỗ' }),
-      'staff-logs': t('dashboard.staffLogs', { defaultValue: 'Nhật ký nhân viên' })
+      'parking-map': t('dashboard.parkingMapLabel'),
+      'live-status': t('dashboard.liveStatusLabel'),
+      'slot-management': t('dashboard.slotManagementLabel'),
+      'staff-logs': t('dashboard.staffLogsLabel')
     };
 
     // Vehicles distribution calculations
@@ -869,7 +869,7 @@ const Dashboard = ({ section = 'overview' }) => {
                       <td className="px-4 py-4 align-middle">
                         <div className="flex flex-col">
                           <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(row.vehicleType)}</span>
-                          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{row.description}</span>
+                          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{row.descKey ? t(`dashboard.${row.descKey}`) : row.description}</span>
                         </div>
                       </td>
                       <td className="px-4 py-4 align-middle">
@@ -960,7 +960,7 @@ const Dashboard = ({ section = 'overview' }) => {
           </div>
         ) : (
           <div className="bg-white border border-slate-100 rounded-2xl py-24 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h3 className="text-slate-900 font-extrabold tracking-tight text-lg dark:text-slate-100">{sectionLabels[section] || 'Chức năng quản lý'}</h3>
+            <h3 className="text-slate-900 font-extrabold tracking-tight text-lg dark:text-slate-100">{sectionLabels[section] || t('dashboard.defaultSectionLabel')}</h3>
             <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto dark:text-slate-400">
               {t('dashboard.noDataSection')}
             </p>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { NotificationContext } from '../context/NotificationContext';
 import { formatDateTimeVN } from '../utils/dateTime';
 
 const NotificationBell = () => {
+  const { t } = useTranslation();
   // 1. Tiêu thụ Context: Sử dụng useContext(NotificationContext)
   const context = useContext(NotificationContext);
   if (!context) {
@@ -55,7 +57,7 @@ const NotificationBell = () => {
         type="button"
         onClick={toggleDropdown} // Gán onClick xử lý đóng mở
         className="flex w-10 h-10 rounded-full items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-[0_2px_5px_rgba(0,0,0,0.02)] relative dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-        aria-label="Thông báo"
+        aria-label={t('notificationBell.ariaLabel')}
       >
         <Bell size={18} strokeWidth={2} />
 
@@ -71,14 +73,14 @@ const NotificationBell = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2.5 w-80 sm:w-96 origin-top-right rounded-2xl border border-slate-100 bg-white shadow-xl focus:outline-none dark:border-slate-800 dark:bg-slate-900 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5 dark:border-slate-800">
-            <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Thông báo mới</h3>
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{t('notificationBell.newNotifications')}</h3>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllAsRead} // Gọi hàm markAllAsRead để xóa ngay Badge số lượng
                 className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
-                Đánh dấu đã đọc
+                {t('notificationBell.markAllRead')}
               </button>
             )}
           </div>
@@ -86,12 +88,12 @@ const NotificationBell = () => {
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/50">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center text-xs font-semibold text-slate-400">
-                Không có thông báo nào.
+                {t('notificationBell.empty')}
               </div>
             ) : (
               notifications.map((item, index) => {
                 const id = item.id || index;
-                const title = item.title || 'Thông báo';
+                const title = item.title || t('notificationBell.defaultTitle');
                 const content = item.content || '';
                 const createdAt = item.createdAt;
                 const isRead = item.isRead;
@@ -112,7 +114,7 @@ const NotificationBell = () => {
                         {title}
                       </span>
                       <span className="text-[10px] font-medium text-slate-400 whitespace-nowrap">
-                        {createdAt ? formatDateTimeVN(createdAt, 'Mới đây') : 'N/A'}
+                        {createdAt ? formatDateTimeVN(createdAt, t('notificationBell.justNow')) : 'N/A'}
                       </span>
                     </div>
                     <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -129,7 +131,7 @@ const NotificationBell = () => {
               type="button"
               className="w-full rounded-xl py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
             >
-              Xem tất cả thông báo
+              {t('notificationBell.viewAll')}
             </button>
           </div>
         </div>

@@ -100,15 +100,15 @@ const Settings = () => {
     const trimmedPhone = phoneNumber.trim();
 
     if (trimmedName.length > 100) {
-      nextErrors.fullName = 'Họ tên không được vượt quá 100 ký tự.';
+      nextErrors.fullName = t('settings.errFullNameTooLong');
     }
 
     if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      nextErrors.email = 'Email không đúng định dạng.';
+      nextErrors.email = t('settings.errEmailFormat');
     }
 
     if (trimmedPhone && !/^[0-9+\-\s()]{8,20}$/.test(trimmedPhone)) {
-      nextErrors.phoneNumber = 'Số điện thoại không đúng định dạng cơ bản.';
+      nextErrors.phoneNumber = t('settings.errPhoneFormat');
     }
 
     if (showPasswordSection) {
@@ -117,15 +117,15 @@ const Settings = () => {
 
       if (wantsPasswordChange) {
         if (!oldPassword.trim()) {
-          nextErrors.oldPassword = 'Vui lòng nhập mật khẩu hiện tại.';
+          nextErrors.oldPassword = t('settings.errOldPasswordRequired');
         }
 
         if (newPassword.length < 6) {
-          nextErrors.newPassword = 'Mật khẩu mới phải từ 6 ký tự trở lên.';
+          nextErrors.newPassword = t('settings.errNewPasswordTooShort');
         }
 
         if (confirmNewPassword !== newPassword) {
-          nextErrors.confirmNewPassword = 'Xác nhận mật khẩu mới không khớp.';
+          nextErrors.confirmNewPassword = t('settings.errConfirmPasswordMismatch');
         }
       }
     }
@@ -138,7 +138,7 @@ const Settings = () => {
     event.preventDefault();
 
     if (!validateForm()) {
-      message.error('Vui lòng kiểm tra lại thông tin tài khoản.');
+      message.error(t('settings.errCheckAccountInfo'));
       return;
     }
 
@@ -175,11 +175,11 @@ const Settings = () => {
         setShowPasswordSection(false);
       }
       message.success(result?.message || (wantsPasswordChange
-        ? 'Cập nhật hồ sơ và đổi mật khẩu thành công!'
-        : 'Cập nhật thông tin cá nhân thành công!'));
+        ? t('settings.successUpdateWithPassword')
+        : t('settings.successUpdateProfile')));
     } catch (err) {
       console.error(err);
-      message.error(getErrorMessage(err, 'Đã xảy ra lỗi khi lưu thông tin.'));
+      message.error(getErrorMessage(err, t('settings.errSaveFailed')));
     }
   };
 
@@ -192,17 +192,17 @@ const Settings = () => {
     setConfirmNewPassword('');
     setShowPasswordSection(false);
     setErrors({});
-    message.info('Đã hủy bỏ các thay đổi.');
+    message.info(t('settings.infoDiscard'));
   };
 
   return (
     <div className="relative mx-auto max-w-4xl space-y-6 font-sans">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-          Cài đặt tài khoản
+          {t('settings.pageTitle')}
         </h1>
         <p className="mt-1 text-sm text-slate-550 dark:text-slate-400 font-medium">
-          Quản lý thông tin cá nhân và thiết lập bảo mật của bạn
+          {t('settings.pageSubtitle')}
         </p>
       </div>
 
@@ -215,10 +215,10 @@ const Settings = () => {
               </div>
               <div>
                 <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
-                  Thông tin cá nhân
+                  {t('settings.cardTitle')}
                 </h2>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  Cập nhật các thông tin cơ bản về tài khoản
+                  {t('settings.cardDesc')}
                 </p>
               </div>
             </div>
@@ -229,25 +229,25 @@ const Settings = () => {
             {!user && (
               <div className="flex items-start gap-3 rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
                 <ShieldAlert size={18} className="mt-0.5 shrink-0" />
-                <span>Không tải được thông tin tài khoản. Vui lòng đăng nhập lại.</span>
+                <span>{t('settings.noAccountData')}</span>
               </div>
             )}
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className={labelClass}>Tài khoản đăng nhập (Email)</label>
+                <label className={labelClass}>{t('settings.accountEmailLabel')}</label>
                 <div className="relative">
                   <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
                   <input
                     type="text"
                     disabled
                     value={username}
-                    placeholder="Không tải được username"
+                    placeholder={t('settings.usernamePlaceholderFallback')}
                     className={disabledInputClass}
                   />
                 </div>
                 <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">
-                  Tên đăng nhập bằng Email không thể thay đổi
+                  {t('settings.usernameImmutableHint')}
                 </span>
               </div>
 
@@ -283,7 +283,7 @@ const Settings = () => {
                 {errors.email && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.email}</p>}
                 {!isAdmin && (
                   <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">
-                    Chỉ Quản trị viên (Admin) mới có quyền đổi Email
+                    {t('settings.adminOnlyEmailHint')}
                   </span>
                 )}
               </div>
@@ -304,7 +304,7 @@ const Settings = () => {
                 {errors.phoneNumber && <p className="pl-1 text-xs font-semibold text-rose-600">{errors.phoneNumber}</p>}
                 {!isAdmin && (
                   <span className="block pl-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">
-                    Chỉ Quản trị viên (Admin) mới có quyền đổi Số điện thoại
+                    {t('settings.adminOnlyPhoneHint')}
                   </span>
                 )}
               </div>
@@ -323,15 +323,15 @@ const Settings = () => {
                     </div>
                     <div>
                       <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">
-                        Thay đổi mật khẩu
+                        {t('settings.changePasswordTitle')}
                       </h3>
                       <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-                        Cập nhật mật khẩu đăng nhập tài khoản
+                        {t('settings.changePasswordDesc')}
                       </p>
                     </div>
                   </div>
                   <div className="text-xs font-bold text-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100/50 dark:border-indigo-900/30 px-3.5 py-2 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                    Thay đổi
+                    {t('settings.changeBtnLabel')}
                   </div>
                 </button>
               </div>
@@ -344,10 +344,10 @@ const Settings = () => {
                     </div>
                     <div>
                       <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-                        Thay đổi mật khẩu tài khoản
+                        {t('settings.changePasswordTitleExpanded')}
                       </h3>
                       <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500 font-medium">
-                        Cập nhật mật khẩu đăng nhập tài khoản
+                        {t('settings.changePasswordDesc')}
                       </p>
                     </div>
                   </div>
@@ -357,14 +357,14 @@ const Settings = () => {
                       onClick={() => setShowPasswords((prev) => !prev)}
                       className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
-                      {showPasswords ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                      {showPasswords ? t('settings.hidePasswordBtn') : t('settings.showPasswordBtn')}
                     </button>
                     <button
                       type="button"
                       onClick={handleTogglePasswordSection}
                       className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-500 hover:text-rose-600 hover:border-rose-200 transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
                     >
-                      Đóng lại
+                      {t('settings.closeBtn')}
                     </button>
                   </div>
                 </div>
@@ -372,9 +372,9 @@ const Settings = () => {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <label className={labelClass}>Mật khẩu hiện tại</label>
+                      <label className={labelClass}>{t('settings.currentPasswordLabel')}</label>
                       <Link to="/forgot-password" className="text-[10px] font-extrabold text-indigo-600 hover:underline">
-                        Quên mật khẩu?
+                        {t('settings.forgotPasswordLink')}
                       </Link>
                     </div>
                     <div className="relative">
@@ -391,7 +391,7 @@ const Settings = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className={labelClass}>Mật khẩu mới</label>
+                    <label className={labelClass}>{t('settings.newPasswordLabel')}</label>
                     <div className="relative">
                       <Lock size={18} className={iconClass} />
                       <input
@@ -406,7 +406,7 @@ const Settings = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className={labelClass}>Xác nhận mật khẩu mới</label>
+                    <label className={labelClass}>{t('settings.confirmNewPasswordLabel')}</label>
                     <div className="relative">
                       <Lock size={18} className={iconClass} />
                       <input
@@ -430,7 +430,7 @@ const Settings = () => {
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-slate-200 bg-white px-6 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:w-auto"
               >
                 <X size={16} />
-                Hủy thay đổi
+                {t('settings.cancelChangesBtn')}
               </button>
 
               <button
@@ -438,7 +438,7 @@ const Settings = () => {
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-indigo-500 to-indigo-600 px-8 text-sm font-bold text-white shadow-[0_12px_24px_-10px_rgba(79,70,229,0.7)] transition-all hover:-translate-y-0.5 sm:w-auto"
               >
                 <Save size={16} />
-                Lưu thay đổi
+                {t('settings.saveChangesBtn')}
               </button>
             </div>
           </form>

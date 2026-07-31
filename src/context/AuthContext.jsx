@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.loginWithGoogle(googleIdToken);
 
       if (!data) {
-        throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
+        throw new Error(t('authContext.errNoValidResponse'));
       }
 
       const rawRole = data.roleName || data.RoleName || "Registered_Driver";
@@ -82,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: matchedUser };
     } catch (error) {
       console.error("Lỗi xác thực Google SSO:", error);
-      return { success: false, message: error || "Đăng nhập Google thất bại!" };
+      return { success: false, message: error || t('authContext.errGoogleLoginFailed') };
     }
   };
 
@@ -97,7 +99,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!data) {
-        throw new Error("Không nhận được phản hồi hợp lệ từ máy chủ.");
+        throw new Error(t('authContext.errNoValidResponse'));
       }
 
       const rawRole = data.roleName || data.RoleName || data.role || data.Role || "Member";
@@ -125,7 +127,7 @@ export const AuthProvider = ({ children }) => {
 
     } catch (error) {
       console.error("Quá trình đăng nhập xảy ra lỗi:", error);
-      return { success: false, message: error || "Đăng nhập thất bại!" };
+      return { success: false, message: error || t('authContext.errLoginFailed') };
     }
   };
 

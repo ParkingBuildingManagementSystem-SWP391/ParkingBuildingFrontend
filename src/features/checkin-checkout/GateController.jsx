@@ -29,6 +29,7 @@ import {
 import TicketModal from './TicketModal';
 import QrScannerModal from './QrScannerModal';
 import CreateIncidentModal from './CreateIncidentModal';
+import MyIncidentsModal from './MyIncidentsModal';
 import { formatVietnamDateTime } from '../../utils/dateTime';
 
 
@@ -187,7 +188,7 @@ const SmartCamera = ({ type, color, onCapture, onClear, previewUrl, isScanning, 
           </>
         ) : previewUrl ? (
           <>
-            <img src={previewUrl} alt="Ảnh xe" className="w-full h-full object-contain bg-slate-950 rounded-2xl" />
+            <img src={previewUrl} alt={t('gate.camera.vehicleImageAlt')} className="w-full h-full object-contain bg-slate-950 rounded-2xl" />
 
             {isScanning && (
               <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
@@ -275,7 +276,7 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
 
   return (
     <Modal
-      title={<span className="font-extrabold text-slate-900 text-base uppercase tracking-tight flex items-center gap-2"><CheckCircle size={18} className="text-emerald-500" />Xác nhận Check-in</span>}
+      title={<span className="font-extrabold text-slate-900 text-base uppercase tracking-tight flex items-center gap-2"><CheckCircle size={18} className="text-emerald-500" />{t('gate.bookingCheckIn.title')}</span>}
       open={isOpen}
       onCancel={onClose}
       footer={[
@@ -285,7 +286,7 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
           onClick={onClose}
           className="h-11 bg-gradient-to-br from-emerald-500 to-emerald-600 hover:!from-emerald-400 hover:!to-emerald-500 border-none font-bold rounded-[14px] px-6 shadow-md transition-all"
         >
-          Xác nhận cho xe vào
+          {t('gate.bookingCheckIn.confirmBtn')}
         </Button>
       ]}
       centered
@@ -293,28 +294,26 @@ const BookingCheckInModal = ({ isOpen, onClose, data }) => {
       destroyOnClose
     >
       <div className="space-y-4 py-3">
-        {/* Vị trí ô đỗ được Backend cấp động */}
         <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/40 border border-emerald-100 rounded-2xl p-5 text-center shadow-sm">
-          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">Vị trí ô đỗ phân phối</span>
+          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">{t('gate.bookingCheckIn.assignedSlot')}</span>
           <span className="text-4xl font-black text-emerald-700 tracking-wide">{data.slotName || data.SlotName || "N/A"}</span>
         </div>
 
-        {/* Bảng chi tiết thông tin */}
         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
           <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">Họ và tên chủ thẻ</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.driverName')}</span>
             <span className="text-slate-900 font-black">{data.driverName || data.DriverName || data.fullName || data.FullName || "N/A"}</span>
           </div>
           <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">Số điện thoại</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.phone')}</span>
             <span className="text-slate-900 font-bold font-mono">{data.driverPhone || data.DriverPhone || data.phoneNumber || data.PhoneNumber || "N/A"}</span>
           </div>
           <div className="flex justify-between border-b border-slate-200/60 pb-2 text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">Biển số xe</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.plate')}</span>
             <span className="text-slate-900 font-black font-mono">{data.licenseVehicle || data.LicenseVehicle || "N/A"}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-slate-500 font-bold uppercase tracking-wider">Loại phương tiện</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider">{t('gate.bookingCheckIn.vehicleType')}</span>
             <span className="text-slate-900 font-bold">{data.vehicleTypeName || data.VehicleTypeName || data.vehicleType || "Car"}</span>
           </div>
         </div>
@@ -362,13 +361,13 @@ const GateController = () => {
     try {
       const res = await staffService.startShift();
       if (res && res.isSuccess) {
-        message.success("Mở ca trực thành công!");
+        message.success(t('staffShifts.openSuccess'));
         await checkActiveShift();
       } else {
-        message.error(res?.message || "Không thể mở ca trực.");
+        message.error(res?.message || t('staffShifts.openError'));
       }
     } catch (err) {
-      message.error(err.response?.data?.message || err.message || "Lỗi mở ca trực.");
+      message.error(err.response?.data?.message || err.message || t('staffShifts.openErrorGeneric'));
     } finally {
       setLoadingShift(false);
     }
@@ -382,7 +381,7 @@ const GateController = () => {
         notes: values.notes || ""
       });
       if (res && res.isSuccess) {
-        message.success("Đóng ca trực thành công! Hệ thống tự động đăng xuất.");
+        message.success(t('staffShifts.closeSuccess'));
         setIsEndShiftModalOpen(false);
         endShiftForm.resetFields();
         setActiveShift(null);
@@ -390,10 +389,10 @@ const GateController = () => {
           logout();
         }, 1500);
       } else {
-        message.error(res?.message || "Không thể đóng ca trực.");
+        message.error(res?.message || t('staffShifts.closeError'));
       }
     } catch (err) {
-      message.error(err.response?.data?.message || err.message || "Lỗi đóng ca trực.");
+      message.error(err.response?.data?.message || err.message || t('staffShifts.closeErrorGeneric'));
     } finally {
       setLoadingShift(false);
     }
@@ -402,6 +401,7 @@ const GateController = () => {
   const [isLocalQrScannerOpen, setIsLocalQrScannerOpen] = useState(false);
   const [qrScannerTarget, setQrScannerTarget] = useState('entry'); // 'entry' or 'exit'
   const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
+  const [isMyIncidentsOpen, setIsMyIncidentsOpen] = useState(false);
   const [isCheckInConfirmOpen, setIsCheckInConfirmOpen] = useState(false);
   const [bookingCheckInData, setBookingCheckInData] = useState(null);
   const qrInputRef = React.useRef(null);
@@ -527,9 +527,9 @@ const GateController = () => {
   };
 
   const getVehicleTypeLabel = (type) => {
-    if (type === 'Car') return 'Ô tô';
-    if (type === 'Motorbike' || type === 'Motorcycle') return 'Xe máy';
-    if (type === 'Bicycle') return 'Xe đạp';
+    if (type === 'Car') return t('gate.form.car');
+    if (type === 'Motorbike' || type === 'Motorcycle') return t('gate.form.motorbike');
+    if (type === 'Bicycle') return t('gate.form.bicycle');
     return type || 'N/A';
   };
 
@@ -540,7 +540,7 @@ const GateController = () => {
 
       // CHẶN CỨNG: Bắt buộc phải có ảnh chụp cổng vào
       if (!tempImageUrl) {
-        message.error("Vui lòng chụp ảnh hoặc tải ảnh xe lên trước khi check-in!");
+        message.error(t('gate.messages.entryImageRequired'));
         return;
       }
 
@@ -585,7 +585,7 @@ const GateController = () => {
         // Reservation / Membership mode
         const vehicleType = values.type || checkInForm.getFieldValue('type') || 'Car';
         if (ticketCode?.startsWith('MBC_') && !licenseVehicle && vehicleType !== 'Bicycle') {
-          message.warning('Vui lòng nhập biển số xe đang vào bãi trước khi check-in thẻ thành viên!');
+          message.warning(t('gate.messages.membershipPlateRequired'));
           return;
         }
 
@@ -606,10 +606,10 @@ const GateController = () => {
         } else {
           if (requiresWalkIn) {
             Modal.confirm({
-              title: 'Thẻ thành viên đang được sử dụng',
-              content: `${response?.message || 'Thẻ đang có xe khác trong bãi.'} Bạn có muốn check-in xe này theo hình thức vãng lai không?`,
-              okText: 'Đồng ý - Check-in vãng lai',
-              cancelText: 'Hủy',
+              title: t('gate.messages.membershipInUseTitle'),
+              content: t('gate.messages.membershipInUseBody', { reason: response?.message || t('gate.messages.membershipInUseDefault') }),
+              okText: t('gate.messages.walkinConfirmBtn'),
+              cancelText: t('gate.messages.cancelBtn'),
               onOk: async () => {
                 try {
                   const vehicleTypeId = VEHICLE_TYPE_MAP[values.type] || 2;
@@ -620,16 +620,16 @@ const GateController = () => {
                   );
 
                   if (result?.isSuccess || result?.IsSuccess || result?.success) {
-                    message.success('Check-in vãng lai thành công!');
+                    message.success(t('gate.messages.walkinSuccess'));
                     checkInForm.resetFields();
                   } else {
-                    message.error(result?.message || 'Check-in vãng lai thất bại.');
+                    message.error(result?.message || t('gate.messages.walkinFailed'));
                   }
                 } catch (walkInErr) {
                   const msg =
                     walkInErr?.response?.data?.message ||
                     walkInErr?.message ||
-                    'Check-in vãng lai thất bại.';
+                    t('gate.messages.walkinFailed');
                   message.error(msg);
                 }
               },
@@ -655,7 +655,7 @@ const GateController = () => {
     
     // 1. Cho phép gửi check-out nếu có biển số HOẶC mã QR vé
     if (!plate && !ticketCode) {
-      message.error("Vui lòng nhập biển số xe hoặc quét mã QR vé!");
+      message.error(t('gate.messages.checkoutIdentifierRequired'));
       return;
     }
 
@@ -664,7 +664,7 @@ const GateController = () => {
     const isBicycle = plate?.toUpperCase().startsWith('BIKE_');
     const hasIdentifier = Boolean(plate?.trim() || ticketCode?.trim());
     if (!isBicycle && !hasIdentifier && !tempImageUrl) {
-      message.error("Vui lòng chụp ảnh hoặc tải ảnh xe ở cổng ra trước khi check-out!");
+      message.error(t('gate.messages.exitImageRequired'));
       return;
     }
 
@@ -987,7 +987,7 @@ const GateController = () => {
                 checkInForm.setFieldValue('tempImageUrl', null);
                 try {
                   const file = await resizeAndCompressImage(imageSrc, "entry_capture.jpg", 1280, 720, 0.8);
-                  if (!file) throw new Error("Ảnh chụp không hợp lệ.");
+                  if (!file) throw new Error(t('gate.messages.invalidCapturedImage'));
                   const type = checkInForm.getFieldValue('type') || 'Car';
                   const typeId = VEHICLE_TYPE_MAP[type] || 3;
 
@@ -1002,7 +1002,7 @@ const GateController = () => {
                       plate: randomBikePlate,
                       tempImageUrl: rawImageUrl
                     });
-                    message.success(t('gate.messages.bicycleExitImage') || "Đã lưu ảnh xe đạp!");
+                    message.success(t('gate.messages.bicycleExitImage'));
                   } else {
                     // XE MÁY / Ô TÔ: Chạy nhận diện biển số bình thường
                     const result = await parkingService.recognizeLicensePlate(file, typeId);
@@ -1101,7 +1101,7 @@ const GateController = () => {
                           checkInForm.setFieldsValue({
                             ticketCode: checkRes.ticketCode || checkRes.TicketCode
                           });
-                          message.success(`Phát hiện đặt chỗ của tài xế: ${checkRes.driverName || "N/A"}`);
+                          message.success(t('gate.messages.bookingFound', { driver: checkRes.driverName || "N/A" }));
                         }
                       } catch (err) {
                         checkInForm.setFieldsValue({ ticketCode: '' });
@@ -1154,12 +1154,12 @@ const GateController = () => {
 
               <Form.Item
                 name="ticketCode"
-                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.qrTicketCode')} (Nếu có)</span>}
+                label={<span className="text-slate-500 text-xs font-bold uppercase tracking-wider dark:text-slate-400">{t('gate.form.qrTicketCode')} {t('gate.form.optionalSuffix')}</span>}
                 className="mb-3"
               >
                 <Input 
                   ref={entryQrInputRef}
-                  placeholder="Quét mã QR đặt chỗ hoặc Membership..."
+                  placeholder={t('gate.form.scanQrEntryPlaceholder')}
                   className="h-11 bg-slate-50 border-slate-200 text-slate-800 rounded-[14px] font-mono uppercase font-bold focus:bg-white focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800" 
                 />
               </Form.Item>
@@ -1279,7 +1279,7 @@ const GateController = () => {
                 checkOutForm.setFieldValue('tempImageUrl', null);
                 try {
                   const file = await resizeAndCompressImage(imageSrc, "exit_capture.jpg", 1280, 720, 0.8);
-                  if (!file) throw new Error("Ảnh chụp không hợp lệ.");
+                  if (!file) throw new Error(t('gate.messages.invalidCapturedImage'));
 
                   const currentPlate = checkOutForm.getFieldValue('plate') || '';
                   const isBike = currentPlate.toUpperCase().startsWith('BIKE_');
@@ -1290,7 +1290,7 @@ const GateController = () => {
                     
                     setExitOcrResult(currentPlate);
                     checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
-                    message.success("Đã ghi nhận ảnh chụp xe đạp cổng ra.");
+                    message.success(t('gate.messages.bicycleExitImage'));
                   } else {
                     const result = await parkingService.recognizeLicensePlate(file, 3);
                     const isSuccess = result?.isSuccess || result?.IsSuccess;
@@ -1358,7 +1358,7 @@ const GateController = () => {
                     URL.revokeObjectURL(url);
                     setExitOcrResult(currentPlate);
                     checkOutForm.setFieldsValue({ tempImageUrl: rawImageUrl });
-                    message.success("Đã ghi nhận ảnh chụp xe đạp cổng ra.");
+                    message.success(t('gate.messages.bicycleExitImage'));
                   } else {
                     const result = await parkingService.recognizeLicensePlate(compressedFile, 3);
                     const isSuccess = result?.isSuccess || result?.IsSuccess;
@@ -1502,14 +1502,24 @@ const GateController = () => {
               </Button>
             </div>
             
-            <Button
-              type="primary"
-              danger
-              onClick={() => setIsCreateIncidentOpen(true)}
-              className="w-full h-11 font-bold rounded-[14px] flex items-center justify-center gap-1.5 mt-3 bg-rose-600 hover:bg-rose-700 border-none shadow-sm shadow-rose-600/20"
-            >
-              <AlertCircle size={15} /> Báo cáo sự cố / Mất thẻ
-            </Button>
+            <div className="flex items-stretch gap-2 mt-3">
+              <Button
+                type="primary"
+                danger
+                onClick={() => setIsCreateIncidentOpen(true)}
+                className="flex-1 h-11 font-bold rounded-[14px] flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 border-none shadow-sm shadow-rose-600/20"
+              >
+                <AlertCircle size={15} /> {t('gate.form.reportIncidentBtn')}
+              </Button>
+
+              <button
+                type="button"
+                onClick={() => setIsMyIncidentsOpen(true)}
+                className="flex-1 h-11 flex items-center justify-center gap-2 text-xs font-extrabold text-rose-600 bg-rose-50 border border-rose-200 rounded-[14px] hover:bg-rose-100 transition-all shadow-sm active:scale-95 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400"
+              >
+                <AlertCircle size={16} /> {t('gate.form.myIncidentsBtn')}
+              </button>
+            </div>
           </Card>
         </div>
 
@@ -1655,8 +1665,8 @@ const GateController = () => {
               {/* THÊM BIỂU NGỮ CẢNH BÁO THIẾU ẢNH VÀO Ở ĐÂY */}
               {isSuccess && !checkInImageUrl && !isBicycle && (
                 <Alert
-                  message="Cảnh báo an ninh: Phiên đỗ xe thiếu ảnh đầu vào!"
-                  description="Phương tiện này được check-in bằng cách nhập tay biển số hoặc camera bị lỗi lúc vào. Vui lòng đối chiếu thực tế kỹ lưỡng trước khi xác nhận cho xe ra!"
+                  message={t('gate.checkoutModal.missingEntryImageWarning')}
+                  description={t('gate.checkoutModal.missingEntryImageDesc')}
                   type="warning"
                   showIcon
                   className="rounded-xl font-bold border-amber-300 bg-amber-50 text-amber-900"
@@ -1707,12 +1717,12 @@ const GateController = () => {
                           ) : isBicycle ? (
                             <div className="flex flex-col items-center justify-center p-3 text-center bg-slate-100 w-full h-full">
                               <span className="text-slate-400 font-extrabold text-[22px] mb-1">🚲</span>
-                              <span className="text-[10px] text-slate-500 font-bold uppercase">Xe đạp (Không ảnh)</span>
+                              <span className="text-[10px] text-slate-500 font-bold uppercase">{t('gate.checkoutModal.bicycleNoImage')}</span>
                             </div>
                           ) : (
                             <div className="flex flex-col items-center justify-center p-3 text-center bg-amber-50 w-full h-full border border-dashed border-amber-300">
                               <span className="text-amber-500 animate-pulse text-[22px] mb-1">⚠️</span>
-                              <span className="text-[10px] text-amber-700 font-extrabold uppercase">Không có ảnh vào</span>
+                              <span className="text-[10px] text-amber-700 font-extrabold uppercase">{t('gate.checkoutModal.noEntryImage')}</span>
                             </div>
                           )}
                         </div>
@@ -2026,6 +2036,11 @@ const GateController = () => {
         onSuccess={() => {}}
       />
 
+      <MyIncidentsModal
+        isOpen={isMyIncidentsOpen}
+        onClose={() => setIsMyIncidentsOpen(false)}
+      />
+
       {/* Start Shift Overlay Modal */}
       <Modal
         title={<span className="text-lg font-bold text-slate-800">{t('staffShifts.requireShiftTitle')}</span>}
@@ -2100,7 +2115,7 @@ const GateController = () => {
           >
             <Input
               type="number"
-              placeholder="Ví dụ: 500000"
+              placeholder={t('gate.form.amountPlaceholderExample')}
               className="h-11 rounded-xl text-lg font-bold"
               suffix={<span className="font-bold text-slate-400">VND</span>}
             />
