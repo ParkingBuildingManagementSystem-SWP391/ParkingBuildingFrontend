@@ -181,22 +181,22 @@ const IncidentsTable = () => {
   const getSeverityTag = (severity) => {
     switch (severity) {
       case 'Critical': return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 ring-1 ring-inset ring-rose-200">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 ring-1 ring-inset ring-rose-200 whitespace-nowrap">
           <AlertCircle size={14} /> {t('dashboard.incidents.severity.critical')}
         </span>
       );
       case 'Warning': return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-200">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-200 whitespace-nowrap">
           <AlertTriangle size={14} /> {t('dashboard.incidents.severity.warning')}
         </span>
       );
       case 'Info': return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-inset ring-indigo-200">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-inset ring-indigo-200 whitespace-nowrap">
           <Info size={14} /> {t('dashboard.incidents.severity.info')}
         </span>
       );
       default: return (
-        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 whitespace-nowrap dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
           {severity}
         </span>
       );
@@ -205,12 +205,12 @@ const IncidentsTable = () => {
 
   const getStatusTag = (status) => {
     if (isResolved(status)) return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/40">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200 whitespace-nowrap dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/40">
         <CheckCircle2 size={14} /> {t('dashboard.incidents.status.resolved')}
       </span>
     );
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200 whitespace-nowrap dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
         <span className="h-1.5 w-1.5 rounded-full bg-rose-500" /> {t('dashboard.incidents.status.open')}
       </span>
     );
@@ -264,7 +264,7 @@ const IncidentsTable = () => {
       key: 'action',
       render: (_, record) => {
         if (isResolved(record.status)) {
-          return <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600"><CheckCircle2 size={14} /> {t('dashboard.incidents.resolvedLabel')}</span>;
+          return <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 whitespace-nowrap"><CheckCircle2 size={14} /> {t('dashboard.incidents.resolvedLabel')}</span>;
         }
 
         return (
