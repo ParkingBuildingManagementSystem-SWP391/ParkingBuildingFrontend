@@ -302,7 +302,6 @@ const ParkingLotMap = () => {
   const [bookingPaymentMethod, setBookingPaymentMethod] = useState('WALLET');
   const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
   const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
-  const [bookingDateOption, setBookingDateOption] = useState('auto'); // 'auto', 'today', 'tomorrow'
 
   // Form states for Manager/Admin reservation
   const [adminPlate, setAdminPlate] = useState('');
@@ -661,8 +660,6 @@ const ParkingLotMap = () => {
   };
 
   const isBookingNextDay = () => {
-    if (bookingDateOption === 'tomorrow') return true;
-    if (bookingDateOption === 'today') return false;
     const todayDate = new Date(createVietnamWallTimeIso({ hour: expectedHour, minute: expectedMinute }));
     return todayDate <= new Date();
   };
@@ -1400,33 +1397,7 @@ const ParkingLotMap = () => {
                 )}
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.expectedCheckinLabel')}</label>
-                    <div className="flex bg-slate-100 p-0.5 rounded-xl text-xs dark:bg-slate-800">
-                      <button
-                        type="button"
-                        onClick={() => setBookingDateOption('today')}
-                        className={`px-3 py-1 font-bold rounded-lg transition-all ${
-                          !isBookingNextDay()
-                            ? 'bg-white text-indigo-700 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-                        }`}
-                      >
-                        Hôm nay
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setBookingDateOption('tomorrow')}
-                        className={`px-3 py-1 font-bold rounded-lg transition-all ${
-                          isBookingNextDay()
-                            ? 'bg-indigo-600 text-white shadow-sm dark:bg-indigo-500'
-                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-                        }`}
-                      >
-                        Ngày mai
-                      </button>
-                    </div>
-                  </div>
+                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.expectedCheckinLabel')}</label>
                   <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-3 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                     <div className="flex flex-col items-center gap-1.5">
                       <input
