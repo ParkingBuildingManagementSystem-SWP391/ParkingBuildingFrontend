@@ -14,6 +14,7 @@
       "my-bookings": "My Bookings",
       "checkin-checkout": "Gate Control Center",
       "settings": "Account Settings",
+      "incident-history": "Incident Log & History",
       "default": "User Accounts Management"
     },
     "subtitle": {
@@ -29,6 +30,7 @@
       "checkin-checkout": "Coordinate Entry and Exit lanes",
       "create-account": "Create new users and grant access",
       "my-bookings": "Manage your parking reservations and history",
+      "incident-history": "Look up every reported incident and its resolution status",
       "default": "Manage user accounts and system access"
     },
     "activeStatus": "{{count}} active",
@@ -770,6 +772,14 @@
       "promptNotesRequired": "Please enter resolution notes.",
       "promptNotes": "Resolution / Compensation Notes",
       "notesPlaceholder": "Enter resolution notes, e.g. Key was found / Customer paid lost-ticket fine...",
+      "fineAmountLabel": "Fine amount (if any)",
+      "fineAmountPlaceholder": "Enter the fine amount, e.g. 50000",
+      "statsTotal": "Total Incidents",
+      "statsPending": "Pending",
+      "statsResolved": "Resolved",
+      "statsTotalFine": "Total Fines Collected",
+      "statsTopIssue": "Most Common Incident Type",
+      "statsLoadError": "Unable to load incident statistics.",
       "severity": {
         "critical": "CRITICAL",
         "warning": "WARNING",
@@ -882,6 +892,8 @@
       "bookingFailed": "Check-in failed. Please check QR code/ticket code.",
       "plateRequired": "Please enter license plate!",
       "plateMismatch": "License plate does not match!",
+      "lostTicketChecking": "Checking for a lost-ticket incident...",
+      "lostTicketResolvedBadge": "Lost-ticket incident resolved & paid (#{{id}}) — vehicle may exit without a physical ticket.",
       "prePaidCheckout": "Customer has pre-paid via Mobile App. Vehicle may exit!",
       "checkoutOpened": "Check-out processed. Verification panel opened.",
       "switchPayment": "Switched to payment method {{method}}",
@@ -1320,7 +1332,8 @@
     "profile": "Profile",
     "home": "Home",
     "userAccounts": "User Accounts",
-    "logout": "Logout"
+    "logout": "Logout",
+    "incidentHistory": "Incident History"
   },
   "membershipConfig": {
     "title": "Membership Package Pricing Configuration",
@@ -1493,6 +1506,34 @@
     "plateRequiredToast": "Please enter the license plate.",
     "submitSuccess": "Incident report submitted successfully.",
     "submitFailed": "Failed to submit report."
+  },
+  "incidentHistory": {
+    "pageTitle": "Incident Log & History",
+    "pageSubtitle": "Look up every reported incident and its resolution status",
+    "filterStatusAll": "All statuses",
+    "filterStatusResolved": "Resolved",
+    "filterStatusPending": "Pending",
+    "filterTypeAll": "All incident types",
+    "searchPlaceholder": "Search by license plate...",
+    "colId": "ID #",
+    "colPlate": "License Plate",
+    "colType": "Incident Type",
+    "colFine": "Fine Amount",
+    "colStatus": "Status",
+    "colResolvedBy": "Resolved By",
+    "colResolvedAt": "Resolved At",
+    "colNotes": "Resolution Notes",
+    "notApplicable": "N/A",
+    "notResolvedYet": "Not yet",
+    "noNotes": "No notes",
+    "loading": "Loading data...",
+    "emptyText": "No incidents found matching the filters.",
+    "emptyTextError": "Unable to load incident data.",
+    "fetchError": "Unable to load the incident list.",
+    "statusResolvedTag": "Resolved",
+    "statusPendingTag": "Pending",
+    "statsFetchError": "Unable to load incident statistics.",
+    "colSeverity": "Severity"
   },
   "staffShifts": {
     "title": "Shift Management & Activity Logs",

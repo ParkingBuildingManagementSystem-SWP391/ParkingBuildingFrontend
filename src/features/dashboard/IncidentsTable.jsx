@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Table, Button, Input, Tooltip, Space, Modal, Image, message } from 'antd';
+import { Table, Button, Input, InputNumber, Tooltip, Space, Modal, Image, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
@@ -10,9 +10,11 @@ import {
   MapPin,
   Clock,
   Activity,
-  Search
+  Search,
+  Coins
 } from 'lucide-react';
 import { managerService } from '../../services/managerService';
+import incidentReportService from '../../services/incidentReportService';
 import { formatVietnamDateTime, parseUtcDate } from '../../utils/dateTime';
 import { useAuth } from '../../context/AuthContext';
 
@@ -29,6 +31,8 @@ const IncidentsTable = () => {
   const [evidenceIncident, setEvidenceIncident] = useState(null);
   const [resolveIncidentId, setResolveIncidentId] = useState(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
+  const [fineAmount, setFineAmount] = useState(0);
+  const [stats, setStats] = useState(null);
 
   const normalizeIncident = (item, index) => {
     const safeItem = item || {};
@@ -97,6 +101,19 @@ const IncidentsTable = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [filterSeverity, searchText]);
 
+  const fetchStats = async () => {
+    try {
+      const data = await incidentReportService.getIncidentStatistics();
+      setStats(data);
+    } catch (err) {
+      console.error('fetchStats error:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isManager) fetchStats();
+  }, [isManager]);
+
   // Filter Logic
   const filteredIncidents = useMemo(() => {
     return incidents.filter(inc => {
@@ -116,9 +133,10 @@ const IncidentsTable = () => {
   }, [incidents, searchText, filterSeverity]);
 
   // Handle Resolve Action
-  const handleResolve = (id) => {
-    setResolveIncidentId(id);
+  const handleResolve = (record) => {
+    setResolveIncidentId(record.id);
     setResolutionNotes(t('dashboard.incidents.defaultResolutionNotes'));
+    setFineAmount(record.type === 'Lost Ticket' ? 50000 : 0);
   };
 
   const handleResolveSubmit = () => {
@@ -129,7 +147,7 @@ const IncidentsTable = () => {
 
     const payload = {
       resolutionNotes: resolutionNotes.trim(),
-      fineAmount: 0,
+      fineAmount: Number(fineAmount) || 0,
     };
 
     setResolvingId(resolveIncidentId);
@@ -147,6 +165,8 @@ const IncidentsTable = () => {
         message.success(t('dashboard.incidents.resolveSuccess', { id: resolveIncidentId }));
         setResolveIncidentId(null);
         setResolutionNotes('');
+        setFineAmount(0);
+        if (isManager) fetchStats();
       })
       .catch((err) => {
         console.error('resolveIncident error:', err);
@@ -262,7 +282,7 @@ const IncidentsTable = () => {
                 type="primary"
                 size="small"
                 className="rounded-[12px] border-0 bg-emerald-600 font-bold shadow-sm hover:bg-emerald-700"
-                onClick={() => handleResolve(record.id)}
+                onClick={() => handleResolve(record)}
               >
                 {t('dashboard.incidents.resolve')}
               </Button>
@@ -278,6 +298,38 @@ const IncidentsTable = () => {
   const warningCount = incidents.filter(i => i.severity === 'Warning' && isPending(i.status)).length;
 
   return (
+    <div className="space-y-5 font-sans">
+
+      {/* Manager-only KPI stats */}
+      {isManager && stats && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="rounded-2xl border-l-4 border-indigo-500 bg-white p-5 shadow-sm dark:border-indigo-400 dark:bg-slate-900">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('dashboard.incidents.statsTotal')}</p>
+            <h3 className="mt-1 text-2xl font-extrabold text-indigo-600 dark:text-indigo-300">{stats.totalIncidents ?? 0}</h3>
+          </div>
+          <div className="rounded-2xl border-l-4 border-amber-500 bg-white p-5 shadow-sm dark:border-amber-400 dark:bg-slate-900">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('dashboard.incidents.statsPending')}</p>
+            <h3 className="mt-1 text-2xl font-extrabold text-amber-600 dark:text-amber-300">{stats.pendingCount ?? 0}</h3>
+          </div>
+          <div className="rounded-2xl border-l-4 border-emerald-500 bg-white p-5 shadow-sm dark:border-emerald-400 dark:bg-slate-900">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('dashboard.incidents.statsResolved')}</p>
+            <h3 className="mt-1 text-2xl font-extrabold text-emerald-600 dark:text-emerald-300">{stats.resolvedCount ?? 0}</h3>
+          </div>
+          <div className="rounded-2xl border-l-4 border-rose-500 bg-white p-5 shadow-sm dark:border-rose-400 dark:bg-slate-900">
+            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <Coins size={13} /> {t('dashboard.incidents.statsTotalFine')}
+            </p>
+            <h3 className="mt-1 text-2xl font-extrabold text-rose-600 dark:text-rose-300">
+              {(stats.totalFineCollected || 0).toLocaleString('vi-VN')} đ
+            </h3>
+          </div>
+          <div className="rounded-2xl border-l-4 border-purple-500 bg-white p-5 shadow-sm dark:border-purple-400 dark:bg-slate-900">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('dashboard.incidents.statsTopIssue')}</p>
+            <h3 className="mt-1 truncate text-lg font-extrabold text-purple-600 dark:text-purple-300">{stats.topIssueType || t('incidentHistory.notApplicable')}</h3>
+          </div>
+        </div>
+      )}
+
     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5 font-sans dark:border-slate-700 dark:bg-slate-900">
 
       {/* Header & Controls */}
@@ -390,8 +442,24 @@ const IncidentsTable = () => {
               className="rounded-lg"
             />
           </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400">
+              {t('dashboard.incidents.fineAmountLabel')}
+            </label>
+            <InputNumber
+              min={0}
+              step={1000}
+              value={fineAmount}
+              onChange={(value) => setFineAmount(value || 0)}
+              placeholder={t('dashboard.incidents.fineAmountPlaceholder')}
+              addonAfter="đ"
+              className="w-full rounded-lg"
+            />
+          </div>
         </div>
       </Modal>
+    </div>
     </div>
   );
 };

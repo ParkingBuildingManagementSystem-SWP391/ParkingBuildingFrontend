@@ -27,6 +27,7 @@ import MembershipSuccessPage from './pages/MembershipSuccessPage';
 import MyMembership from './pages/MyMembership';
 import MembershipManager from './pages/MembershipManager';
 import MyWallet from './pages/MyWallet';
+import IncidentHistory from './pages/IncidentHistory';
 
 // Feature Components (Dashboard, Parking Map, Check-in counter)
 import Dashboard, {
@@ -118,6 +119,7 @@ function App() {
             {/* Staff/Manager operations paths */}
             <Route element={<RoleProtectedRoute allowedRoles={['Staff', 'Manager']} />}>
               <Route path="/checkin-checkout" element={<GateController />} />
+              <Route path="/incident-history" element={<IncidentHistory />} />
             </Route>
 
             {/* Driver/Customer-only paths */}

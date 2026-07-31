@@ -14,6 +14,7 @@
       "my-bookings": "Lịch đặt chỗ của tôi",
       "checkin-checkout": "Điều khiển cổng",
       "settings": "Cài đặt tài khoản",
+      "incident-history": "Nhật ký & Lịch sử Sự cố",
       "default": "Quản lý người dùng"
     },
     "subtitle": {
@@ -29,6 +30,7 @@
       "checkin-checkout": "Trung tâm điều phối làn vào và làn ra",
       "create-account": "Tạo người dùng mới và cấp quyền truy cập hệ thống",
       "my-bookings": "Quản lý lịch đặt chỗ và lịch sử gửi xe của bạn",
+      "incident-history": "Tra cứu toàn bộ sự cố đã báo cáo và trạng thái xử lý",
       "default": "Quản lý tài khoản người dùng và quyền truy cập hệ thống"
     },
     "activeStatus": "{{count}} đang hoạt động",
@@ -770,6 +772,14 @@
       "promptNotesRequired": "Vui lòng nhập ghi chú giải quyết.",
       "promptNotes": "Ghi chú giải quyết / Đền bù",
       "notesPlaceholder": "Nhập ghi chú xử lý, ví dụ: Đã tìm thấy chìa khóa / Khách nộp phạt mất thẻ xe...",
+      "fineAmountLabel": "Tiền phạt (nếu có)",
+      "fineAmountPlaceholder": "Nhập số tiền phạt, ví dụ: 50000",
+      "statsTotal": "Tổng số sự cố",
+      "statsPending": "Đang chờ xử lý",
+      "statsResolved": "Đã giải quyết",
+      "statsTotalFine": "Tổng tiền phạt đã thu",
+      "statsTopIssue": "Loại sự cố gặp nhiều nhất",
+      "statsLoadError": "Không thể tải thống kê sự cố.",
       "severity": {
         "critical": "NGHIÊM TRỌNG",
         "warning": "CẢNH BÁO",
@@ -882,6 +892,8 @@
       "bookingFailed": "Check-in thất bại. Vui lòng kiểm tra mã QR/mã vé.",
       "plateRequired": "Vui lòng nhập biển số xe!",
       "plateMismatch": "Biển số không khớp!",
+      "lostTicketChecking": "Đang kiểm tra sự cố mất thẻ...",
+      "lostTicketResolvedBadge": "Đã giải quyết & đã thanh toán sự cố mất thẻ (#{{id}}) — có thể cho xe ra mà không cần thẻ vật lý.",
       "prePaidCheckout": "Khách hàng đã thanh toán trước qua App di động. Mời xe ra!",
       "checkoutOpened": "Đã xử lý check-out. Bảng xác minh đã được mở.",
       "switchPayment": "Đã chuyển sang thanh toán bằng {{method}}",
@@ -1317,7 +1329,8 @@
     "profile": "Hồ sơ cá nhân",
     "home": "Trang chủ",
     "userAccounts": "Quản lý người dùng",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "incidentHistory": "Nhật ký sự cố"
   },
   "membershipConfig": {
     "title": "Cấu hình giá gói Membership",
@@ -1490,6 +1503,34 @@
     "plateRequiredToast": "Vui lòng nhập biển số xe.",
     "submitSuccess": "Báo cáo sự cố đã được gửi đi thành công.",
     "submitFailed": "Gửi báo cáo thất bại."
+  },
+  "incidentHistory": {
+    "pageTitle": "Nhật ký & Lịch sử Sự cố",
+    "pageSubtitle": "Tra cứu toàn bộ sự cố đã báo cáo và trạng thái xử lý",
+    "filterStatusAll": "Tất cả trạng thái",
+    "filterStatusResolved": "Đã giải quyết",
+    "filterStatusPending": "Đang chờ xử lý",
+    "filterTypeAll": "Tất cả loại sự cố",
+    "searchPlaceholder": "Tìm theo biển số xe...",
+    "colId": "Mã #",
+    "colPlate": "Biển số xe",
+    "colType": "Loại sự cố",
+    "colFine": "Tiền phạt",
+    "colStatus": "Trạng thái",
+    "colResolvedBy": "Người giải quyết",
+    "colResolvedAt": "Thời gian xử lý",
+    "colNotes": "Ghi chú xử lý",
+    "notApplicable": "N/A",
+    "notResolvedYet": "Chưa có",
+    "noNotes": "Không có ghi chú",
+    "loading": "Đang tải dữ liệu...",
+    "emptyText": "Không tìm thấy sự cố nào khớp với bộ lọc.",
+    "emptyTextError": "Không thể tải dữ liệu sự cố.",
+    "fetchError": "Không thể tải danh sách sự cố.",
+    "statusResolvedTag": "Đã giải quyết",
+    "statusPendingTag": "Đang chờ",
+    "statsFetchError": "Không thể tải thống kê sự cố.",
+    "colSeverity": "Mức độ"
   },
   "staffShifts": {
     "title": "Quản lý Ca trực & Nhật ký Hoạt động",
