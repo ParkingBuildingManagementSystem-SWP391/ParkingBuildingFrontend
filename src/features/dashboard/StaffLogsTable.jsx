@@ -159,7 +159,7 @@ const StaffLogsTable = () => {
         if (val === 0) return <Tag color="success" className="font-bold">{t('staffShifts.sufficient')}</Tag>;
         return (
           <Tag color="error" className="font-extrabold flex items-center gap-1 w-fit">
-            <AlertTriangle size={12} /> {val > 0 ? '+' : ''}{formatVND(val)}
+            <AlertTriangle size={12} /> {formatVND(Math.abs(val))}
           </Tag>
         );
       }

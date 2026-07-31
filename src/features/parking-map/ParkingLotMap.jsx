@@ -1058,11 +1058,6 @@ const ParkingLotMap = () => {
     return (
       <section key={section.key} className="rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900/70">
         <div className="mb-4 flex items-center gap-2">
-          {activeFloorId === 3 ? (
-            isBicycleZone ? <Bike size={18} className="text-indigo-600" /> : <Motorcycle size={18} className="text-indigo-600" />
-          ) : (
-            <Car size={18} className="text-indigo-600" />
-          )}
           <h3 className="text-sm font-extrabold uppercase tracking-tight text-slate-900 dark:text-slate-100">
             {getZoneDisplayName(section.title)}
           </h3>
@@ -1089,7 +1084,6 @@ const ParkingLotMap = () => {
     return (
       <section key={`${topZone.key}-${bottomZone?.key || 'single'}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/70">
         <div className="mb-3 flex items-center gap-2">
-          <Car size={18} className="text-indigo-600" />
           <h3 className="text-sm font-extrabold uppercase tracking-tight text-slate-900 dark:text-slate-100">
             {getZoneDisplayName(title)}
           </h3>
@@ -1254,9 +1248,6 @@ const ParkingLotMap = () => {
                   <div className={activeFloorId === 3 ? 'min-w-[1010px]' : 'min-w-[860px]'}>
                     <div className="mb-3 flex items-center justify-between gap-4 border-b border-slate-100 pb-3 dark:border-slate-700">
                       <div className="flex items-center gap-2">
-                        {activeFloorId === 3 ? (
-                          <div className="flex items-center gap-1"><Motorcycle size={18} className="text-indigo-600" /><Bike size={18} className="text-indigo-600" /></div>
-                        ) : <Car size={18} className="text-indigo-600" />}
                         <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight dark:text-slate-100">
                           {t('parkingMap.floorMap')} {getFloorDisplayName(activeFloor.name).split(' ').slice(1).join(' ')} ({getFloorDescriptionLabel(activeFloor.desc)})
                         </h3>
