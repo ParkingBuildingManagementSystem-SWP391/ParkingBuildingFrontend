@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import i18n from '../i18n';
 import { useAuth } from './AuthContext';
 
 export const NotificationContext = createContext(null);
@@ -79,7 +80,7 @@ export const NotificationProvider = ({ children }) => {
           const notificationType = getField(data, 'notificationType') || 'General';
 
           let finalContent = getField(data, 'content') || '';
-          const finalTitle = getField(data, 'title') || 'Thông báo mới';
+          const finalTitle = getField(data, 'title') || i18n.t('notificationBell.newNotificationDefaultTitle');
 
           // Nếu là thông báo cập nhật giá đỗ xe và có đủ thông tin giá cũ/giá mới
           if (
@@ -88,7 +89,11 @@ export const NotificationProvider = ({ children }) => {
             oldPrice !== undefined &&
             newPrice !== undefined
           ) {
-            finalContent = `Biểu phí đỗ xe cho loại xe ${vehicleType} đã thay đổi từ ${formatCurrency(oldPrice)} thành ${formatCurrency(newPrice)} áp dụng từ thời điểm này.`;
+            finalContent = i18n.t('notificationBell.priceUpdateContent', {
+              vehicleType,
+              oldPrice: formatCurrency(oldPrice),
+              newPrice: formatCurrency(newPrice),
+            });
           }
           
           // Định dạng dữ liệu linh hoạt chống lỗi viết hoa/thường từ Backend

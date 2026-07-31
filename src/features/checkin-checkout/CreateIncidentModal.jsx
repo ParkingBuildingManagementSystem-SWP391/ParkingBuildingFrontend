@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Select, Input, Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import incidentReportService from '../../services/incidentReportService';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [fileList, setFileList] = useState([]);
@@ -23,10 +25,10 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
   const selectedIssueType = Form.useWatch('issueType', form);
 
   const issueTypes = [
-    { value: 'Lost Ticket', label: 'Mất thẻ giữ xe' },
-    { value: 'Vehicle Damage', label: 'Xe bị va chạm / Hư hỏng' },
-    { value: 'Equipment Malfunction', label: 'Lỗi thiết bị (Barrier/Camera/Hệ thống)' },
-    { value: 'Other', label: 'Khác' },
+    { value: 'Lost Ticket', label: t('createIncident.typeLostTicket') },
+    { value: 'Vehicle Damage', label: t('createIncident.typeVehicleDamage') },
+    { value: 'Equipment Malfunction', label: t('createIncident.typeEquipmentMalfunction') },
+    { value: 'Other', label: t('createIncident.typeOther') },
   ];
 
   const uploadImageToCloud = async (file) => {
@@ -41,12 +43,12 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
     });
 
     if (!res.ok) {
-      throw new Error('Không thể tải ảnh lên máy chủ Cloudinary');
+      throw new Error(t('createIncident.uploadCloudError'));
     }
 
     const data = await res.json();
     if (!data.secure_url) {
-      throw new Error('Cloudinary không trả về URL ảnh hợp lệ');
+      throw new Error(t('createIncident.uploadCloudInvalidUrl'));
     }
 
     return data.secure_url;
@@ -66,7 +68,7 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
         .toUpperCase();
 
       if (values.issueType !== 'EquipmentMalfunction' && !normalizedPlate) {
-        message.error('Vui lòng nhập biển số xe.');
+        message.error(t('createIncident.plateRequiredToast'));
         return;
       }
 
@@ -78,13 +80,13 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
       };
 
       await incidentReportService.createIncident(payload);
-      message.success('Báo cáo sự cố đã được gửi đi thành công.');
+      message.success(t('createIncident.submitSuccess'));
       onSuccess?.();
       form.resetFields();
       setFileList([]);
       onClose();
     } catch (err) {
-      message.error(err.message || 'Gửi báo cáo thất bại.');
+      message.error(err.message || t('createIncident.submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -94,7 +96,7 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
 
   return (
     <Modal
-      title="Báo cáo sự cố mới"
+      title={t('createIncident.modalTitle')}
       open={isOpen}
       onCancel={onClose}
       footer={null}
@@ -111,8 +113,8 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
       >
         <Form.Item
           name="issueType"
-          label="Loại sự cố:"
-          rules={[{ required: true, message: 'Vui lòng chọn loại sự cố!' }]}
+          label={t('createIncident.issueTypeLabel')}
+          rules={[{ required: true, message: t('createIncident.issueTypeRequired') }]}
         >
           <Select>
             {issueTypes.map((type) => (
@@ -123,29 +125,29 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
 
         <Form.Item
           name="licenseVehicle"
-          label="Biển số xe:"
+          label={t('createIncident.plateLabel')}
           rules={[
             {
               required: selectedIssueType !== 'EquipmentMalfunction',
-              message: 'Vui lòng nhập biển số xe!',
+              message: t('createIncident.plateRequired'),
             },
           ]}
         >
           <Input
             disabled={!!licenseVehicle}
-            placeholder={selectedIssueType === 'EquipmentMalfunction' ? 'Không bắt buộc với sự cố thiết bị' : 'VD: 51A12345'}
+            placeholder={selectedIssueType === 'EquipmentMalfunction' ? t('createIncident.plateOptionalEquipment') : t('createIncident.platePlaceholder')}
           />
         </Form.Item>
 
         <Form.Item
           name="description"
-          label="Chi tiết sự việc:"
-          rules={[{ required: true, message: 'Vui lòng nhập chi tiết sự cố!' }]}
+          label={t('createIncident.descriptionLabel')}
+          rules={[{ required: true, message: t('createIncident.descriptionRequired') }]}
         >
-          <TextArea rows={4} placeholder="Nhập thông tin chi tiết sự cố..." />
+          <TextArea rows={4} placeholder={t('createIncident.descriptionPlaceholder')} />
         </Form.Item>
 
-        <Form.Item label="Ảnh chụp bằng chứng (nếu có):">
+        <Form.Item label={t('createIncident.evidenceLabel')}>
           <Upload
             beforeUpload={() => false}
             listType="picture"
@@ -153,14 +155,14 @@ const CreateIncidentModal = ({ isOpen, onClose, licenseVehicle = '', onSuccess }
             fileList={fileList}
             onChange={handleUploadChange}
           >
-            <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+            <Button icon={<UploadOutlined />}>{t('createIncident.chooseImage')}</Button>
           </Upload>
         </Form.Item>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
-          <Button onClick={onClose} disabled={submitting}>Hủy</Button>
+          <Button onClick={onClose} disabled={submitting}>{t('createIncident.cancelBtn')}</Button>
           <Button type="primary" htmlType="submit" loading={submitting} danger>
-            Gửi báo cáo
+            {t('createIncident.submitBtn')}
           </Button>
         </div>
       </Form>

@@ -400,7 +400,7 @@ const ParkingLotMap = () => {
       }
     } catch (err) {
       console.error(err);
-      setErrorMap('Không thể tải dữ liệu chỗ đỗ từ backend.');
+      setErrorMap(t('parkingMap.loadSlotError'));
     } finally {
       setLoadingMap(false);
     }
@@ -465,7 +465,7 @@ const ParkingLotMap = () => {
         });
 
         if (successfulSummaries.length < floorList.length) {
-          setErrorMap('Một số tầng chưa tải được dữ liệu từ backend.');
+          setErrorMap(t('parkingMap.partialLoadError'));
         }
       } finally {
         setLoadingMap(false);
@@ -608,7 +608,8 @@ const ParkingLotMap = () => {
         const typeId = Number(slot.typeId);
         const reqTypeId = Number(paramVehicleTypeId);
         if (paramVehicleTypeId && typeId !== reqTypeId) {
-          message.error(`Vui lòng chọn ô đỗ dành cho loại xe đã đăng ký (${reqTypeId === 3 ? 'Ô tô' : reqTypeId === 2 ? 'Xe máy' : 'Xe đạp'}).`);
+          const reqTypeLabel = reqTypeId === 3 ? t('parkingMap.carOpt') : reqTypeId === 2 ? t('parkingMap.motorcycleOpt') : t('parkingMap.bicycleOpt');
+          message.error(t('parkingMap.vehicleTypeMismatch', { type: reqTypeLabel }));
           return;
         }
         const returnParams = new URLSearchParams({
@@ -619,7 +620,7 @@ const ParkingLotMap = () => {
         if (membershipDuration) returnParams.set('durationMonths', membershipDuration);
         navigate(`/my-membership?${returnParams.toString()}`);
       } else {
-        message.info("Vị trí này đã được sử dụng. Vui lòng chọn vị trí màu xanh trống khác.");
+        message.info(t('parkingMap.slotOccupiedMsg'));
       }
       return;
     }
@@ -646,7 +647,7 @@ const ParkingLotMap = () => {
         setIsDetailsModalOpen(true);
         fetchSlotDetail(slot.slotId);
       } else {
-        message.info("This slot is currently occupied or reserved.");
+        message.info(t('parkingMap.slotOccupiedMsg'));
       }
     }
   };
@@ -701,13 +702,13 @@ const ParkingLotMap = () => {
     // Guard: ensure JWT bearer token is fully authenticated
     const token = localStorage.getItem('token');
     if (!token) {
-      message.error("Authentication session expired. Please log in again to book a slot.");
+      message.error(t('parkingMap.authExpired'));
       return;
     }
 
     // Guard: ensure user is authorized to book (roleId === 4)
     if (user && user.roleId !== undefined && Number(user.roleId) !== 4) {
-      message.error("Access denied. Only registered drivers can book slots.");
+      message.error(t('parkingMap.driverOnly'));
       return;
     }
 
@@ -763,25 +764,25 @@ const ParkingLotMap = () => {
 
       setIsBookingModalOpen(false);
       if (paymentUrl) {
-        const depositText = depositAmount ? ` Tiền cọc: ${Number(depositAmount).toLocaleString('vi-VN')} VND.` : '';
-        message.success((responseData.message || responseData.Message || 'Cần thanh toán tiền cọc để hoàn tất đặt chỗ.') + depositText);
+        const depositText = depositAmount ? t('parkingMap.depositAmountSuffix', { amount: Number(depositAmount).toLocaleString('vi-VN') }) : '';
+        message.success((responseData.message || responseData.Message || t('parkingMap.depositRequired')) + depositText);
         if (invoiceId) localStorage.setItem('pending_invoice_id', String(invoiceId));
         window.location.href = paymentUrl;
       } else if (requiresPayment) {
-        message.success(responseData.message || responseData.Message || `Đã giữ chỗ ${selectedSlot.id}. Thanh toán tiền cọc đang chờ xử lý.`);
+        message.success(responseData.message || responseData.Message || t('parkingMap.bookingHold', { id: selectedSlot.id }));
       } else if (bookingPaymentMethod === 'WALLET') {
         if (invoiceId && String(paymentStatus || '').toUpperCase() === 'SUCCESS') {
           navigate(`/payment-success?type=booking&invoiceId=${invoiceId}`);
           return;
         }
-        message.success(responseData.message || responseData.Message || `Đặt chỗ ${selectedSlot.id} và thanh toán cọc bằng ví thành công!`);
+        message.success(responseData.message || responseData.Message || t('parkingMap.bookingWalletSuccess', { id: selectedSlot.id }));
       } else {
         message.success(
           responseData.message ||
           responseData.Message ||
           (walletPaid
-            ? `Đặt chỗ ${selectedSlot.id} thành công. Tiền cọc đã được trừ từ ví.`
-            : `Đặt chỗ ${selectedSlot.id} thành công!`)
+            ? t('parkingMap.bookingSuccessWalletDeducted', { id: selectedSlot.id })
+            : t('parkingMap.bookingSuccess', { id: selectedSlot.id }))
         );
       }
       if (paymentStatus) {
@@ -791,7 +792,7 @@ const ParkingLotMap = () => {
     } catch (err) {
       console.error("Booking Error Response:", err);
       // Bắt chi tiết lỗi từ Backend
-      const errMsg = err.response?.data?.message || err.response?.data?.error || err || "Đặt chỗ thất bại.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err || t('parkingMap.bookingFail');
 
       // Hiển thị dạng modal alert hoặc toast chuyên nghiệp
       message.error(errMsg);
@@ -808,13 +809,13 @@ const ParkingLotMap = () => {
     // Guard: ensure JWT bearer token is fully authenticated
     const token = localStorage.getItem('token');
     if (!token) {
-      message.error("Authentication session expired. Please log in again to check in.");
+      message.error(t('parkingMap.authExpiredCheckin'));
       return;
     }
 
     // Guard: ensure user is authorized for staff check-in (Staff = 2, Admin = 1)
     if (user && user.roleId !== undefined && Number(user.roleId) !== 1 && Number(user.roleId) !== 2) {
-      message.error("Access denied. Only staff or admins can perform walk-in check-ins.");
+      message.error(t('parkingMap.staffOnly'));
       return;
     }
 
@@ -833,7 +834,7 @@ const ParkingLotMap = () => {
       } else {
         // Xe cơ giới: bắt buộc 7-9 ký tự
         if (cleanPlate.length < 7 || cleanPlate.length > 9) {
-          message.warning("Biển số xe không hợp lệ. Vui lòng nhập từ 7 đến 9 ký tự chữ và số.");
+          message.warning(t('parkingMap.invalidPlate'));
           setSubmitting(false);
           return;
         }
@@ -858,14 +859,14 @@ const ParkingLotMap = () => {
 
       setIsDetailsModalOpen(false);
 
-      const successMsg = response?.message || `Chỗ ${selectedSlot.id} hiện đã được xe ${cleanPlate} sử dụng.`;
+      const successMsg = response?.message || t('parkingMap.checkinSuccess', { id: selectedSlot.id, plate: cleanPlate });
       message.success(successMsg);
 
       // Load lại sơ đồ bãi xe để cập nhật màu Đỏ (Occupied)
       onFloorChange(activeFloorId);
     } catch (err) {
       console.error("Walk-in Check-in Error Response:", err.response?.data || err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error || "Check-in thất bại. Vui lòng kiỒm tra lại quyền.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error || t('parkingMap.checkinFail');
       message.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -891,10 +892,10 @@ const ParkingLotMap = () => {
 
       setIsDetailsModalOpen(false);
       const invoiceText = response.totalAmount !== undefined
-        ? ` Phí đã xử lý: ${response.totalAmount.toLocaleString('vi-VN')} đ.`
+        ? ` ${t('parkingMap.processedFee', { fee: response.totalAmount.toLocaleString('vi-VN') })}`
         : '';
 
-      message.success((response.message || `Chỗ ${selectedSlot.id} đã được giải phóng thành công.`) + invoiceText);
+      message.success((response.message || t('parkingMap.checkoutSuccess', { id: selectedSlot.id })) + invoiceText);
 
       onFloorChange(activeFloorId);
     } catch (err) {
@@ -911,12 +912,12 @@ const ParkingLotMap = () => {
     try {
       const slotId = selectedSlot.slotId || selectedSlot.dbSlotId;
       await managerService.lockSlot(slotId);
-      message.success(`Đã khóa ô đỗ ${selectedSlot.id} thành công.`);
+      message.success(t('parkingMap.lockSlotSuccess', { id: selectedSlot.id }));
       setIsDetailsModalOpen(false);
       onFloorChange(activeFloorId);
     } catch (err) {
       console.error(err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error || "Không thể khóa ô đỗ.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error || t('parkingMap.lockSlotError');
       message.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -929,23 +930,16 @@ const ParkingLotMap = () => {
     try {
       const slotId = selectedSlot.slotId || selectedSlot.dbSlotId;
       await managerService.unlockSlot(slotId);
-      message.success(`Đã mở khóa ô đỗ ${selectedSlot.id} thành công.`);
+      message.success(t('parkingMap.unlockSlotSuccess', { id: selectedSlot.id }));
       setIsDetailsModalOpen(false);
       onFloorChange(activeFloorId);
     } catch (err) {
       console.error(err);
-      const errMsg = err.response?.data?.message || err.response?.data?.error || "Không thể mở khóa ô đỗ.";
+      const errMsg = err.response?.data?.message || err.response?.data?.error || t('parkingMap.unlockSlotError');
       message.error(errMsg);
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Hourly Rate display helper
-  const hourlyRateLabel = (type) => {
-    if (type === 'Bicycle') return '2.000 đ';
-    if (type === 'Motorcycle') return '20.000 đ';
-    return '5.000 đ';
   };
 
   const renderSlotTile = (slot) => {
@@ -973,7 +967,7 @@ const ParkingLotMap = () => {
         >
           {isUserCar && (
             <span className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-amber-500 text-slate-950 font-black text-[9px] px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap animate-bounce border border-slate-900 tracking-wider z-30">
-              🚗 VỊ TRÍ XE CỦA BẠN
+              {t('parkingMap.yourCarBadge')}
             </span>
           )}
 
@@ -992,7 +986,7 @@ const ParkingLotMap = () => {
         </div>
 
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[9px] font-bold py-1 px-2 rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none transition-all">
-          Trạng thái: {getStatusLabel(slot.status)} ({getVehicleTypeLabel(slot.type)})
+          {t('parkingMap.statusPrefix')} {getStatusLabel(slot.status)} ({getVehicleTypeLabel(slot.type)})
         </div>
       </div>
     );
@@ -1209,7 +1203,7 @@ const ParkingLotMap = () => {
               <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10 dark:bg-slate-950/70">
                 <div className="flex flex-col items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Đang tải chỗ đỗ từ cơ sở dữ liệu...</span>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('parkingMap.loadingDatabase')}</span>
                 </div>
               </div>
             )}
@@ -1217,7 +1211,7 @@ const ParkingLotMap = () => {
             {filteredSlots.length === 0 ? (
               <div className="flex flex-col items-center justify-center min-h-[260px] text-slate-400 gap-2 dark:text-slate-500">
                 <Info size={24} />
-                <span className="text-sm font-medium">Không tìm thấy chỗ đỗ trên {getFloorDisplayName(activeFloor.name)}.</span>
+                <span className="text-sm font-medium">{t('parkingMap.noSlotFound')} {getFloorDisplayName(activeFloor.name)}.</span>
               </div>
             ) : (
               <div
@@ -1660,15 +1654,15 @@ const ParkingLotMap = () => {
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">
                         {selectedSlot.type === 'Bicycle'
-                          ? 'Biển số xe đạp (Không bắt buộc)'
-                          : 'Nhập biển số xe vãng lai'}
+                          ? t('parkingMap.bikePlateOptional')
+                          : t('parkingMap.walkinPlate')}
                       </label>
                       <input
                         type="text"
                         required={selectedSlot.type !== 'Bicycle'}
                         placeholder={selectedSlot.type === 'Bicycle'
-                          ? 'Để trống → Tự tạo biển số ảo BIKE_XXXXXXXX'
-                          : 'e.g. 29A-888.88'}
+                          ? t('parkingMap.bikePlatePlaceholder')
+                          : t('parkingMap.carPlatePlaceholder')}
                         value={adminPlate}
                         onChange={(e) => setAdminPlate(e.target.value)}
                         className="w-full h-11 px-3.5 bg-slate-50 border-[1.5px] border-slate-200 text-sm rounded-[14px] focus:outline-none focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 focus:bg-white transition-all uppercase font-mono font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
@@ -1681,7 +1675,7 @@ const ParkingLotMap = () => {
                         disabled={submitting}
                         className="flex-1 h-11 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 text-white font-bold rounded-[14px] transition-all duration-200 text-sm disabled:opacity-60 disabled:hover:translate-y-0"
                       >
-                        {submitting ? 'Đang xử lý...' : 'Cho xe vào'}
+                        {submitting ? t('parkingMap.processingBtn') : t('parkingMap.walkinBtn')}
                       </button>
                     </div>
                   </form>

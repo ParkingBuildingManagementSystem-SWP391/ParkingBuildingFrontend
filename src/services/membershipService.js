@@ -1,4 +1,5 @@
 import api from './api';
+import i18n from '../i18n';
 
 export const membershipService = {
   getMembershipTiers: async () => {
@@ -22,10 +23,10 @@ export const membershipService = {
     } catch (error) {
       const status = error.response?.status;
       const msg = error.response?.data?.message;
-      if (status === 409) throw new Error(msg || 'Bạn đã có thẻ thành viên đang hoạt động.');
-      if (status === 400) throw new Error(msg || 'Thông tin đăng ký không hợp lệ.');
-      if (status === 404) throw new Error(msg || 'Gói cước hoặc ô đỗ không tồn tại.');
-      throw new Error(msg || 'Đăng ký thẻ thất bại. Vui lòng thử lại.');
+      if (status === 409) throw new Error(msg || i18n.t('membershipService.errAlreadyActive'));
+      if (status === 400) throw new Error(msg || i18n.t('membershipService.errInvalidRegistration'));
+      if (status === 404) throw new Error(msg || i18n.t('membershipService.errPlanOrSlotNotFound'));
+      throw new Error(msg || i18n.t('membershipService.errRegisterFailed'));
     }
   },
 
@@ -50,7 +51,7 @@ export const membershipService = {
       return response.data;
     } catch (error) {
       const msg = error.response?.data?.message;
-      throw new Error(msg || 'Hủy thẻ thành viên thất bại. Vui lòng thử lại.');
+      throw new Error(msg || i18n.t('membershipService.errCancelFailed'));
     }
   },
 };
