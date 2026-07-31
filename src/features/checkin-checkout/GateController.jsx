@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, Form, Input, Button, Alert, Tag, Upload, Modal, Descriptions, Image, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { parkingService } from '../../services/parkingService';
+import incidentReportService from '../../services/incidentReportService';
 import { staffService } from '../../services/staffService';
 import { useAuth } from '../../context/AuthContext';
 import { toast as message } from '../../components/ToastProvider';
@@ -517,8 +518,39 @@ const GateController = () => {
   // Auto-fill Entry Camera feeds on typing
   const handlePlateChange = () => {};
 
-  // Auto-fill Exit Camera feeds on typing
-  const handleCheckOutPlateChange = () => {};
+  // Lost-ticket incident lookup states (checkout without physical card)
+  const [lostTicketIncident, setLostTicketIncident] = useState(null);
+  const [checkingLostTicketIncident, setCheckingLostTicketIncident] = useState(false);
+  const lostTicketCheckTimeoutRef = useRef(null);
+
+  // Auto-fill Exit Camera feeds on typing + look up resolved lost-ticket incidents for this plate
+  const handleCheckOutPlateChange = (e) => {
+    const cleanPlate = String(e.target.value || '').trim().toUpperCase();
+
+    if (lostTicketCheckTimeoutRef.current) clearTimeout(lostTicketCheckTimeoutRef.current);
+
+    if (cleanPlate.length < 6) {
+      setLostTicketIncident(null);
+      return;
+    }
+
+    lostTicketCheckTimeoutRef.current = setTimeout(async () => {
+      setCheckingLostTicketIncident(true);
+      try {
+        const results = await incidentReportService.getIncidents({
+          licenseVehicle: cleanPlate,
+          status: 'Resolved',
+          issueType: 'Lost Ticket',
+        });
+        setLostTicketIncident(Array.isArray(results) && results.length > 0 ? results[0] : null);
+      } catch (err) {
+        console.error('Lost ticket incident lookup failed:', err);
+        setLostTicketIncident(null);
+      } finally {
+        setCheckingLostTicketIncident(false);
+      }
+    }, 500);
+  };
 
   const VEHICLE_TYPE_MAP = {
     Bicycle: 1,
@@ -909,6 +941,7 @@ const GateController = () => {
     setChangeDue(null);
 
     checkOutForm.resetFields();
+    setLostTicketIncident(null);
     if (exitImagePreviewUrl) {
       URL.revokeObjectURL(exitImagePreviewUrl);
       setExitImagePreviewUrl(null);
@@ -1416,6 +1449,7 @@ const GateController = () => {
                 setExitWebcamOn(false);
                 setExitOcrResult(null);
                 checkOutForm.setFieldsValue({ plate: '', tempImageUrl: null });
+                setLostTicketIncident(null);
               }}
               onRetry={() => {
                 if (exitImagePreviewUrl) {
@@ -1475,7 +1509,17 @@ const GateController = () => {
                 }}
               </Form.Item>
 
-
+              {checkingLostTicketIncident && (
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-400">
+                  <RefreshCw className="animate-spin" size={12} /> {t('gate.messages.lostTicketChecking')}
+                </div>
+              )}
+              {!checkingLostTicketIncident && lostTicketIncident && (
+                <div className="mb-2 flex items-start gap-2 rounded-[12px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  <CheckCircle size={14} className="mt-0.5 shrink-0" />
+                  <span>{t('gate.messages.lostTicketResolvedBadge', { id: lostTicketIncident.incidentId })}</span>
+                </div>
+              )}
 
               <div className="pt-2">
                 <Button
