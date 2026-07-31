@@ -198,3 +198,64 @@ export const formatIncidentTypeLabel = (rawType, t) => {
 
   return clean;
 };
+
+/**
+ * Auto-corrects unaccented Vietnamese backend messages to proper accented Vietnamese.
+ */
+export const fixVietnameseAccents = (str) => {
+  if (!str || typeof str !== 'string') return str;
+
+  const map = [
+    // Booking & Payments
+    [/dat cho va thanh toan tien coc ([\d,.]+\s*(?:VND|VNĐ|đ)?) bang vi thanh cong\.?/gi, 'Đặt chỗ và thanh toán tiền cọc $1 bằng ví thành công.'],
+    [/dat cho va thanh toan tien coc bang vi thanh cong\.?/gi, 'Đặt chỗ và thanh toán tiền cọc bằng ví thành công.'],
+    [/dat cho cho do xe ([a-z0-9-]+) thanh cong\.?/gi, 'Đặt chỗ đỗ xe $1 thành công.'],
+    [/dat cho thanh cong\.?/gi, 'Đặt chỗ thành công.'],
+    [/thanh toan tien coc thanh cong\.?/gi, 'Thanh toán tiền cọc thành công.'],
+    [/nap tien vao vi thanh cong\.?/gi, 'Nạp tiền vào ví thành công.'],
+    [/so du vi khong du/gi, 'Số dư ví không đủ.'],
+    [/cho do xe da duoc dat/gi, 'Chỗ đỗ xe đã được đặt.'],
+    [/cho do xe khong hop le/gi, 'Chỗ đỗ xe không hợp lệ.'],
+    [/khong tim thay phien dat cho/gi, 'Không tìm thấy phiên đặt chỗ.'],
+    [/khong tim thay/gi, 'Không tìm thấy'],
+    [/phien dat cho/gi, 'phiên đặt chỗ'],
+
+    // Checkin / Checkout / Gate
+    [/check-in thanh cong/gi, 'Check-in thành công.'],
+    [/check-out thanh cong/gi, 'Check-out thành công.'],
+    [/xe da trong bai/gi, 'Xe đã trong bãi.'],
+    [/xe chua nhap bai/gi, 'Xe chưa nhập bãi.'],
+    [/bien so khong trung khop/gi, 'Biển số không trùng khớp.'],
+    [/ma ve khong hop le/gi, 'Mã vé không hợp lệ.'],
+    [/da mo cong/gi, 'Đã mở cổng.'],
+    [/xac nhan thanh toan/gi, 'Xác nhận thanh toán'],
+
+    // User management & incidents
+    [/xoa tai khoan thanh cong/gi, 'Xóa tài khoản thành công.'],
+    [/tao bao cao su co thanh cong/gi, 'Tạo báo cáo sự cố thành công.'],
+    [/giai quyet su co thanh cong/gi, 'Giải quyết sự cố thành công.'],
+    [/cap nhat thanh cong/gi, 'Cập nhật thành công.'],
+    [/them moi thanh cong/gi, 'Thêm mới thành công.'],
+    [/loi he thong/gi, 'Lỗi hệ thống.'],
+    [/thao tac thanh cong/gi, 'Thao tác thành công.'],
+
+    // Individual words & phrases fallback
+    [/dat cho/gi, 'Đặt chỗ'],
+    [/thanh toan/gi, 'thanh toán'],
+    [/tien coc/gi, 'tiền cọc'],
+    [/bang vi/gi, 'bằng ví'],
+    [/thanh cong/gi, 'thành công'],
+    [/khong hop le/gi, 'không hợp lệ'],
+    [/khong trung khop/gi, 'không trùng khớp'],
+    [/bien so/gi, 'biển số'],
+    [/ma ve/gi, 'mã vé'],
+    [/su co/gi, 'sự cố'],
+    [/tai khoan/gi, 'tài khoản'],
+  ];
+
+  let result = str;
+  for (const [regex, replacement] of map) {
+    result = result.replace(regex, replacement);
+  }
+  return result;
+};

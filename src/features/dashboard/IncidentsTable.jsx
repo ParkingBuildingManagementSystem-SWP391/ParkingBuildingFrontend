@@ -402,7 +402,7 @@ const IncidentsTable = () => {
       />
 
       <Modal
-        title={evidenceIncident ? `${t('dashboard.incidents.cameraEvidence')} #${evidenceIncident.id}` : t('dashboard.incidents.cameraEvidence')}
+        title={evidenceIncident ? `${t('dashboard.incidents.cameraEvidence')} (${evidenceIncident.id})` : t('dashboard.incidents.cameraEvidence')}
         open={!!evidenceIncident}
         onCancel={() => setEvidenceIncident(null)}
         footer={null}
@@ -418,7 +418,7 @@ const IncidentsTable = () => {
       </Modal>
 
       <Modal
-        title={`${t('dashboard.incidents.resolve', 'Giải quyết sự cố')} #${resolveIncidentId}`}
+        title={`${t('dashboard.incidents.resolve', 'Giải quyết sự cố')} (${resolveIncidentId})`}
         open={!!resolveIncidentId}
         onOk={handleResolveSubmit}
         onCancel={() => setResolveIncidentId(null)}

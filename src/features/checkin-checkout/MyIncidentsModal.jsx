@@ -98,7 +98,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#1e293b' }}>
-                        #{safeItem.incidentId || '---'} - {formatIncidentTypeLabel(safeItem.issueType, t)}
+                        {formatIncidentTypeLabel(safeItem.issueType, t)}
                       </span>
                       {renderStatusTag(safeItem.status)}
                     </div>

@@ -33,7 +33,7 @@ import motorbikeIcon from '../../assets/vehicles/motorbike.png';
 import bikeIcon from '../../assets/vehicles/bike.png';
 import i18n from '../../i18n';
 import { useTranslation } from 'react-i18next';
-import { createVietnamWallTimeIso, formatVietnamDateTime, getVietnamDateParts } from '../../utils/dateTime';
+import { createVietnamWallTimeIso, formatVietnamDateTime, getVietnamDateParts, fixVietnameseAccents } from '../../utils/dateTime';
 
 
 
@@ -302,6 +302,7 @@ const ParkingLotMap = () => {
   const [bookingPaymentMethod, setBookingPaymentMethod] = useState('WALLET');
   const [expectedHour, setExpectedHour] = useState(() => getDefaultExpectedCheckInTimeParts().hour);
   const [expectedMinute, setExpectedMinute] = useState(() => getDefaultExpectedCheckInTimeParts().minute);
+  const [bookingDateOption, setBookingDateOption] = useState('auto'); // 'auto', 'today', 'tomorrow'
 
   // Form states for Manager/Admin reservation
   const [adminPlate, setAdminPlate] = useState('');
@@ -660,22 +661,22 @@ const ParkingLotMap = () => {
   };
 
   const isBookingNextDay = () => {
+    if (bookingDateOption === 'tomorrow') return true;
+    if (bookingDateOption === 'today') return false;
     const todayDate = new Date(createVietnamWallTimeIso({ hour: expectedHour, minute: expectedMinute }));
     return todayDate <= new Date();
   };
 
   const buildExpectedCheckInIso = () => {
-    let expectedDate = new Date(createVietnamWallTimeIso({ hour: expectedHour, minute: expectedMinute }));
+    const isNextDay = isBookingNextDay();
+    const baseDate = isNextDay ? new Date(Date.now() + 24 * 60 * 60 * 1000) : new Date();
 
-    if (expectedDate <= new Date()) {
-      expectedDate = new Date(createVietnamWallTimeIso({
-        hour: expectedHour,
-        minute: expectedMinute,
-        baseDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      }));
-    }
+    const expectedDate = new Date(createVietnamWallTimeIso({
+      hour: expectedHour,
+      minute: expectedMinute,
+      baseDate,
+    }));
 
-    // Send the standard UTC ISO string. The backend treats it as UTC and computes the time diff correctly.
     return expectedDate.toISOString();
   };
 
@@ -787,27 +788,37 @@ const ParkingLotMap = () => {
       const invoiceId = responseData.invoiceId || responseData.InvoiceId;
       const walletPaid = String(paymentStatus || '').toUpperCase() === 'SUCCESS';
 
+      try {
+        const savedTimes = JSON.parse(localStorage.getItem('spotflow_expected_times') || '{}');
+        const sId = responseData.sessionId || responseData.SessionId;
+        const tCode = responseData.ticketCode || responseData.TicketCode;
+        if (sId) savedTimes[sId] = expectedCheckInTime;
+        if (tCode) savedTimes[tCode] = expectedCheckInTime;
+        if (selectedSlot?.slotId) savedTimes[`slot_${selectedSlot.slotId}`] = expectedCheckInTime;
+        localStorage.setItem('spotflow_expected_times', JSON.stringify(savedTimes));
+      } catch (e) {
+        console.error('Error storing expectedCheckInTime locally:', e);
+      }
+
       setIsBookingModalOpen(false);
       if (paymentUrl) {
         const depositText = depositAmount ? t('parkingMap.depositAmountSuffix', { amount: Number(depositAmount).toLocaleString('vi-VN') }) : '';
-        message.success((responseData.message || responseData.Message || t('parkingMap.depositRequired')) + depositText);
+        message.success(t('parkingMap.depositRequired') + depositText);
         if (invoiceId) localStorage.setItem('pending_invoice_id', String(invoiceId));
         window.location.href = paymentUrl;
       } else if (requiresPayment) {
-        message.success(responseData.message || responseData.Message || t('parkingMap.bookingHold', { id: selectedSlot.id }));
+        message.success(t('parkingMap.bookingHold', { id: selectedSlot.id }));
       } else if (bookingPaymentMethod === 'WALLET') {
         if (invoiceId && String(paymentStatus || '').toUpperCase() === 'SUCCESS') {
           navigate(`/payment-success?type=booking&invoiceId=${invoiceId}`);
           return;
         }
-        message.success(responseData.message || responseData.Message || t('parkingMap.bookingWalletSuccess', { id: selectedSlot.id }));
+        message.success(t('parkingMap.bookingWalletSuccess', { id: selectedSlot.id }));
       } else {
         message.success(
-          responseData.message ||
-          responseData.Message ||
-          (walletPaid
+          walletPaid
             ? t('parkingMap.bookingSuccessWalletDeducted', { id: selectedSlot.id })
-            : t('parkingMap.bookingSuccess', { id: selectedSlot.id }))
+            : t('parkingMap.bookingSuccess', { id: selectedSlot.id })
         );
       }
       if (paymentStatus) {
@@ -816,10 +827,9 @@ const ParkingLotMap = () => {
       onFloorChange(activeFloorId);
     } catch (err) {
       console.error("Booking Error Response:", err);
-      // Bắt chi tiết lỗi từ Backend
-      const errMsg = err.response?.data?.message || err.response?.data?.error || err || t('parkingMap.bookingFail');
+      const rawErrMsg = err.response?.data?.message || err.response?.data?.error || err.message || err;
+      const errMsg = fixVietnameseAccents(typeof rawErrMsg === 'string' ? rawErrMsg : t('parkingMap.bookingFail'));
 
-      // Hiển thị dạng modal alert hoặc toast chuyên nghiệp
       message.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -1390,7 +1400,33 @@ const ParkingLotMap = () => {
                 )}
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.expectedCheckinLabel')}</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider dark:text-slate-400">{t('parkingMap.expectedCheckinLabel')}</label>
+                    <div className="flex bg-slate-100 p-0.5 rounded-xl text-xs dark:bg-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => setBookingDateOption('today')}
+                        className={`px-3 py-1 font-bold rounded-lg transition-all ${
+                          !isBookingNextDay()
+                            ? 'bg-white text-indigo-700 shadow-sm dark:bg-slate-900 dark:text-indigo-300'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                        }`}
+                      >
+                        Hôm nay
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBookingDateOption('tomorrow')}
+                        className={`px-3 py-1 font-bold rounded-lg transition-all ${
+                          isBookingNextDay()
+                            ? 'bg-indigo-600 text-white shadow-sm dark:bg-indigo-500'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                        }`}
+                      >
+                        Ngày mai
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex items-start justify-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-3 dark:border-indigo-500/40 dark:bg-indigo-500/15">
                     <div className="flex flex-col items-center gap-1.5">
                       <input

@@ -4,13 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import incidentReportService from '../services/incidentReportService';
 import { formatVietnamDateTime, formatIncidentTypeLabel } from '../utils/dateTime';
+import { useAuth } from '../context/AuthContext';
 
 const IncidentHistory = () => {
   const { t } = useTranslation();
+  const { role } = useAuth();
+  const isStaffOrDriver = !['manager', 'admin'].includes(String(role || '').toLowerCase());
+
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Resolved');
+  const [statusFilter, setStatusFilter] = useState('');
   const [issueTypeFilter, setIssueTypeFilter] = useState('');
   const [searchText, setSearchText] = useState('');
 
@@ -27,13 +31,40 @@ const IncidentHistory = () => {
       setLoading(true);
       setError('');
       try {
-        const filters = {};
-        if (statusFilter) filters.status = statusFilter;
-        if (issueTypeFilter) filters.issueType = issueTypeFilter;
-        if (searchText.trim()) filters.licenseVehicle = searchText.trim();
+        if (isStaffOrDriver) {
+          const response = await incidentReportService.getMyIncidents();
+          const list = Array.isArray(response) ? response : [];
 
-        const response = await incidentReportService.getIncidents(filters);
-        setIncidents(Array.isArray(response) ? response : []);
+          const filtered = list.filter((item) => {
+            const safeItem = item || {};
+            // Status filter
+            if (statusFilter === 'Resolved' && safeItem.status !== 'Resolved') return false;
+            if (statusFilter === 'Pending' && safeItem.status === 'Resolved') return false;
+
+            // Issue type filter
+            if (issueTypeFilter && (safeItem.issueType || safeItem.type) !== issueTypeFilter) return false;
+
+            // Search text
+            if (searchText.trim()) {
+              const term = searchText.trim().toLowerCase();
+              const plate = String(safeItem.licenseVehicle || '').toLowerCase();
+              const id = String(safeItem.incidentId || safeItem.id || '').toLowerCase();
+              if (!plate.includes(term) && !id.includes(term)) return false;
+            }
+
+            return true;
+          });
+
+          setIncidents(filtered);
+        } else {
+          const filters = {};
+          if (statusFilter) filters.status = statusFilter;
+          if (issueTypeFilter) filters.issueType = issueTypeFilter;
+          if (searchText.trim()) filters.licenseVehicle = searchText.trim();
+
+          const response = await incidentReportService.getIncidents(filters);
+          setIncidents(Array.isArray(response) ? response : []);
+        }
       } catch (err) {
         console.error('IncidentHistory fetch error:', err);
         setError(t('incidentHistory.fetchError'));
@@ -44,14 +75,14 @@ const IncidentHistory = () => {
     }, 400);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [statusFilter, issueTypeFilter, searchText, t]);
+  }, [statusFilter, issueTypeFilter, searchText, isStaffOrDriver, t]);
 
   const columns = [
     {
       title: t('incidentHistory.colId'),
       dataIndex: 'incidentId',
       key: 'incidentId',
-      render: (id) => <span className="font-mono text-xs font-extrabold text-indigo-700 dark:text-indigo-300">#{id}</span>,
+      render: (id) => <span className="font-mono text-xs font-extrabold text-indigo-700 dark:text-indigo-300">{id}</span>,
     },
     {
       title: t('incidentHistory.colPlate'),

@@ -262,7 +262,7 @@ const SessionDetailModal = ({ selectedTicketCode, open, onClose }) => {
                   return (
                     <div key={incidentId} className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
                       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-mono text-xs font-extrabold text-slate-700 dark:text-slate-200">#{incidentId}</span>
+                        <span className="font-mono text-xs font-extrabold text-slate-700 dark:text-slate-200">{incidentId}</span>
                         <Tag color={status === 'Resolved' ? 'success' : 'warning'}>{status || 'Pending'}</Tag>
                       </div>
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Modal } from 'antd';
 import { useAuth } from '../context/AuthContext';
 import { parkingService } from '../services/parkingService';
 
@@ -64,6 +65,7 @@ const MyBookings = () => {
   const [isIncidentOpen, setIsIncidentOpen] = useState(false);
   const [isMyIncidentsOpen, setIsMyIncidentsOpen] = useState(false);
   const [selectedLicenseVehicleForIncident, setSelectedLicenseVehicleForIncident] = useState('');
+  const [selectedBookingToPay, setSelectedBookingToPay] = useState(null);
 
   const handlePayVNPay = async (booking) => {
     setPayingSessionId(booking.id);
@@ -162,7 +164,13 @@ const MyBookings = () => {
         let bookedTime = 'N/A';
         let deadlineTime = 'N/A';
         let deadlineDate = '';
-        const expectedCheckInTime = item.expectedCheckInTime || item.ExpectedCheckInTime;
+
+        const savedTimes = JSON.parse(localStorage.getItem('spotflow_expected_times') || '{}');
+        const sId = item.sessionId || item.SessionId;
+        const tCode = item.ticketCode || item.TicketCode;
+        const localExpected = (sId ? savedTimes[sId] : null) || (tCode ? savedTimes[tCode] : null);
+
+        const expectedCheckInTime = item.expectedCheckInTime || item.ExpectedCheckInTime || localExpected;
         const deadlineBaseTime = expectedCheckInTime || item.bookingTime;
 
         if (item.bookingTime) {
@@ -175,7 +183,7 @@ const MyBookings = () => {
           if (base) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
             deadlineTime = formatVietnamTime(deadline);
-            deadlineDate = formatVietnamDate(deadlineBaseTime);
+            deadlineDate = formatVietnamDate(deadline);
           }
         }
 
@@ -550,6 +558,11 @@ const MyBookings = () => {
                       </span>
                       {booking.sessionStatus === 'Reserved' ? (
                         <div className="flex flex-col items-start gap-1">
+                          {booking.expectedCheckInTime && (
+                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                              Hẹn: {formatVietnamDate(booking.expectedCheckInTime)} {formatVietnamTime(booking.expectedCheckInTime)}
+                            </span>
+                          )}
                           {booking.deadlineDate && (
                             <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{booking.deadlineDate}</span>
                           )}
@@ -660,25 +673,10 @@ const MyBookings = () => {
                       </button>
                     )}
 
-                    {canPayPendingInvoiceWithWallet(booking) && (
+                    {(canPayPendingInvoiceWithWallet(booking) || isDepositPaymentDue(booking) || isParkingFeePaymentDue(booking)) && (
                       <button
                          disabled={payingSessionId === booking.id}
-                         onClick={() => handlePayWallet(booking)}
-                         className="flex-1 lg:flex-none w-full sm:w-auto h-10 px-5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-[14px] font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
-                      >
-                        {payingSessionId === booking.id ? (
-                          <span className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
-                        ) : (
-                          <Wallet size={14} />
-                        )}
-                        Thanh toan vi
-                      </button>
-                    )}
-
-                    {(isDepositPaymentDue(booking) || isParkingFeePaymentDue(booking)) && (
-                      <button
-                         disabled={payingSessionId === booking.id}
-                         onClick={() => handlePayVNPay(booking)}
+                         onClick={() => setSelectedBookingToPay(booking)}
                          className="flex-1 lg:flex-none w-full sm:w-auto h-10 px-5 bg-gradient-to-br from-indigo-500 to-indigo-600 hover:-translate-y-0.5 text-white rounded-[14px] font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                       >
                         {payingSessionId === booking.id ? (
@@ -809,6 +807,92 @@ const MyBookings = () => {
         isOpen={isMyIncidentsOpen}
         onClose={() => setIsMyIncidentsOpen(false)}
       />
+
+      {/* 9. MODAL CHỌN PHƯƠNG THỨC THANH TOÁN */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+            <CreditCard size={18} className="text-indigo-600" />
+            <span>{t('myBookings.selectPaymentMethodTitle', 'Chọn phương thức thanh toán')}</span>
+          </div>
+        }
+        open={!!selectedBookingToPay}
+        onCancel={() => setSelectedBookingToPay(null)}
+        footer={null}
+        destroyOnClose
+        className="font-sans"
+      >
+        {selectedBookingToPay && (
+          <div className="space-y-4 py-2">
+            <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+              <div className="flex justify-between items-center text-xs text-slate-500 mb-1 dark:text-slate-400">
+                <span>{t('myBookings.sessionLabel', 'Vị trí đỗ')}:</span>
+                <span className="font-bold text-slate-800 dark:text-white">{selectedBookingToPay.location}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-bold text-slate-900 dark:text-white">
+                <span>{t('myBookings.amountToPay', 'Số tiền cần thanh toán')}:</span>
+                <span className="text-rose-600 dark:text-rose-400 text-base font-extrabold">
+                  {selectedBookingToPay.totalAmount ? `${Number(selectedBookingToPay.totalAmount).toLocaleString('vi-VN')} đ` : '6.000 đ'}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {/* Option 1: WALLET */}
+              <button
+                type="button"
+                disabled={payingSessionId === selectedBookingToPay.id}
+                onClick={() => {
+                  const b = selectedBookingToPay;
+                  setSelectedBookingToPay(null);
+                  handlePayWallet(b);
+                }}
+                className="group relative flex flex-col justify-between rounded-2xl border-2 border-emerald-100 bg-emerald-50/50 p-4 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm shadow-emerald-500/30">
+                    <Wallet size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-emerald-900 dark:text-emerald-200">Ví SpotFlow</h4>
+                    <p className="text-[11px] font-semibold text-emerald-700/80 dark:text-emerald-300/80">Trừ tiền ví cá nhân</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                  <span>Thanh toán ngay</span>
+                  <span className="text-base font-bold transition-transform group-hover:translate-x-1">→</span>
+                </div>
+              </button>
+
+              {/* Option 2: VNPAY */}
+              <button
+                type="button"
+                disabled={payingSessionId === selectedBookingToPay.id}
+                onClick={() => {
+                  const b = selectedBookingToPay;
+                  setSelectedBookingToPay(null);
+                  handlePayVNPay(b);
+                }}
+                className="group relative flex flex-col justify-between rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 p-4 text-left transition-all hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-md dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-600/30">
+                    <CreditCard size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-indigo-900 dark:text-indigo-200">Cổng VNPAY</h4>
+                    <p className="text-[11px] font-semibold text-indigo-700/80 dark:text-indigo-300/80">QR / Thẻ ngân hàng</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                  <span>Chuyển tới VNPAY</span>
+                  <span className="text-base font-bold transition-transform group-hover:translate-x-1">→</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
