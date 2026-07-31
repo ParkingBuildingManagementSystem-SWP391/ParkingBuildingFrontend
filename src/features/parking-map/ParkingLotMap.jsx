@@ -676,11 +676,30 @@ const ParkingLotMap = () => {
   const getEstimatedDeposit = () => {
     // Lấy cấu hình giá từ loại xe đang chọn.
     // Giả định mức giá mặc định nếu chưa lấy được từ DB:
-    const rates = {
+    let rates = {
       Car: { day: 20000, night: 30000 },
       Motorcycle: { day: 4000, night: 6000 },
       Bicycle: { day: 2000, night: 3000 }
     };
+
+    try {
+      const saved = localStorage.getItem('parking_prices');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((row) => {
+            const vType = row.vehicleType; // 'Car', 'Motorbike', 'Bicycle'
+            const mapType = vType === 'Motorbike' ? 'Motorcycle' : vType;
+            if (rates[mapType]) {
+              rates[mapType].day = row.bookingDayRate ?? row.dayRate ?? rates[mapType].day;
+              rates[mapType].night = row.bookingNightRate ?? row.nightRate ?? rates[mapType].night;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Lỗi khi đọc cấu hình giá từ localStorage', e);
+    }
 
     const currentVehicleRates = rates[bookingVehicleType] || { day: 0, night: 0 };
 
