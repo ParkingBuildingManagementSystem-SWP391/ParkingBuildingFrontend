@@ -13,7 +13,8 @@ import {
   Filter,
   Download,
   BarChart3,
-  Loader2
+  Loader2,
+  Bookmark
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button, InputNumber } from 'antd';
@@ -30,7 +31,9 @@ const defaultPricingData = [
     fullDayRate: 5000,
     maxHoursPerTurn: null,
     firstHourRate: 0,
-    subsequentHourRate: 0
+    subsequentHourRate: 0,
+    bookingDayRate: 2000,
+    bookingNightRate: 3000 // Giá đặt chỗ mặc định ban ngày/đêm
   },
   {
     vehicleTypeId: 2,
@@ -41,7 +44,9 @@ const defaultPricingData = [
     fullDayRate: 10000,
     maxHoursPerTurn: null,
     firstHourRate: 0,
-    subsequentHourRate: 0
+    subsequentHourRate: 0,
+    bookingDayRate: 4000,
+    bookingNightRate: 6000 // Giá đặt chỗ mặc định ban ngày/đêm
   },
   {
     vehicleTypeId: 3,
@@ -52,7 +57,9 @@ const defaultPricingData = [
     fullDayRate: 50000,
     maxHoursPerTurn: 4,
     firstHourRate: 10000,
-    subsequentHourRate: 5000
+    subsequentHourRate: 5000,
+    bookingDayRate: 20000,
+    bookingNightRate: 30000 // Giá đặt chỗ mặc định ban ngày/đêm
   }
 ];
 
@@ -205,6 +212,35 @@ const Dashboard = ({ section = 'overview' }) => {
       }
     } finally {
       setSavingPricingIds((prev) => ({ ...prev, [rowKey]: false }));
+    }
+  };
+
+  const handleUpdateBookingPricing = async (row) => {
+    if (!canEditPricing) return;
+
+    const rowKey = getPricingRowKey(row);
+    const saveKey = 'booking-' + rowKey;
+    setSavingPricingIds((prev) => ({ ...prev, [saveKey]: true }));
+    try {
+      const updatedRows = pricingRows.map((r) => {
+        if (getPricingRowKey(r) === rowKey) {
+          return {
+            ...row,
+            bookingDayRate: row.bookingDayRate ?? row.dayRate,
+            bookingNightRate: row.bookingNightRate ?? row.nightRate
+          };
+        }
+        return r;
+      });
+      localStorage.setItem('parking_prices', JSON.stringify(updatedRows));
+      setPricingRows(updatedRows);
+      
+      message.success('Cập nhật cấu hình giá đặt chỗ thành công!');
+    } catch (err) {
+      console.error('handleUpdateBookingPricing error:', err);
+      message.error('Lỗi khi cập nhật cấu hình giá đặt chỗ.');
+    } finally {
+      setSavingPricingIds((prev) => ({ ...prev, [saveKey]: false }));
     }
   };
 
@@ -833,129 +869,174 @@ const Dashboard = ({ section = 'overview' }) => {
             )}
           </div>
         ) : section === 'pricing' ? (
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm dark:bg-slate-900 dark:border-slate-700">
-            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-700">
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 dark:bg-indigo-500/15 dark:text-indigo-300">
-                <DollarSign size={18} />
+          <div className="space-y-6">
+            {/* Card 1: Cấu hình giá đỗ xe */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm dark:bg-slate-900 dark:border-slate-700">
+              <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-700">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 dark:bg-indigo-500/15 dark:text-indigo-300">
+                  <DollarSign size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.pricingTitle')}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.pricingDesc')}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.pricingTitle')}</h3>
-                <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">{t('dashboard.pricingDesc')}</p>
+
+              <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
+                <table className="w-full min-w-[750px] border-collapse text-left">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.vehicleType')}</th>
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.dayRate')}</th>
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.nightRate')}</th>
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.fullDayRate')}</th>
+                      {canEditPricing && (
+                        <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                    {pricingRows.map((row, index) => {
+                      const rowKey = getPricingRowKey(row) ?? index;
+                      return (
+                      <tr key={rowKey} className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/70">
+                        <td className="px-4 py-4 align-middle">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(row.vehicleType)}</span>
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{row.description}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <InputNumber
+                            min={0}
+                            value={row.dayRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'dayRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                          />
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <InputNumber
+                            min={0}
+                            value={row.nightRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'nightRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                          />
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <InputNumber
+                            min={0}
+                            value={row.fullDayRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'fullDayRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                          />
+                        </td>
+                        {canEditPricing && (
+                          <td className="px-4 py-4 align-middle text-right">
+                            <Button
+                              type="primary"
+                              loading={Boolean(savingPricingIds[rowKey])}
+                              onClick={() => handleUpdatePricing(row)}
+                              className="h-9 rounded-xl bg-indigo-600 px-5 font-bold"
+                            >
+                              {t('dashboard.pricingTable.save')}
+                            </Button>
+                          </td>
+                        )}
+                      </tr>
+                      )})}
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
-              <table className="w-full min-w-[1050px] border-collapse text-left">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 dark:bg-slate-800 dark:border-slate-700">
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.vehicleType')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.dayRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.nightRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.fullDayRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.firstHourRate')}</th>
-                    <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.subsequentHourRate')}</th>
-                    {canEditPricing && (
-                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
-                  {pricingRows.map((row, index) => {
-                    const rowKey = getPricingRowKey(row) ?? index;
-                    const isCarPricing = Number(row.vehicleTypeId) === 3 || String(row.vehicleType).toLowerCase() === 'car';
+            {/* Card 2: Cấu hình giá đặt chỗ (Tiền cọc) */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm dark:bg-slate-900 dark:border-slate-700">
+              <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-700">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 dark:bg-indigo-500/15 dark:text-indigo-300">
+                  <Bookmark size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Cấu hình giá đặt chỗ (Tiền cọc)</h3>
+                  <p className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Cập nhật giá tiền cọc ước tính khi tài xế đặt chỗ trước ban ngày và ban đêm.</p>
+                </div>
+              </div>
 
-                    return (
-                    <tr key={rowKey} className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/70">
-                      <td className="px-4 py-4 align-middle">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(row.vehicleType)}</span>
-                          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{row.descKey ? t(`dashboard.${row.descKey}`) : row.description}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <InputNumber
-                          min={0}
-                          value={row.dayRate}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'dayRate', value ?? 0) : undefined}
-                          disabled={!canEditPricing}
-                          addonAfter="VND"
-                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                        />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <InputNumber
-                          min={0}
-                          value={row.nightRate}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'nightRate', value ?? 0) : undefined}
-                          disabled={!canEditPricing}
-                          addonAfter="VND"
-                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                        />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <InputNumber
-                          min={0}
-                          value={row.fullDayRate}
-                          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                          parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                          onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'fullDayRate', value ?? 0) : undefined}
-                          disabled={!canEditPricing}
-                          addonAfter="VND"
-                          className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                        />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        {isCarPricing ? (
-                          <InputNumber
-                            min={0}
-                            value={row.firstHourRate}
-                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'firstHourRate', value ?? 0) : undefined}
-                            disabled={!canEditPricing}
-                            addonAfter="VND"
-                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                          />
-                        ) : (
-                          <span className="text-slate-400 font-bold dark:text-slate-500">N/A</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        {isCarPricing ? (
-                          <InputNumber
-                            min={0}
-                            value={row.subsequentHourRate}
-                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
-                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'subsequentHourRate', value ?? 0) : undefined}
-                            disabled={!canEditPricing}
-                            addonAfter="VND"
-                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
-                          />
-                        ) : (
-                          <span className="text-slate-400 font-bold dark:text-slate-500">N/A</span>
-                        )}
-                      </td>
+              <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
+                <table className="w-full min-w-[750px] border-collapse text-left">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">{t('dashboard.pricingTable.vehicleType')}</th>
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Giá đặt chỗ ban ngày</th>
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Giá đặt chỗ ban đêm</th>
                       {canEditPricing && (
-                        <td className="px-4 py-4 align-middle text-right">
-                          <Button
-                            type="primary"
-                            loading={Boolean(savingPricingIds[rowKey])}
-                            onClick={() => handleUpdatePricing(row)}
-                            className="h-9 rounded-xl bg-indigo-600 px-5 font-bold"
-                          >
-                            {t('dashboard.pricingTable.save')}
-                          </Button>
-                        </td>
+                        <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wider text-slate-500 text-right dark:text-slate-300">{t('dashboard.pricingTable.action')}</th>
                       )}
                     </tr>
-                  )})}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                    {pricingRows.map((row, index) => {
+                      const rowKey = getPricingRowKey(row) ?? index;
+                      return (
+                      <tr key={'booking-' + rowKey} className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/70">
+                        <td className="px-4 py-4 align-middle">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">{getVehicleTypeLabel(row.vehicleType)}</span>
+                            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{row.description}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <InputNumber
+                            min={0}
+                            value={row.bookingDayRate ?? row.dayRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'bookingDayRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                          />
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <InputNumber
+                            min={0}
+                            value={row.bookingNightRate ?? row.nightRate}
+                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                            parser={(value) => value?.replace(/\s?VND|(,*)/g, '')}
+                            onChange={canEditPricing ? (value) => handlePricingValueChange(rowKey, 'bookingNightRate', value ?? 0) : undefined}
+                            disabled={!canEditPricing}
+                            addonAfter="VND"
+                            className="w-full dark:[&_.ant-input-number]:!bg-slate-800 dark:[&_.ant-input-number]:!border-slate-600 dark:[&_.ant-input-number-input]:!text-slate-100 dark:[&_.ant-input-number-disabled]:!bg-slate-800 dark:[&_.ant-input-number-disabled]:!text-slate-300 dark:[&_.ant-input-number-group-addon]:!bg-slate-700 dark:[&_.ant-input-number-group-addon]:!border-slate-600 dark:[&_.ant-input-number-group-addon]:!text-slate-300"
+                          />
+                        </td>
+                        {canEditPricing && (
+                          <td className="px-4 py-4 align-middle text-right">
+                            <Button
+                              type="primary"
+                              loading={Boolean(savingPricingIds['booking-' + rowKey])}
+                              onClick={() => handleUpdateBookingPricing(row)}
+                              className="h-9 rounded-xl bg-indigo-600 px-5 font-bold"
+                            >
+                              {t('dashboard.pricingTable.save')}
+                            </Button>
+                          </td>
+                        )}
+                      </tr>
+                      )})}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         ) : (

@@ -21,7 +21,8 @@ import {
   Lock,
   Wrench,
   Settings,
-  Trash2
+  Trash2,
+  CalendarClock
 } from 'lucide-react';
 import { parkingService } from '../../services/parkingService';
 import { managerService } from '../../services/managerService';
@@ -658,6 +659,11 @@ const ParkingLotMap = () => {
     return Math.min(max, Math.max(min, numberValue));
   };
 
+  const isBookingNextDay = () => {
+    const todayDate = new Date(createVietnamWallTimeIso({ hour: expectedHour, minute: expectedMinute }));
+    return todayDate <= new Date();
+  };
+
   const buildExpectedCheckInIso = () => {
     let expectedDate = new Date(createVietnamWallTimeIso({ hour: expectedHour, minute: expectedMinute }));
 
@@ -677,11 +683,30 @@ const ParkingLotMap = () => {
   const getEstimatedDeposit = () => {
     // Lấy cấu hình giá từ loại xe đang chọn.
     // Giả định mức giá mặc định nếu chưa lấy được từ DB:
-    const rates = {
+    let rates = {
       Car: { day: 20000, night: 30000 },
       Motorcycle: { day: 4000, night: 6000 },
       Bicycle: { day: 2000, night: 3000 }
     };
+
+    try {
+      const saved = localStorage.getItem('parking_prices');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((row) => {
+            const vType = row.vehicleType; // 'Car', 'Motorbike', 'Bicycle'
+            const mapType = vType === 'Motorbike' ? 'Motorcycle' : vType;
+            if (rates[mapType]) {
+              rates[mapType].day = row.bookingDayRate ?? row.dayRate ?? rates[mapType].day;
+              rates[mapType].night = row.bookingNightRate ?? row.nightRate ?? rates[mapType].night;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Lỗi khi đọc cấu hình giá từ localStorage', e);
+    }
 
     const currentVehicleRates = rates[bookingVehicleType] || { day: 0, night: 0 };
 
@@ -1396,18 +1421,26 @@ const ParkingLotMap = () => {
                     </div>
                   </div>
 
-                  {/* Preview Tiền cọc động */}
-                  {bookingVehicleType !== 'Bicycle' && (
-                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-100 rounded-[14px] flex items-center justify-between text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">
-                      <div>
-                        <span className="font-semibold block">{t('parkingMap.estimatedDepositLabel')}</span>
-                        <span className="text-[10px] text-amber-600 font-medium dark:text-amber-300">({getEstimatedDeposit().shiftText})</span>
-                      </div>
-                      <span className="text-sm font-extrabold text-amber-700">
-                        {getEstimatedDeposit().estimatedAmount.toLocaleString('vi-VN')} VND
+                  {/* Cảnh báo khi chọn giờ quá khứ → đặt cho ngày mai */}
+                  {isBookingNextDay() && (
+                    <div className="mt-2 p-2.5 bg-blue-50 border border-blue-200 rounded-[14px] flex items-center gap-2 text-xs text-blue-800 dark:border-blue-500/40 dark:bg-blue-500/15 dark:text-blue-300">
+                      <CalendarClock size={16} className="shrink-0 text-blue-600 dark:text-blue-400" />
+                      <span className="font-semibold">
+                        Giờ bạn chọn đã qua hôm nay. Hệ thống sẽ tự động đặt chỗ cho <strong>ngày mai ({String(expectedHour).padStart(2, '0')}:{String(expectedMinute).padStart(2, '0')})</strong>.
                       </span>
                     </div>
                   )}
+
+                  {/* Preview Tiền cọc động */}
+                  <div className="mt-2 p-2.5 bg-amber-50 border border-amber-100 rounded-[14px] flex items-center justify-between text-xs text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300">
+                    <div>
+                      <span className="font-semibold block">{t('parkingMap.estimatedDepositLabel')}</span>
+                      <span className="text-[10px] text-amber-600 font-medium dark:text-amber-300">({getEstimatedDeposit().shiftText})</span>
+                    </div>
+                    <span className="text-sm font-extrabold text-amber-700">
+                      {getEstimatedDeposit().estimatedAmount.toLocaleString('vi-VN')} VND
+                    </span>
+                  </div>
 
                   <div className="rounded-[14px] border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800">
                     <label className="mb-2 block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">

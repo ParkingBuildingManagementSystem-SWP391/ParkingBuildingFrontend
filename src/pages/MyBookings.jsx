@@ -161,6 +161,7 @@ const MyBookings = () => {
         let bookedDate = 'N/A';
         let bookedTime = 'N/A';
         let deadlineTime = 'N/A';
+        let deadlineDate = '';
         const expectedCheckInTime = item.expectedCheckInTime || item.ExpectedCheckInTime;
         const deadlineBaseTime = expectedCheckInTime || item.bookingTime;
 
@@ -174,6 +175,7 @@ const MyBookings = () => {
           if (base) {
             const deadline = new Date(base.getTime() + 15 * 60 * 1000);
             deadlineTime = formatVietnamTime(deadline);
+            deadlineDate = formatVietnamDate(deadlineBaseTime);
           }
         }
 
@@ -192,6 +194,7 @@ const MyBookings = () => {
           bookedDate: bookedDate,
           bookedTime: bookedTime,
           deadlineTime: deadlineTime,
+          deadlineDate: deadlineDate,
           contact: item.licenseVehicle || item.LicenseVehicle || 'N/A',
           rawBookingTime: item.bookingTime || item.BookingTime,
           checkInTime: item.checkInTime || item.CheckInTime,
@@ -542,6 +545,9 @@ const MyBookings = () => {
                       </span>
                       {booking.sessionStatus === 'Reserved' ? (
                         <div className="flex flex-col items-start gap-1">
+                          {booking.deadlineDate && (
+                            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{booking.deadlineDate}</span>
+                          )}
                           <span className="block text-sm font-bold leading-none text-slate-700 dark:text-slate-300">{booking.deadlineTime}</span>
                           <span className="inline-block animate-pulse rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
                             {getRemainingMinutesText(booking.rawDeadlineBaseTime)}

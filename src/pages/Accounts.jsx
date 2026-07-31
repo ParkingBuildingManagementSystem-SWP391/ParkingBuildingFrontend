@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock } from 'lucide-react';
+import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock, Trash2 } from 'lucide-react';
 import { Select, Modal, Input, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +39,10 @@ const Accounts = () => {
   const [editUsername, setEditUsername] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPhoneNumber, setEditPhoneNumber] = useState('');
+
+  // Delete Confirmation Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUserToDelete, setSelectedUserToDelete] = useState(null);
 
   // Helper: map backend user DTO to local structure
   const mapUserToUI = (u) => {
@@ -169,6 +173,36 @@ const Accounts = () => {
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setEditUser(null);
+  };
+
+  // Open Delete User Modal
+  const openDeleteModal = (user) => {
+    setSelectedUserToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Close Delete User Modal
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedUserToDelete(null);
+  };
+
+  // API handler to delete user
+  const handleDeleteUser = async () => {
+    if (!selectedUserToDelete) return;
+    setSubmitting(true);
+    try {
+      await api.delete(`/Admin/users/${selectedUserToDelete.id}`);
+      message.success(`Xóa tài khoản ${selectedUserToDelete.name} thành công!`);
+      closeDeleteModal();
+      loadUsers(); // Reload list
+    } catch (err) {
+      console.error("Delete User Error:", err);
+      const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || "Lỗi khi xóa tài khoản.";
+      message.error(errMsg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Save changes callback executing backend role update
@@ -456,15 +490,22 @@ const Accounts = () => {
 
                           {/* Actions Column */}
                           <td className="py-4 px-6 md:px-8 text-right">
-                            <div className="flex items-center justify-end">
-                              <button
-                                onClick={() => openEditModal(item)}
-                                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-400 dark:hover:text-indigo-300"
-                                title={t('accounts.editInfo')}
-                              >
-                                <Edit size={14} />
-                              </button>
-                            </div>
+                             <div className="flex items-center justify-end gap-2">
+                               <button
+                                 onClick={() => openEditModal(item)}
+                                 className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-400 dark:hover:text-indigo-300"
+                                 title={t('accounts.editInfo')}
+                               >
+                                 <Edit size={14} />
+                               </button>
+                               <button
+                                 onClick={() => openDeleteModal(item)}
+                                 className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-rose-400 shadow-sm transition-all hover:border-rose-300 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-rose-400 dark:hover:text-rose-300"
+                                 title="Xóa tài khoản"
+                               >
+                                 <Trash2 size={14} />
+                               </button>
+                             </div>
                           </td>
                         </tr>
                       );
@@ -631,6 +672,64 @@ const Accounts = () => {
               </div>
             </div>
           </Modal>
+        )}
+
+        {/* F. "Delete User" Interactive Confirmation Modal Overlay */}
+        {isDeleteModalOpen && selectedUserToDelete && (
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="w-full max-w-md animate-in rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl duration-200 fade-in zoom-in-95 dark:border-slate-700 dark:bg-slate-900">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-700">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="text-rose-500 animate-bounce" size={20} />
+                  <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Xác Nhận Xóa Tài Khoản</h3>
+                </div>
+                <button
+                  onClick={closeDeleteModal}
+                  disabled={submitting}
+                  className="rounded-xl p-1.5 text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="py-6 space-y-4">
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                  Bạn có chắc chắn muốn xóa tài khoản <strong>{selectedUserToDelete.name}</strong> (#{selectedUserToDelete.id})? Hành động này không thể hoàn tác.
+                </p>
+
+                {/* Account Details Box */}
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white ${getRoleStyle(selectedUserToDelete.roleId).avatar}`}>
+                    {getInitials(selectedUserToDelete.name)}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{selectedUserToDelete.name}</span>
+                    <span className="text-[11px] text-slate-400">{selectedUserToDelete.email}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 font-sans dark:border-slate-700">
+                <button
+                  onClick={closeDeleteModal}
+                  disabled={submitting}
+                  className="rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  onClick={handleDeleteUser}
+                  disabled={submitting}
+                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-[14px] text-sm shadow-md hover:shadow-rose-500/20 transition-all duration-200 disabled:opacity-50 active:scale-95"
+                >
+                  {submitting ? "Đang xử lý..." : "Xác Nhận Xóa"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
