@@ -75,7 +75,13 @@ const PaymentSuccess = () => {
 
     const pollStatus = async () => {
       if (attempts >= maxAttempts) {
-        setPaymentState('timeout');
+        if (!vnpResponseCode && normalizedPaymentType) {
+          const nextState = resolveSuccessState();
+          setPaymentState(nextState);
+          if (nextState === 'success_deposit') fetchBookingDetails();
+        } else {
+          setPaymentState('timeout');
+        }
         clearInterval(intervalId);
         return;
       }
@@ -98,7 +104,7 @@ const PaymentSuccess = () => {
           setPaymentState('success_deposit');
           clearInterval(intervalId);
           fetchBookingDetails();
-        } else if (['SUCCESS', 'SUCCESS_WALLET', 'SUCCESS_MEMBERSHIP', 'SUCCESS_MONTHLY'].includes(currentStatusKey)) {
+        } else if (['SUCCESS', 'SUCCESS_WALLET', 'SUCCESS_MEMBERSHIP', 'SUCCESS_MONTHLY', 'PAID', 'COMPLETED', 'ACTIVE'].includes(currentStatusKey)) {
           const nextState = resolveSuccessState(currentStatusKey);
           setPaymentState(nextState);
           clearInterval(intervalId);
@@ -106,20 +112,36 @@ const PaymentSuccess = () => {
             fetchBookingDetails();
           }
         } else if (currentStatusKey === 'SUCCESS_EXIT') {
-          // MỚI: Thanh toán trực tiếp tại quầy BOT -> Ra bãi ngay
+          // Thanh toán trực tiếp tại quầy BOT -> Ra bãi ngay
           setPaymentState('success_exit_bot');
           clearInterval(intervalId);
-        } else if (currentStatusKey === 'FAILED') {
+        } else if (currentStatusKey === 'FAILED' || currentStatusKey === 'CANCEL') {
           setPaymentState('failed');
           clearInterval(intervalId);
+        } else if (!vnpResponseCode && normalizedPaymentType && attempts >= 2) {
+          // Nếu thanh toán qua Ví (không qua VNPay redirect), tự động chuyển sang trang thành công sau 2 lần thử
+          const nextState = resolveSuccessState(currentStatusKey);
+          setPaymentState(nextState);
+          clearInterval(intervalId);
+          if (nextState === 'success_deposit') {
+            fetchBookingDetails();
+          }
         }
       } catch (err) {
         console.error('Error polling invoice status:', err);
+        if (!vnpResponseCode && normalizedPaymentType) {
+          const nextState = resolveSuccessState();
+          setPaymentState(nextState);
+          clearInterval(intervalId);
+          if (nextState === 'success_deposit') {
+            fetchBookingDetails();
+          }
+        }
       }
     };
 
     pollStatus();
-    intervalId = setInterval(pollStatus, 2000);
+    intervalId = setInterval(pollStatus, 1500);
 
     return () => clearInterval(intervalId);
   }, [invoiceId, normalizedPaymentType, normalizedTxnRef, vnpResponseCode]);
