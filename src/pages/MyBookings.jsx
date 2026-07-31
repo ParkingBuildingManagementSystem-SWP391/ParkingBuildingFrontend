@@ -102,18 +102,18 @@ const MyBookings = () => {
 
   const handlePayWallet = async (booking) => {
     if (!booking.invoiceId) {
-      message.error('Khong tim thay hoa don dang cho thanh toan.');
+      message.error(t('myBookings.errNoInvoiceFound'));
       return;
     }
 
     setPayingSessionId(booking.id);
     try {
       const response = await parkingService.payPendingInvoiceWallet(booking.invoiceId);
-      message.success(response?.message || 'Thanh toan tien coc bang vi thanh cong.');
+      message.success(response?.message || t('myBookings.walletPaySuccess'));
       await fetchMyBookings();
       navigate(`/payment-success?type=booking&invoiceId=${booking.invoiceId}`);
     } catch (err) {
-      const errorMessage = typeof err === 'string' ? err : err?.message || 'Thanh toan bang vi that bai.';
+      const errorMessage = typeof err === 'string' ? err : err?.message || t('myBookings.walletPayFailed');
       message.error(errorMessage);
     } finally {
       setPayingSessionId(null);
@@ -440,7 +440,7 @@ const MyBookings = () => {
           onClick={() => setIsMyIncidentsOpen(true)}
           className="flex items-center gap-2 px-4 py-2.5 text-xs font-extrabold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all shadow-sm active:scale-95 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400"
         >
-          <AlertCircle size={16} /> Lịch sử Báo cáo Sự cố
+          <AlertCircle size={16} /> {t('myBookings.myIncidentsBtn')}
         </button>
       </div>
 
@@ -511,7 +511,7 @@ const MyBookings = () => {
                           </span>
                         ) : (
                           <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
-                            Đặt Chỗ
+                            {t('myBookings.bookingBadge')}
                           </span>
                         )}
                         <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${
@@ -572,7 +572,7 @@ const MyBookings = () => {
                             0 đ (Membership)
                           </span>
                           <span className="text-[10px] font-bold uppercase text-emerald-500">
-                            Đã thanh toán gói
+                            {t('myBookings.membershipPaidLabel')}
                           </span>
                         </div>
                       ) : booking.totalAmount !== null && booking.totalAmount !== undefined ? (
@@ -624,7 +624,7 @@ const MyBookings = () => {
                     {booking.sessionStatus !== 'Canceled' && (
                       <button
                         disabled={booking.sessionStatus === 'Reserved'}
-                        title={booking.sessionStatus === 'Reserved' ? "Chỉ có thể báo cáo sự cố khi xe đã qua cổng (Check-In)" : ""}
+                        title={booking.sessionStatus === 'Reserved' ? t('myBookings.reportIncidentTooltip') : ""}
                         onClick={() => {
                           if (booking.sessionStatus === 'Reserved') return;
                           setSelectedLicenseVehicleForIncident(booking.contact);
@@ -636,7 +636,7 @@ const MyBookings = () => {
                             : 'border-orange-200 bg-white text-orange-600 hover:bg-orange-50 dark:border-orange-500/40 dark:bg-slate-800 dark:text-orange-300 dark:hover:bg-orange-500/15'
                         }`}
                       >
-                        <AlertCircle size={14} /> {t('myBookings.reportIncident') || 'Báo cáo sự cố'}
+                        <AlertCircle size={14} /> {t('myBookings.reportIncident')}
                       </button>
                     )}
 
@@ -788,7 +788,7 @@ const MyBookings = () => {
         }}
         licenseVehicle={selectedLicenseVehicleForIncident}
         onSuccess={() => {
-          message.success(t('myBookings.reportIncidentSuccess') || 'Đã gửi báo cáo sự cố!');
+          message.success(t('myBookings.reportIncidentSuccess'));
           fetchMyBookings();
         }}
       />

@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Tag, Spin, Empty, Button, Timeline } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import incidentReportService from '../../services/incidentReportService';
+import { formatDateTimeVN } from '../../utils/dateTime';
 
 const MyIncidentsModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +20,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
         setIncidents([]);
       }
     } catch (err) {
-      console.error('Lỗi khi tải sự cố cá nhân:', err);
+      console.error('Error loading my incidents:', err);
     } finally {
       setLoading(false);
     }
@@ -33,13 +36,13 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
     if (status === 'Resolved') {
       return (
         <Tag color="success" icon={<CheckCircleOutlined />}>
-          Đã giải quyết
+          {t('myIncidents.statusResolved')}
         </Tag>
       );
     }
     return (
       <Tag color="warning" icon={<ClockCircleOutlined />}>
-        Đang chờ xử lý
+        {t('myIncidents.statusPending')}
       </Tag>
     );
   };
@@ -49,10 +52,10 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: '24px' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <WarningOutlined style={{ color: '#ef4444' }} /> Lịch sử Báo cáo Sự cố của tôi
+            <WarningOutlined style={{ color: '#ef4444' }} /> {t('myIncidents.modalTitle')}
           </span>
           <Button icon={<ReloadOutlined />} size="small" onClick={loadIncidents} loading={loading}>
-            Làm mới
+            {t('myIncidents.refresh')}
           </Button>
         </div>
       }
@@ -60,7 +63,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
       onCancel={onClose}
       footer={[
         <Button key="close" type="primary" onClick={onClose}>
-          Đóng
+          {t('myIncidents.close')}
         </Button>,
       ]}
       width={650}
@@ -68,22 +71,17 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
     >
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <Spin tip="Đang tải danh sách sự cố..." />
+          <Spin tip={t('myIncidents.loading')} />
         </div>
       ) : incidents.length === 0 ? (
-        <Empty description="Bạn chưa gửi báo cáo sự cố nào." style={{ margin: '30px 0' }} />
+        <Empty description={t('myIncidents.empty')} style={{ margin: '30px 0' }} />
       ) : (
         <div style={{ maxHeight: '450px', overflowY: 'auto', paddingLeft: '24px', paddingRight: '8px', paddingTop: '8px', marginTop: '16px' }}>
           <Timeline
             items={(incidents || []).map((item) => {
               const safeItem = item || {};
               const isResolved = safeItem.status === 'Resolved';
-              
-              const formatSafeDate = (dateStr) => {
-                if (!dateStr) return '---';
-                const d = new Date(dateStr);
-                return isNaN(d.getTime()) ? '---' : d.toLocaleString('vi-VN');
-              };
+              const formatSafeDate = (dateStr) => formatDateTimeVN(dateStr, '---');
 
               return {
                 color: isResolved ? 'green' : 'gold',
@@ -100,23 +98,23 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#1e293b' }}>
-                        #{safeItem.incidentId || '---'} - {safeItem.issueType || 'Sự cố'}
+                        #{safeItem.incidentId || '---'} - {safeItem.issueType || t('myIncidents.defaultType')}
                       </span>
                       {renderStatusTag(safeItem.status)}
                     </div>
 
                     {safeItem.licenseVehicle && (
                       <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
-                        Biển số: <strong style={{ color: '#0f172a' }}>{safeItem.licenseVehicle}</strong>
+                        {t('myIncidents.plateLabel')} <strong style={{ color: '#0f172a' }}>{safeItem.licenseVehicle}</strong>
                       </div>
                     )}
 
                     <div style={{ fontSize: '13px', color: '#334155', marginBottom: '8px' }}>
-                      Mô tả: {safeItem.description || 'Không có mô tả'}
+                      {t('myIncidents.descriptionLabel')} {safeItem.description || t('myIncidents.noDescription')}
                     </div>
 
                     <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                      Thời gian gửi: {formatSafeDate(safeItem.createdAt)}
+                      {t('myIncidents.submittedAtLabel')} {formatSafeDate(safeItem.createdAt)}
                     </div>
 
                     {isResolved && (
@@ -131,14 +129,14 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
                         }}
                       >
                         <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#166534', marginBottom: '4px' }}>
-                          Kết quả giải quyết từ Quản lý ({safeItem.resolvedUsername || 'Manager'}):
+                          {t('myIncidents.resolvedByLabel', { manager: safeItem.resolvedUsername || t('myIncidents.defaultManager') })}
                         </div>
                         <div style={{ fontSize: '12px', color: '#15803d' }}>
-                          {safeItem.resolutionNotes || 'Đã được kiểm tra và xử lý xong.'}
+                          {safeItem.resolutionNotes || t('myIncidents.noResolutionNotes')}
                         </div>
                         {safeItem.resolvedAt && (
                           <div style={{ fontSize: '11px', color: '#16a34a', marginTop: '4px' }}>
-                            Xử lý lúc: {formatSafeDate(safeItem.resolvedAt)}
+                            {t('myIncidents.resolvedAtLabel')} {formatSafeDate(safeItem.resolvedAt)}
                           </div>
                         )}
                       </div>

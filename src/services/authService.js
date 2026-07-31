@@ -1,4 +1,5 @@
 import api from './api';
+import i18n from '../i18n';
 
 export const authService = {
   // 1. Hàm Đăng nhập - Ép chuẩn gửi bằng Email sang Backend .NET
@@ -47,7 +48,7 @@ export const authService = {
         error.response?.data?.title ||
         error.response?.data?.message ||
         (error.response?.data?.errors ? Object.values(error.response.data.errors).flat().join(', ') : null);
-      throw serverMessage || "Đăng nhập thất bại. Vui lòng kiểm tra lại!";
+      throw serverMessage || i18n.t('authService.errLoginFailed');
     }
   },
 
@@ -130,7 +131,7 @@ export const authService = {
       const serverMessage = error.response?.data?.error || 
                             error.response?.data?.message || 
                             error.response?.data?.title;
-      throw serverMessage || "Đăng nhập Google thất bại. Vui lòng thử lại!";
+      throw serverMessage || i18n.t('authService.errGoogleLoginFailed');
     }
   },
 

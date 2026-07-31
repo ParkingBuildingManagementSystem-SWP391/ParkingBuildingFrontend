@@ -1,4 +1,5 @@
 import api from './api';
+import i18n from '../i18n';
 
 // Hàm kiểm tra lỗi Hủy Request từ Axios
 const isCanceled = (error) => error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED';
@@ -88,6 +89,21 @@ const incidentReportService = {
       return response.data;
     } catch (error) {
       const handledError = unwrapError(error, 'Không thể tải danh sách sự cố cá nhân.');
+      if (handledError === null) return null;
+      throw handledError;
+    }
+  },
+
+  /**
+   * 6. Lấy thống kê sự cố & tổng tiền phạt đã thu
+   * Vai trò: Manager
+   */
+  getIncidentStatistics: async (signal) => {
+    try {
+      const response = await api.get('/incident-reports/statistics', { signal });
+      return response.data;
+    } catch (error) {
+      const handledError = unwrapError(error, i18n.t('incidentHistory.statsFetchError'));
       if (handledError === null) return null;
       throw handledError;
     }

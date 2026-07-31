@@ -1,6 +1,7 @@
 ﻿import {
   CalendarCheck,
   CreditCard,
+  History,
   Home,
   LayoutDashboard,
   LogOut,
@@ -19,6 +20,7 @@ export const ROLE_MENU_ROUTES = {
   myBookings: '/my-bookings',
   myWallet: '/my-wallet',
   myMembership: '/my-membership',
+  incidentHistory: '/incident-history',
   managerDashboard: '/dashboard',
   adminDashboard: '/dashboard',
   adminAccounts: '/accounts',
@@ -93,6 +95,12 @@ export const getRoleMenuItems = ({ role, routes = ROLE_MENU_ROUTES, t, currentPa
         label: label(t, 'menu.parkingMap', 'Parking Map'),
         path: routes.parkingMap,
         icon: Map
+      },
+      {
+        key: 'incident-history',
+        label: label(t, 'menu.incidentHistory', 'Incident History'),
+        path: routes.incidentHistory,
+        icon: History
       }
     ];
   }
