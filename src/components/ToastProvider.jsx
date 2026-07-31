@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
+import { fixVietnameseAccents } from '../utils/dateTime';
 
 const ToastContext = createContext(null);
 
@@ -30,10 +31,11 @@ const typeConfig = {
 
 const normalizeToast = (input, fallbackType) => {
   if (input && typeof input === 'object' && !React.isValidElement(input)) {
+    const rawMsg = input.message ?? input.content ?? '';
     return {
       type: input.type || fallbackType,
       title: input.title,
-      message: input.message ?? input.content ?? '',
+      message: typeof rawMsg === 'string' ? fixVietnameseAccents(rawMsg) : rawMsg,
       duration: input.duration,
     };
   }
@@ -41,7 +43,7 @@ const normalizeToast = (input, fallbackType) => {
   return {
     type: fallbackType,
     title: undefined,
-    message: input,
+    message: typeof input === 'string' ? fixVietnameseAccents(input) : input,
     duration: undefined,
   };
 };
