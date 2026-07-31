@@ -659,8 +659,11 @@ const GateController = () => {
       return;
     }
 
-    // 2. CHẶN CỨNG: Bắt buộc phải chụp ảnh xe ở cổng ra trước khi check-out
-    if (!tempImageUrl) {
+    // 2. Chỉ bắt buộc ảnh cổng ra khi KHÔNG có biển số/mã vé để xác định xe.
+    //    Xe đạp, quét QR vé, hoặc nhập tay biển số khi AI đọc thất bại vẫn được phép check-out.
+    const isBicycle = plate?.toUpperCase().startsWith('BIKE_');
+    const hasIdentifier = Boolean(plate?.trim() || ticketCode?.trim());
+    if (!isBicycle && !hasIdentifier && !tempImageUrl) {
       message.error("Vui lòng chụp ảnh hoặc tải ảnh xe ở cổng ra trước khi check-out!");
       return;
     }
@@ -1296,6 +1299,12 @@ const GateController = () => {
                     const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
                     const msg = result?.message || result?.Message;
 
+                    // Ảnh đã được upload lên server song song với việc AI đọc biển số,
+                    // nên vẫn giữ lại ảnh này để đính kèm check-out dù AI đọc thất bại/độ tin cậy thấp.
+                    if (rawImageUrl || imageUrl) {
+                      checkOutForm.setFieldValue('tempImageUrl', rawImageUrl || imageUrl);
+                    }
+
                     if (isSuccess && predictedPlate) {
                       setExitImagePreviewUrl(rawImageUrl || imageUrl);
                       const confidence = result?.confidence !== undefined ? result.confidence : 1.0;
@@ -1357,6 +1366,12 @@ const GateController = () => {
                     const imageUrl = result?.imageUrl || result?.ImageUrl;
                     const rawImageUrl = result?.rawImageUrl || result?.RawImageUrl;
                     const msg = result?.message || result?.Message;
+
+                    // Ảnh đã được upload lên server song song với việc AI đọc biển số,
+                    // nên vẫn giữ lại ảnh này để đính kèm check-out dù AI đọc thất bại/độ tin cậy thấp.
+                    if (rawImageUrl || imageUrl) {
+                      checkOutForm.setFieldValue('tempImageUrl', rawImageUrl || imageUrl);
+                    }
 
                     if (isSuccess && predictedPlate) {
                       URL.revokeObjectURL(url);
