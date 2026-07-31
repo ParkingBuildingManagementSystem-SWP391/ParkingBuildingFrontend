@@ -56,7 +56,7 @@ export const parseUtcDate = (value) => {
   if (!text) return null;
 
   const hasTimezone = /Z$|[+-]\d{2}:\d{2}$/.test(text);
-  const normalized = hasTimezone ? text : `${text}Z`;
+  const normalized = hasTimezone ? text : `${text}+07:00`;
   const date = new Date(normalized);
   return Number.isNaN(date.getTime()) ? null : date;
 };

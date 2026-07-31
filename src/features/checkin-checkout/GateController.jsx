@@ -923,15 +923,22 @@ const GateController = () => {
   };
 
   const handleCloseCheckoutResultModal = () => {
+    const isSuccess = checkoutResult?.isSuccess || checkoutResult?.IsSuccess;
+    const isPaid = checkoutResult?.isPaid !== undefined ? checkoutResult?.isPaid : checkoutResult?.IsPaid;
+
     setIsCheckoutResultModalOpen(false);
     setCheckoutResult(null);
     setChangeDue(null);
 
-    checkOutForm.resetFields();
-    setLostTicketIncident(null);
-    if (exitImagePreviewUrl) {
-      URL.revokeObjectURL(exitImagePreviewUrl);
-      setExitImagePreviewUrl(null);
+    // CHỈ xóa dữ liệu khi check-out THÀNH CÔNG và ĐÃ THANH TOÁN.
+    // Khi có lỗi hoặc cảnh báo nhập sai thông tin, GIỮ NGUYÊN dữ liệu để người dùng/nhân viên sửa trực tiếp!
+    if (isSuccess && isPaid) {
+      checkOutForm.resetFields();
+      setLostTicketIncident(null);
+      if (exitImagePreviewUrl) {
+        URL.revokeObjectURL(exitImagePreviewUrl);
+        setExitImagePreviewUrl(null);
+      }
     }
   };
 
