@@ -43,6 +43,16 @@ export const membershipService = {
     const response = await api.put(`/MembershipCard/${cardId}/vehicles`, plates);
     return response.data;
   },
+
+  cancelMembershipCard: async (cardId) => {
+    try {
+      const response = await api.delete(`/MembershipCard/${cardId}/cancel`);
+      return response.data;
+    } catch (error) {
+      const msg = error.response?.data?.message;
+      throw new Error(msg || 'Hủy thẻ thành viên thất bại. Vui lòng thử lại.');
+    }
+  },
 };
 
 export default membershipService;

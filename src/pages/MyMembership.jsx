@@ -304,6 +304,13 @@ const ActiveMembershipView = ({ cards, onRefresh, onCancel, t }) => {
                   <p className="mt-1 text-sm font-extrabold text-slate-800 dark:text-slate-100">{formatDateTime(card.startTime)}</p>
                   <p className="text-xs font-medium text-slate-500">{t('membershipRegister.to')} {formatDateTime(card.endTime)}</p>
                 </div>
+                <button
+                  onClick={() => onCancel(card.membershipCardId)}
+                  className="mt-1 inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] border border-rose-200 bg-rose-50 px-3 text-xs font-bold text-rose-600 transition-all hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20"
+                >
+                  <CalendarX2 size={14} />
+                  {t('membershipRegister.cancelCard')}
+                </button>
               </div>
             </div>
 
@@ -853,8 +860,9 @@ const MyMembership = () => {
       await membershipService.cancelMembershipCard(cardId);
       message.success(t('membershipRegister.cancelSuccess'));
       fetchCardInfo();
-    } catch {
-      message.error(t('membershipRegister.cancelError'));
+    } catch (error) {
+      console.error('Cancel membership card error:', error);
+      message.error(error.message || t('membershipRegister.cancelError'));
     }
   };
 
