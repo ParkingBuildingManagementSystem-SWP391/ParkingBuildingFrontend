@@ -1546,23 +1546,15 @@ const GateController = () => {
               </Button>
             </div>
             
-            <div className="flex items-stretch gap-2 mt-3">
+            <div className="mt-3">
               <Button
                 type="primary"
                 danger
                 onClick={() => setIsCreateIncidentOpen(true)}
-                className="flex-1 h-11 font-bold rounded-[14px] flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 border-none shadow-sm shadow-rose-600/20"
+                className="w-full h-11 font-bold rounded-[14px] flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 border-none shadow-sm shadow-rose-600/20"
               >
                 <AlertCircle size={15} /> {t('gate.form.reportIncidentBtn')}
               </Button>
-
-              <button
-                type="button"
-                onClick={() => setIsMyIncidentsOpen(true)}
-                className="flex-1 h-11 flex items-center justify-center gap-2 text-xs font-extrabold text-rose-600 bg-rose-50 border border-rose-200 rounded-[14px] hover:bg-rose-100 transition-all shadow-sm active:scale-95 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400"
-              >
-                <AlertCircle size={16} /> {t('gate.form.myIncidentsBtn')}
-              </button>
             </div>
           </Card>
         </div>

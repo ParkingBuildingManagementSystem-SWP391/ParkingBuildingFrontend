@@ -3,7 +3,7 @@ import { Table, Input, Select, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import incidentReportService from '../services/incidentReportService';
-import { formatVietnamDateTime } from '../utils/dateTime';
+import { formatVietnamDateTime, formatIncidentTypeLabel } from '../utils/dateTime';
 
 const IncidentHistory = () => {
   const { t } = useTranslation();
@@ -63,7 +63,7 @@ const IncidentHistory = () => {
       title: t('incidentHistory.colType'),
       dataIndex: 'issueType',
       key: 'issueType',
-      render: (issueType) => <Tag color="purple">{issueType}</Tag>,
+      render: (issueType) => <Tag color="purple">{formatIncidentTypeLabel(issueType, t)}</Tag>,
     },
     {
       title: t('incidentHistory.colSeverity'),

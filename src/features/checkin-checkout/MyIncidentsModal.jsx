@@ -3,7 +3,7 @@ import { Modal, Tag, Spin, Empty, Button, Timeline } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import incidentReportService from '../../services/incidentReportService';
-import { formatDateTimeVN } from '../../utils/dateTime';
+import { formatDateTimeVN, formatIncidentTypeLabel } from '../../utils/dateTime';
 
 const MyIncidentsModal = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
@@ -98,7 +98,7 @@ const MyIncidentsModal = ({ isOpen, onClose }) => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#1e293b' }}>
-                        #{safeItem.incidentId || '---'} - {safeItem.issueType || t('myIncidents.defaultType')}
+                        #{safeItem.incidentId || '---'} - {formatIncidentTypeLabel(safeItem.issueType, t)}
                       </span>
                       {renderStatusTag(safeItem.status)}
                     </div>
