@@ -490,17 +490,27 @@
     "actionFailed": "Action Failed",
     "actionSuccess": "Action Successful",
     "labelUsername": "Username",
-    "phUsername": "john_doe",
+    "phUsername": "Enter username (e.g. john_doe)",
     "labelEmail": "Email Address",
-    "phEmail": "john@example.com",
+    "phEmail": "Enter email address (e.g. john@example.com)",
     "labelPhone": "Phone Number",
-    "phPhone": "0912345678",
+    "phPhone": "Enter phone number",
     "labelTempPwd": "Temporary Password",
     "phTempPwd": "••••••••",
     "labelSysRole": "System Role",
-    "btnCreateAcc": "Create User Account",
+    "btnCreateAcc": "Create Account",
     "pageTitle": "Create New Account",
-    "pageSubtitle": "Add a new user and assign their system access role"
+    "pageSubtitle": "Add a new user and assign their system access role",
+    "roles": {
+      "Admin": "Administrator",
+      "Manager": "Building Manager",
+      "Staff": "Operating Staff"
+    },
+    "roleDescs": {
+      "Admin": "Full system permissions",
+      "Manager": "Revenue & report management",
+      "Staff": "Gate check-in/out operations"
+    }
   },
   "parkingSession": {
     "vehBike": "Bicycle",
@@ -1268,13 +1278,19 @@
       "autoPlate": "Automatic license plate recognition",
       "centralizedManagement": "Centralized Membership management"
     },
+    "terms": {
+      "title": "Cancellation Terms Confirmation",
+      "noRefundWarning": "Membership cards are non-refundable under any circumstances once registered if you choose to cancel the card.",
+      "agreeCheckbox": "I have read and agree to the conditions above"
+    },
     "errors": {
       "alreadyActive": "You already have an active Membership for this vehicle type.",
       "selectVehicleDurationFirst": "Please select vehicle type and duration first.",
       "selectFixedSlot": "Please select a fixed parking slot.",
       "duplicatePlates": "License plates in the same package must be unique.",
       "noRegisterPermission": "Your account does not have permission to register a Membership.",
-      "createRegistrationError": "Could not create membership registration."
+      "createRegistrationError": "Could not create membership registration.",
+      "mustAgreeTerms": "Please confirm agreement to the non-refundable cancellation terms."
     }
   },
   "roles": {
@@ -1338,8 +1354,8 @@
     "incidentHistory": "Incident History"
   },
   "membershipConfig": {
-    "title": "Membership Package Pricing Configuration",
-    "subtitle": "Membership prices are stored by MembershipTier.",
+    "title": "Membership Pricing Configuration",
+    "subtitle": "",
     "membershipFallback": "This membership",
     "noPhone": "No phone number",
     "validUntil": "until {{date}}",

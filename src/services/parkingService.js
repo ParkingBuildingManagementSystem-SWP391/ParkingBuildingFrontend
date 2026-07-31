@@ -107,7 +107,7 @@ export const parkingService = {
   },
 
   // 5. Nhân viên quét xe cho xe ra cổng (Check-out - Tính phí & giải phóng slot)
-  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'CASH') => {
+  checkOutVehicle: async (ticketCode, checkoutLicensePlate, checkOutImageUrl, sessionId, paymentMethod = 'AUTO') => {
     try {
       const formData = new FormData();
       if (ticketCode) formData.append('TicketCode', ticketCode.trim());

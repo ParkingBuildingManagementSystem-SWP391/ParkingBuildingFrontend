@@ -16,7 +16,7 @@ const CreateAccount = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const roles = ['Admin', 'Manager', 'Staff', 'Registered_Driver'];
+  const roles = ['Admin', 'Manager', 'Staff'];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -182,7 +182,7 @@ const CreateAccount = () => {
             {/* Role Selection */}
             <div className="space-y-3 pt-2">
               <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 ml-1">{t('createAccount.labelSysRole')}</label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {roles.map((role) => (
                   <button
                     key={role}
@@ -200,8 +200,11 @@ const CreateAccount = () => {
                       </div>
                     )}
                     <Shield size={24} className={`mb-2 ${formData.roleName === role ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span className={`text-sm font-bold text-center ${formData.roleName === role ? 'text-indigo-900 dark:text-indigo-200' : 'text-slate-600 dark:text-slate-300'}`}>
-                      {role.replace('_', ' ')}
+                    <span className={`text-sm font-extrabold text-center ${formData.roleName === role ? 'text-indigo-900 dark:text-indigo-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                      {t(`createAccount.roles.${role}`, role)}
+                    </span>
+                    <span className="text-[11px] font-medium text-slate-400 mt-0.5 text-center">
+                      {t(`createAccount.roleDescs.${role}`, '')}
                     </span>
                   </button>
                 ))}

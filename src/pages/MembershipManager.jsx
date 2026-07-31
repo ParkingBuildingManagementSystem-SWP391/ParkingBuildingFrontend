@@ -389,10 +389,9 @@ const MembershipManager = () => {
       <div className="mb-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="mb-1 text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+            <h2 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
               {t('membershipConfig.title')}
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{t('membershipConfig.subtitle')}</p>
           </div>
           <Button icon={<RefreshCw size={15} />} onClick={fetchTiers} loading={loadingTiers}>
             {t('membershipConfig.actions.refresh')}

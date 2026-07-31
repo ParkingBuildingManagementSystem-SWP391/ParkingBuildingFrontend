@@ -489,18 +489,28 @@
     "errCreate": "Tạo tài khoản thất bại. Vui lòng thử lại.",
     "actionFailed": "Thao tác thất bại",
     "actionSuccess": "Thao tác thành công",
-    "labelUsername": "Tên Người Dùng",
-    "phUsername": "john_doe",
-    "labelEmail": "Địa Chỉ Email",
-    "phEmail": "john@example.com",
-    "labelPhone": "Số Điện Thoại",
-    "phPhone": "0912345678",
-    "labelTempPwd": "Mật Khẩu Tạm Thời",
+    "labelUsername": "Tên người dùng",
+    "phUsername": "Nhập tên người dùng (vd: john_doe)",
+    "labelEmail": "Địa chỉ email",
+    "phEmail": "Nhập địa chỉ email (vd: john@example.com)",
+    "labelPhone": "Số điện thoại",
+    "phPhone": "Nhập số điện thoại",
+    "labelTempPwd": "Mật khẩu tạm thời",
     "phTempPwd": "••••••••",
-    "labelSysRole": "Vai Trò Hệ Thống",
-    "btnCreateAcc": "Tạo Tài Khoản",
+    "labelSysRole": "Vai trò hệ thống",
+    "btnCreateAcc": "Tạo tài khoản",
     "pageTitle": "Tạo tài khoản mới",
-    "pageSubtitle": "Thêm người dùng mới và phân quyền truy cập hệ thống"
+    "pageSubtitle": "Thêm người dùng mới và phân quyền truy cập hệ thống",
+    "roles": {
+      "Admin": "Quản trị viên",
+      "Manager": "Quản lý tòa nhà",
+      "Staff": "Nhân viên vận hành"
+    },
+    "roleDescs": {
+      "Admin": "Toàn quyền hệ thống",
+      "Manager": "Quản lý doanh thu & báo cáo",
+      "Staff": "Quản lý cổng check-in/out"
+    }
   },
   "parkingSession": {
     "vehBike": "Xe đạp",
@@ -1265,13 +1275,19 @@
       "autoPlate": "Tự động nhận diện biển số",
       "centralizedManagement": "Quản lý tập trung trong Membership"
     },
+    "terms": {
+      "title": "Xác nhận điều khoản hủy thẻ",
+      "noRefundWarning": "Thẻ Membership sau khi đăng ký thành công sẽ không được hoàn lại tiền dưới bất kỳ hình thức nào khi bạn chủ động hủy thẻ.",
+      "agreeCheckbox": "Tôi đã đọc và đồng ý với điều kiện trên"
+    },
     "errors": {
       "alreadyActive": "Bạn đã có Membership đang Active cho loại xe này.",
       "selectVehicleDurationFirst": "Vui lòng chọn loại xe và thời hạn trước.",
       "selectFixedSlot": "Vui lòng chọn 1 ô đỗ cố định.",
       "duplicatePlates": "Biển số trong cùng một gói không được trùng nhau.",
       "noRegisterPermission": "Tài khoản chưa có quyền đăng ký Membership.",
-      "createRegistrationError": "Không thể tạo đăng ký Membership."
+      "createRegistrationError": "Không thể tạo đăng ký Membership.",
+      "mustAgreeTerms": "Vui lòng xác nhận đồng ý với điều kiện không hoàn tiền khi hủy thẻ."
     }
   },
   "roles": {
@@ -1336,7 +1352,7 @@
   },
   "membershipConfig": {
     "title": "Cấu hình giá gói Membership",
-    "subtitle": "Giá Membership được lưu theo MembershipTier.",
+    "subtitle": "",
     "membershipFallback": "Membership này",
     "noPhone": "Chưa có SĐT",
     "validUntil": "đến {{date}}",
