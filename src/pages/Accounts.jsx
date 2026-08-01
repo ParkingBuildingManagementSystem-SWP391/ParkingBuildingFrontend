@@ -301,16 +301,10 @@ const Accounts = () => {
           </div>
         )}
 
-        {/* A. Top Stats Cards Row — bấm để lọc nhanh theo trạng thái */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* A. Top Stats Cards Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Total Users */}
-          <button
-            type="button"
-            onClick={() => { setStatusFilter('All Statuses'); setRoleFilter('All Roles'); }}
-            className={`flex items-center gap-5 rounded-2xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 dark:bg-slate-900 ${
-              statusFilter === 'All Statuses' ? 'border-indigo-300 ring-2 ring-indigo-100 dark:border-indigo-400/60 dark:ring-indigo-500/10' : 'border-slate-100 dark:border-slate-700'
-            }`}
-          >
+          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
               <Users size={24} strokeWidth={2.5} />
             </div>
@@ -318,16 +312,10 @@ const Accounts = () => {
               <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{totalCount}</h3>
               <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.totalUsers')}</p>
             </div>
-          </button>
+          </div>
 
           {/* Active Users */}
-          <button
-            type="button"
-            onClick={() => setStatusFilter('Active')}
-            className={`flex items-center gap-5 rounded-2xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 dark:bg-slate-900 ${
-              statusFilter === 'Active' ? 'border-emerald-300 ring-2 ring-emerald-100 dark:border-emerald-400/60 dark:ring-emerald-500/10' : 'border-slate-100 dark:border-slate-700'
-            }`}
-          >
+          <div className="flex items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/15 dark:text-emerald-300">
               <CheckCircle size={24} strokeWidth={2.5} />
             </div>
@@ -335,24 +323,7 @@ const Accounts = () => {
               <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{activeCount}</h3>
               <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.active')}</p>
             </div>
-          </button>
-
-          {/* Deleted Users */}
-          <button
-            type="button"
-            onClick={() => setStatusFilter('Inactive')}
-            className={`flex items-center gap-5 rounded-2xl border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 dark:bg-slate-900 ${
-              statusFilter === 'Inactive' ? 'border-rose-300 ring-2 ring-rose-100 dark:border-rose-400/60 dark:ring-rose-500/10' : 'border-slate-100 dark:border-slate-700'
-            }`}
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 dark:bg-rose-500/15 dark:text-rose-300">
-              <Trash2 size={24} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{lockedCount}</h3>
-              <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">{t('accounts.locked')}</p>
-            </div>
-          </button>
+          </div>
         </div>
 
         {/* B. Table Section */}
@@ -378,18 +349,6 @@ const Accounts = () => {
                 <Select.Option value="Manager">Manager</Select.Option>
                 <Select.Option value="Staff">Staff</Select.Option>
                 <Select.Option value="User">User</Select.Option>
-              </Select>
-
-              {/* Status Filter */}
-              <Select
-                value={statusFilter}
-                onChange={setStatusFilter}
-                className="w-[150px] [&_.ant-select-selector]:!h-[42px] [&_.ant-select-selector]:!rounded-[14px] [&_.ant-select-selector]:!items-center"
-                popupClassName="rounded-xl"
-              >
-                <Select.Option value="All Statuses">{t('accounts.filterAllStatuses')}</Select.Option>
-                <Select.Option value="Active">{t('accounts.active')}</Select.Option>
-                <Select.Option value="Inactive">{t('accounts.locked')}</Select.Option>
               </Select>
 
               {/* Search Input */}
