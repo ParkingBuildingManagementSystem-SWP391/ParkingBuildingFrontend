@@ -444,6 +444,7 @@
     "myIncidentsBtn": "Lịch sử Báo cáo Sự cố",
     "bookingBadge": "Đặt Chỗ",
     "membershipPaidLabel": "Đã thanh toán gói",
+    "bookingPaidLabel": "Đã thanh toán (Khi đặt chỗ)",
     "reportIncidentTooltip": "Chỉ có thể báo cáo sự cố khi xe đã qua cổng (Check-In)"
   },
   "accounts": {

@@ -82,24 +82,28 @@ const IncidentHistory = () => {
       title: t('incidentHistory.colId'),
       dataIndex: 'incidentId',
       key: 'incidentId',
+      className: 'whitespace-nowrap',
       render: (id) => <span className="font-mono text-xs font-extrabold text-indigo-700 dark:text-indigo-300">{id}</span>,
     },
     {
       title: t('incidentHistory.colPlate'),
       dataIndex: 'licenseVehicle',
       key: 'licenseVehicle',
+      className: 'whitespace-nowrap',
       render: (plate) => <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{plate || t('incidentHistory.notApplicable')}</span>,
     },
     {
       title: t('incidentHistory.colType'),
       dataIndex: 'issueType',
       key: 'issueType',
+      className: 'whitespace-nowrap',
       render: (issueType) => <Tag color="purple">{formatIncidentTypeLabel(issueType, t)}</Tag>,
     },
     {
       title: t('incidentHistory.colSeverity'),
       dataIndex: 'severity',
       key: 'severity',
+      className: 'whitespace-nowrap',
       render: (severity) => {
         if (severity === 'Critical') return <Tag color="error">{severity}</Tag>;
         if (severity === 'Warning') return <Tag color="warning">{severity}</Tag>;
@@ -110,8 +114,9 @@ const IncidentHistory = () => {
       title: t('incidentHistory.colFine'),
       dataIndex: 'fineAmount',
       key: 'fineAmount',
+      className: 'whitespace-nowrap',
       render: (fineAmount) => (
-        <span className="font-bold text-rose-600 dark:text-rose-400">
+        <span className="whitespace-nowrap font-bold text-rose-600 dark:text-rose-400">
           {fineAmount ? `${Number(fineAmount).toLocaleString('vi-VN')} đ` : '0 đ'}
         </span>
       ),
@@ -120,6 +125,7 @@ const IncidentHistory = () => {
       title: t('incidentHistory.colStatus'),
       dataIndex: 'status',
       key: 'status',
+      className: 'whitespace-nowrap',
       render: (status) => (
         status === 'Resolved'
           ? <Tag color="success">{t('incidentHistory.statusResolvedTag')}</Tag>
@@ -130,12 +136,14 @@ const IncidentHistory = () => {
       title: t('incidentHistory.colResolvedBy'),
       dataIndex: 'resolvedUsername',
       key: 'resolvedUsername',
+      className: 'whitespace-nowrap',
       render: (name) => name || t('incidentHistory.notResolvedYet'),
     },
     {
       title: t('incidentHistory.colResolvedAt'),
       dataIndex: 'resolvedAt',
       key: 'resolvedAt',
+      className: 'whitespace-nowrap',
       render: (value) => value ? formatVietnamDateTime(value) : t('incidentHistory.notResolvedYet'),
     },
     {
@@ -185,6 +193,7 @@ const IncidentHistory = () => {
           rowKey="incidentId"
           locale={{ emptyText: error ? t('incidentHistory.emptyTextError') : t('incidentHistory.emptyText') }}
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 'max-content' }}
           className="border border-slate-100 rounded-2xl overflow-hidden dark:border-slate-700"
         />
       </div>
