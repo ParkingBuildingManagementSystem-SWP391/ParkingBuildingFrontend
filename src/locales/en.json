@@ -455,7 +455,7 @@
     "updFail": "Failed to update profile info.",
     "totalUsers": "Total Users",
     "active": "Active",
-    "locked": "Locked",
+    "locked": "Deleted",
     "allUsersTitle": "All Users",
     "accountsFound": "accounts found",
     "searchPlaceholder": "Search name or email...",

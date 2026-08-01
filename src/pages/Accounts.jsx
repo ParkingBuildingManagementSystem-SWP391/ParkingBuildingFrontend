@@ -337,7 +337,7 @@ const Accounts = () => {
             </div>
           </button>
 
-          {/* Locked Users */}
+          {/* Deleted Users */}
           <button
             type="button"
             onClick={() => setStatusFilter('Inactive')}
@@ -346,7 +346,7 @@ const Accounts = () => {
             }`}
           >
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 dark:bg-rose-500/15 dark:text-rose-300">
-              <Lock size={24} strokeWidth={2.5} />
+              <Trash2 size={24} strokeWidth={2.5} />
             </div>
             <div>
               <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{lockedCount}</h3>
@@ -429,14 +429,13 @@ const Accounts = () => {
                     <th className="py-4 px-4 font-extrabold">{t('accounts.colEmail')}</th>
                     <th className="py-4 px-4 font-extrabold">{t('accounts.colRole')}</th>
                     <th className="py-4 px-4 font-extrabold">{t('accounts.colStatus')}</th>
-                    <th className="py-4 px-4 font-extrabold">{t('accounts.colCreated')}</th>
                     <th className="py-4 px-6 md:px-8 text-right font-extrabold">{t('accounts.colActions')}</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
                   {filteredAccounts.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-[13px] font-medium text-slate-400 dark:text-slate-500">
+                      <td colSpan={5} className="py-12 text-center text-[13px] font-medium text-slate-400 dark:text-slate-500">
                         {t('accounts.noAccountsFound')}
                       </td>
                     </tr>
@@ -450,7 +449,7 @@ const Accounts = () => {
                       const isActive = item.status === 'Active';
                       const statusBadge = isActive
                         ? <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300">active</span>
-                        : <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-600 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">locked</span>;
+                        : <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-600 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-300">deleted</span>;
 
                       // Avatar background follows the same role color as the badge
                       const avatarBg = roleStyle.avatar;
@@ -481,11 +480,6 @@ const Accounts = () => {
                           {/* Status Column */}
                           <td className="py-4 px-4">
                             {statusBadge}
-                          </td>
-
-                          {/* Created Column */}
-                          <td className="px-4 py-4 font-medium text-slate-500 dark:text-slate-400">
-                            {item.joined}
                           </td>
 
                           {/* Actions Column */}
