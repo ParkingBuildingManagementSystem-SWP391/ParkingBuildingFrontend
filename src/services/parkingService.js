@@ -112,7 +112,7 @@ export const parkingService = {
       const formData = new FormData();
       if (ticketCode) formData.append('TicketCode', ticketCode.trim());
       if (checkoutLicensePlate) formData.append('CheckoutLicensePlate', checkoutLicensePlate.trim().toUpperCase());
-      if (checkOutImageUrl) formData.append('ImageUrl', checkOutImageUrl);
+      if (checkOutImageUrl) formData.append('CheckOutImageUrl', checkOutImageUrl);
       if (sessionId) formData.append('SessionId', parseInt(sessionId));
       formData.append('PaymentMethod', paymentMethod);
 
