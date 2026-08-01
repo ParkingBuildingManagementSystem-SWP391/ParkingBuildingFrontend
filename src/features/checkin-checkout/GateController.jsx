@@ -691,11 +691,9 @@ const GateController = () => {
       return;
     }
 
-    // 2. Chỉ bắt buộc ảnh cổng ra khi KHÔNG có biển số/mã vé để xác định xe.
-    //    Xe đạp, quét QR vé, hoặc nhập tay biển số khi AI đọc thất bại vẫn được phép check-out.
+    // 2. Bắt buộc có ảnh chụp/tải lên tại cổng ra đối với xe máy và ô tô theo quy tắc an ninh 2 lớp của backend.
     const isBicycle = plate?.toUpperCase().startsWith('BIKE_');
-    const hasIdentifier = Boolean(plate?.trim() || ticketCode?.trim());
-    if (!isBicycle && !hasIdentifier && !tempImageUrl) {
+    if (!isBicycle && !tempImageUrl) {
       message.error(t('gate.messages.exitImageRequired'));
       return;
     }
@@ -1344,7 +1342,7 @@ const GateController = () => {
                         setExitOcrResult(predictedPlate);
                         checkOutForm.setFieldsValue({
                           plate: predictedPlate,
-                          tempImageUrl: rawImageUrl
+                          tempImageUrl: rawImageUrl || imageUrl
                         });
                         message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
 
@@ -1413,7 +1411,7 @@ const GateController = () => {
                         setExitOcrResult(predictedPlate);
                         checkOutForm.setFieldsValue({
                           plate: predictedPlate,
-                          tempImageUrl: rawImageUrl
+                          tempImageUrl: rawImageUrl || imageUrl
                         });
                         message.success(t('gate.messages.alprSuccess', { plate: predictedPlate }));
 

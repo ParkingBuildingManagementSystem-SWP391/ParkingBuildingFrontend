@@ -276,7 +276,9 @@ const MyBookings = () => {
   );
   const canPayPendingInvoiceWithWallet = (booking) => isDepositPaymentDue(booking) && Boolean(booking.invoiceId);
   const isParkingFeePaymentDue = (booking) => (
+    booking.ticketType !== 'Booking' &&
     (booking.sessionStatus === 'InProgress' || booking.sessionStatus === 'Occupied') &&
+    Boolean(booking.invoiceId) &&
     !isPaymentCompleted(booking.paymentStatus)
   );
   const getVnPayPaymentLabel = (booking) => (
@@ -601,7 +603,7 @@ const MyBookings = () => {
                         </div>
                       ) : booking.totalAmount !== null && booking.totalAmount !== undefined ? (
                         <div>
-                          <span className="text-sm font-extrabold text-indigo-700 block">
+                          <span className="text-sm font-extrabold text-indigo-700 block whitespace-nowrap">
                             {booking.totalAmount.toLocaleString('vi-VN')} đ
                           </span>
                           <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">
@@ -610,11 +612,20 @@ const MyBookings = () => {
                         </div>
                       ) : booking.depositAmount !== null && booking.depositAmount !== undefined ? (
                         <div>
-                          <span className="text-sm font-extrabold text-amber-600 block">
+                          <span className="text-sm font-extrabold text-amber-600 block whitespace-nowrap">
                             {Number(booking.depositAmount).toLocaleString('vi-VN')} đ
                           </span>
                           <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">
                             DEP - {booking.paymentStatus || 'PENDING'}
+                          </span>
+                        </div>
+                      ) : booking.ticketType === 'Booking' ? (
+                        <div>
+                          <span className="text-xs font-bold text-emerald-600 block whitespace-nowrap">
+                            Đã thanh toán
+                          </span>
+                          <span className="text-[10px] font-bold uppercase text-emerald-500">
+                            {t('myBookings.bookingPaidLabel')}
                           </span>
                         </div>
                       ) : (

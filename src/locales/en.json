@@ -444,6 +444,7 @@
     "myIncidentsBtn": "Incident Report History",
     "bookingBadge": "Booking",
     "membershipPaidLabel": "Paid via membership",
+    "bookingPaidLabel": "Paid upon booking",
     "reportIncidentTooltip": "You can only report an incident after the vehicle has checked in at the gate"
   },
   "accounts": {
