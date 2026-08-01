@@ -76,7 +76,7 @@ export const parkingService = {
       const formData = new FormData();
       if (ticketCode) formData.append('TicketCode', ticketCode.trim());
       if (licenseVehicle) formData.append('LicenseVehicle', licenseVehicle.trim().toUpperCase());
-      if (checkInImageUrl) formData.append('ImageUrl', checkInImageUrl);
+      if (checkInImageUrl) formData.append('CheckInImageUrl', checkInImageUrl);
 
       const response = await api.post('/Parking/check-in', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -94,7 +94,7 @@ export const parkingService = {
       const formData = new FormData();
       if (licenseVehicle) formData.append('LicenseVehicle', licenseVehicle.trim().toUpperCase());
       formData.append('VehicleTypeId', parseInt(vehicleTypeId));
-      if (checkInImageUrl) formData.append('ImageUrl', checkInImageUrl);
+      if (checkInImageUrl) formData.append('CheckInImageUrl', checkInImageUrl);
 
       const response = await api.post('/Parking/walk-in', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
