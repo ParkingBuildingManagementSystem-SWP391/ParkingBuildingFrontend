@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Lock, Trash2 } from 'lucide-react';
+import { Users, UserCog, X, Search, CheckCircle, AlertTriangle, Edit, Trash2 } from 'lucide-react';
 import { Select, Modal, Input, Button } from 'antd';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
@@ -288,7 +288,6 @@ const Accounts = () => {
 
   const totalCount = filteredAccounts.length;
   const activeCount = filteredAccounts.filter(a => a.status === 'Active').length;
-  const lockedCount = filteredAccounts.filter(a => a.status !== 'Active').length;
 
   return (
     <div className="min-h-full w-full select-none bg-slate-50 pb-12 font-sans dark:bg-slate-900">
