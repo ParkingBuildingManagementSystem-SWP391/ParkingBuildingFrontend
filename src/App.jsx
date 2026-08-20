@@ -90,10 +90,6 @@ function App() {
               <Route path="/staff-management" element={<StaffManagement />} />
               <Route path="/accounts" element={<Accounts />} />
               <Route path="/create-account" element={<CreateAccount />} />
-            </Route>
-
-            {/* Admin parking session management */}
-            <Route element={<RoleProtectedRoute allowedRoles={['Admin']} />}>
               <Route path="/admin/parking-sessions" element={<ParkingSessionManager />} />
             </Route>
 
